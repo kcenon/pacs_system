@@ -382,4 +382,13 @@ TEST_CASE("test_data_generator::current_time returns valid DICOM time", "[data_g
     CHECK(std::all_of(time.begin(), time.end(), ::isdigit));
 }
 
+// DO NOT MERGE: deliberate failure for the #1243 CI probe
+// (branch ci/1243-failure-probe). The tags put it into every CI selection of
+// pacs_integration_e2e: integration, stability smoke, and the DCMTK steps.
+TEST_CASE("ci probe 1243 deliberate integration failure",
+          "[probe1243][data_generator][config][stability][smoke]"
+          "[dcmtk][echo][store][find][move]") {
+    FAIL("deliberate failure for the #1243 probe: this job must turn red");
+}
+
 }  // namespace kcenon::pacs::integration_test

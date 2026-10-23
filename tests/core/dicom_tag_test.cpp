@@ -4,6 +4,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <climits>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -547,4 +549,33 @@ TEST_CASE("dicom_tag private mapping round-trip", "[dicom_tag][private]") {
 
     CHECK(data_elem >= range->first);
     CHECK(data_elem <= range->second);
+}
+
+// ============================================================================
+// DO NOT MERGE: deliberate defects for the #1243 CI probe
+// (branch ci/1243-failure-probe). Each case passes in a normal build and must
+// fail only in the matching sanitizer job.
+// ============================================================================
+
+TEST_CASE("ci probe 1243 tsan data race", "[probe1243]") {
+    volatile int shared = 0;  // written by two threads without synchronization
+    std::thread first([&shared] { for (int i = 0; i < 1000; ++i) { shared = shared + 1; } });
+    std::thread second([&shared] { for (int i = 0; i < 1000; ++i) { shared = shared + 1; } });
+    first.join();
+    second.join();
+    CHECK(shared >= 0);
+}
+
+TEST_CASE("ci probe 1243 asan heap overflow", "[probe1243]") {
+    char* buffer = new char[8]();
+    volatile char* view = buffer;
+    const char past_end = view[8];  // reads one byte past the allocation
+    delete[] buffer;
+    CHECK((past_end == 0 || past_end != 0));
+}
+
+TEST_CASE("ci probe 1243 ubsan signed overflow", "[probe1243]") {
+    volatile int largest = INT_MAX;
+    const int wrapped = largest + 1;  // signed integer overflow
+    CHECK((wrapped < 0 || wrapped >= 0));
 }
