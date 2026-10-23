@@ -3,7 +3,7 @@
 > **SSOT**: This file is the single source of truth for the documentation index
 > of **pacs_system**.
 
-Total documents: **87**
+Total documents: **89**
 
 ## Document Index
 
@@ -66,7 +66,7 @@ Total documents: **87**
 | 55 | PAC-QUAL-001 | PACS System 프로덕션 품질 | [PRODUCTION_QUALITY.kr.md](./PRODUCTION_QUALITY.kr.md) | Released |
 | 56 | PAC-QUAL-002 | PACS System Production Quality | [PRODUCTION_QUALITY.md](./PRODUCTION_QUALITY.md) | Released |
 | 57 | PAC-QUAL-008 | Feature-Test-Module Traceability Matrix | [TRACEABILITY.md](./TRACEABILITY.md) | Released |
-| 59 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
+| 58 | PAC-QUAL-003 | Thread System Stability Verification Report | [THREAD_SYSTEM_STABILITY_REPORT.md](./THREAD_SYSTEM_STABILITY_REPORT.md) | Released |
 | 59 | PAC-QUAL-004 | PACS 시스템 검증 보고서 (Validation Report) | [VALIDATION_REPORT.kr.md](./VALIDATION_REPORT.kr.md) | Released |
 | 60 | PAC-QUAL-005 | PACS System Validation Report | [VALIDATION_REPORT.md](./VALIDATION_REPORT.md) | Released |
 | 61 | PAC-QUAL-006 | PACS 시스템 검증 보고서 | [VERIFICATION_REPORT.kr.md](./VERIFICATION_REPORT.kr.md) | Released |
@@ -96,6 +96,8 @@ Total documents: **87**
 | 85 | PAC-QUAL-019 | SaMD checklist sources and applicability | [regulatory-references.md](./checklists/regulatory-references.md) | Draft |
 | 86 | PAC-QUAL-020 | SaMD checklist review record template | [review-record-template.md](./checklists/review-record-template.md) | Draft |
 | 87 | PAC-GUID-034 | README Editing Policy | [README_POLICY.md](./contributing/README_POLICY.md) | Released |
+| 88 | PAC-PROJ-008 | Package State - PACS System | [PACKAGE_STATE.md](./PACKAGE_STATE.md) | Accepted |
+| 89 | PAC-PROJ-009 | 패키지 상태 - PACS System | [PACKAGE_STATE.kr.md](./PACKAGE_STATE.kr.md) | Accepted |
 
 ## Documents by Category
 
@@ -229,7 +231,7 @@ Total documents: **87**
 | PAC-ADR-002 | ADR-002: Define PACS Storage Port Segmentation | [ADR-002-pacs-storage-port-segmentation.md](./adr/ADR-002-pacs-storage-port-segmentation.md) | Released |
 | PAC-ADR-003 | ADR-003: DICOM Layer Separation Architecture | [ADR-003-dicom-layer-separation.md](./adr/ADR-003-dicom-layer-separation.md) | Accepted |
 
-### Project (7)
+### Project (9)
 
 | doc_id | Topic | Document | Status |
 |--------|-------|----------|--------|
@@ -240,6 +242,8 @@ Total documents: **87**
 | PAC-PROJ-005 | Project Structure - PACS System | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | Released |
 | PAC-PROJ-006 | SOUP List &mdash; pacs_system | [SOUP.md](./SOUP.md) | Released |
 | PAC-PROJ-007 | Contributing to PACS System | [CONTRIBUTING.md](./contributing/CONTRIBUTING.md) | Released |
+| PAC-PROJ-008 | Package State - PACS System | [PACKAGE_STATE.md](./PACKAGE_STATE.md) | Accepted |
+| PAC-PROJ-009 | 패키지 상태 - PACS System | [PACKAGE_STATE.kr.md](./PACKAGE_STATE.kr.md) | Accepted |
 
 ---
 

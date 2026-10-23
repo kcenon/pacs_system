@@ -32,6 +32,7 @@ category: "ARCH"
 - [오류 처리 전략](#오류-처리-전략)
 - [보안 아키텍처](#보안-아키텍처)
 - [C++20 모듈 아키텍처](#c20-모듈-아키텍처)
+- [에코시스템 의존성](#에코시스템-의존성)
 
 ---
 
@@ -954,6 +955,35 @@ int main() {
 | `kcenon.pacs:di` | 의존성 주입 유틸리티 |
 
 > **참고**: C++20 모듈은 실험적입니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
+
+---
+
+## 에코시스템 의존성
+
+pacs_system은 kcenon 에코시스템의 **Tier 5**, 즉 최상위 애플리케이션에 위치합니다.
+
+```mermaid
+graph TD
+    A[common_system] --> B[thread_system]
+    A --> C[container_system]
+    B --> D[logger_system]
+    B --> E[monitoring_system]
+    D --> F[database_system]
+    E --> F
+    F --> G[network_system]
+    G --> H[pacs_system]
+
+    style H fill:#f9f,stroke:#333,stroke-width:3px
+```
+
+> **에코시스템 참조**:
+> [common_system](https://github.com/kcenon/common_system) — Tier 0: Result&lt;T&gt;, IExecutor
+> [container_system](https://github.com/kcenon/container_system) — Tier 1: DICOM 데이터 직렬화
+> [thread_system](https://github.com/kcenon/thread_system) — Tier 1: 동시성 (network_system 경유)
+> [logger_system](https://github.com/kcenon/logger_system) — Tier 2: 로깅 (network_system 경유)
+> [monitoring_system](https://github.com/kcenon/monitoring_system) — Tier 3: 관측성 (선택)
+> [network_system](https://github.com/kcenon/network_system) — Tier 4: DICOM용 TCP/TLS 전송
+> [database_system](https://github.com/kcenon/database_system) — Tier 3: 데이터베이스 추상화 (선택)
 
 ---
 

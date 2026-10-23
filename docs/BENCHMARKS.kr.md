@@ -37,7 +37,7 @@ category: "PERF"
 | 스레드 성능 | `benchmarks/thread_performance/` | `thread_performance_benchmarks` | Association 수립, C-ECHO 및 C-STORE 처리량, 동시 부하, 종료 시간 |
 | SIMD 성능 | `benchmarks/simd_performance/` | `simd_performance_benchmarks`, `photometric_benchmark`, `windowing_benchmark` | 바이트 스왑, RLE, 광도 변환, window/level |
 
-아래의 코덱, 스토리지, 쿼리 카테고리는 목표만 정의하며, 저장소에는 아직 이에 대한 벤치마크 소스가 없습니다.
+아래의 코덱, 스토리지, 쿼리 카테고리는 계획 단계입니다. 목표만 정의하며, 저장소에는 아직 이에 대한 벤치마크 소스가 없습니다.
 
 스레드 마이그레이션 기준 목표는 [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md)를, 기록된 실행의
 전체 보고서는 [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md)를 참조하세요.
@@ -54,7 +54,7 @@ category: "PERF"
 | 항목 | 기록 |
 |------|------|
 | 환경 | macOS 26.2 (Darwin), Apple M4 Max (ARM64), 메모리 36 GB, Apple Clang 17.0.0, Release 빌드, C++20 ([Test Environment](PERFORMANCE_RESULTS.md#test-environment)) |
-| 날짜 | 신뢰할 수 있는 기록 없음. 보고서는 2024-12-05로 적고 있지만 보고서를 추가한 커밋(`501957b0`, PR #171)의 날짜는 2025-12-05이며, macOS 26.2와 Apple Clang 17.0.0은 2024-12-05에는 출시되지 않았습니다. |
+| 날짜 | 신뢰할 수 있는 기록 없음. 보고서는 원래 2024-12-05로 적었지만 벤치마크 소스는 2025-12-04에 추가되었고(`7c59a5d7`, PR #164), 보고서를 추가한 커밋(`501957b0`, PR #171)의 날짜는 2025-12-05이며, macOS 26.2와 Apple Clang 17.0.0은 2024-12-05에는 출시되지 않았습니다. |
 | 명령 | 기록 없음. 보고서는 `thread_performance_benchmarks`의 네 스위트(association, throughput, 동시 부하, shutdown)를 언급하며, 이를 실행하는 명령은 [벤치마크 실행](#벤치마크-실행)에 있습니다. |
 | 결과 파일 | [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) (요약 표). 원시 벤치마크 출력은 저장소에 기록되어 있지 않습니다. |
 | 구성 | 클라이언트와 `benchmark_server` 픽스처가 한 프로세스 안에서 `localhost`로 통신합니다 (`benchmarks/thread_performance/benchmark_common.h`). 보고서는 단일 워커의 높은 처리율을 메모리 내 벤치마크 연산 때문이라고 설명하므로, 이 값은 호스트 간 네트워크 처리량이 아닙니다. |
@@ -85,8 +85,8 @@ category: "PERF"
 
 ### SIMD 벤치마크
 
-환경과 날짜를 갖춘 SIMD 결과는 저장소에 기록되어 있지 않습니다.
-[FEATURES.kr.md](FEATURES.kr.md#simd-최적화)는 측정 기록 없이 바이트 스왑 속도 향상 범위를 제시합니다.
+환경과 날짜를 갖춘 SIMD 결과는 저장소에 기록되어 있지 않으므로,
+[FEATURES.kr.md](FEATURES.kr.md#simd-최적화)는 SIMD 속도 향상 수치를 제시하지 않습니다.
 
 ### 이전 참조 플랫폼
 
@@ -114,9 +114,11 @@ NVMe SSD, Ubuntu 22.04 LTS, GCC 13.1 `-O2`를 적었습니다. 저장소의 어�
 | C-STORE 처리량 | > 20 store/s | 소형 이미지 (64x64) |
 | 데이터 전송률 (512x512) | > 5 MB/s | 대형 이미지 전송 |
 
-### 코덱 성능
+### 코덱 성능 (계획됨)
 
-목표만 정의되어 있으며, 코덱 벤치마크 소스는 아직 없습니다.
+코덱 벤치마크 소스가 아직 없으므로 이 표는 목표만 정의합니다. SIMD 스위트의 `rle_simd_benchmark.cpp`는
+RLE 코덱이 사용하는 SIMD 보조 단계(RGB 평면 변환, 16비트 평면 분할 및 병합)를 측정하며, RLE 압축이나
+해제를 측정하지는 않습니다.
 
 | 코덱 | 연산 | 목표 | 비고 |
 |------|------|------|------|
@@ -129,9 +131,9 @@ NVMe SSD, Ubuntu 22.04 LTS, GCC 13.1 `-O2`를 적었습니다. 저장소의 어�
 | RLE | 압축 | 이미지당 측정 | 무손실, DICOM 표준 RLE |
 | RLE | 해제 | 이미지당 측정 | - |
 
-### 스토리지 성능
+### 스토리지 성능 (계획됨)
 
-목표만 정의되어 있으며, 스토리지 벤치마크 소스는 아직 없습니다.
+스토리지 벤치마크 소스가 아직 없으므로 이 표는 목표만 정의합니다.
 
 | 백엔드 | 연산 | 메트릭 | 설명 |
 |-------|------|--------|------|
@@ -141,9 +143,9 @@ NVMe SSD, Ubuntu 22.04 LTS, GCC 13.1 `-O2`를 적었습니다. 저장소의 어�
 | 클라우드 (S3) | 다운로드 | 지연시간 (ms) | 단일 객체 다운로드 지연시간 |
 | 데이터베이스 | 인덱싱 | ops/s | 메타데이터 인덱싱 속도 |
 
-### 쿼리 성능
+### 쿼리 성능 (계획됨)
 
-목표만 정의되어 있으며, 쿼리 벤치마크 소스는 아직 없습니다.
+쿼리 벤치마크 소스가 아직 없으므로 이 표는 목표만 정의합니다.
 
 | 쿼리 유형 | 목표 | 설명 |
 |----------|------|------|

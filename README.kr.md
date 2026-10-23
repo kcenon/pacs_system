@@ -196,7 +196,7 @@ store, find, move, get, print), 서버(Query/Retrieve, worklist, MPPS, `pacs_ser
 | [monitoring_system](https://github.com/kcenon/monitoring_system) | 메트릭 및 추적 | 선택 (Tier 3) |
 | [database_system](https://github.com/kcenon/database_system) | 구성 시점에 발견되면 스토리지 인덱스 리포지토리의 쿼리 빌더로 사용 (`PACS_WITH_DATABASE_SYSTEM`) | 선택 (Tier 3) |
 
-의존성 그래프는 [Architecture](docs/ARCHITECTURE.md#ecosystem-dependencies)에, 버전·라이선스·안전 분류는
+의존성 그래프는 [아키텍처](docs/ARCHITECTURE.kr.md#에코시스템-의존성)에, 버전·라이선스·안전 분류는
 [IEC 62304 SOUP 등록부](docs/SOUP.md)에 있습니다.
 
 ## 아키텍처
