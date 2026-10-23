@@ -305,20 +305,15 @@ bool accept_worker::should_continue_work() const {
 }
 
 void accept_worker::on_stop_requested() {
-    // Called when stop() is requested, before thread actually stops.
-    // Close the socket to unblock any pending accept operations.
-
-#ifdef _WIN32
-    if (listen_socket_ != INVALID_SOCKET) {
-        closesocket(listen_socket_);
-        listen_socket_ = INVALID_SOCKET;
-    }
-#else
-    if (listen_socket_ >= 0) {
-        close(listen_socket_);
-        listen_socket_ = -1;
-    }
-#endif
+    // Called on the thread calling stop() while the worker thread may still
+    // be inside do_work(). The listening socket is owned by the worker thread
+    // and closed in after_stop(), so it must not be touched here: closing it
+    // during select() makes Linux report the closed descriptor as ready, and
+    // FD_ISSET() then reads listen_socket_ == -1 and aborts the process
+    // (glibc "bit out of range 0 - FD_SETSIZE on fd_set").
+    //
+    // Nothing needs unblocking: the socket is non-blocking, select() times
+    // out after 10 ms, and the base class wakes the worker thread.
 }
 
 // =============================================================================
