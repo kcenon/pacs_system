@@ -31,9 +31,10 @@
 #include "kcenon/pacs/web/rest_config.h"
 #include "kcenon/pacs/web/rest_types.h"
 
+#include "endpoint_uuid.h"
+
 #include <chrono>
 #include <iomanip>
-#include <random>
 #include <sstream>
 
 namespace kcenon::pacs::web::endpoints {
@@ -48,26 +49,6 @@ void add_cors_headers(crow::response &res, const rest_server_context &ctx) {
     res.add_header("Access-Control-Allow-Origin",
                    ctx.config->cors_allowed_origins);
   }
-}
-
-/**
- * @brief Generate a UUID for key_image_id
- */
-std::string generate_uuid() {
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> dis(0, 15);
-  static const char *hex = "0123456789abcdef";
-
-  std::string uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-  for (char &c : uuid) {
-    if (c == 'x') {
-      c = hex[dis(gen)];
-    } else if (c == 'y') {
-      c = hex[(dis(gen) & 0x3) | 0x8];
-    }
-  }
-  return uuid;
 }
 
 /**
@@ -191,7 +172,7 @@ void register_key_image_endpoints_impl(crow::SimpleApp &app,
             }
 
             storage::key_image_record ki;
-            ki.key_image_id = generate_uuid();
+            ki.key_image_id = detail::generate_uuid();
             ki.study_uid = study_uid;
             ki.sop_instance_uid = parse_json_string(body, "sop_instance_uid");
             ki.frame_number = parse_json_int(body, "frame_number");

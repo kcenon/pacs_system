@@ -236,8 +236,10 @@ void patient_reconciliation_service::apply_demographics(
 }
 
 std::string patient_reconciliation_service::generate_record_id() const {
-    static std::mt19937_64 gen{std::random_device{}()};
-    static std::uniform_int_distribution<uint64_t> dist;
+    // Every instance shares these statics, so each thread owns its engine
+    // (seeded once from std::random_device) instead of sharing one.
+    static thread_local std::mt19937_64 gen{std::random_device{}()};
+    static thread_local std::uniform_int_distribution<uint64_t> dist;
 
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(

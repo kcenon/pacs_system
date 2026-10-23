@@ -10,6 +10,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <atomic>
+#include <regex>
+#include <string>
+#include <thread>
+#include <vector>
+
 using namespace kcenon::pacs::services;
 using namespace kcenon::pacs::network;
 using namespace kcenon::pacs::network::dimse;
@@ -403,4 +409,92 @@ TEST_CASE("mpps_result is copyable and movable", "[services][mpps][scu]") {
         CHECK(moved.status == 0x0000);
         CHECK(moved.elapsed.count() == 100);
     }
+}
+
+// ============================================================================
+// Thread Safety Tests
+// ============================================================================
+
+TEST_CASE("mpps_scu instances generate MPPS UIDs on concurrent threads",
+          "[services][mpps][scu][threading]") {
+    constexpr int num_threads = 8;
+    constexpr int creates_per_thread = 25;
+
+    // SCP-side association that accepts MPPS: no network peer, so
+    // send_dimse() succeeds locally and receive_dimse() returns whatever
+    // the test queued with enqueue_message().
+    associate_rq rq;
+    rq.calling_ae_title = "MODALITY";
+    rq.called_ae_title = "RIS";
+    rq.application_context = DICOM_APPLICATION_CONTEXT;
+    rq.presentation_contexts.push_back(
+        {1, std::string(mpps_sop_class_uid), {"1.2.840.10008.1.2.1"}});
+    rq.user_info.max_pdu_length = 16384;
+
+    scp_config config;
+    config.ae_title = "RIS";
+    config.supported_abstract_syntaxes = {std::string(mpps_sop_class_uid)};
+    config.supported_transfer_syntaxes = {"1.2.840.10008.1.2.1"};
+
+    // One association and one mpps_scu per thread: only the UID generator
+    // is shared between the threads.
+    std::vector<association> associations;
+    associations.reserve(num_threads);
+    for (int t = 0; t < num_threads; ++t) {
+        associations.push_back(association::accept(rq, config));
+        REQUIRE(associations.back().is_established());
+    }
+
+    std::atomic<int> failed_creates{0};
+    std::vector<std::vector<std::string>> uids(num_threads);
+    std::vector<std::thread> threads;
+    threads.reserve(num_threads);
+
+    for (int t = 0; t < num_threads; ++t) {
+        threads.emplace_back([&, t]() {
+            auto& assoc = associations[t];
+            mpps_scu scu;
+            mpps_create_data data;
+            data.patient_id = "PAT-" + std::to_string(t);
+
+            auto context_id = assoc.accepted_context_id(mpps_sop_class_uid);
+            if (!context_id) {
+                failed_creates += creates_per_thread;
+                return;
+            }
+
+            for (int i = 0; i < creates_per_thread; ++i) {
+                assoc.enqueue_message(
+                    *context_id,
+                    make_n_create_rsp(1, mpps_sop_class_uid, "1.2.3"));
+                auto result = scu.create(assoc, data);
+                if (result.is_err() || !result.value().is_success()) {
+                    ++failed_creates;
+                    continue;
+                }
+                uids[t].push_back(result.value().mpps_sop_instance_uid);
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    CHECK(failed_creates == 0);
+
+    // <root>.<milliseconds since epoch>.<0-99999>. The random part has only
+    // five digits, so two UIDs drawn in the same millisecond may collide by
+    // chance and uniqueness is not asserted here.
+    const std::regex uid_format(
+        R"(1\.2\.826\.0\.1\.3680043\.2\.1545\.[1-9][0-9]*\.(0|[1-9][0-9]{0,4}))");
+    std::size_t total = 0;
+    for (const auto& thread_uids : uids) {
+        total += thread_uids.size();
+        for (const auto& uid : thread_uids) {
+            CHECK(uid.size() <= 64);
+            CHECK(std::regex_match(uid, uid_format));
+        }
+    }
+    CHECK(total == static_cast<std::size_t>(num_threads * creates_per_thread));
 }
