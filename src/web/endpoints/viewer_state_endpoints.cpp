@@ -35,9 +35,10 @@
 #include "kcenon/pacs/web/rest_config.h"
 #include "kcenon/pacs/web/rest_types.h"
 
+#include "endpoint_uuid.h"
+
 #include <chrono>
 #include <iomanip>
-#include <random>
 #include <sstream>
 
 namespace kcenon::pacs::web::endpoints {
@@ -52,26 +53,6 @@ void add_cors_headers(crow::response &res, const rest_server_context &ctx) {
     res.add_header("Access-Control-Allow-Origin",
                    ctx.config->cors_allowed_origins);
   }
-}
-
-/**
- * @brief Generate a UUID for state_id
- */
-std::string generate_uuid() {
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> dis(0, 15);
-  static const char *hex = "0123456789abcdef";
-
-  std::string uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-  for (char &c : uuid) {
-    if (c == 'x') {
-      c = hex[dis(gen)];
-    } else if (c == 'y') {
-      c = hex[(dis(gen) & 0x3) | 0x8];
-    }
-  }
-  return uuid;
 }
 
 /**
@@ -265,7 +246,7 @@ void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
         }
 
         storage::viewer_state_record state;
-        state.state_id = generate_uuid();
+        state.state_id = detail::generate_uuid();
         state.study_uid = parse_json_string(body, "study_uid");
         state.user_id = parse_json_string(body, "user_id");
         state.state_json = build_state_json(body);

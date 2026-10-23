@@ -359,6 +359,7 @@ if(PACS_BUILD_TESTS)
             tests/web/measurement_endpoints_test.cpp
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
+            tests/web/endpoint_uuid_test.cpp
             tests/web/wado_uri_endpoints_test.cpp
             tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp
