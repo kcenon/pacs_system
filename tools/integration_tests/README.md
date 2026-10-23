@@ -169,6 +169,43 @@ Tests TLS-encrypted DICOM communication:
 - Client certificate verification
 - Cipher suite negotiation
 
+## In-Memory dicom_server Hook (C++)
+
+Until the real TCP client lands, `association::connect()` reaches a
+`dicom_server` only through the in-process registry
+(`dicom_server::get_server_on_port`): the client association is paired with
+a server-side association, and DIMSE messages pass through in-memory queues.
+All `[stress]` coverage in `test_stress.cpp` runs on this hook. Its limits:
+
+- **Two association loops at a time by default.** The server runs one
+  message loop per association on its thread pool, and the default pool
+  (`thread_pool_config::min_threads` in
+  `include/kcenon/pacs/integration/thread_pool_interface.h`) has two
+  threads; further associations wait for a free thread. A test with more
+  concurrent SCUs sizes the pool through the
+  `dicom_server(config, thread_pool)` constructor, as `stress_test_server`
+  does with its `concurrent_associations` argument. The production default
+  is unchanged.
+- **Server-side loops end after about 1 s without a message.** Each loop
+  waits at most `min(idle_timeout, 1 s)` for the next message and ends when
+  that wait times out, whatever `idle_timeout` is set to (with
+  `idle_timeout = 0` it does not wait at all). A client that sends nothing
+  for longer than that, counted from when the loop starts or last received,
+  finds its peer gone: its next `send_dimse()` or `receive_dimse()` returns
+  `association_aborted`, and a request sent as the loop ends is lost. Slow
+  builds such as ThreadSanitizer with a suppression file can stall a client
+  that long.
+- **Release, abort, and destruction reach the other end.** When either end
+  is released, aborted, or destroyed, the other end first receives what was
+  already queued, then sees the association end the same way on its next
+  `send_dimse()` or `receive_dimse()`; both return `association_aborted`
+  instead of touching freed memory (#1245).
+- **Stop the server before what its services use.** Association threads
+  call service handlers until `dicom_server::stop()` returns, so a fixture
+  stops the server before it destroys the storage or database those
+  handlers use. `stress_test_server` does this in its destructor, which also
+  runs when a `REQUIRE` throws.
+
 ## dicom_server_v2 E2E Integration Tests (C++)
 
 The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testing for `dicom_server_v2`, verifying real DICOM operations with the network_system-based implementation.
