@@ -1,0 +1,24 @@
+# CTest quarantine for the AddressSanitizer job (.github/workflows/sanitizers.yml)
+#
+# One exact CTest test name per line; lines starting with # are comments.
+# Each group names the issue that tracks the failure. Remove the lines when
+# the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
+
+# #1252: oauth2_middleware reads a destroyed header string
+# (heap-use-after-free)
+oauth2_middleware authenticate extracts Bearer token
+
+# #1256: the thread lambda reads the loop index after its scope ended
+# (stack-use-after-scope)
+integration::monitoring_adapter thread safety
+
+# #1257: OpenJPH's AVX-512 block encoder stores to unaligned stack arrays
+# (SIGSEGV on runners whose CPU takes the AVX-512 path)
+htj2k_codec lossless 8-bit grayscale round-trip
+htj2k_codec lossless 12-bit grayscale round-trip
+htj2k_codec lossless 16-bit grayscale round-trip
+htj2k_codec lossless 8-bit RGB round-trip
+htj2k_codec lossless with RPCL round-trip
+htj2k_codec lossy 8-bit grayscale
+htj2k_codec lossy 8-bit RGB
+htj2k_codec decode sets output parameters correctly

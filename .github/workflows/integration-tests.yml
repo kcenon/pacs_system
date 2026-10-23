@@ -865,9 +865,8 @@ jobs:
       # Known failing, so this step reports failure without failing the job:
       # every suite runs a pacs_system SCU against a server in another process,
       # which needs the real TCP client path in association::connect() (#1240),
-      # and the scripts still call echo_scu, store_scu, and worklist_scu with the
-      # old positional AE-title syntax. Remove continue-on-error when both are
-      # fixed.
+      # and the scripts pass arguments the CLI tools no longer accept (#1258).
+      # Remove continue-on-error when both are fixed.
       continue-on-error: true
 
   # ============================================================================
