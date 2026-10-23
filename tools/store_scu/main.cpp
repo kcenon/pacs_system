@@ -84,6 +84,8 @@ constexpr const char* explicit_vr_be = "1.2.840.10008.1.2.2";
 constexpr const char* jpeg_baseline = "1.2.840.10008.1.2.4.50";
 constexpr const char* jpeg_extended = "1.2.840.10008.1.2.4.51";
 constexpr const char* jpeg_lossless = "1.2.840.10008.1.2.4.70";
+constexpr const char* jpeg_ls_lossless = "1.2.840.10008.1.2.4.80";
+constexpr const char* jpeg_ls_near_lossless = "1.2.840.10008.1.2.4.81";
 constexpr const char* jpeg2000_lossless = "1.2.840.10008.1.2.4.90";
 constexpr const char* jpeg2000_lossy = "1.2.840.10008.1.2.4.91";
 constexpr const char* rle = "1.2.840.10008.1.2.5";
@@ -694,6 +696,7 @@ std::vector<std::string> get_transfer_syntaxes(transfer_syntax_mode mode) {
             return {ts::explicit_vr_le};
         case transfer_syntax_mode::prefer_lossless:
             return {ts::jpeg_lossless, ts::jpeg2000_lossless, ts::rle,
+                    ts::jpeg_ls_lossless,
                     ts::explicit_vr_le, ts::implicit_vr_le};
         case transfer_syntax_mode::propose_all:
         default:
@@ -701,7 +704,8 @@ std::vector<std::string> get_transfer_syntaxes(transfer_syntax_mode mode) {
                     ts::explicit_vr_be,       ts::jpeg_baseline,
                     ts::jpeg_extended,        ts::jpeg_lossless,
                     ts::jpeg2000_lossless,    ts::jpeg2000_lossy,
-                    ts::rle};
+                    ts::rle,                  ts::jpeg_ls_lossless,
+                    ts::jpeg_ls_near_lossless};
     }
 }
 
