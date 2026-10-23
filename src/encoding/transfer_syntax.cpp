@@ -32,7 +32,7 @@ struct ts_entry {
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
  * Compression support will be added in later phases.
  */
-static constexpr std::array<ts_entry, 18> TS_REGISTRY = {{
+static constexpr std::array<ts_entry, 20> TS_REGISTRY = {{
     // Uncompressed Transfer Syntaxes (supported in Phase 1)
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
@@ -68,6 +68,20 @@ static constexpr std::array<ts_entry, 18> TS_REGISTRY = {{
 
     {"1.2.840.10008.1.2.4.70",
      "JPEG Lossless, Non-Hierarchical, First-Order Prediction",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, false},
+
+    // JPEG-LS Transfer Syntaxes (jpeg_ls_codec needs CharLS; not flagged
+    // supported, like JPEG 2000)
+    {"1.2.840.10008.1.2.4.80",
+     "JPEG-LS Lossless Image Compression",
+     byte_order::little_endian,
+     vr_encoding::explicit_vr,
+     true, false, false},
+
+    {"1.2.840.10008.1.2.4.81",
+     "JPEG-LS Lossy (Near-Lossless) Image Compression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      true, false, false},
@@ -205,6 +219,20 @@ const transfer_syntax transfer_syntax::jpeg_baseline{
 const transfer_syntax transfer_syntax::jpeg_lossless{
     "1.2.840.10008.1.2.4.70",
     "JPEG Lossless, Non-Hierarchical, First-Order Prediction",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, false};
+
+const transfer_syntax transfer_syntax::jpeg_ls_lossless{
+    "1.2.840.10008.1.2.4.80",
+    "JPEG-LS Lossless Image Compression",
+    byte_order::little_endian,
+    vr_encoding::explicit_vr,
+    true, false, false};
+
+const transfer_syntax transfer_syntax::jpeg_ls_near_lossless{
+    "1.2.840.10008.1.2.4.81",
+    "JPEG-LS Lossy (Near-Lossless) Image Compression",
     byte_order::little_endian,
     vr_encoding::explicit_vr,
     true, false, false};

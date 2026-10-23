@@ -57,6 +57,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-10-23 | 1.6.0 | Add JPEG-LS Lossless and Near-Lossless transfer syntaxes; list all optional codec libraries in Appendix B |
 | 2026-03-05 | 1.5.0 | Add HEVC, JPEG XL, Frame Deflate transfer syntaxes; Heightmap/Label Map Segmentation, Waveform PS/Annotation SOP classes; TLS 1.3 BCP 195 profiles; OAuth 2.0 and DICOMweb Storage Commitment |
 | 2026-03-04 | 1.4.0 | Add CT For Processing Image Storage SOP Class (multi-energy/spectral CT) |
 | 2026-03-04 | 1.3.0 | Add HTJ2K Transfer Syntax support (Supplement 235) |
@@ -491,6 +492,8 @@ Workstation (Print SCU)                      Printer (Print SCP)
 |----------------|-----|------|---------|
 | JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | Lossy | Full |
 | JPEG Lossless, Non-Hierarchical, First-Order Prediction | 1.2.840.10008.1.2.4.70 | Lossless | Full |
+| JPEG-LS Lossless Image Compression | 1.2.840.10008.1.2.4.80 | Lossless | Full |
+| JPEG-LS Lossy (Near-Lossless) Image Compression | 1.2.840.10008.1.2.4.81 | Lossy (near-lossless) | Full |
 | JPEG 2000 Image Compression (Lossless Only) | 1.2.840.10008.1.2.4.90 | Lossless | Full |
 | JPEG 2000 Image Compression | 1.2.840.10008.1.2.4.91 | Lossy | Full |
 | RLE Lossless | 1.2.840.10008.1.2.5 | Lossless | Full |
@@ -503,6 +506,11 @@ Workstation (Print SCU)                      Printer (Print SCP)
 | JPEG XL JPEG Recompression | 1.2.840.10008.1.2.4.111 | Lossless | Full |
 | JPEG XL | 1.2.840.10008.1.2.4.112 | Lossless/Lossy | Full |
 | Frame Deflate | 1.2.840.10008.1.2.11 | Lossless | Full |
+
+The JPEG Baseline, JPEG 2000, JPEG-LS, and HTJ2K codecs depend on optional libraries
+detected at build time ([Appendix B](#appendix-b-known-limitations)). PACS_SCP accepts
+these transfer syntaxes during association negotiation whether or not the library is
+present; encoding and decoding their pixel data requires it.
 
 ### 4.3 Default Transfer Syntax
 
@@ -812,9 +820,17 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
 | Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
-| HTJ2K Codec | Requires OpenJPH library at build time (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
+| JPEG Baseline Codec | Requires libjpeg-turbo at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG_CODEC`) | Optional dependency |
+| JPEG 2000 Codec | Requires OpenJPEG at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG2000_CODEC`) | Optional dependency |
+| JPEG-LS Codec | Requires CharLS at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEGLS_CODEC`) | Optional dependency |
+| HTJ2K Codec | Requires OpenJPH at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library or, with `PACS_FETCH_OPENJPH=ON` (default), fetches it from GitHub (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
+
+`PACS_BUILD_CODECS=OFF` disables all four codecs. With it on, CMake looks for each library at
+configure time and disables only the codec whose library is missing, with a warning
+(`cmake/dependencies.cmake`); the compile definition in parentheses is set when the codec is
+built.
 
 ---
 
