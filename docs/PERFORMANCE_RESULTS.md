@@ -115,17 +115,20 @@ The scalability pattern shows that single-worker performance is extremely high d
 
 **Analysis:**
 
-Shutdown performance is **significantly improved** after the `cancellation_token` integration. The graceful shutdown with active connections completes in ~110ms, well under the 5-second baseline target. This demonstrates that cooperative cancellation is working effectively.
+All shutdown cases pass after the `cancellation_token` integration. The graceful shutdown with 5 active connections completes in 107 ms against the 5-second pass threshold, and the shutdown under load completes in 110 ms against the 10-second threshold. Shutdown time was not measured before the migration, so these results show that cooperative cancellation meets the targets, not how much it changed shutdown time.
 
 ## Comparison with Baseline
 
-| Category | Baseline Target | Migration Result | Change |
+The baseline column holds the pass thresholds, not measurements from before the migration, so the
+table reports pass or fail rather than a ratio.
+
+| Category | Baseline Target | Migration Result | Status |
 |----------|-----------------|------------------|--------|
-| Association establishment | < 100 ms | ~0.001 ms | ✅ Excellent |
-| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | ✅ 900x baseline |
-| C-STORE throughput | > 20 store/s | 31,759 store/s | ✅ 1,500x baseline |
-| Concurrent operations | > 50 ops/s | 124 ops/s | ✅ 2.5x baseline |
-| Shutdown time | < 5000 ms | 110 ms | ✅ 45x faster |
+| Association establishment | < 100 ms | ~0.001 ms | ✅ Pass |
+| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | ✅ Pass |
+| C-STORE throughput | > 20 store/s | 31,759 store/s | ✅ Pass |
+| Concurrent operations | > 50 ops/s | 124 ops/s | ✅ Pass |
+| Shutdown time (5 active connections) | < 5000 ms | 107 ms | ✅ Pass |
 | Memory stability | No leaks | No leaks detected | ✅ Pass |
 
 ## Key Improvements from Thread Migration
@@ -204,7 +207,7 @@ Per Issue #160, all acceptance criteria have been verified:
 The thread migration (Phase 2-3) has been successfully completed with:
 
 - **No performance regression** compared to baseline
-- **Significant improvement** in shutdown time (45x faster)
+- **Shutdown within target**: 107 ms with 5 active connections (threshold < 5000 ms) and 110 ms under load (threshold < 10000 ms)
 - **100% success rate** in all concurrent operations
 - **Clean integration** with thread_system's modern C++20 features
 

@@ -79,7 +79,7 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
 ### C++ Style
 
 - Use C++20 features when beneficial
-- Follow existing code style (clang-format configuration provided)
+- Follow existing code style; the repository has no `.clang-format` file, so format changes by hand to match the surrounding code
 - Prefer RAII for resource management
 - Use `auto` for obvious types
 - Avoid raw pointers; use smart pointers
@@ -178,7 +178,7 @@ Before submitting a PR, ensure:
 ## Getting Help
 
 - Check [existing issues](https://github.com/kcenon/pacs_system/issues)
-- Open a [discussion](https://github.com/kcenon/pacs_system/discussions) for questions
+- Ask questions in a new issue (GitHub Discussions is not enabled for this repository)
 
 ## License
 
