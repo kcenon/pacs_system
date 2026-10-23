@@ -544,7 +544,16 @@ public:
     void set_state(association_state new_state);
 
     /**
-     * @brief Set peer association for in-memory testing.
+     * @brief Pair this association with a peer for in-memory testing.
+     *
+     * Links both ends, so one call is enough. Messages sent on either end
+     * are queued on the other. When an end is released, aborted, or
+     * destroyed, the other end drains what is already queued and then sees
+     * the association end the same way on its next send_dimse() or
+     * receive_dimse(); a send to a peer that is gone returns an error.
+     * Moving an end keeps the pairing.
+     *
+     * @param peer The other end, or nullptr to leave the current pairing
      */
     void set_peer(association* peer);
 
@@ -554,7 +563,11 @@ public:
     void enqueue_message(uint8_t context_id, dimse::dimse_message msg);
 
     /**
-     * @brief Update peer pointer (for in-memory testing).
+     * @brief Re-pair with @p new_peer if paired with @p old_peer (for
+     *        in-memory testing).
+     *
+     * Moves keep the pairing on their own; this is only needed to switch
+     * an end to a different peer.
      */
     void update_peer(association* old_peer, association* new_peer);
 
@@ -574,6 +587,23 @@ private:
 
     /// Negotiate presentation contexts for SCP
     void negotiate_contexts(const associate_rq& rq, const scp_config& config);
+
+    /// Pairing state shared by both ends of an in-memory association
+    struct peer_link;
+
+    /// Leave the in-memory pairing and wake the peer (requires mutex_)
+    void leave_peer_link();
+
+    /// Take over the pairing and inbound queue of @p other (requires
+    /// other.mutex_; this must not be paired)
+    void take_peer_link_from(association& other);
+
+    /// How the in-memory peer ended the association, or std::nullopt while
+    /// it is still there (requires mutex_)
+    [[nodiscard]] std::optional<association_state> peer_exit_state() const;
+
+    /// End this side after the in-memory peer left (requires mutex_)
+    void finish_after_peer_left(association_state peer_exit);
 
     // =========================================================================
     // Member Variables
@@ -633,8 +663,11 @@ private:
     /// Is this an SCU (true) or SCP (false)?
     bool is_scu_{true};
 
-    /// Peer association for in-memory testing
-    association* peer_{nullptr};
+    /// Pairing with the peer end for in-memory testing (null when unpaired)
+    std::shared_ptr<peer_link> peer_link_;
+
+    /// This end's slot in peer_link_ (0 or 1)
+    std::size_t peer_end_{0};
 
     /// Incoming message queue for in-memory testing (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;

@@ -114,6 +114,7 @@ if(PACS_BUILD_TESTS)
         tests/network/pdu_decoder_test.cpp
         tests/network/association_test.cpp
         tests/network/dicom_server_test.cpp
+        tests/network/in_memory_peer_test.cpp
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
         tests/network/detail/accept_worker_test.cpp
