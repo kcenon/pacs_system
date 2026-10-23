@@ -41,7 +41,7 @@ cd build && ctest --output-on-failure --timeout 120
 
 Key CMake options:
 - `PACS_BUILD_TESTS` (ON) — Catch2 v3.4.0 unit tests
-- `PACS_BUILD_EXAMPLES` (OFF) — 32 CLI utility binaries (sources under `tools/`)
+- `PACS_BUILD_EXAMPLES` (OFF) — CLI tools plus the `module_example` demo (sources under `tools/`; listed in `docs/CLI_REFERENCE.md`)
 - `PACS_BUILD_SAMPLES` (OFF) — 5 progressive tutorials (sources under `examples/`)
 - `PACS_BUILD_BENCHMARKS` (OFF)
 - `PACS_BUILD_STORAGE` (ON) — Requires SQLite3
