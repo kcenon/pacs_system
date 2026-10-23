@@ -579,3 +579,8 @@ TEST_CASE("ci probe 1243 ubsan signed overflow", "[probe1243]") {
     const int wrapped = largest + 1;  // signed integer overflow
     CHECK((wrapped < 0 || wrapped >= 0));
 }
+
+// Stage 2: a plain unit test failure in every build
+TEST_CASE("ci probe 1243 deliberate unit failure", "[probe1243]") {
+    FAIL("deliberate failure for the #1243 probe: this job must turn red");
+}
