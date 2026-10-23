@@ -668,13 +668,16 @@ jobs:
 
   # ============================================================================
   # Extended Stress Tests
-  # Run only on main branch pushes - longer running tests
+  # Run on main branch pushes and on pull requests into main/develop, so a
+  # stress regression is caught before it reaches main
   # ============================================================================
   stress-tests:
     name: Stress Tests
     needs: [integration-tests, stability-smoke-tests]
     runs-on: ubuntu-24.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
 
     steps:
     - name: Checkout pacs_system
@@ -733,11 +736,12 @@ jobs:
           fi
 
           echo "Found stress tests, running..."
+          # No failure masking: a failed test, an abort, or the timeout
+          # fails this step (the report is still published below)
           timeout 840 ./bin/pacs_integration_e2e \
             --reporter junit \
             --out stress-test-results.xml \
-            "[stress]" "~[.slow]" \
-            || echo "Some stress tests failed"
+            "[stress]" "~[.slow]"
         else
           echo "Integration test binary not found"
           echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stress" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stress-test-results.xml
@@ -761,7 +765,7 @@ jobs:
       if: always()
       with:
         report_paths: pacs_system/build/stress-test-results.xml
-        fail_on_failure: false
+        fail_on_failure: true
         check_name: Stress Tests
 
   # ============================================================================

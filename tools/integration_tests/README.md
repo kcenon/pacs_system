@@ -890,7 +890,7 @@ Integration tests are automatically executed via GitHub Actions. The pipelines a
 | `integration-tests` | All PRs | Run library-level integration tests |
 | `stability-smoke-tests` | All PRs | Quick 10-second stability validation |
 | `binary-integration-tests` | All PRs | Run shell-based binary integration tests |
-| `stress-tests` | Main only | Extended stress tests (5 min) |
+| `stress-tests` | Main pushes and all PRs | Extended stress tests (5 min) |
 | `test-summary` | Always | Aggregate and report results |
 | `dcmtk-cpp-tests` | All PRs | DCMTK C++ interoperability tests |
 | `dcmtk-shell-tests` | All PRs | DCMTK shell script tests |
@@ -926,7 +926,7 @@ ctest -L integration -V
 | `[dcmtk][find]` | C-FIND interoperability | All PRs |
 | `[dcmtk][move]` | C-MOVE interoperability | All PRs |
 | `[stability]` | Stability tests | All PRs (smoke only) |
-| `[stress]` | Stress/load tests | Main only |
+| `[stress]` | Stress/load tests | Main pushes and all PRs |
 | `[.slow]` | Long-running tests (hidden) | Manual only |
 
 ### Viewing Test Results
