@@ -51,7 +51,8 @@ calculate_stats() {
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-    workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
+    # Workflow files under .github/workflows/, both extensions (e.g. build-Doxygen.yaml)
+    workflow_files=$(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | wc -l | tr -d ' ')
 
     # Line counts (approximate)
     local header_loc
@@ -148,7 +149,7 @@ export_raw_stats() {
     test_files=$(find tests -name '*.cpp' -type f 2>/dev/null | wc -l | tr -d ' ')
     example_dirs=$(count_example_programs)
     doc_files=$(find docs -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-    workflow_files=$(find .github/workflows -name '*.yml' -type f 2>/dev/null | wc -l | tr -d ' ')
+    workflow_files=$(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null | wc -l | tr -d ' ')
     header_loc=$(find include -name '*.h' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     source_loc=$(find src -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
     test_loc=$(find tests -name '*.cpp' -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')

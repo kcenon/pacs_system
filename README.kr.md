@@ -159,8 +159,8 @@ v1.0.0 릴리스가 실제로 태그되기 전까지 v1.0.0 섹션을 만들지 
 | JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | ✅ 완료 |
 | JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ 완료 |
 | JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | ✅ 완료 |
-| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ 완료 |
-| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ 완료 |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | 구현됨; 적합성 선언문에는 아직 미기재 |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | 구현됨; 적합성 선언문에는 아직 미기재 |
 | RLE Lossless | 1.2.840.10008.1.2.5 | ✅ 완료 |
 
 > 전체 DICOM 적합성 선언문은 [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md)를 참조하세요.
@@ -181,7 +181,7 @@ vcpkg install kcenon-pacs-system[feature1,feature2,...]
 | rest-api | off | Crow HTTP 프레임워크를 통한 DICOMweb REST API | crow | -- |
 | ssl | off | 보안 DICOM association을 위한 TLS/SSL 지원 | openssl | -- |
 | storage | off | SQLite3 기반 PACS 스토리지 및 인덱싱 | sqlite3 | -- |
-| testing | off | 단위 테스트 및 벤치마크 | benchmark | -- |
+| testing | off | 단위 테스트 및 벤치마크 | gtest, benchmark | -- |
 
 ### 기능 선택 가이드
 
@@ -207,18 +207,18 @@ vcpkg install kcenon-pacs-system[feature1,feature2,...]
 
 **Linux (Ubuntu 24.04+):**
 ```bash
-sudo apt install cmake ninja-build libsqlite3-dev libssl-dev libfmt-dev
+sudo apt install cmake ninja-build libicu-dev libsqlite3-dev libssl-dev libfmt-dev
 ```
 
 **macOS:**
 ```bash
-brew install cmake ninja sqlite3 openssl@3 fmt
+brew install cmake ninja icu4c sqlite3 openssl@3 fmt
 ```
 
 **Windows:**
 - C++ 워크로드를 포함한 Visual Studio 2022
 - 패키지 관리를 위한 [vcpkg](https://vcpkg.io/)
-- 의존성: `sqlite3`, `openssl`, `fmt`
+- 의존성: `icu`, `sqlite3`, `openssl`, `fmt`
 
 ### 빌드
 
@@ -243,7 +243,7 @@ cd build && ctest --output-on-failure
 # 사전 요구사항: Visual Studio 2022, vcpkg, CMake 3.20+
 
 # vcpkg를 통한 의존성 설치
-vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows
+vcpkg install icu:x64-windows sqlite3:x64-windows openssl:x64-windows fmt:x64-windows
 
 # 리포지토리 클론
 git clone https://github.com/kcenon/pacs_system.git
@@ -271,7 +271,7 @@ ctest --output-on-failure
 
 ```cmake
 PACS_BUILD_TESTS (ON)              # 단위 테스트 활성화
-PACS_BUILD_EXAMPLES (OFF)          # 예제 빌드 활성화
+PACS_BUILD_EXAMPLES (OFF)          # CLI 도구 빌드 (tools/)
 PACS_BUILD_BENCHMARKS (OFF)        # 벤치마크 활성화
 PACS_BUILD_STORAGE (ON)            # 스토리지 모듈 빌드
 ```
@@ -356,8 +356,9 @@ auto value = std::max(x, y);
 
 이 프로젝트는 두 개의 상호 보완적인 하위 트리를 제공합니다(자세한 내용은 [#1139](https://github.com/kcenon/pacs_system/issues/1139) 참조):
 
-- `tools/` — 32개의 독립 실행형 CLI 유틸리티 바이너리
-- `examples/` — 5개의 점진적 튜토리얼 (`01_hello_dicom`부터 `05_production_pacs`까지)
+- `tools/` — 도구마다 하나의 하위 디렉터리: 아래 표의 CLI 유틸리티와 `module_example` C++20 모듈
+  데모 (하위 디렉터리 32개)
+- `examples/` — `examples/tutorials/` 아래의 5개 점진적 튜토리얼 (`01_hello_dicom`부터 `05_production_pacs`까지)
 
 CLI 도구 빌드:
 
@@ -502,28 +503,34 @@ graph TD
 
 ```
 pacs_system/
-├── include/kcenon/pacs/  # 공개 헤더 (290 파일)
-├── src/                  # 소스 구현 (217 파일)
-├── tests/                # 테스트 스위트 (189 파일, 2,657+ 테스트)
-├── examples/             # 튜토리얼 (5단계 점진적 학습)
-├── tools/                # CLI 유틸리티 바이너리 (32 앱)
-├── docs/                 # 문서 (87 마크다운 파일)
+├── include/kcenon/pacs/  # 공개 헤더
+├── src/                  # 소스 구현
+├── tests/                # 테스트 스위트
+├── examples/             # 점진적 튜토리얼 (examples/tutorials/)
+├── tools/                # CLI 유틸리티, 도구마다 하나의 하위 디렉터리
+├── docs/                 # 문서 (마크다운)
 └── CMakeLists.txt        # 빌드 구성 (project VERSION 0.1.0)
 ```
 
-> 전체 파일 수준 디렉터리 트리는 [Project Structure](docs/PROJECT_STRUCTURE.md)를 참조하세요.
+> 파일·라인·테스트 수는 CI에서 `scripts/check-stats-drift.sh`가 검사하는 [코드 통계](#코드-통계)에
+> 기록됩니다. 전체 파일 수준 디렉터리 트리는 [Project Structure](docs/PROJECT_STRUCTURE.md)를 참조하세요.
 
 ---
 
 ## C++20 모듈 지원
 
-PACS System은 헤더 기반 인터페이스의 대안으로 C++20 모듈 지원을 제공합니다.
+PACS System은 헤더 기반 인터페이스의 대안으로 C++20 모듈 인터페이스(`src/modules/`)를 정의합니다.
+
+> **상태**: 현재 리비전에서는 모듈 빌드가 컴파일되지 않습니다. 파티션은 여전히 접두사 없는 `pacs::`
+> 네임스페이스의 이름을 재노출하지만(예: `using pacs::core::dicom_tag;`) 공개 헤더는 이 이름들을
+> `kcenon::pacs::`에 선언하므로, `pacs_system_modules` 빌드는 비어 있는 `:ai` 파티션을 제외한 모든
+> 파티션에서 실패합니다. `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업은 없습니다. 헤더 기반
+> 인터페이스를 사용하세요.
 
 ### 모듈 요구사항
 
 - **CMake 3.28+**
 - **Clang 16+, GCC 14+ 또는 MSVC 2022 17.4+**
-- 모듈을 지원하는 **common_system**, **container_system**, **network_system**
 
 ### 모듈로 빌드하기
 
@@ -534,13 +541,18 @@ cmake --build build
 
 ### 모듈 사용하기
 
+아래 예제는 공개 헤더가 선언하는 이름을 사용하며, 파티션이 이 이름들을 export한 뒤에야 빌드됩니다
+(위의 상태 안내 참조).
+
 ```cpp
 import kcenon.pacs;
 
 int main() {
-    // PACS 컴포넌트를 직접 사용
-    auto server = kcenon::pacs::create_scp_server();
-    server->start();
+    kcenon::pacs::core::dicom_dataset dataset;
+    dataset.set_string(kcenon::pacs::core::tags::patient_name,
+                       kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
+    const auto& syntax = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian;
+    return (dataset.size() == 1 && syntax.is_valid()) ? 0 : 1;
 }
 ```
 
@@ -557,6 +569,10 @@ int main() {
 | `kcenon.pacs:security` | TLS 및 인증 |
 | `kcenon.pacs:web` | DICOMweb REST API |
 | `kcenon.pacs:workflow` | 워크플로우 관리 |
+| `kcenon.pacs:integration` | 에코시스템 어댑터 |
+| `kcenon.pacs:ai` | AI 서비스 커넥터 (`KCENON_WITH_AI`가 정의되지 않으면 비어 있으며, 빌드는 이를 정의하지 않음) |
+| `kcenon.pacs:monitoring` | 헬스 체크 및 메트릭 |
+| `kcenon.pacs:di` | 의존성 주입 유틸리티 |
 
 > **참고**: C++20 모듈은 실험적입니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
 
@@ -575,7 +591,7 @@ int main() {
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - 스레드 시스템 마이그레이션 요약
 
 **업그레이드:**
-- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - 0.1.0 베이스라인과 1.0.0 API 고정 사이의 모든 호환성 변경 사항, 전후 스니펫, `Result<T>` 마이그레이션 설명, 자가 점검 체크리스트 포함.
+- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - 0.1.0 베이스라인과 계획된 1.0.0 API 고정 사이의 모든 호환성 변경 사항, 전후 스니펫, `Result<T>` 마이그레이션 설명, 자가 점검 체크리스트 포함.
 
 **데이터베이스 통합:**
 - 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system 통합 가이드
@@ -644,9 +660,9 @@ cmake --build build --target run_full_benchmarks
 | **테스트 케이스** | 2661+ 테스트 |
 | **예제 프로그램** | 5 앱 |
 | **문서** | 108 마크다운 파일 |
-| **CI/CD 워크플로우** | 22 워크플로우 |
+| **CI/CD 워크플로우** | 23 워크플로우 |
 | **버전** | 0.1.0 |
-| **최종 업데이트** | 2026-10-03 |
+| **최종 업데이트** | 2026-10-22 |
 
 <!-- STATS_END -->
 
@@ -663,7 +679,7 @@ cmake --build build --target run_full_benchmarks
 - [ISO 27799 통제 매핑](docs/compliance/iso-27799.md) — ATNA 감사 추적, 감사 로그 암호화, TLS 정책, 접근 통제, 익명화가 ISO 27799:2016 조항 7.4–7.7에 어떻게 매핑되는지
 - [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) — 구현된 ISO 12052 / DICOM 2023e 서비스, SOP 클래스, 전송 구문
 
-에코시스템 수준의 색인 [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/develop/docs/compliance/ISO_OVERVIEW.md)는 kcenon 시스템이 다루는 모든 ISO 표준을 나열합니다.
+에코시스템 수준의 색인 [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/main/docs/compliance/ISO_OVERVIEW.md)는 kcenon 시스템이 다루는 모든 ISO 표준을 나열합니다.
 
 ---
 

@@ -34,6 +34,7 @@ A modern C++20 PACS (Picture Archiving and Communication System) implementation 
 - [CLI Tools & Examples](#cli-tools--examples)
 - [Ecosystem Dependencies](#ecosystem-dependencies)
 - [Project Structure](#project-structure)
+- [C++20 Module Support](#c20-module-support)
 - [Documentation](#documentation)
 - [Performance](#performance)
 - [Code Statistics](#code-statistics)
@@ -160,8 +161,8 @@ v1.0.0 release is actually tagged.
 | JPEG Lossless (Process 14) | 1.2.840.10008.1.2.4.70 | ✅ Complete |
 | JPEG 2000 Lossless | 1.2.840.10008.1.2.4.90 | ✅ Complete |
 | JPEG 2000 Lossy | 1.2.840.10008.1.2.4.91 | ✅ Complete |
-| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | ✅ Complete |
-| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | ✅ Complete |
+| JPEG-LS Lossless | 1.2.840.10008.1.2.4.80 | Implemented; not yet in the Conformance Statement |
+| JPEG-LS Near-Lossless | 1.2.840.10008.1.2.4.81 | Implemented; not yet in the Conformance Statement |
 | RLE Lossless | 1.2.840.10008.1.2.5 | ✅ Complete |
 
 > For the full DICOM Conformance Statement, see [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md).
@@ -208,18 +209,18 @@ vcpkg install kcenon-pacs-system[feature1,feature2,...]
 
 **Linux (Ubuntu 24.04+):**
 ```bash
-sudo apt install cmake ninja-build libsqlite3-dev libssl-dev libfmt-dev
+sudo apt install cmake ninja-build libicu-dev libsqlite3-dev libssl-dev libfmt-dev
 ```
 
 **macOS:**
 ```bash
-brew install cmake ninja sqlite3 openssl@3 fmt
+brew install cmake ninja icu4c sqlite3 openssl@3 fmt
 ```
 
 **Windows:**
 - Visual Studio 2022 with C++ workload
 - [vcpkg](https://vcpkg.io/) for package management
-- Dependencies: `sqlite3`, `openssl`, `fmt`, `gtest`
+- Dependencies: `icu`, `sqlite3`, `openssl`, `fmt`
 
 ### Build
 
@@ -244,7 +245,7 @@ cd build && ctest --output-on-failure
 # Prerequisites: Visual Studio 2022, vcpkg, CMake 3.20+
 
 # Install dependencies via vcpkg
-vcpkg install sqlite3:x64-windows openssl:x64-windows fmt:x64-windows gtest:x64-windows
+vcpkg install icu:x64-windows sqlite3:x64-windows openssl:x64-windows fmt:x64-windows
 
 # Clone repository
 git clone https://github.com/kcenon/pacs_system.git
@@ -272,7 +273,7 @@ ctest --output-on-failure
 
 ```cmake
 PACS_BUILD_TESTS (ON)              # Enable unit tests
-PACS_BUILD_EXAMPLES (OFF)          # Enable example builds
+PACS_BUILD_EXAMPLES (OFF)          # Build CLI tools (tools/)
 PACS_BUILD_BENCHMARKS (OFF)        # Enable benchmarks
 PACS_BUILD_STORAGE (ON)            # Build storage module
 ```
@@ -360,8 +361,9 @@ auto value = std::max(x, y);
 
 The project ships two complementary subtrees (see [#1139](https://github.com/kcenon/pacs_system/issues/1139)):
 
-- `tools/` — 32 standalone CLI utility binaries
-- `examples/` — 5 progressive tutorials (`01_hello_dicom` through `05_production_pacs`)
+- `tools/` — one subdirectory per tool: the CLI utilities in the table below plus the
+  `module_example` C++20 module demo (32 subdirectories)
+- `examples/` — 5 progressive tutorials under `examples/tutorials/` (`01_hello_dicom` through `05_production_pacs`)
 
 Build the CLI tools:
 
@@ -506,28 +508,35 @@ path was retired; all consumers should `#include <kcenon/pacs/...>`.
 
 ```
 pacs_system/
-├── include/kcenon/pacs/  # Public headers (290 files)
-├── src/                  # Source implementations (217 files)
-├── tests/                # Test suites (189 files, 2,657+ tests)
-├── examples/             # Tutorials (5 progressive learning steps)
-├── tools/                # CLI utility binaries (32 apps)
-├── docs/                 # Documentation (87 markdown files)
+├── include/kcenon/pacs/  # Public headers
+├── src/                  # Source implementations
+├── tests/                # Test suites
+├── examples/             # Progressive tutorials (examples/tutorials/)
+├── tools/                # CLI utilities, one subdirectory per tool
+├── docs/                 # Documentation (Markdown)
 └── CMakeLists.txt        # Build configuration (project VERSION 0.1.0)
 ```
 
-> For the full file-level directory tree, see [Project Structure](docs/PROJECT_STRUCTURE.md).
+> File, line, and test counts live in [Code Statistics](#code-statistics), which
+> `scripts/check-stats-drift.sh` checks in CI. For the full file-level directory tree, see
+> [Project Structure](docs/PROJECT_STRUCTURE.md).
 
 ---
 
 ## C++20 Module Support
 
-PACS System provides C++20 module support as an alternative to the header-based interface.
+PACS System defines C++20 module interfaces (`src/modules/`) as an alternative to the header-based interface.
+
+> **Status**: the module build does not compile at this revision. The partitions still re-export
+> names from a bare `pacs::` namespace (for example `using pacs::core::dicom_tag;`), while the
+> public headers declare them in `kcenon::pacs::`, so building `pacs_system_modules` fails in every
+> partition except the empty `:ai` partition. No CI job builds with `PACS_BUILD_MODULES=ON`. Use
+> the header-based interface.
 
 ### Requirements for Modules
 
 - **CMake 3.28+**
 - **Clang 16+, GCC 14+, or MSVC 2022 17.4+**
-- **common_system**, **container_system**, **network_system** with module support
 
 ### Building with Modules
 
@@ -538,13 +547,18 @@ cmake --build build
 
 ### Using Modules
 
+The example uses names that the public headers declare; it builds only once the partitions
+export them (see the status note above).
+
 ```cpp
 import kcenon.pacs;
 
 int main() {
-    // Use PACS components directly
-    auto server = kcenon::pacs::create_scp_server();
-    server->start();
+    kcenon::pacs::core::dicom_dataset dataset;
+    dataset.set_string(kcenon::pacs::core::tags::patient_name,
+                       kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
+    const auto& syntax = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian;
+    return (dataset.size() == 1 && syntax.is_valid()) ? 0 : 1;
 }
 ```
 
@@ -561,6 +575,10 @@ int main() {
 | `kcenon.pacs:security` | TLS and authentication |
 | `kcenon.pacs:web` | DICOMweb REST API |
 | `kcenon.pacs:workflow` | Workflow management |
+| `kcenon.pacs:integration` | Ecosystem adapters |
+| `kcenon.pacs:ai` | AI service connector (empty unless `KCENON_WITH_AI` is defined; the build does not define it) |
+| `kcenon.pacs:monitoring` | Health checks and metrics |
+| `kcenon.pacs:di` | Dependency injection utilities |
 
 > **Note**: C++20 modules are experimental. The header-based interface remains the primary API.
 
@@ -579,7 +597,7 @@ int main() {
 - 🚀 [Migration Complete](docs/MIGRATION_COMPLETE.md) - Thread system migration summary
 
 **Upgrading:**
-- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - Every breaking change between the 0.1.0 baseline and the 1.0.0 API freeze, with before/after snippets, a `Result<T>` migration walkthrough, and a self-audit checklist.
+- 📘 [0.x to 1.0 Migration Guide](docs/migration/0.x-to-1.0.md) - Every breaking change between the 0.1.0 baseline and the planned 1.0.0 API freeze, with before/after snippets, a `Result<T>` migration walkthrough, and a self-audit checklist.
 
 **Database Integration:**
 - 🗄️ [Migration Guide](docs/database/MIGRATION_GUIDE.md) - database_system integration guide
@@ -646,9 +664,9 @@ cmake --build build --target run_full_benchmarks
 | **Test Cases** | 2661+ tests |
 | **Example Programs** | 5 apps |
 | **Documentation** | 108 markdown files |
-| **CI/CD Workflows** | 22 workflows |
+| **CI/CD Workflows** | 23 workflows |
 | **Version** | 0.1.0 |
-| **Last Updated** | 2026-10-03 |
+| **Last Updated** | 2026-10-22 |
 
 <!-- STATS_END -->
 
@@ -663,7 +681,7 @@ cmake --build build --target run_full_benchmarks
 - [ISO 27799 Control Mapping](docs/compliance/iso-27799.md) — how ATNA audit trail, audit log encryption, TLS policy, access control, and anonymization map to ISO 27799:2016 clauses 7.4–7.7
 - [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) — ISO 12052 / DICOM 2023e services, SOP classes, and transfer syntaxes implemented
 
-The ecosystem-level index at [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/develop/docs/compliance/ISO_OVERVIEW.md) lists all ISO standards the kcenon systems touch.
+The ecosystem-level index at [common_system / ISO Standards Overview](https://github.com/kcenon/common_system/blob/main/docs/compliance/ISO_OVERVIEW.md) lists all ISO standards the kcenon systems touch.
 
 ---
 
