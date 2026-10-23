@@ -1,8 +1,8 @@
 ---
 doc_id: "PAC-PERF-002"
 doc_title: "PACS System Performance Benchmarks"
-doc_version: "1.0.0"
-doc_date: "2026-04-04"
+doc_version: "1.1.0"
+doc_date: "2026-10-23"
 doc_status: "Released"
 project: "pacs_system"
 category: "PERF"
@@ -14,34 +14,90 @@ category: "PERF"
 
 > **Language:** **English** | [한국어](BENCHMARKS.kr.md)
 
-**Last Updated**: 2026-03-18
+**Last Updated**: 2026-10-23
 
-This document provides comprehensive performance metrics, benchmarking methodologies, and results for the PACS System.
+This document holds the benchmark suites and targets, every result recorded in the repository
+with its environment, date, command, and result file, and the commands that run the benchmarks.
+The README links here instead of quoting figures.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Recorded Results](#recorded-results)
 - [Benchmark Categories](#benchmark-categories)
-- [DICOM Transfer Performance](#dicom-transfer-performance)
-- [Codec Performance](#codec-performance)
-- [Storage Performance](#storage-performance)
-- [Query Performance](#query-performance)
 - [Running Benchmarks](#running-benchmarks)
 
 ---
 
 ## Overview
 
-The PACS System provides performance benchmarks covering DICOM operations throughput, codec processing, storage I/O, and query response times.
+| Suite | Source | Executables | What it measures |
+|-------|--------|-------------|------------------|
+| Thread performance | `benchmarks/thread_performance/` | `thread_performance_benchmarks` | Association setup, C-ECHO and C-STORE throughput, concurrent load, shutdown time |
+| SIMD performance | `benchmarks/simd_performance/` | `simd_performance_benchmarks`, `photometric_benchmark`, `windowing_benchmark` | Byte swapping, RLE, photometric conversion, window/level |
 
-**Current Status**:
-- Association and transfer benchmarks defined with baseline targets
-- Codec benchmarks for compression/decompression throughput
-- Storage benchmarks for filesystem and cloud backends
+The codec, storage, and query categories below define targets only; the repository has no
+benchmark source for them yet.
 
-See also [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) for thread migration baseline measurements.
+See also [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) for the thread migration baseline
+targets and [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) for the full report of the recorded run.
+
+---
+
+## Recorded Results
+
+### Thread migration run (Issue #160)
+
+This is the only benchmark run recorded in the repository. The values are copied from
+[PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md). This table replaces the "Key Performance Metrics"
+table that the README carried until #1212.
+
+| Item | Record |
+|------|--------|
+| Environment | macOS 26.2 (Darwin), Apple M4 Max (ARM64), 36 GB memory, Apple Clang 17.0.0, Release build, C++20 ([Test Environment](PERFORMANCE_RESULTS.md#test-environment)) |
+| Date | Not recorded reliably. The report states 2024-12-05, but the commit that added it (`501957b0`, PR #171) is dated 2025-12-05, and macOS 26.2 and Apple Clang 17.0.0 were not available on 2024-12-05. |
+| Command | Not recorded. The report names the four `thread_performance_benchmarks` suites (association, throughput, concurrent load, shutdown); [Running Benchmarks](#running-benchmarks) lists commands that run them. |
+| Result file | [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) (summary tables). Raw benchmark output is not recorded in the repository. |
+| Setup | Client and `benchmark_server` fixture in one process over `localhost` (`benchmarks/thread_performance/benchmark_common.h`). The report attributes the high single-worker rates to in-memory benchmark operations, so these values are not network throughput between hosts. |
+
+| Metric | Target | Recorded | Report status | Report section |
+|--------|--------|----------|---------------|----------------|
+| Single association (connect) | < 100 ms | 0.00134 ms | PASS | 1 |
+| Connect + release round-trip | < 200 ms | 0.00267 ms | PASS | 1 |
+| Connect + C-ECHO + release | < 150 ms | 468.7 ms | INVESTIGATE | 1 |
+| Sequential connection rate | > 10 conn/s | 419,655 conn/s | PASS | 1 |
+| C-ECHO, single connection | > 100 msg/s | 89,964 echo/s | PASS | 2 |
+| C-ECHO, sustained 10 s | > 80 msg/s | 132,391 msg/s | PASS | 2 |
+| C-STORE, single connection | > 20 store/s | 31,759 store/s | PASS | 2 |
+| C-STORE data rate, 512x512 (512 KB) images | > 5 MB/s | 9,247 MB/s (18,494 store/s) | Not stated | 2 |
+| Concurrent C-ECHO, 10 workers | > 50 ops/s | 124 echo/s | PASS | 3 |
+| Concurrent C-STORE, 5 workers | > 10 ops/s | 49.6 store/s | PASS | 3 |
+| Shutdown with 5 active connections | < 5000 ms | 107 ms | PASS | 4 |
+| Shutdown under load (3 workers) | < 10000 ms | 110 ms | PASS | 4 |
+
+The data-rate target comes from [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md); the report
+lists that row without a status. The report explains the Connect + C-ECHO + release value as
+benchmark fixture timing ("Known Issues and Investigations"); no later measurement is recorded.
+
+**Reconciliation with the former README table.** The README's "Association Latency < 1 ms" row
+took the connect and round-trip values and left out the Connect + C-ECHO + release value
+(468.7 ms, INVESTIGATE). Its "Graceful Shutdown 110 ms (with active connections)" row paired the
+under-load value (3 workers) with the active-connections label; the active-connections value is
+107 ms. Its C-ECHO, C-STORE, concurrent operations, and 512x512 data-rate rows match the report.
+
+### SIMD benchmarks
+
+No SIMD result with an environment and date is recorded in the repository.
+[FEATURES.md](FEATURES.md#simd-optimization) lists a byte-swap speedup range without a
+measurement record.
+
+### Earlier reference platform
+
+Earlier revisions of this document listed a reference platform: Intel i7-12700K @ 3.2GHz
+(12 cores, 20 threads), 32GB DDR4-3200, NVMe SSD, Ubuntu 22.04 LTS, GCC 13.1 with `-O2`.
+No result in the repository was recorded on it.
 
 ---
 
@@ -49,7 +105,8 @@ See also [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) for thread migration
 
 ### DICOM Transfer Performance
 
-Measures DICOM network protocol performance including association establishment, message exchange, and data transfer.
+Measures DICOM network protocol performance including association establishment, message
+exchange, and data transfer (`benchmarks/thread_performance/`).
 
 | Metric | Target | Description |
 |--------|--------|-------------|
@@ -64,7 +121,7 @@ Measures DICOM network protocol performance including association establishment,
 
 ### Codec Performance
 
-Measures compression and decompression throughput for supported transfer syntaxes.
+Targets only; no codec benchmark source exists yet.
 
 | Codec | Operation | Target | Notes |
 |-------|-----------|--------|-------|
@@ -79,7 +136,7 @@ Measures compression and decompression throughput for supported transfer syntaxe
 
 ### Storage Performance
 
-Measures storage backend I/O throughput.
+Targets only; no storage benchmark source exists yet.
 
 | Backend | Operation | Metric | Description |
 |---------|-----------|--------|-------------|
@@ -91,7 +148,7 @@ Measures storage backend I/O throughput.
 
 ### Query Performance
 
-Measures DICOM query/retrieve and DICOMweb query performance.
+Targets only; no query benchmark source exists yet.
 
 | Query Type | Target | Description |
 |------------|--------|-------------|
@@ -107,41 +164,40 @@ Measures DICOM query/retrieve and DICOMweb query performance.
 ### Build
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DPACS_BUILD_TESTS=ON
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPACS_BUILD_BENCHMARKS=ON
 cmake --build build
 ```
 
-### Execute
+Both suites need Catch2, which CMake fetches only while `PACS_BUILD_TESTS` is `ON` (the
+default; see `cmake/testing.cmake` and `cmake/examples.cmake`).
+
+### Thread performance suite
 
 ```bash
-# Run all benchmarks
-./build/bin/pacs_benchmarks
+# Run all thread performance benchmarks
+cmake --build build --target run_full_benchmarks
 
-# Run specific benchmark category
-./build/bin/pacs_benchmarks --filter=Association
-./build/bin/pacs_benchmarks --filter=Codec
-./build/bin/pacs_benchmarks --filter=Storage
+# Quick subset: association and C-ECHO throughput
+cmake --build build --target run_quick_benchmarks
+
+# JUnit output in build/benchmark_results.xml
+cmake --build build --target run_benchmarks_ci
+
+# Run one category
+./build/bin/thread_performance_benchmarks "[benchmark][association]"
+./build/bin/thread_performance_benchmarks "[benchmark][throughput]"
+./build/bin/thread_performance_benchmarks "[benchmark][concurrent]"
+./build/bin/thread_performance_benchmarks "[benchmark][shutdown]"
 ```
 
-### Configuration
+### SIMD suite
 
-Benchmark behavior can be configured via environment variables:
+```bash
+cmake --build build --target run_simd_benchmarks_full     # byte swap and RLE
+cmake --build build --target run_simd_benchmarks_quick    # summary only
+cmake --build build --target run_photometric_benchmark
+cmake --build build --target run_windowing_benchmark
+```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PACS_BENCH_ITERATIONS` | 100 | Number of iterations per benchmark |
-| `PACS_BENCH_WARMUP` | 10 | Warmup iterations |
-| `PACS_BENCH_OUTPUT` | stdout | Output format (stdout, json, csv) |
-
----
-
-## Results
-
-Benchmark results vary by hardware configuration and network environment. See `PERFORMANCE_RESULTS.md` for the latest documented results.
-
-**Reference Platform**:
-- **CPU**: Intel i7-12700K @ 3.2GHz (12 cores, 20 threads)
-- **RAM**: 32GB DDR4-3200
-- **Storage**: NVMe SSD
-- **OS**: Ubuntu 22.04 LTS
-- **Compiler**: GCC 13.1, -O2
+When you record a new result here, include the environment, the date of the run, the exact
+command, and a link to the result file in the repository.

@@ -21,6 +21,7 @@ category: "PROJ"
 ## 목차
 
 - [개요](#개요)
+- [공개 헤더 모듈](#공개-헤더-모듈)
 - [디렉토리 레이아웃](#디렉토리-레이아웃)
 - [모듈 설명](#모듈-설명)
 - [헤더 파일](#헤더-파일)
@@ -34,6 +35,35 @@ category: "PROJ"
 ## 개요
 
 PACS 시스템은 다른 kcenon 에코시스템 프로젝트와 일관된 모듈러 디렉토리 구조를 따릅니다. 각 모듈은 명확한 책임을 가지며 인터페이스는 `include/` 디렉토리의 헤더 파일을 통해 정의됩니다.
+
+---
+
+## 공개 헤더 모듈
+
+공개 헤더는 `include/kcenon/pacs/<module>/` 아래에 위치합니다. 레거시 `include/pacs/...` 경로는
+폐기되었으며, 모든 소비자는 `#include <kcenon/pacs/...>`를 사용해야 합니다. 게시된 0.1.0 패키지는
+이 재배치 이전 버전이므로 여전히 헤더를 `include/pacs/` 아래에 설치합니다
+([패키지 상태](PACKAGE_STATE.kr.md) 참조).
+
+| 모듈 | 위치 | 설명 |
+|--------|----------|-------------|
+| **Core** | `include/kcenon/pacs/core/` | DICOM 태그, 요소, 데이터셋, Part 10 파일 I/O, 태그 사전 |
+| **Encoding** | `include/kcenon/pacs/encoding/` | VR 타입, 전송 구문, 압축 코덱 (JPEG, JP2K, JPLS, RLE) |
+| **Network** | `include/kcenon/pacs/network/` | PDU 인코딩/디코딩, association 상태 머신, DIMSE 프로토콜 |
+| **Services** | `include/kcenon/pacs/services/` | SCP/SCU 구현, SOP 클래스 레지스트리, IOD 검증기 |
+| **Storage** | `include/kcenon/pacs/storage/` | 파일 스토리지, SQLite 인덱싱, 클라우드 스토리지 (S3/Azure), HSM |
+| **Security** | `include/kcenon/pacs/security/` | RBAC, 익명화 (PS3.15), 디지털 서명, TLS |
+| **Monitoring** | `include/kcenon/pacs/monitoring/` | 헬스 체크, Prometheus 메트릭 |
+| **Web** | `include/kcenon/pacs/web/` | REST API (Crow), DICOMweb (WADO/STOW/QIDO) |
+| **Client** | `include/kcenon/pacs/client/` | 작업, 라우팅, 동기, 프리페치, 원격 노드 관리 |
+| **Workflow** | `include/kcenon/pacs/workflow/` | 자동 프리페치, 작업 스케줄러, 연구 잠금 관리자 |
+| **AI** | `include/kcenon/pacs/ai/` | AI 서비스 커넥터, 결과 처리기 (SR/SEG) |
+| **Integration** | `include/kcenon/pacs/integration/` | 에코시스템 어댑터 (container, network, thread, logger, monitoring) |
+| **IHE** | `include/kcenon/pacs/ihe/` | IHE 액터 (XDS.b Document Source/Consumer, Registry Query, ATNA 감사) |
+| **DI** | `include/kcenon/pacs/di/` | 서비스 구성을 위한 의존성 주입 유틸리티 |
+| **Compat** | `include/kcenon/pacs/compat/` | 크로스 플랫폼 및 레거시 include 경로용 호환성 shim |
+
+아래의 디렉토리 레이아웃과 모듈 설명은 헤더 재배치 이전에 작성되어 여전히 `include/pacs/` 경로를 사용합니다.
 
 ---
 

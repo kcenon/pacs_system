@@ -30,6 +30,8 @@ category: "ARCH"
 - [Thread Model](#thread-model)
 - [Error Handling Strategy](#error-handling-strategy)
 - [Security Architecture](#security-architecture)
+- [C++20 Module Architecture](#c20-module-architecture)
+- [Ecosystem Dependencies](#ecosystem-dependencies)
 
 ---
 
@@ -167,6 +169,46 @@ Memory and thread safety enforced through modern C++ idioms:
 ---
 
 ## System Architecture
+
+### Layer Overview
+
+The layers and the ecosystem libraries beneath them (moved from the README):
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                            PACS System                               │
+├──────────────────────────────────────────────────────────────────────┤
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌───────────┐  │
+│  │ REST API │ │ DICOMweb │ │ Web UI  │ │ AI Svc   │ │ Workflow  │  │
+│  │ (Crow)   │ │ WADO/STOW│ │ (React) │ │Connector │ │ Scheduler │  │
+│  └────┬─────┘ └────┬─────┘ └────┬────┘ └────┬─────┘ └─────┬─────┘  │
+│       └─────────────┼───────────┼───────────┼──────────────┘        │
+│  ┌──────────────────▼───────────▼───────────▼────────────────────┐  │
+│  │  IHE Actors (XDS.b Source / Consumer / Registry Query + ATNA) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Services (Storage/Query/Retrieve/Worklist/MPPS/Commit/Print) │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Network (PDU/Association/DIMSE) + Security (RBAC/TLS/Anon)   │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌──────────────────────────────▼────────────────────────────────┐  │
+│  │  Core (Tag/Element/Dataset/File) + Encoding (VR/Codecs/SIMD)  │  │
+│  └──────────────────────────────┬────────────────────────────────┘  │
+│  ┌─────────────┐  ┌─────────────┴──────────┐  ┌─────────────────┐  │
+│  │  Storage    │  │  Client Module         │  │  Monitoring     │  │
+│  │  (DB/File/  │  │  (Job/Route/Sync/      │  │  (Health/       │  │
+│  │   S3/Azure) │  │   Prefetch/RemoteNode) │  │   Metrics)      │  │
+│  └──────┬──────┘  └────────────────────────┘  └─────────────────┘  │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │             Integration Adapters + DI                      │
+│  container │ network │ thread │ logger │ monitoring                  │
+├─────────┼────────────────────────────────────────────────────────────┤
+│         │              kcenon Ecosystem                               │
+│  common_system │ container_system │ thread_system │ network_system   │
+│  logger_system │ monitoring_system │ database_system (opt)           │
+└──────────────────────────────────────────────────────────────────────┘
+```
 
 ### High-Level Architecture
 
@@ -950,25 +992,33 @@ auto& file = result.value();
 
 ## C++20 Module Architecture
 
-The PACS System supports C++20 modules for improved compilation times and better encapsulation.
+PACS System defines C++20 module interfaces (`src/modules/`) as an alternative to the header-based interface.
+
+> **Status**: the module build does not compile at this revision. The partitions still re-export
+> names from a bare `pacs::` namespace (for example `using pacs::core::dicom_tag;`), while the
+> public headers declare them in `kcenon::pacs::`, so building `pacs_system_modules` fails in every
+> partition except the empty `:ai` partition. No CI job builds with `PACS_BUILD_MODULES=ON`. Use
+> the header-based interface.
 
 ### Module Structure
 
-```
-kcenon.pacs                    # Primary module
-├── :core                      # DICOM core types (Tier 1)
-├── :encoding                  # Transfer syntax & codecs (Tier 2)
-├── :storage                   # Database backends (Tier 2)
-├── :security                  # RBAC & encryption (Tier 2)
-├── :network                   # DICOM network (Tier 3)
-├── :services                  # SCP services (Tier 4)
-├── :workflow                  # Task scheduling (Tier 5)
-├── :web                       # REST API (Tier 5)
-├── :integration               # External adapters (Tier 5)
-├── :ai                        # AI/ML services (Tier 6)
-├── :monitoring                # Health checks (Tier 6)
-└── :di                        # Dependency injection (Utility)
-```
+`src/modules/pacs.cppm` imports the following partitions:
+
+| Module | Contents |
+|--------|----------|
+| `kcenon.pacs` | Primary module (imports all partitions) |
+| `kcenon.pacs:core` | Core DICOM data structures and utilities |
+| `kcenon.pacs:network` | DICOM network protocol (DIMSE) |
+| `kcenon.pacs:storage` | DICOM file storage and retrieval |
+| `kcenon.pacs:encoding` | Transfer syntax and codec support |
+| `kcenon.pacs:services` | DICOM service implementations (C-STORE, C-FIND, etc.) |
+| `kcenon.pacs:security` | TLS and authentication |
+| `kcenon.pacs:web` | DICOMweb REST API |
+| `kcenon.pacs:workflow` | Workflow management |
+| `kcenon.pacs:integration` | Ecosystem adapters |
+| `kcenon.pacs:ai` | AI service connector (empty unless `KCENON_WITH_AI` is defined; the build does not define it) |
+| `kcenon.pacs:monitoring` | Health checks and metrics |
+| `kcenon.pacs:di` | Dependency injection utilities |
 
 ### Module Tier Hierarchy
 
@@ -998,18 +1048,24 @@ kcenon.pacs                    # Primary module
 
 **Building with Modules:**
 ```bash
-cmake -DPACS_BUILD_MODULES=ON ..
-cmake --build .
+cmake -B build -DPACS_BUILD_MODULES=ON
+cmake --build build
 ```
 
 **Using in Application Code:**
+
+The example uses names that the public headers declare; it builds only once the partitions
+export them (see the status note above).
+
 ```cpp
 import kcenon.pacs;
 
 int main() {
-    pacs::core::dicom_dataset ds;
-    auto ts = pacs::encoding::transfer_syntax::implicit_vr_little_endian();
-    // ...
+    kcenon::pacs::core::dicom_dataset dataset;
+    dataset.set_string(kcenon::pacs::core::tags::patient_name,
+                       kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
+    const auto& syntax = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian;
+    return (dataset.size() == 1 && syntax.is_valid()) ? 0 : 1;
 }
 ```
 
@@ -1020,6 +1076,8 @@ int main() {
 - CMake 3.28 or later
 - Clang 16+, GCC 14+, or MSVC 2022 17.4+
 - C++20 standard enabled
+
+> **Note**: C++20 modules are experimental. The header-based interface remains the primary API.
 
 ---
 

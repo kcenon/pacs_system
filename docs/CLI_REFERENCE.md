@@ -14,7 +14,7 @@ category: "API"
 
 > **Language:** **English** | [한국어](CLI_REFERENCE.kr.md)
 
-Complete documentation for all 32 CLI tools included in the PACS System. For a quick overview, see the [README](../README.md).
+Complete documentation for the CLI tools under `tools/`. `tools/` has one subdirectory per tool (32 subdirectories); one of them, `module_example`, is a C++20 module demo rather than a CLI tool. For a quick overview, see the [README](../README.md#cli-tools--examples).
 
 ## Build Examples
 

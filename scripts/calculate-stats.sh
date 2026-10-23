@@ -88,10 +88,6 @@ calculate_stats() {
     local version
     version=$(sed -n '/^project(/,/)/p' CMakeLists.txt | grep -oE 'VERSION\s+[0-9]+\.[0-9]+\.[0-9]+' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "0.0.0")
 
-    # Current date
-    local last_updated
-    last_updated=$(date -u +%Y-%m-%d)
-
     # Output based on format
     case "${OUTPUT_FORMAT}" in
         --json)
@@ -109,8 +105,7 @@ calculate_stats() {
   "example_programs": ${example_dirs},
   "documentation": ${doc_files},
   "workflows": ${workflow_files},
-  "version": "${version}",
-  "last_updated": "${last_updated}"
+  "version": "${version}"
 }
 EOF
             ;;
@@ -131,7 +126,6 @@ EOF
 | **Documentation** | ${doc_files} markdown files |
 | **CI/CD Workflows** | ${workflow_files} workflows |
 | **Version** | ${version} |
-| **Last Updated** | ${last_updated} |
 EOF
             ;;
     esac

@@ -3,7 +3,7 @@
 > **SSOT**: This file is the single source of truth for the documentation index
 > of **pacs_system**.
 
-Total documents: **86**
+Total documents: **87**
 
 ## Document Index
 
@@ -95,6 +95,7 @@ Total documents: **86**
 | 84 | PAC-QUAL-018 | MFDS digital medical device cybersecurity checklist | [mfds-digital-cybersecurity-checklist.md](./checklists/mfds-digital-cybersecurity-checklist.md) | Draft |
 | 85 | PAC-QUAL-019 | SaMD checklist sources and applicability | [regulatory-references.md](./checklists/regulatory-references.md) | Draft |
 | 86 | PAC-QUAL-020 | SaMD checklist review record template | [review-record-template.md](./checklists/review-record-template.md) | Draft |
+| 87 | PAC-GUID-034 | README Editing Policy | [README_POLICY.md](./contributing/README_POLICY.md) | Released |
 
 ## Documents by Category
 
@@ -123,7 +124,7 @@ Total documents: **86**
 | PAC-FEAT-001 | PACS 시스템 기능 | [FEATURES.kr.md](./FEATURES.kr.md) | Released |
 | PAC-FEAT-002 | PACS System Features | [FEATURES.md](./FEATURES.md) | Released |
 
-### Guides (33)
+### Guides (34)
 
 | doc_id | Topic | Document | Status |
 |--------|-------|----------|--------|
@@ -160,6 +161,7 @@ Total documents: **86**
 | PAC-GUID-031 | PACS System Documentation | [index.md](./index.md) | Released |
 | PAC-GUID-032 | PACS System Integration Guide | [README.md](./integration/README.md) | Released |
 | PAC-GUID-033 | PACS System Performance Documentation | [README.md](./performance/README.md) | Released |
+| PAC-GUID-034 | README Editing Policy | [README_POLICY.md](./contributing/README_POLICY.md) | Released |
 
 ### Performance (5)
 

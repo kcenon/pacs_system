@@ -47,6 +47,69 @@ The `pacs_system::*` names belong to the planned v1.0 contract. The overlay keep
 text until the registry is corrected in
 [kcenon/vcpkg-registry#104](https://github.com/kcenon/vcpkg-registry/issues/104).
 
+## vcpkg features
+
+The published port (`vcpkg-ports/kcenon-pacs-system/vcpkg.json`) offers these features; all are
+off by default.
+
+```bash
+vcpkg install kcenon-pacs-system[feature1,feature2,...]
+```
+
+| Feature | Default | Description | Pulls In | Prerequisites |
+|---------|:-------:|-------------|----------|---------------|
+| aws | off | AWS S3 integration for cloud-based PACS storage | aws-sdk-cpp (S3) | -- |
+| azure | off | Azure Blob storage integration for cloud-based PACS storage | azure-storage-blobs-cpp | -- |
+| codecs | off | Image compression codecs (JPEG, JPEG 2000, HTJ2K, JPEG-LS, PNG) | libjpeg-turbo, openjpeg, charls, openjph, libpng | -- |
+| rest-api | off | DICOMweb REST API via Crow HTTP framework | crow | -- |
+| ssl | off | TLS/SSL support for secure DICOM associations | openssl | -- |
+| storage | off | SQLite3-based PACS storage and indexing | sqlite3 | -- |
+| testing | off | Unit tests and benchmarks | gtest, benchmark | -- |
+
+Feature selection examples:
+
+- **Minimal install**: `vcpkg install kcenon-pacs-system`
+- **Production with TLS**: `vcpkg install kcenon-pacs-system[storage,ssl]`
+- **Full imaging pipeline**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,rest-api]`
+- **Cloud deployment (AWS)**: `vcpkg install kcenon-pacs-system[storage,codecs,ssl,aws,rest-api]`
+
+## CMake targets (planned v1.0 contract)
+
+The planned v1.0 contract (#1158) replaces the 0.1.0 `kcenon::pacs::<component>` names with the
+canonical target `pacs_system::pacs_system`, an aggregate INTERFACE target that pulls in every
+required and built optional sub-component, so a single `target_link_libraries` call is enough for
+typical consumers. No published package ships it yet; a source install of the current tree
+provides the targets but reports package version 0.1.0, so request
+`find_package(pacs_system 0.1 REQUIRED)` until v1.0.0 is released. After that, downstream projects
+depend on it as follows:
+
+```cmake
+find_package(pacs_system 1.0 REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
+```
+
+For fine-grained control, link individual components instead:
+
+| Component | Target | Provides |
+|-----------|--------|----------|
+| Core | `pacs_system::core` | Tags, datasets, Part 10 file I/O |
+| Encoding | `pacs_system::encoding` | VR types, transfer syntaxes, codecs |
+| Network | `pacs_system::network` | PDU, association, DIMSE |
+| Client | `pacs_system::client` | Job/routing/sync/prefetch managers |
+| Services | `pacs_system::services` | SCP/SCU implementations |
+| Security | `pacs_system::security` | RBAC, anonymization, signatures, TLS |
+| Storage | `pacs_system::storage` | File storage, SQLite, S3/Azure (optional) |
+| AI | `pacs_system::ai` | AI service connector (optional) |
+| Monitoring | `pacs_system::monitoring` | Health checks, metrics (optional) |
+| Workflow | `pacs_system::workflow` | Auto prefetch, scheduling (optional) |
+| Web | `pacs_system::web` | REST API, DICOMweb (optional) |
+| Integration | `pacs_system::integration` | Ecosystem adapters (optional) |
+
+The legacy spelling `kcenon::pacs_system` is preserved as an alias for backward compatibility,
+but new code should use `pacs_system::pacs_system`.
+
 ## Root manifest and overlay dependency sets
 
 The root `vcpkg.json` builds the current source tree; the overlay builds the published `v0.1.0`

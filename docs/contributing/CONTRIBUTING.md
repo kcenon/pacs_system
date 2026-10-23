@@ -137,6 +137,25 @@ The project uses clang-format. Format your code before submitting:
 clang-format -i src/**/*.cpp include/**/*.h
 ```
 
+### Windows Compatibility
+
+When writing code for Windows compatibility, wrap `std::min` and `std::max` calls in parentheses to prevent conflicts with Windows.h macros:
+
+```cpp
+// Correct: Works on all platforms
+size_t result = (std::min)(a, b);
+auto value = (std::max)(x, y);
+
+// Incorrect: Fails on Windows MSVC (error C2589)
+size_t result = std::min(a, b);
+auto value = std::max(x, y);
+```
+
+### README Changes
+
+`README.md` and `README.kr.md` follow the [README editing policy](README_POLICY.md); run
+`python3 scripts/readme_lint.py` before submitting changes to them.
+
 ---
 
 ## Testing

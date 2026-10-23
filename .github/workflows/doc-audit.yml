@@ -7,6 +7,9 @@ on:
       - 'README.md'
       - 'README.kr.md'
       - 'CLAUDE.md'
+      - 'scripts/readme_lint.py'
+      - 'scripts/tests/test_readme_lint.py'
+      - '.github/workflows/doc-audit.yml'
 
 permissions:
   contents: read
@@ -29,6 +32,12 @@ jobs:
 
       - name: Install dependencies
         run: pip install pyyaml
+
+      - name: Test README policy
+        run: python3 -m unittest discover -s scripts/tests -p 'test_readme_lint.py'
+
+      - name: Lint English and Korean READMEs
+        run: python3 scripts/readme_lint.py README.md README.kr.md
 
       - name: Fetch audit tool
         run: |
