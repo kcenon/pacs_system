@@ -152,10 +152,14 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120 ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
       env:
         CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
+    # pwsh does not stop when a native command fails, and ctest exits 0 when it
+    # finds no tests: a failed configure or build used to end in "No tests were
+    # found!!!" and a passing step. Both Windows steps therefore check each exit
+    # code and pass --no-tests=error.
     - name: Build application (vcpkg - Windows)
       if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
       id: build_vcpkg_windows
@@ -178,9 +182,11 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
 
     - name: Build application (fallback - Unix)
       if: runner.os != 'Windows' && (steps.vcpkg_install_unix.outcome == 'failure' || steps.build_vcpkg_unix.outcome != 'success')
@@ -203,7 +209,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120 ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
       env:
         CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
@@ -211,6 +217,13 @@ jobs:
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
       working-directory: pacs_system
       shell: pwsh
+      # Known failing, so this step reports failure without failing the job:
+      # the vcpkg manifest build stops at kcenon-logger-system (link errors on
+      # x64-windows), and this fallback has no vcpkg toolchain, so ICU and the
+      # other dependencies are missing. Windows unit tests run in
+      # integration-tests.yml (Build & Unit Tests (windows-2022)). Remove
+      # continue-on-error when the Windows vcpkg build is fixed.
+      continue-on-error: true
       run: |
         Write-Host "vcpkg build failed. Falling back to system libraries..."
         if (Test-Path build) { Remove-Item -Recurse -Force build }
@@ -228,9 +241,11 @@ jobs:
           -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
 
     - name: Upload test results
       if: always()
