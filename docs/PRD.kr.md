@@ -709,7 +709,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 |--------|----------|------|------|
 | **common_system** | 기반 | Result<T>, 오류 코드, IExecutor | ✅ 통합됨 |
 | **container_system** | 데이터 레이어 | DICOM 값 직렬화 | ✅ 통합됨 |
-| **thread_system** | 동시성 | 워커 풀, 비동기 처리, jthread 지원, cancellation_token | ✅ 완전 마이그레이션 (v1.1.0) |
+| **thread_system** | 동시성 | 워커 풀, 비동기 처리, jthread 지원, cancellation_token | ✅ 완전 마이그레이션 (`v0.1.0` 포함) |
 | **logger_system** | 로깅 | 감사 로그, 진단 | ✅ 통합됨 |
 | **monitoring_system** | 관찰성 | 메트릭, 상태 확인 | ✅ 통합됨 |
 | **network_system** | 네트워크 | TCP/TLS, 세션 관리, messaging_server | ✅ V2 구현 (선택적) |
@@ -723,7 +723,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 |----------|------|------|------|
 | Accept 루프 | `std::thread accept_thread_` | `accept_worker` (`thread_base` 상속) | jthread, cancellation_token |
 | 워커 스레드 | 연결별 `std::thread` | `thread_adapter` 풀 | 통합 모니터링, 로드 밸런싱 |
-| 종료 | 수동 스레드 관리 | 협력적 취소 | 45배 빠른 graceful shutdown |
+| 종료 | 수동 스레드 관리 | 협력적 취소 | 목표 내 graceful shutdown (활성 연결 5개에서 107 ms, 통과 기준 < 5000 ms) |
 | 통계 | 없음 | 통합 스레드 통계 | 완전한 관찰성 |
 
 #### Network System V2 (선택적)
@@ -775,7 +775,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 | C-STORE 처리량 | ≥100 MB/s | 9,247 MB/s | ✅ 통과 | 512KB 이미지 |
 | C-ECHO 처리량 | ≥100 msg/s | 89,964 msg/s | ✅ 통과 | 지속 트래픽 |
 | 연결 지연시간 | <100 ms | ~1 ms | ✅ 통과 | 협상 포함 |
-| Graceful 종료 | <5,000 ms | 110 ms | ✅ 통과 | 활성 연결 포함 |
+| Graceful 종료 | <5,000 ms | 107 ms | ✅ 통과 | 활성 연결 5개 |
 | 연결당 메모리 | <10 MB | ~5 MB | ✅ 통과 | 활성 연결 |
 
 *성능은 thread_system 마이그레이션 후 측정됨 (2025-12-07). 상세 내용은 [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) 참조.*

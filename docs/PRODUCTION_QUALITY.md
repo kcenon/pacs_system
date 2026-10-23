@@ -75,7 +75,6 @@ The PACS System is designed for production use with comprehensive quality assura
 
 - **Clang-Tidy**: Modernization and correctness checks
 - **Cppcheck**: Additional static analysis
-- **Clang-Format**: Code formatting verification
 
 ### Design Principles
 

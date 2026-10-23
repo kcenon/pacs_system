@@ -833,7 +833,7 @@ PACS System은 다음을 수행하는 의료 영상 저장 및 통신 플랫폼�
 | **우선순위** | Must Have |
 | **단계** | 2 |
 | **추적 대상** | IR-1 |
-| **상태** | ✅ 완전 구현됨 (v1.1.0) |
+| **상태** | ✅ 완전 구현됨 (`v0.1.0` 포함) |
 
 **인수 조건:**
 1. DIMSE 처리를 위한 작업자 풀 ✅
@@ -850,7 +850,7 @@ PACS System은 다음을 수행하는 의료 영상 저장 및 통신 플랫폼�
 |----------|--------|------|
 | Accept Worker | `accept_worker` | `thread_base`를 상속, jthread 및 cancellation_token으로 수락 루프 관리 |
 | Thread Pool | `thread_adapter` | 부하 분산을 통한 association 작업자 스레드 관리 |
-| Shutdown | 협력적 | 깨끗한 종료를 위해 `cancellation_token` 사용 (활성 연결 시 ~110ms) |
+| Shutdown | 협력적 | 깨끗한 종료를 위해 `cancellation_token` 사용 (활성 연결 5개에서 107 ms) |
 
 **관련 이슈:** #153, #156, #157, #158, #159, #160
 
