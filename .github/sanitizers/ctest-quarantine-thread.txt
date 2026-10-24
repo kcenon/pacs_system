@@ -42,13 +42,6 @@ study_lock_manager concurrent access
 # #1255: rest_server start_async() and stop() race on the Crow app
 rest_server async lifecycle
 
-# #1256: Catch2 assertions on worker threads, loop index captured by
-# reference (pipeline_coordinator concurrent job submission and pipeline
-# integration - job ID uniqueness are listed under #1253)
-thread safety integration
-UidMapping: Thread Safety
-integration::monitoring_adapter thread safety
-
 # #1257: OpenJPH's AVX-512 block encoder stores to unaligned stack arrays
 # (SIGSEGV on runners whose CPU takes the AVX-512 path)
 htj2k_codec lossless 8-bit grayscale round-trip

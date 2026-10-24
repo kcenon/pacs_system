@@ -296,7 +296,10 @@ TEST_CASE("pipeline integration - job ID uniqueness", "[network][pipeline][integ
             waiter.signal();
         });
 
-    // Submit jobs from multiple threads
+    // Submit jobs from multiple threads. Catch2 assertions are not
+    // thread-safe: the submitters only count failures, and the main thread
+    // asserts after join()
+    std::atomic<size_t> failed_submissions{0};
     std::vector<std::thread> threads;
     for (size_t t = 0; t < 4; ++t) {
         threads.emplace_back([&, t]() {
@@ -304,7 +307,9 @@ TEST_CASE("pipeline integration - job ID uniqueness", "[network][pipeline][integ
                 auto job = std::make_unique<simple_test_job>(t * 1000 + i);
                 auto result = coordinator.submit_to_stage(
                     pipeline_stage::network_receive, std::move(job));
-                REQUIRE(result.is_ok());
+                if (!result.is_ok()) {
+                    failed_submissions.fetch_add(1, std::memory_order_relaxed);
+                }
             }
         });
     }
@@ -313,13 +318,18 @@ TEST_CASE("pipeline integration - job ID uniqueness", "[network][pipeline][integ
         thread.join();
     }
 
+    REQUIRE(failed_submissions.load() == 0);
+
     bool completed = waiter.wait_for(std::chrono::seconds(10));
     REQUIRE(completed);
 
-    // Check uniqueness
-    std::sort(job_ids.begin(), job_ids.end());
-    auto unique_end = std::unique(job_ids.begin(), job_ids.end());
-    CHECK(unique_end == job_ids.end());
+    // Check uniqueness (the callbacks append under ids_mutex)
+    {
+        std::lock_guard<std::mutex> lock(ids_mutex);
+        std::sort(job_ids.begin(), job_ids.end());
+        auto unique_end = std::unique(job_ids.begin(), job_ids.end());
+        CHECK(unique_end == job_ids.end());
+    }
 
     static_cast<void>(coordinator.stop());
 }

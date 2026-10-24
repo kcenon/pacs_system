@@ -462,15 +462,20 @@ TEST_CASE("thread safety integration", "[integration][thread]") {
 
     SECTION("concurrent supported_sop_classes access") {
         std::atomic<int> completed{0};
+        std::atomic<int> empty_results{0};
         constexpr int threads = 4;
         constexpr int iterations = 100;
 
+        // Catch2 assertions are not thread-safe: the readers only count,
+        // and the main thread asserts after join()
         std::vector<std::thread> readers;
         for (int t = 0; t < threads; ++t) {
             readers.emplace_back([&]() {
                 for (int i = 0; i < iterations; ++i) {
                     auto sops = server.supported_sop_classes();
-                    CHECK_FALSE(sops.empty());
+                    if (sops.empty()) {
+                        empty_results.fetch_add(1);
+                    }
                 }
                 completed.fetch_add(1);
             });
@@ -481,6 +486,7 @@ TEST_CASE("thread safety integration", "[integration][thread]") {
         }
 
         CHECK(completed.load() == threads);
+        CHECK(empty_results.load() == 0);
     }
 }
 
