@@ -40,9 +40,6 @@ constexpr const char* VERIFICATION_SOP_CLASS = "1.2.840.10008.1.1";
 constexpr const char* EXPLICIT_VR_LE = "1.2.840.10008.1.2.1";
 constexpr uint8_t CONTEXT_ID = 1;
 
-/// No dicom_server listens here, so connect() returns an unpaired SCU
-constexpr uint16_t UNSERVED_PORT = 104;
-
 /// Port for the dicom_server end-to-end test
 constexpr uint16_t SERVER_PORT = 11145;
 
@@ -62,10 +59,8 @@ struct paired_associations {
 };
 
 paired_associations make_paired_associations() {
-    auto connect_result =
-        association::connect("localhost", UNSERVED_PORT, make_scu_config());
-    REQUIRE(connect_result.is_ok());
-    auto scu = std::make_unique<association>(std::move(connect_result.value()));
+    // An unpaired SCU awaiting A-ASSOCIATE-AC, paired by hand below
+    auto scu = std::make_unique<association>(association::propose(make_scu_config()));
 
     scp_config config;
     config.ae_title = "PEER_SCP";
@@ -235,12 +230,9 @@ TEST_CASE("in-memory peer: moving an end keeps the pairing",
 
 TEST_CASE("in-memory peer: an association that was never paired still sends",
           "[association][in_memory]") {
-    // Without a peer, send_dimse() keeps its placeholder behavior (no
-    // transport yet), so only a peer that left makes it fail
-    auto connect_result =
-        association::connect("localhost", UNSERVED_PORT, make_scu_config());
-    REQUIRE(connect_result.is_ok());
-    auto& scu = connect_result.value();
+    // Without a peer or a transport, send_dimse() validates the message and
+    // drops it, so only a peer that left makes it fail
+    auto scu = association::propose(make_scu_config());
 
     associate_ac ac;
     ac.calling_ae_title = "PEER_SCU";

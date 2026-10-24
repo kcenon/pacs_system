@@ -275,6 +275,22 @@ private:
  *     assoc.release();
  * }
  * @endcode
+ *
+ * @par Transports
+ * An association reaches its peer in one of three ways:
+ * - **TCP**: connect() to any peer that is not an in-process dicom_server
+ *   (dicom_server_v2, DCMTK, other DICOM nodes). The association owns the
+ *   connection and exchanges PDUs per PS3.8: A-ASSOCIATE-RQ/AC/RJ,
+ *   P-DATA-TF fragmented to the peer's maximum PDU length, A-RELEASE-RQ/RP,
+ *   and A-ABORT. PDUs from the peer are validated before they are buffered;
+ *   a malformed or unexpected PDU aborts the association with A-ABORT.
+ * - **In-memory (test hook)**: connect() to a loopback host ("localhost",
+ *   127.x.x.x, ::1) on a port where a dicom_server of this process is
+ *   running. The two associations are paired in memory and no socket is
+ *   used. The v1 dicom_server serves only these associations.
+ * - **PDU writer**: an SCP association that dicom_server_v2 accepted;
+ *   send_dimse() writes through set_pdu_writer() and the server delivers
+ *   received messages to its services.
  */
 class association {
 public:
@@ -286,8 +302,21 @@ public:
     using duration = std::chrono::milliseconds;
     using time_point = clock::time_point;
 
+    /**
+     * @brief Writes encoded PDUs to the peer (network layer integration).
+     *
+     * Receives one or more complete PDUs back to back and returns false when
+     * the network layer could not take them.
+     */
+    using pdu_writer = std::function<bool(std::vector<uint8_t> pdus)>;
+
     /// Default timeout for operations
     static constexpr duration default_timeout{30000};  // 30 seconds
+
+    /// Whether connect() reaches peers that are not an in-process
+    /// dicom_server over TCP (Issue #1240). Test suites gate their TCP cases
+    /// on it (supports_real_tcp_dicom() in tools/integration_tests).
+    static constexpr bool tcp_transport_available = true;
 
     // =========================================================================
     // Construction / Destruction
@@ -324,17 +353,42 @@ public:
     /**
      * @brief Initiate an SCU association to a remote SCP.
      *
+     * When @p host is a loopback host and a dicom_server of this process
+     * runs on @p port, the association is paired with it in memory (test
+     * hook). Otherwise it opens a TCP connection, sends A-ASSOCIATE-RQ, and
+     * waits for A-ASSOCIATE-AC or -RJ.
+     *
+     * Over TCP, @p timeout bounds the TCP handshake together with the wait
+     * for the A-ASSOCIATE response (ARTIM); when it expires the association
+     * is aborted. It also bounds each later PDU write.
+     *
      * @param host Remote host address
      * @param port Remote port (typically 104 or 11112)
      * @param config Association configuration
-     * @param timeout Connection timeout
-     * @return Result containing established association or error
+     * @param timeout Connection and response timeout
+     * @return The established association, or connection_failed,
+     *         connection_timeout, association_rejected (the message gives
+     *         the A-ASSOCIATE-RJ result, source, and reason),
+     *         association_aborted, no_acceptable_context, or a PDU error
      */
     [[nodiscard]] static Result<association> connect(
         const std::string& host,
         uint16_t port,
         const association_config& config,
         duration timeout = default_timeout);
+
+    /**
+     * @brief Prepare an SCU association without opening a connection.
+     *
+     * The association is in awaiting_associate_ac and proposes what
+     * @p config lists. The caller exchanges the A-ASSOCIATE PDUs itself with
+     * build_associate_rq(), process_associate_ac(), and
+     * process_associate_rj(); connect() starts from this.
+     *
+     * @param config Association configuration
+     * @return The association awaiting A-ASSOCIATE-AC
+     */
+    [[nodiscard]] static association propose(const association_config& config);
 
     /**
      * @brief Accept an incoming SCP association.
@@ -445,6 +499,10 @@ public:
     /**
      * @brief Send a DIMSE message.
      *
+     * Over TCP or a PDU writer the message is encoded as P-DATA-TF PDUs no
+     * longer than the peer's maximum PDU length. An association with no
+     * transport and no in-memory peer validates the message and drops it.
+     *
      * @param context_id Presentation Context ID to use
      * @param msg The DIMSE message to send
      * @return Success or error
@@ -455,6 +513,10 @@ public:
 
     /**
      * @brief Receive a DIMSE message.
+     *
+     * Over TCP, an A-RELEASE-RQ from the peer is answered with
+     * A-RELEASE-RP and an A-ABORT ends the association; both return an
+     * error, as does a malformed PDU (which aborts the association).
      *
      * @param timeout Receive timeout
      * @return Received message with context ID, or error
@@ -492,6 +554,18 @@ public:
      */
     [[nodiscard]] std::optional<rejection_info> get_rejection_info() const;
 
+    /**
+     * @brief Send this association's PDUs through @p writer.
+     *
+     * For an SCP association from accept() whose connection the network
+     * layer owns: dicom_server_v2 installs a writer that sends to the TCP
+     * session, so the responses services send with send_dimse() reach the
+     * SCU. abort() also writes its A-ABORT through it.
+     *
+     * @param writer The writer, or an empty function to detach
+     */
+    void set_pdu_writer(pdu_writer writer);
+
     // =========================================================================
     // Lifecycle Management
     // =========================================================================
@@ -499,7 +573,9 @@ public:
     /**
      * @brief Gracefully release the association.
      *
-     * Sends A-RELEASE-RQ and waits for A-RELEASE-RP.
+     * Sends A-RELEASE-RQ and waits for A-RELEASE-RP. Over TCP, when no
+     * A-RELEASE-RP arrives within @p timeout (ARTIM) the association is
+     * aborted and release_failed is returned.
      *
      * @param timeout Timeout for release handshake
      * @return Success or error
@@ -522,6 +598,9 @@ public:
 
     /**
      * @brief Abort the association immediately.
+     *
+     * Over TCP or a PDU writer, an A-ABORT PDU is sent first (best effort)
+     * and the TCP connection is shut down.
      *
      * @param source Abort source (0=service-user, 2=service-provider)
      * @param reason Abort reason
@@ -605,6 +684,30 @@ private:
     /// End this side after the in-memory peer left (requires mutex_)
     void finish_after_peer_left(association_state peer_exit);
 
+    /// TCP connection or PDU writer (null for in-memory and detached
+    /// associations)
+    struct transport;
+
+    /// Open the TCP connection and negotiate (connect() after propose())
+    [[nodiscard]] Result<std::monostate> establish_over_tcp(
+        const std::string& host, uint16_t port, duration timeout);
+
+    /// receive_dimse() over the TCP connection
+    [[nodiscard]] Result<std::pair<uint8_t, dimse::dimse_message>> receive_over_tcp(
+        transport& link, duration timeout);
+
+    /// release() over the TCP connection (state_ is awaiting_release_rp)
+    [[nodiscard]] Result<std::monostate> release_over_tcp(
+        transport& link, duration timeout);
+
+    /// Abort because of a local or protocol error: send A-ABORT, end the
+    /// association, and shut the connection down
+    void abort_transport(transport& link, abort_source source, abort_reason reason);
+
+    /// End the association in @p final_state and shut the connection down
+    /// without sending anything
+    void end_transport(transport& link, association_state final_state);
+
     // =========================================================================
     // Member Variables
     // =========================================================================
@@ -668,6 +771,10 @@ private:
 
     /// This end's slot in peer_link_ (0 or 1)
     std::size_t peer_end_{0};
+
+    /// TCP connection or PDU writer; shared so that a thread blocked in
+    /// I/O keeps it alive while another thread aborts
+    std::shared_ptr<transport> transport_;
 
     /// Incoming message queue for in-memory testing (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;

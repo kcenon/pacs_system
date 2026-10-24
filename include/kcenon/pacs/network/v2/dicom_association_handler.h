@@ -44,6 +44,10 @@ namespace kcenon::network::interfaces {
 class i_session;
 }  // namespace kcenon::network::interfaces
 
+namespace kcenon::pacs::network::detail {
+class dimse_assembler;
+}  // namespace kcenon::pacs::network::detail
+
 namespace kcenon::pacs::network::v2 {
 
 // =============================================================================
@@ -158,6 +162,9 @@ public:
     using time_point = clock::time_point;
     using duration = std::chrono::milliseconds;
 
+    /// Closes a network session on the handler's behalf
+    using session_closer = std::function<void(const session_ptr&)>;
+
     /// PDU header size (type + reserved + length)
     static constexpr size_t pdu_header_size = 6;
 
@@ -174,11 +181,14 @@ public:
      * @param session The network_system session to wrap
      * @param config Server configuration for association negotiation
      * @param services Map from SOP Class UID to service implementation
+     * @param session_id Identifier reported by session_id() and passed to
+     *        the callbacks; empty to use the session's own id()
      */
     dicom_association_handler(
         session_ptr session,
         const server_config& config,
-        const service_map& services);
+        const service_map& services,
+        std::string session_id = {});
 
     /**
      * @brief Destructor (stops handler if still running).
@@ -320,6 +330,20 @@ public:
      */
     void set_error_callback(handler_error_callback callback);
 
+    /**
+     * @brief Close the session through @p closer instead of directly.
+     *
+     * network_system invokes a session's receive, error, and disconnection
+     * callbacks while it holds the session's callback mutex, and closing
+     * the session takes that mutex again, so a handler must not close its
+     * session from inside those callbacks. dicom_server_v2 installs a
+     * closer that hands the close to another thread. Without a closer the
+     * handler closes the session directly. Set it before start().
+     *
+     * @param closer Function that closes the session
+     */
+    void set_session_closer(session_closer closer);
+
     // =========================================================================
     // Statistics
     // =========================================================================
@@ -448,8 +472,12 @@ private:
     // Member Variables
     // =========================================================================
 
-    /// Network session
+    /// Network session (set once at construction)
     session_ptr session_;
+
+    /// Session identifier (set once at construction, so reading it needs
+    /// no lock)
+    std::string session_id_;
 
     /// Server configuration
     server_config config_;
@@ -459,6 +487,17 @@ private:
 
     /// DICOM association
     association association_;
+
+    /// Reassembles DIMSE messages from P-DATA-TF fragments (set when the
+    /// association is established)
+    std::unique_ptr<detail::dimse_assembler> assembler_;
+
+    /// Largest PDU length field accepted for P-DATA-TF: the maximum PDU
+    /// length announced in A-ASSOCIATE-AC
+    uint32_t receive_limit_;
+
+    /// Closes the session (empty: close it directly)
+    session_closer session_closer_;
 
     /// Current handler state
     std::atomic<handler_state> state_{handler_state::idle};
