@@ -11,6 +11,7 @@
 #include "kcenon/pacs/web/rest_config.h"
 #include "kcenon/pacs/web/rest_server.h"
 
+#include <atomic>
 #include <chrono>
 #include <thread>
 
@@ -120,4 +121,82 @@ TEST_CASE("rest_server async lifecycle", "[web][server][async]") {
 
     server.stop();
   }
+}
+
+TEST_CASE("rest_server stop right after start", "[web][server][async]") {
+  rest_server_config config;
+  config.port = 18081; // Own port: CTest may run test cases in parallel
+  config.concurrency = 1;
+
+  rest_server server(config);
+
+  // No sleep between starting and stopping, repeated to hit the window in
+  // which Crow's run() is still starting the server
+  SECTION("stop() right after start_async() joins the server thread") {
+    for (int i = 0; i < 20; ++i) {
+      server.start_async();
+      REQUIRE(server.is_running());
+
+      server.stop();
+      REQUIRE_FALSE(server.is_running());
+
+      server.stop(); // Second stop should be no-op
+    }
+  }
+
+  SECTION("stop() from another thread while start() is starting") {
+    for (int i = 0; i < 20; ++i) {
+      std::atomic<bool> returned{false};
+      std::thread blocking([&] {
+        server.start();
+        returned = true;
+      });
+
+      while (!server.is_running() && !returned) {
+        std::this_thread::yield();
+      }
+      server.stop();
+
+      blocking.join();
+      REQUIRE_FALSE(server.is_running());
+    }
+  }
+}
+
+TEST_CASE("rest_server start_async failure", "[web][server][async]") {
+  rest_server_config config;
+  config.port = 18082; // Own port: CTest may run test cases in parallel
+  config.concurrency = 1;
+
+  SECTION("invalid bind address") {
+    config.bind_address = "not-an-address";
+    rest_server server(config);
+
+    server.start_async();
+    REQUIRE_FALSE(server.is_running());
+
+    server.stop(); // Should not block or throw
+    server.stop();
+    REQUIRE_FALSE(server.is_running());
+  }
+
+#if !defined(_WIN32)
+  // Windows lets a second socket bind a port that a socket with SO_REUSEADDR
+  // (which Crow sets) listens on, so the second start would succeed there
+  SECTION("port in use") {
+    rest_server first(config);
+    first.start_async();
+    REQUIRE(first.is_running());
+
+    rest_server second(config);
+    second.start_async();
+    REQUIRE_FALSE(second.is_running());
+
+    second.stop(); // Should not block or throw
+    REQUIRE(first.is_running());
+
+    first.stop();
+    REQUIRE_FALSE(first.is_running());
+  }
+#endif
 }
