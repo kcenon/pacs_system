@@ -400,10 +400,32 @@ jobs:
               2>&1 || status=$?
           fi
 
-          # Skip network-dependent tests in CI (connectivity, store_query, worklist, etc.)
-          # These tests require actual network servers and may hang in CI environment.
-          # Binary integration tests job handles these with continue-on-error.
-          echo "=== Skipping network-dependent tests in CI ==="
+          # dicom_server_v2 over the association TCP client (#1240). Ubuntu runs
+          # every [v2] case; macOS runs all but [v2][stress], which the Stress
+          # Tests job also runs on Ubuntu. The [tls][v2] cases are left out:
+          # they configure TLS on neither end and fail in their own setup.
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            V2_SPEC="[v2]~[tls]"
+          else
+            V2_SPEC="[v2]~[tls]~[stress]"
+          fi
+          echo "=== Running dicom_server_v2 tests ($V2_SPEC) ==="
+          if [ -n "$TIMEOUT_CMD" ]; then
+            $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --reporter console \
+              --reporter junit::out=integration-test-v2.xml \
+              2>&1 || status=$?
+          else
+            ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --reporter console \
+              --reporter junit::out=integration-test-v2.xml \
+              2>&1 || status=$?
+          fi
+
+          # The other network-dependent tests (connectivity, store_query,
+          # worklist, etc.) do not run here; the binary-integration-tests job
+          # runs the CLI tools as separate processes.
+          echo "=== Skipping other network-dependent tests in CI ==="
           echo "Network tests (connectivity, store_query, worklist, etc.) are run in binary-integration-tests job"
 
           # Merge results
@@ -462,7 +484,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
           Write-Host "Config tests completed (exit code $LASTEXITCODE)"
 
-          Write-Host "=== Skipping network-dependent tests in CI ==="
+          # dicom_server_v2 over the association TCP client (#1240), without
+          # [v2][stress] and [tls][v2] (see the Unix step)
+          Write-Host "=== Running dicom_server_v2 tests ==="
+          & .\bin\pacs_integration_e2e.exe "[v2]~[tls]~[stress]" --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
+          if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
+          Write-Host "dicom_server_v2 tests completed (exit code $LASTEXITCODE)"
+
+          Write-Host "=== Skipping other network-dependent tests in CI ==="
 
           # Create merged results file
           $header = '<?xml version="1.0" encoding="UTF-8"?><testsuites>'

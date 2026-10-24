@@ -253,9 +253,11 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // findscu needs a pacs_system SCP that accepts TCP; see
+    // v1_server_accepts_tcp() in test_fixtures.h
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     // Setup: Start pacs_system query server with test data
@@ -421,12 +423,8 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
-    }
-
-    // Setup: Start pacs_system server with query capability
+    // Setup: Start pacs_system server with query capability (the SCU below
+    // reaches it in memory)
     auto port = find_available_port();
     const std::string ae_title = "QUERY_SCP";
 
@@ -594,11 +592,6 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
-    }
-
     auto port = find_available_port();
     const std::string ae_title = "STRESS_FIND_SCP";
 
@@ -628,6 +621,12 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
     }, server_ready_timeout()));
 
     SECTION("3 concurrent DCMTK findscu clients") {
+        // findscu needs a pacs_system SCP that accepts TCP
+        if (!v1_server_accepts_tcp()) {
+            SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+                 "this section needs a dicom_server_v2 fixture");
+        }
+
         constexpr int num_clients = 3;
         std::vector<std::future<dcmtk_result>> futures;
         futures.reserve(num_clients);
@@ -715,9 +714,9 @@ TEST_CASE("C-FIND: Connection error handling", "[dcmtk][interop][find][error]") 
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU tries TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     SECTION("findscu to non-existent server fails gracefully") {
@@ -769,9 +768,10 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // findscu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -834,9 +834,10 @@ TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // findscu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
