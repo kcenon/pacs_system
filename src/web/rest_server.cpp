@@ -45,6 +45,8 @@
 #endif
 
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <mutex>
 #include <sstream>
 #include <thread>
@@ -109,11 +111,47 @@ struct rest_server::impl {
   std::atomic<std::uint16_t> actual_port{0};
   std::mutex mutex;
 
+  /// Serializes start(), start_async() and stop(); guards app and
+  /// server_thread
+  std::mutex lifecycle_mutex;
+
+  /// Signals wait() when running turns false
+  std::mutex run_mutex;
+  std::condition_variable run_cv;
+
   impl() : context(std::make_shared<rest_server_context>()) {}
 
   explicit impl(const rest_server_config &cfg)
       : config(cfg), context(std::make_shared<rest_server_context>()) {
     context->config = &config;
+  }
+
+  /// Mark the server stopped once app->run() has returned
+  void set_stopped() {
+    {
+      std::lock_guard<std::mutex> lock(run_mutex);
+      running = false;
+    }
+    run_cv.notify_all();
+  }
+
+  /// Wait until run() has started the server, failed to start it, or
+  /// returned. Crow's stop() only stops a server that run() has already
+  /// created, so calling it earlier races with run() and leaves the server
+  /// running.
+  void await_startup(crow::SimpleApp &server_app) {
+    while (server_app.wait_for_server_start(std::chrono::milliseconds(50)) ==
+               std::cv_status::timeout &&
+           running) {
+    }
+  }
+
+  /// Join the server thread and free the app of a run() that has returned
+  void release_finished_run() {
+    if (server_thread.joinable()) {
+      server_thread.join();
+    }
+    app.reset();
   }
 };
 
@@ -198,9 +236,11 @@ void rest_server::set_oauth2_middleware(
 }
 
 void rest_server::start() {
-  if (impl_->running.exchange(true)) {
+  std::unique_lock<std::mutex> lifecycle(impl_->lifecycle_mutex);
+  if (impl_->running) {
     return; // Already running
   }
+  impl_->release_finished_run();
 
   impl_->app = std::make_unique<crow::SimpleApp>();
   auto &app = *impl_->app;
@@ -226,100 +266,132 @@ void rest_server::start() {
             });
   }
 
-  // Start server
   app.bindaddr(impl_->config.bind_address)
       .port(impl_->config.port)
-      .concurrency(static_cast<uint16_t>(impl_->config.concurrency))
-      .run();
+      .concurrency(static_cast<uint16_t>(impl_->config.concurrency));
+  impl_->running = true;
 
-  impl_->running = false;
+  // Start server; stop() takes the lifecycle lock, so release it first
+  lifecycle.unlock();
+  try {
+    app.run();
+  } catch (...) {
+    impl_->set_stopped();
+    throw;
+  }
+
+  impl_->set_stopped();
 }
 
 void rest_server::start_async() {
-  if (impl_->running.exchange(true)) {
+  std::lock_guard<std::mutex> lifecycle(impl_->lifecycle_mutex);
+  if (impl_->running) {
     return; // Already running
   }
+  impl_->release_finished_run();
 
-  impl_->server_thread = std::thread([this]() {
-    impl_->app = std::make_unique<crow::SimpleApp>();
-    auto &app = *impl_->app;
+  // Create the app on this thread, before the server thread exists, so
+  // stop() never reads impl_->app while another thread assigns it
+  impl_->app = std::make_unique<crow::SimpleApp>();
+  auto &app = *impl_->app;
 
-    // Register endpoints
-    endpoints::register_system_endpoints_impl(app, impl_->context);
-    endpoints::register_security_endpoints_impl(app, impl_->context);
-    endpoints::register_patient_endpoints_impl(app, impl_->context);
-    endpoints::register_study_endpoints_impl(app, impl_->context);
-    endpoints::register_series_endpoints_impl(app, impl_->context);
-    endpoints::register_worklist_endpoints_impl(app, impl_->context);
-    endpoints::register_audit_endpoints_impl(app, impl_->context);
-    endpoints::register_association_endpoints_impl(app, impl_->context);
-    endpoints::register_dicomweb_endpoints_impl(app, impl_->context);
-    endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
-    endpoints::register_jobs_endpoints_impl(app, impl_->context);
-    endpoints::register_routing_endpoints_impl(app, impl_->context);
-    endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
-    endpoints::register_metadata_endpoints_impl(app, impl_->context);
-    endpoints::register_annotation_endpoints_impl(app, impl_->context);
-    endpoints::register_measurement_endpoints_impl(app, impl_->context);
-    endpoints::register_key_image_endpoints_impl(app, impl_->context);
-    endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
-    endpoints::register_wado_uri_endpoints_impl(app, impl_->context);
-    endpoints::register_storage_commitment_endpoints_impl(app, impl_->context);
+  // Register endpoints
+  endpoints::register_system_endpoints_impl(app, impl_->context);
+  endpoints::register_security_endpoints_impl(app, impl_->context);
+  endpoints::register_patient_endpoints_impl(app, impl_->context);
+  endpoints::register_study_endpoints_impl(app, impl_->context);
+  endpoints::register_series_endpoints_impl(app, impl_->context);
+  endpoints::register_worklist_endpoints_impl(app, impl_->context);
+  endpoints::register_audit_endpoints_impl(app, impl_->context);
+  endpoints::register_association_endpoints_impl(app, impl_->context);
+  endpoints::register_dicomweb_endpoints_impl(app, impl_->context);
+  endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
+  endpoints::register_jobs_endpoints_impl(app, impl_->context);
+  endpoints::register_routing_endpoints_impl(app, impl_->context);
+  endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
+  endpoints::register_metadata_endpoints_impl(app, impl_->context);
+  endpoints::register_annotation_endpoints_impl(app, impl_->context);
+  endpoints::register_measurement_endpoints_impl(app, impl_->context);
+  endpoints::register_key_image_endpoints_impl(app, impl_->context);
+  endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
+  endpoints::register_wado_uri_endpoints_impl(app, impl_->context);
+  endpoints::register_storage_commitment_endpoints_impl(app, impl_->context);
 
 #ifdef PACS_WITH_DATABASE_SYSTEM
-    endpoints::register_metrics_endpoints_impl(app, impl_->context);
+  endpoints::register_metrics_endpoints_impl(app, impl_->context);
 #endif
 
-    // Add CORS preflight handler
-    if (impl_->config.enable_cors) {
-      CROW_ROUTE(app, "/api/<path>")
-          .methods(crow::HTTPMethod::OPTIONS)(
-              [this](const crow::request & /*req*/,
-                     const std::string & /*path*/) {
-                crow::response res(204);
-                res.add_header("Access-Control-Allow-Origin",
-                               impl_->config.cors_allowed_origins);
-                res.add_header("Access-Control-Allow-Methods",
-                               "GET, POST, PUT, DELETE, OPTIONS");
-                res.add_header("Access-Control-Allow-Headers",
-                               "Content-Type, Authorization");
-                res.add_header("Access-Control-Max-Age", "86400");
-                return res;
-              });
-    }
+  // Add CORS preflight handler
+  if (impl_->config.enable_cors) {
+    CROW_ROUTE(app, "/api/<path>")
+        .methods(crow::HTTPMethod::OPTIONS)(
+            [this](const crow::request & /*req*/,
+                   const std::string & /*path*/) {
+              crow::response res(204);
+              res.add_header("Access-Control-Allow-Origin",
+                             impl_->config.cors_allowed_origins);
+              res.add_header("Access-Control-Allow-Methods",
+                             "GET, POST, PUT, DELETE, OPTIONS");
+              res.add_header("Access-Control-Allow-Headers",
+                             "Content-Type, Authorization");
+              res.add_header("Access-Control-Max-Age", "86400");
+              return res;
+            });
+  }
 
-    // Start server
-    app.bindaddr(impl_->config.bind_address)
-        .port(impl_->config.port)
-        .concurrency(static_cast<uint16_t>(impl_->config.concurrency))
-        .run();
+  app.bindaddr(impl_->config.bind_address)
+      .port(impl_->config.port)
+      .concurrency(static_cast<uint16_t>(impl_->config.concurrency));
+  impl_->running = true;
 
+  // Start server
+  try {
+    impl_->server_thread = std::thread([this, &app]() {
+      app.run();
+      impl_->set_stopped();
+    });
+  } catch (...) {
     impl_->running = false;
-  });
+    impl_->app.reset();
+    throw;
+  }
+
+  // Return once the server accepts connections or has failed to start
+  impl_->await_startup(app);
+  if (!app.is_bound()) {
+    // Startup failed (for example, the port is in use) and run() returns
+    // without serving; release it so is_running() reports the failure
+    impl_->release_finished_run();
+  }
 }
 
 void rest_server::stop() {
-  if (!impl_->running) {
-    return;
+  std::lock_guard<std::mutex> lifecycle(impl_->lifecycle_mutex);
+  if (!impl_->app) {
+    return; // Never started, or already stopped
   }
 
-  if (impl_->app) {
-    impl_->app->stop();
-  }
+  impl_->await_startup(*impl_->app);
+  impl_->app->stop();
 
   if (impl_->server_thread.joinable()) {
     impl_->server_thread.join();
   }
 
-  impl_->running = false;
+  // A blocking start() may still be returning from run() on its own thread;
+  // keep its app until it has
+  if (!impl_->running) {
+    impl_->app.reset();
+  }
 }
 
 bool rest_server::is_running() const noexcept { return impl_->running; }
 
 void rest_server::wait() {
-  if (impl_->server_thread.joinable()) {
-    impl_->server_thread.join();
-  }
+  // Wait for run() to return instead of joining, so a concurrent stop() can
+  // join the server thread
+  std::unique_lock<std::mutex> lock(impl_->run_mutex);
+  impl_->run_cv.wait(lock, [this] { return !impl_->running; });
 }
 
 std::uint16_t rest_server::port() const noexcept {
