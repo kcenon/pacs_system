@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 #include "kcenon/pacs/integration/thread_pool_adapter.h"
@@ -597,20 +598,7 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
     negotiation_config.implementation_version_name = config_.implementation_version_name;
     negotiation_config.supported_abstract_syntaxes = supported_sop_classes();
     // Accept compressed and uncompressed transfer syntaxes
-    negotiation_config.supported_transfer_syntaxes = {
-        "1.2.840.10008.1.2.4.201", // HTJ2K Lossless Only
-        "1.2.840.10008.1.2.4.202", // HTJ2K RPCL Lossless Only
-        "1.2.840.10008.1.2.4.203", // HTJ2K (Lossless or Lossy)
-        "1.2.840.10008.1.2.4.90",  // JPEG 2000 Lossless
-        "1.2.840.10008.1.2.4.91",  // JPEG 2000 Lossy
-        "1.2.840.10008.1.2.4.80",  // JPEG-LS Lossless
-        "1.2.840.10008.1.2.4.81",  // JPEG-LS Near-Lossless
-        "1.2.840.10008.1.2.4.70",  // JPEG Lossless
-        "1.2.840.10008.1.2.4.50",  // JPEG Baseline
-        "1.2.840.10008.1.2.5",     // RLE Lossless
-        "1.2.840.10008.1.2.1",     // Explicit VR LE
-        "1.2.840.10008.1.2"        // Implicit VR LE
-    };
+    negotiation_config.supported_transfer_syntaxes = detail::scp_transfer_syntax_list();
 
     // Accept association
     auto assoc = association::accept(rq, negotiation_config);

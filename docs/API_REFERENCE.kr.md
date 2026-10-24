@@ -924,19 +924,28 @@ public:
     [[nodiscard]] static std::unique_ptr<compression_codec> create(
         const transfer_syntax& ts);
 
-    // 지원 코덱 조회
+    // 구현된 코덱 조회 (빌드와 무관, 스텁 제외)
     [[nodiscard]] static std::vector<std::string_view> supported_transfer_syntaxes();
     [[nodiscard]] static bool is_supported(std::string_view transfer_syntax_uid);
     [[nodiscard]] static bool is_supported(const transfer_syntax& ts);
+
+    // 이 빌드에서 쓸 수 있는 코덱 조회 (내장이거나 선택 라이브러리를 찾은 경우)
+    [[nodiscard]] static std::vector<std::string_view> available_transfer_syntaxes();
+    [[nodiscard]] static bool is_available(std::string_view transfer_syntax_uid);
+    [[nodiscard]] static bool is_available(const transfer_syntax& ts);
 };
 
-// 현재 지원되는 Transfer Syntax:
-// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - 손실
-// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - 무손실
-// - 1.2.840.10008.1.2.4.80 - JPEG-LS 무손실 이미지 압축
-// - 1.2.840.10008.1.2.4.81 - JPEG-LS 손실 (근무손실) 이미지 압축
-// - 1.2.840.10008.1.2.4.90 - JPEG 2000 무손실 전용
-// - 1.2.840.10008.1.2.4.91 - JPEG 2000 (손실 또는 무손실)
+// 구현된 코덱 (supported_transfer_syntaxes()):
+// - 1.2.840.10008.1.2.5   - RLE Lossless (순수 C++ 구현)
+// - 1.2.840.10008.1.2.4.50 - JPEG Baseline (Process 1) - 손실 (libjpeg-turbo)
+// - 1.2.840.10008.1.2.4.70 - JPEG Lossless (Process 14, SV1) - 무손실 (내장)
+// - 1.2.840.10008.1.2.4.80 - JPEG-LS 무손실 이미지 압축 (CharLS)
+// - 1.2.840.10008.1.2.4.81 - JPEG-LS 손실 (근무손실) 이미지 압축 (CharLS)
+// - 1.2.840.10008.1.2.4.90 - JPEG 2000 무손실 전용 (OpenJPEG)
+// - 1.2.840.10008.1.2.4.91 - JPEG 2000 (손실 또는 무손실) (OpenJPEG)
+// - 1.2.840.10008.1.2.4.201/.202/.203 - HTJ2K (OpenJPH)
+// create()는 HEVC, JPEG XL, Frame Deflate 스텁도 반환하지만, 이 스텁의
+// encode()와 decode()는 항상 실패합니다.
 
 } // namespace pacs::encoding::compression
 ```

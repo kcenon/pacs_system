@@ -375,8 +375,11 @@ TEST_CASE("frame_deflate_codec move semantics", "[encoding][compression][frame_d
 }
 
 TEST_CASE("codec_factory Frame Deflate support", "[encoding][compression][frame_deflate]") {
-    SECTION("Factory recognizes Frame Deflate UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.11"));
+    // No build defines PACS_WITH_ZLIB, so the factory creates the stub codec
+    // but does not report it as supported or available.
+    SECTION("Factory creates the Frame Deflate stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.11"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.11"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.11");
         REQUIRE(codec != nullptr);
@@ -384,7 +387,7 @@ TEST_CASE("codec_factory Frame Deflate support", "[encoding][compression][frame_
         CHECK_FALSE(codec->is_lossy());
     }
 
-    SECTION("Frame Deflate UID appears in supported transfer syntaxes list") {
+    SECTION("Frame Deflate UID is not in the supported transfer syntaxes list") {
         auto supported = codec_factory::supported_transfer_syntaxes();
 
         bool found = false;
@@ -394,7 +397,7 @@ TEST_CASE("codec_factory Frame Deflate support", "[encoding][compression][frame_
                 break;
             }
         }
-        CHECK(found);
+        CHECK_FALSE(found);
     }
 }
 
@@ -410,17 +413,17 @@ TEST_CASE("transfer_syntax registry Frame Deflate support",
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("find_transfer_syntax finds Frame Deflate") {
         auto ts = kcenon::pacs::encoding::find_transfer_syntax("1.2.840.10008.1.2.11");
         REQUIRE(ts.has_value());
         CHECK(ts->name() == "Frame Deflate");
-        CHECK(ts->is_supported());
+        CHECK_FALSE(ts->is_supported());
     }
 
-    SECTION("Frame Deflate in supported_transfer_syntaxes list") {
+    SECTION("Frame Deflate is not in supported_transfer_syntaxes list") {
         auto supported = kcenon::pacs::encoding::supported_transfer_syntaxes();
         bool found = false;
         for (const auto& ts : supported) {
@@ -429,6 +432,6 @@ TEST_CASE("transfer_syntax registry Frame Deflate support",
                 break;
             }
         }
-        CHECK(found);
+        CHECK_FALSE(found);
     }
 }

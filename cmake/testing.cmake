@@ -84,6 +84,7 @@ if(PACS_BUILD_TESTS)
     # Encoding tests
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
+        tests/encoding/transfer_syntax_support_test.cpp
         tests/encoding/vr_type_test.cpp
         tests/encoding/vr_info_test.cpp
         tests/encoding/implicit_vr_codec_test.cpp
@@ -115,6 +116,7 @@ if(PACS_BUILD_TESTS)
         tests/network/association_test.cpp
         tests/network/dicom_server_test.cpp
         tests/network/in_memory_peer_test.cpp
+        tests/network/scp_transfer_syntaxes_test.cpp
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
         tests/network/detail/accept_worker_test.cpp
@@ -135,6 +137,10 @@ if(PACS_BUILD_TESTS)
             pacs_network
             pacs_services
             Catch2::Catch2WithMain
+    )
+    # Read by tests/network/scp_transfer_syntaxes_test.cpp (Issue #1275)
+    target_compile_definitions(network_tests PRIVATE
+        PACS_CONFORMANCE_STATEMENT_PATH="${CMAKE_SOURCE_DIR}/docs/DICOM_CONFORMANCE_STATEMENT.md"
     )
     # Link pacs_integration for thread_pool_adapter (used by dicom_server)
     if(TARGET pacs_integration)

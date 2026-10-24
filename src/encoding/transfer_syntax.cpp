@@ -23,17 +23,19 @@ struct ts_entry {
     vr_encoding vr;
     bool encapsulated;
     bool deflated;
-    bool supported;  // Phase 1: only uncompressed syntaxes
+    bool supported;  // see transfer_syntax::is_supported()
 };
 
 /**
  * @brief Static registry of all known DICOM Transfer Syntaxes.
  *
  * This table contains the standard Transfer Syntaxes defined in DICOM PS3.5.
- * Compression support will be added in later phases.
+ * The supported flag follows the definition of transfer_syntax::is_supported();
+ * tests/encoding/transfer_syntax_support_test.cpp checks it against
+ * compression::codec_factory.
  */
 static constexpr std::array<ts_entry, 20> TS_REGISTRY = {{
-    // Uncompressed Transfer Syntaxes (supported in Phase 1)
+    // Uncompressed Transfer Syntaxes
     {"1.2.840.10008.1.2",
      "Implicit VR Little Endian",
      byte_order::little_endian,
@@ -52,52 +54,52 @@ static constexpr std::array<ts_entry, 20> TS_REGISTRY = {{
      vr_encoding::explicit_vr,
      false, false, true},
 
-    // Deflated (not supported in Phase 1)
+    // Deflated (no inflate or deflate code)
     {"1.2.840.10008.1.2.1.99",
      "Deflated Explicit VR Little Endian",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
      false, true, false},
 
-    // JPEG Transfer Syntaxes
+    // JPEG Transfer Syntaxes (jpeg_baseline_codec needs libjpeg-turbo;
+    // jpeg_lossless_codec is built in)
     {"1.2.840.10008.1.2.4.50",
      "JPEG Baseline (Process 1)",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},  // Supported in Phase 3
+     true, false, true},
 
     {"1.2.840.10008.1.2.4.70",
      "JPEG Lossless, Non-Hierarchical, First-Order Prediction",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
-    // JPEG-LS Transfer Syntaxes (jpeg_ls_codec needs CharLS; not flagged
-    // supported, like JPEG 2000)
+    // JPEG-LS Transfer Syntaxes (jpeg_ls_codec needs CharLS)
     {"1.2.840.10008.1.2.4.80",
      "JPEG-LS Lossless Image Compression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
     {"1.2.840.10008.1.2.4.81",
      "JPEG-LS Lossy (Near-Lossless) Image Compression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
-    // JPEG 2000 Transfer Syntaxes (not supported in Phase 1)
+    // JPEG 2000 Transfer Syntaxes (jpeg2000_codec needs OpenJPEG)
     {"1.2.840.10008.1.2.4.90",
      "JPEG 2000 Image Compression (Lossless Only)",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
     {"1.2.840.10008.1.2.4.91",
      "JPEG 2000 Image Compression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, false},
+     true, false, true},
 
     // RLE Lossless Transfer Syntax
     {"1.2.840.10008.1.2.5",
@@ -106,7 +108,8 @@ static constexpr std::array<ts_entry, 20> TS_REGISTRY = {{
      vr_encoding::explicit_vr,
      true, false, true},
 
-    // High-Throughput JPEG 2000 Transfer Syntaxes (DICOM Supplement 235)
+    // High-Throughput JPEG 2000 Transfer Syntaxes (DICOM Supplement 235;
+    // htj2k_codec needs OpenJPH)
     {"1.2.840.10008.1.2.4.201",
      "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
      byte_order::little_endian,
@@ -125,44 +128,45 @@ static constexpr std::array<ts_entry, 20> TS_REGISTRY = {{
      vr_encoding::explicit_vr,
      true, false, true},
 
-    // HEVC/H.265 Transfer Syntaxes
+    // HEVC/H.265 Transfer Syntaxes (hevc_codec is a stub)
     {"1.2.840.10008.1.2.4.107",
      "HEVC/H.265 Main Profile / Level 5.1",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 
     {"1.2.840.10008.1.2.4.108",
      "HEVC/H.265 Main 10 Profile / Level 5.1",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 
-    // JPEG XL Transfer Syntaxes (DICOM Supplement 232)
+    // JPEG XL Transfer Syntaxes (DICOM Supplement 232; jpegxl_codec is a stub)
     {"1.2.840.10008.1.2.4.110",
      "JPEG XL Lossless",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 
     {"1.2.840.10008.1.2.4.111",
      "JPEG XL JPEG Recompression",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 
     {"1.2.840.10008.1.2.4.112",
      "JPEG XL",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 
-    // Frame Deflate Transfer Syntax (DICOM Supplement 244)
+    // Frame Deflate Transfer Syntax (DICOM Supplement 244; frame_deflate_codec
+    // works only with PACS_WITH_ZLIB, which no build defines)
     {"1.2.840.10008.1.2.11",
      "Frame Deflate",
      byte_order::little_endian,
      vr_encoding::explicit_vr,
-     true, false, true},
+     true, false, false},
 }};
 
 /**
@@ -178,148 +182,78 @@ const ts_entry* find_entry(std::string_view uid) {
     return (it != TS_REGISTRY.end()) ? &(*it) : nullptr;
 }
 
+/**
+ * @brief Copies a registry entry into a transfer_syntax.
+ * @param uid A UID that is in TS_REGISTRY
+ * @return The transfer_syntax for the entry
+ */
+transfer_syntax registry_instance(std::string_view uid) {
+    return find_transfer_syntax(uid).value();
+}
+
 }  // namespace
 
-// Static Transfer Syntax instances
-const transfer_syntax transfer_syntax::implicit_vr_little_endian{
-    "1.2.840.10008.1.2",
-    "Implicit VR Little Endian",
-    byte_order::little_endian,
-    vr_encoding::implicit,
-    false, false, true};
+// Static Transfer Syntax instances, copied from their registry entries so
+// that the two cannot disagree
+const transfer_syntax transfer_syntax::implicit_vr_little_endian =
+    registry_instance("1.2.840.10008.1.2");
 
-const transfer_syntax transfer_syntax::explicit_vr_little_endian{
-    "1.2.840.10008.1.2.1",
-    "Explicit VR Little Endian",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    false, false, true};
+const transfer_syntax transfer_syntax::explicit_vr_little_endian =
+    registry_instance("1.2.840.10008.1.2.1");
 
-const transfer_syntax transfer_syntax::explicit_vr_big_endian{
-    "1.2.840.10008.1.2.2",
-    "Explicit VR Big Endian",
-    byte_order::big_endian,
-    vr_encoding::explicit_vr,
-    false, false, true};
+const transfer_syntax transfer_syntax::explicit_vr_big_endian =
+    registry_instance("1.2.840.10008.1.2.2");
 
-const transfer_syntax transfer_syntax::deflated_explicit_vr_le{
-    "1.2.840.10008.1.2.1.99",
-    "Deflated Explicit VR Little Endian",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    false, true, false};
+const transfer_syntax transfer_syntax::deflated_explicit_vr_le =
+    registry_instance("1.2.840.10008.1.2.1.99");
 
-const transfer_syntax transfer_syntax::jpeg_baseline{
-    "1.2.840.10008.1.2.4.50",
-    "JPEG Baseline (Process 1)",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};  // Supported in Phase 3
+const transfer_syntax transfer_syntax::jpeg_baseline =
+    registry_instance("1.2.840.10008.1.2.4.50");
 
-const transfer_syntax transfer_syntax::jpeg_lossless{
-    "1.2.840.10008.1.2.4.70",
-    "JPEG Lossless, Non-Hierarchical, First-Order Prediction",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, false};
+const transfer_syntax transfer_syntax::jpeg_lossless =
+    registry_instance("1.2.840.10008.1.2.4.70");
 
-const transfer_syntax transfer_syntax::jpeg_ls_lossless{
-    "1.2.840.10008.1.2.4.80",
-    "JPEG-LS Lossless Image Compression",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, false};
+const transfer_syntax transfer_syntax::jpeg_ls_lossless =
+    registry_instance("1.2.840.10008.1.2.4.80");
 
-const transfer_syntax transfer_syntax::jpeg_ls_near_lossless{
-    "1.2.840.10008.1.2.4.81",
-    "JPEG-LS Lossy (Near-Lossless) Image Compression",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, false};
+const transfer_syntax transfer_syntax::jpeg_ls_near_lossless =
+    registry_instance("1.2.840.10008.1.2.4.81");
 
-const transfer_syntax transfer_syntax::jpeg2000_lossless{
-    "1.2.840.10008.1.2.4.90",
-    "JPEG 2000 Image Compression (Lossless Only)",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, false};
+const transfer_syntax transfer_syntax::jpeg2000_lossless =
+    registry_instance("1.2.840.10008.1.2.4.90");
 
-const transfer_syntax transfer_syntax::jpeg2000_lossy{
-    "1.2.840.10008.1.2.4.91",
-    "JPEG 2000 Image Compression",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, false};
+const transfer_syntax transfer_syntax::jpeg2000_lossy =
+    registry_instance("1.2.840.10008.1.2.4.91");
 
-const transfer_syntax transfer_syntax::rle_lossless{
-    "1.2.840.10008.1.2.5",
-    "RLE Lossless",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::rle_lossless =
+    registry_instance("1.2.840.10008.1.2.5");
 
-const transfer_syntax transfer_syntax::htj2k_lossless{
-    "1.2.840.10008.1.2.4.201",
-    "High-Throughput JPEG 2000 Image Compression (Lossless Only)",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::htj2k_lossless =
+    registry_instance("1.2.840.10008.1.2.4.201");
 
-const transfer_syntax transfer_syntax::htj2k_rpcl{
-    "1.2.840.10008.1.2.4.202",
-    "High-Throughput JPEG 2000 with RPCL Options Image Compression (Lossless Only)",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::htj2k_rpcl =
+    registry_instance("1.2.840.10008.1.2.4.202");
 
-const transfer_syntax transfer_syntax::htj2k_lossy{
-    "1.2.840.10008.1.2.4.203",
-    "High-Throughput JPEG 2000 Image Compression",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::htj2k_lossy =
+    registry_instance("1.2.840.10008.1.2.4.203");
 
-const transfer_syntax transfer_syntax::hevc_main{
-    "1.2.840.10008.1.2.4.107",
-    "HEVC/H.265 Main Profile / Level 5.1",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::hevc_main =
+    registry_instance("1.2.840.10008.1.2.4.107");
 
-const transfer_syntax transfer_syntax::hevc_main10{
-    "1.2.840.10008.1.2.4.108",
-    "HEVC/H.265 Main 10 Profile / Level 5.1",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::hevc_main10 =
+    registry_instance("1.2.840.10008.1.2.4.108");
 
-const transfer_syntax transfer_syntax::jpegxl_lossless{
-    "1.2.840.10008.1.2.4.110",
-    "JPEG XL Lossless",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::jpegxl_lossless =
+    registry_instance("1.2.840.10008.1.2.4.110");
 
-const transfer_syntax transfer_syntax::jpegxl_jpeg_recompression{
-    "1.2.840.10008.1.2.4.111",
-    "JPEG XL JPEG Recompression",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::jpegxl_jpeg_recompression =
+    registry_instance("1.2.840.10008.1.2.4.111");
 
-const transfer_syntax transfer_syntax::jpegxl_lossy{
-    "1.2.840.10008.1.2.4.112",
-    "JPEG XL",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::jpegxl_lossy =
+    registry_instance("1.2.840.10008.1.2.4.112");
 
-const transfer_syntax transfer_syntax::frame_deflate{
-    "1.2.840.10008.1.2.11",
-    "Frame Deflate",
-    byte_order::little_endian,
-    vr_encoding::explicit_vr,
-    true, false, true};
+const transfer_syntax transfer_syntax::frame_deflate =
+    registry_instance("1.2.840.10008.1.2.11");
 
 // Public constructor - looks up UID in registry
 transfer_syntax::transfer_syntax(std::string_view uid)

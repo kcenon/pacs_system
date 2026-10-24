@@ -19,30 +19,70 @@ namespace kcenon::pacs::encoding::compression {
 
 namespace {
 
+// Whether the codecs that need an optional library were built with it
+// (cmake/targets.cmake defines these macros when CMake finds the library).
+#ifdef PACS_WITH_JPEG_CODEC
+constexpr bool kJpegBaselineBuilt = true;
+#else
+constexpr bool kJpegBaselineBuilt = false;
+#endif
+
+#ifdef PACS_WITH_JPEGLS_CODEC
+constexpr bool kJpegLsBuilt = true;
+#else
+constexpr bool kJpegLsBuilt = false;
+#endif
+
+#ifdef PACS_WITH_JPEG2000_CODEC
+constexpr bool kJpeg2000Built = true;
+#else
+constexpr bool kJpeg2000Built = false;
+#endif
+
+#ifdef PACS_WITH_HTJ2K_CODEC
+constexpr bool kHtj2kBuilt = true;
+#else
+constexpr bool kHtj2kBuilt = false;
+#endif
+
 /**
- * @brief List of supported Transfer Syntax UIDs for compression codecs.
- *
- * As more codecs are implemented (RLE, etc.),
- * they should be added to this list.
+ * @brief A Transfer Syntax that pacs_system has a codec for.
  */
-static constexpr std::array<std::string_view, 16> kSupportedTransferSyntaxes = {{
-    rle_codec::kTransferSyntaxUID,                   // 1.2.840.10008.1.2.5
-    jpeg_baseline_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.50
-    jpeg_lossless_codec::kTransferSyntaxUID,         // 1.2.840.10008.1.2.4.70
-    jpeg_ls_codec::kTransferSyntaxUIDLossless,       // 1.2.840.10008.1.2.4.80
-    jpeg_ls_codec::kTransferSyntaxUIDNearLossless,   // 1.2.840.10008.1.2.4.81
-    jpeg2000_codec::kTransferSyntaxUIDLossless,      // 1.2.840.10008.1.2.4.90
-    jpeg2000_codec::kTransferSyntaxUIDLossy,         // 1.2.840.10008.1.2.4.91
-    hevc_codec::kTransferSyntaxUIDMain,              // 1.2.840.10008.1.2.4.107
-    hevc_codec::kTransferSyntaxUIDMain10,            // 1.2.840.10008.1.2.4.108
-    jpegxl_codec::kTransferSyntaxUIDLossless,        // 1.2.840.10008.1.2.4.110
-    jpegxl_codec::kTransferSyntaxUIDJPEGRecompression, // 1.2.840.10008.1.2.4.111
-    jpegxl_codec::kTransferSyntaxUIDLossy,           // 1.2.840.10008.1.2.4.112
-    htj2k_codec::kTransferSyntaxUIDLossless,         // 1.2.840.10008.1.2.4.201
-    htj2k_codec::kTransferSyntaxUIDRPCL,             // 1.2.840.10008.1.2.4.202
-    htj2k_codec::kTransferSyntaxUIDLossy,            // 1.2.840.10008.1.2.4.203
-    frame_deflate_codec::kTransferSyntaxUID,          // 1.2.840.10008.1.2.11
+struct codec_entry {
+    std::string_view uid;
+    bool available;  ///< true if this build can encode and decode with it
+};
+
+/**
+ * @brief Transfer Syntaxes with an implemented codec.
+ *
+ * RLE and JPEG Lossless are built in; the others need an optional library.
+ * hevc_codec, jpegxl_codec, and frame_deflate_codec are stubs whose encode()
+ * and decode() always fail (frame_deflate_codec's zlib code needs
+ * PACS_WITH_ZLIB, which no build defines), so they are not listed although
+ * create() returns them.
+ */
+static constexpr std::array<codec_entry, 10> kImplementedCodecs = {{
+    {rle_codec::kTransferSyntaxUID, true},                            // 1.2.840.10008.1.2.5
+    {jpeg_baseline_codec::kTransferSyntaxUID, kJpegBaselineBuilt},    // 1.2.840.10008.1.2.4.50
+    {jpeg_lossless_codec::kTransferSyntaxUID, true},                  // 1.2.840.10008.1.2.4.70
+    {jpeg_ls_codec::kTransferSyntaxUIDLossless, kJpegLsBuilt},        // 1.2.840.10008.1.2.4.80
+    {jpeg_ls_codec::kTransferSyntaxUIDNearLossless, kJpegLsBuilt},    // 1.2.840.10008.1.2.4.81
+    {jpeg2000_codec::kTransferSyntaxUIDLossless, kJpeg2000Built},     // 1.2.840.10008.1.2.4.90
+    {jpeg2000_codec::kTransferSyntaxUIDLossy, kJpeg2000Built},        // 1.2.840.10008.1.2.4.91
+    {htj2k_codec::kTransferSyntaxUIDLossless, kHtj2kBuilt},           // 1.2.840.10008.1.2.4.201
+    {htj2k_codec::kTransferSyntaxUIDRPCL, kHtj2kBuilt},               // 1.2.840.10008.1.2.4.202
+    {htj2k_codec::kTransferSyntaxUIDLossy, kHtj2kBuilt},              // 1.2.840.10008.1.2.4.203
 }};
+
+const codec_entry* find_codec(std::string_view transfer_syntax_uid) {
+    for (const auto& entry : kImplementedCodecs) {
+        if (entry.uid == transfer_syntax_uid) {
+            return &entry;
+        }
+    }
+    return nullptr;
+}
 
 }  // namespace
 
@@ -138,20 +178,40 @@ std::unique_ptr<compression_codec> codec_factory::create(
 }
 
 std::vector<std::string_view> codec_factory::supported_transfer_syntaxes() {
-    return {kSupportedTransferSyntaxes.begin(), kSupportedTransferSyntaxes.end()};
+    std::vector<std::string_view> result;
+    result.reserve(kImplementedCodecs.size());
+    for (const auto& entry : kImplementedCodecs) {
+        result.push_back(entry.uid);
+    }
+    return result;
 }
 
 bool codec_factory::is_supported(std::string_view transfer_syntax_uid) {
-    for (const auto& uid : kSupportedTransferSyntaxes) {
-        if (uid == transfer_syntax_uid) {
-            return true;
-        }
-    }
-    return false;
+    return find_codec(transfer_syntax_uid) != nullptr;
 }
 
 bool codec_factory::is_supported(const transfer_syntax& ts) {
     return is_supported(ts.uid());
+}
+
+std::vector<std::string_view> codec_factory::available_transfer_syntaxes() {
+    std::vector<std::string_view> result;
+    result.reserve(kImplementedCodecs.size());
+    for (const auto& entry : kImplementedCodecs) {
+        if (entry.available) {
+            result.push_back(entry.uid);
+        }
+    }
+    return result;
+}
+
+bool codec_factory::is_available(std::string_view transfer_syntax_uid) {
+    const auto* entry = find_codec(transfer_syntax_uid);
+    return entry != nullptr && entry->available;
+}
+
+bool codec_factory::is_available(const transfer_syntax& ts) {
+    return is_available(ts.uid());
 }
 
 }  // namespace kcenon::pacs::encoding::compression

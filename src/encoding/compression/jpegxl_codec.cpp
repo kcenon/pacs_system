@@ -81,8 +81,7 @@ codec_result jpegxl_codec::encode(
     [[maybe_unused]] const compression_options& options) const {
     return kcenon::pacs::pacs_error<compression_result>(
         kcenon::pacs::error_codes::compression_error,
-        "JPEG XL codec not available: libjxl library not found at build time. "
-        "Build with PACS_WITH_JPEGXL=ON to enable.");
+        "JPEG XL codec not available: libjxl is not integrated yet");
 }
 
 codec_result jpegxl_codec::decode(
@@ -90,8 +89,7 @@ codec_result jpegxl_codec::decode(
     [[maybe_unused]] const image_params& params) const {
     return kcenon::pacs::pacs_error<compression_result>(
         kcenon::pacs::error_codes::decompression_error,
-        "JPEG XL codec not available: libjxl library not found at build time. "
-        "Build with PACS_WITH_JPEGXL=ON to enable.");
+        "JPEG XL codec not available: libjxl is not integrated yet");
 }
 
 }  // namespace kcenon::pacs::encoding::compression

@@ -55,7 +55,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK_FALSE(ts.is_encapsulated());
         CHECK(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());  // Not supported in Phase 1
+        CHECK_FALSE(ts.is_supported());  // No inflate or deflate code
     }
 
     SECTION("JPEG Baseline") {
@@ -67,7 +67,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());  // Supported since Phase 3
+        CHECK(ts.is_supported());  // jpeg_baseline_codec (libjpeg-turbo)
     }
 
     SECTION("JPEG Lossless") {
@@ -75,7 +75,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.70");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // Built-in jpeg_lossless_codec
     }
 
     SECTION("JPEG-LS Lossless") {
@@ -88,7 +88,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());  // Same flag as JPEG 2000
+        CHECK(ts.is_supported());  // jpeg_ls_codec (CharLS)
     }
 
     SECTION("JPEG-LS Near-Lossless") {
@@ -101,7 +101,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());  // Same flag as JPEG 2000
+        CHECK(ts.is_supported());  // jpeg_ls_codec (CharLS)
     }
 
     SECTION("JPEG 2000 Lossless") {
@@ -109,7 +109,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.90");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // jpeg2000_codec (OpenJPEG)
     }
 
     SECTION("JPEG 2000 Lossy") {
@@ -117,7 +117,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.91");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // jpeg2000_codec (OpenJPEG)
     }
 
     SECTION("HTJ2K Lossless") {
@@ -167,7 +167,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("JPEG XL JPEG Recompression") {
@@ -180,7 +180,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("JPEG XL Lossy") {
@@ -193,7 +193,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("Frame Deflate") {
@@ -206,7 +206,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 }
 
@@ -334,8 +334,10 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + JPEG XL (3) + Frame Deflate (1)
-        CHECK(supported.size() == 14);
+        // Uncompressed (3) + JPEG Baseline and Lossless (2) + JPEG-LS (2) +
+        // JPEG 2000 (2) + RLE Lossless (1) + HTJ2K (3); the HEVC, JPEG XL,
+        // and Frame Deflate codecs are stubs
+        CHECK(supported.size() == 13);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());

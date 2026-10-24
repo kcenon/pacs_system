@@ -94,10 +94,24 @@ public:
     [[nodiscard]] bool is_valid() const noexcept;
 
     /**
-     * @brief Checks if this Transfer Syntax is currently supported.
-     * @return true if encoding/decoding is implemented
+     * @brief Checks if pacs_system implements this Transfer Syntax.
+     * @return true if the library has a working encoder and decoder for it
      *
-     * In Phase 1, only uncompressed transfer syntaxes are supported.
+     * The value is fixed per registry entry; it does not depend on which
+     * optional codec libraries the current build found.
+     * - Native syntaxes: true when the dataset encoding is implemented
+     *   (Implicit VR Little Endian, Explicit VR Little Endian, Explicit VR
+     *   Big Endian). Deflated Explicit VR Little Endian is false: there is no
+     *   inflate or deflate code.
+     * - Encapsulated syntaxes: true when pacs_system has a pixel data codec
+     *   for the syntax, built in or backed by an optional library, and false
+     *   for the stub codecs (HEVC, JPEG XL, Frame Deflate). The value equals
+     *   compression::codec_factory::is_supported(uid()).
+     *
+     * Whether the current build can encode and decode the pixel data is
+     * answered by compression::codec_factory::is_available(). Which syntaxes
+     * PACS_SCP accepts during association negotiation is stated in Section 4
+     * of the DICOM Conformance Statement.
      */
     [[nodiscard]] bool is_supported() const noexcept;
 
@@ -193,7 +207,7 @@ private:
     friend std::vector<transfer_syntax> supported_transfer_syntaxes();
     friend std::vector<transfer_syntax> all_transfer_syntaxes();
 
-    /// Private constructor for static instances and registry functions
+    /// Private constructor for registry functions
     transfer_syntax(std::string_view uid, std::string_view name,
                     byte_order endian, vr_encoding vr,
                     bool encapsulated, bool deflated, bool supported);
@@ -221,7 +235,8 @@ private:
 
 /**
  * @brief Returns a list of all supported Transfer Syntaxes.
- * @return Vector of supported transfer_syntax instances
+ * @return Vector of the registered transfer_syntax instances whose
+ *         transfer_syntax::is_supported() is true
  */
 [[nodiscard]] std::vector<transfer_syntax> supported_transfer_syntaxes();
 
