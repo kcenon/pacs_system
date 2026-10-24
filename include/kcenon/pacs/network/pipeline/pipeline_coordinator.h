@@ -26,6 +26,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -191,6 +192,14 @@ public:
      * Stops accepting new jobs and waits for pending jobs to complete
      * up to the configured shutdown timeout.
      *
+     * The stage pools are stopped after the coordinator mutex is released,
+     * because pool workers take that mutex when a job completes. Concurrent
+     * calls are serialized: every caller returns after the pools are
+     * stopped. Once stop() has begun, submissions fail with
+     * not_initialized; a submission that overlaps with the start of stop()
+     * either fails with not_initialized or is queued like the jobs submitted
+     * before stop(). It does not throw.
+     *
      * @return VoidResult indicating success or error
      */
     [[nodiscard]] auto stop() -> VoidResult;
@@ -355,7 +364,13 @@ private:
 
     // State
     std::atomic<bool> running_{false};
+    // Guards stage_pools_ and the callbacks. Never held while a stage pool
+    // is started, stopped, or given a job: pool workers take it when a job
+    // completes, so stopping a pool under it inverts the lock order
     mutable std::mutex mutex_;
+    // Serializes start() and stop() and is held while the pools start and
+    // stop. Job and callback paths never take it
+    std::mutex start_stop_mutex_;
 
     // Metrics
     pipeline_metrics metrics_;
@@ -369,6 +384,11 @@ private:
 
     // Internal methods
     [[nodiscard]] auto create_stage_pool(pipeline_stage stage) -> pool_ptr;
+    [[nodiscard]] auto get_pool(size_t stage_idx) const -> pool_ptr;
+    [[nodiscard]] auto get_pools() const -> std::array<pool_ptr, stage_count>;
+    [[nodiscard]] auto submit_failure(const std::exception& e) const -> VoidResult;
+    static void shutdown_pools(std::array<pool_ptr, stage_count>& pools,
+                               bool wait_for_completion);
     void notify_job_completion(const job_context& ctx, bool success);
     void check_backpressure(pipeline_stage stage);
 };

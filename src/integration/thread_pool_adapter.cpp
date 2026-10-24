@@ -57,16 +57,25 @@ thread_pool_adapter::~thread_pool_adapter() {
 // =============================================================================
 
 auto thread_pool_adapter::start() -> bool {
-    std::lock_guard<std::mutex> lock(mutex_);
+    // start_stop_mutex_ serializes start() and shutdown(). mutex_ is not held
+    // across the thread_pool calls below, which take the pool's worker lock
+    // (see shutdown())
+    std::lock_guard<std::mutex> start_stop_lock(start_stop_mutex_);
 
-    if (initialized_ && pool_ && pool_->is_running()) {
-        return true;  // Already running
-    }
+    std::shared_ptr<kcenon::thread::thread_pool> pool;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
 
-    // Create pool if not exists
-    if (!pool_) {
-        kcenon::thread::thread_context context;
-        pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
+        if (initialized_ && pool_ && pool_->is_running()) {
+            return true;  // Already running
+        }
+
+        // Create pool if not exists
+        if (!pool_) {
+            kcenon::thread::thread_context context;
+            pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
+        }
+        pool = pool_;
     }
 
     // Create worker threads
@@ -79,17 +88,18 @@ auto thread_pool_adapter::start() -> bool {
     }
 
     // Enqueue workers
-    auto enqueue_result = pool_->enqueue_batch(std::move(workers));
+    auto enqueue_result = pool->enqueue_batch(std::move(workers));
     if (enqueue_result.is_err()) {
         return false;
     }
 
     // Start the pool
-    auto start_result = pool_->start();
+    auto start_result = pool->start();
     if (start_result.is_err()) {
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(mutex_);
     initialized_ = true;
     return true;
 }
@@ -100,13 +110,23 @@ auto thread_pool_adapter::is_running() const noexcept -> bool {
 }
 
 void thread_pool_adapter::shutdown(bool wait_for_completion) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    // Stop the pool without holding mutex_. thread_pool::stop() holds the
+    // pool's worker lock while it takes each worker's lifecycle lock and
+    // joins it, a worker holds its lifecycle lock while it runs a job, and a
+    // job that submits to this adapter takes mutex_ in is_running(); holding
+    // mutex_ here inverts that order (#1253)
+    std::lock_guard<std::mutex> start_stop_lock(start_stop_mutex_);
 
-    if (pool_) {
-        pool_->stop(!wait_for_completion);
+    std::shared_ptr<kcenon::thread::thread_pool> pool;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        pool = pool_;
+        initialized_ = false;
     }
 
-    initialized_ = false;
+    if (pool) {
+        pool->stop(!wait_for_completion);
+    }
 }
 
 // =============================================================================
@@ -208,8 +228,10 @@ auto thread_pool_adapter::get_pending_task_count() const -> std::size_t {
 }
 
 auto thread_pool_adapter::get_idle_worker_count() const -> std::size_t {
-    std::lock_guard<std::mutex> lock(mutex_);
-    return pool_ ? pool_->get_idle_worker_count() : 0;
+    // thread_pool::get_idle_worker_count() takes the pool's worker lock, so
+    // call it without holding mutex_ (see shutdown())
+    auto pool = get_underlying_pool();
+    return pool ? pool->get_idle_worker_count() : 0;
 }
 
 // =============================================================================
