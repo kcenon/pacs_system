@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/network/v2/dicom_association_handler.h"
+#include "kcenon/pacs/network/detail/dimse_framing.h"
 #include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
@@ -38,11 +39,19 @@ namespace kcenon::pacs::network::v2 {
 dicom_association_handler::dicom_association_handler(
     session_ptr session,
     const server_config& config,
-    const service_map& services)
+    const service_map& services,
+    std::string session_id)
     : session_(std::move(session))
+    , session_id_(std::move(session_id))
     , config_(config)
     , services_(services)
+    , receive_limit_(detail::max_accepted_pdu_length)
     , last_activity_(clock::now()) {
+#ifdef PACS_WITH_NETWORK_SYSTEM
+    if (session_id_.empty() && session_) {
+        session_id_ = std::string(session_->id());
+    }
+#endif
 }
 
 dicom_association_handler::~dicom_association_handler() {
@@ -116,13 +125,8 @@ bool dicom_association_handler::is_closed() const noexcept {
 }
 
 std::string dicom_association_handler::session_id() const {
-#ifdef PACS_WITH_NETWORK_SYSTEM
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (session_) {
-        return std::string(session_->id());
-    }
-#endif
-    return {};
+    // No lock: the PDU processing path calls this while it holds mutex_
+    return session_id_;
 }
 
 std::string dicom_association_handler::calling_ae() const {
@@ -177,6 +181,10 @@ void dicom_association_handler::set_closed_callback(
 void dicom_association_handler::set_error_callback(handler_error_callback callback) {
     std::lock_guard<std::mutex> lock(callback_mutex_);
     error_callback_ = std::move(callback);
+}
+
+void dicom_association_handler::set_session_closer(session_closer closer) {
+    session_closer_ = std::move(closer);
 }
 
 // =============================================================================
@@ -251,9 +259,12 @@ void dicom_association_handler::on_disconnected(const std::string& /*session_id*
 }
 
 void dicom_association_handler::on_error(std::error_code ec) {
-    std::ostringstream oss;
-    oss << "Network error: " << ec.message() << " (" << ec.value() << ")";
-    report_error(oss.str());
+    // After a release or abort, the peer closing the connection is expected
+    if (!is_closed()) {
+        std::ostringstream oss;
+        oss << "Network error: " << ec.message() << " (" << ec.value() << ")";
+        report_error(oss.str());
+    }
 
     close_handler(false);
 }
@@ -266,6 +277,31 @@ void dicom_association_handler::process_buffer() {
     std::lock_guard<std::mutex> lock(mutex_);
 
     while (receive_buffer_.size() >= pdu_header_size) {
+        // Refuse an unknown type or an oversized length from the header,
+        // before the body is buffered
+        auto header_type = pdu_decoder::peek_pdu_type(receive_buffer_);
+        if (!header_type) {
+            report_error("Invalid PDU type received");
+            send_abort(abort_source::service_provider, abort_reason::unrecognized_pdu);
+            close_handler(false);
+            return;
+        }
+        const uint32_t declared_length =
+            (static_cast<uint32_t>(receive_buffer_[2]) << 24) |
+            (static_cast<uint32_t>(receive_buffer_[3]) << 16) |
+            (static_cast<uint32_t>(receive_buffer_[4]) << 8) |
+            static_cast<uint32_t>(receive_buffer_[5]);
+        const uint32_t length_limit = *header_type == pdu_type::p_data_tf
+            ? receive_limit_
+            : detail::max_accepted_pdu_length;
+        if (declared_length > length_limit) {
+            report_error("PDU length " + std::to_string(declared_length) +
+                         " exceeds the limit " + std::to_string(length_limit));
+            send_abort(abort_source::service_provider, abort_reason::invalid_pdu_parameter);
+            close_handler(false);
+            return;
+        }
+
         // Check if we have a complete PDU
         auto length_opt = pdu_decoder::pdu_length(receive_buffer_);
         if (!length_opt) {
@@ -308,6 +344,11 @@ void dicom_association_handler::process_buffer() {
         // Create pdu_data structure for processing
         integration::pdu_data pdu(*type_opt, std::move(payload));
         process_pdu(pdu);
+
+        // Bytes after a release or abort belong to no association
+        if (is_closed()) {
+            return;
+        }
     }
 }
 
@@ -460,6 +501,37 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
 
     // Transition to established state
     association_.set_state(association_state::established);
+
+    // Responses that services send with association_.send_dimse() go to
+    // this session as P-DATA-TF
+    association_.set_pdu_writer(
+        [this, session = session_](std::vector<uint8_t> pdus) {
+#ifdef PACS_WITH_NETWORK_SYSTEM
+            if (!session || !session->is_connected() ||
+                session->send(std::move(pdus)).is_err()) {
+                return false;
+            }
+            pdus_sent_.fetch_add(1, std::memory_order_relaxed);
+            return true;
+#else
+            (void)session;
+            (void)pdus;
+            return false;
+#endif
+        });
+
+    // The A-ASSOCIATE-AC announced max_pdu_size() as the most the SCU may
+    // put in one P-DATA-TF PDU
+    receive_limit_ = detail::receive_pdu_limit(association_.max_pdu_size());
+    assembler_ = std::make_unique<detail::dimse_assembler>(
+        [this](uint8_t context_id) -> std::optional<encoding::transfer_syntax> {
+            auto ts = association_.context_transfer_syntax(context_id);
+            if (ts.is_err()) {
+                return std::nullopt;
+            }
+            return ts.value();
+        });
+
     transition_to(handler_state::established);
 
     // Set up user context for access control
@@ -502,60 +574,27 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
         return;
     }
 
-    const p_data_tf_pdu& p_data = result.value();
-
-    // Process each PDV
-    for (const auto& pdv : p_data.pdvs) {
-        // Get abstract syntax for this presentation context
-        std::string abstract_syntax;
-        for (const auto& ctx : association_.accepted_contexts()) {
-            if (ctx.id == pdv.context_id) {
-                abstract_syntax = ctx.abstract_syntax;
-                break;
-            }
+    // Command and data set fragments may span several PDUs; the assembler
+    // returns each message once its last fragment arrived
+    for (auto& pdv : result.value().pdvs) {
+        auto added = assembler_->add(std::move(pdv));
+        if (added.is_err()) {
+            report_error("Invalid P-DATA-TF fragment: " + added.error().message);
+            send_abort(abort_source::service_provider, abort_reason::unexpected_pdu_parameter);
+            close_handler(false);
+            return;
         }
-
-        if (abstract_syntax.empty()) {
-            report_error("Unknown presentation context ID: " +
-                         std::to_string(pdv.context_id));
+        if (!added.value()) {
             continue;
         }
 
-        // If this is a complete command, decode DIMSE message
-        // Note: For simplicity, we're handling command-only messages here.
-        // Full DIMSE message handling with dataset fragmentation would require
-        // accumulating PDVs until is_last is true for both command and data.
-        if (pdv.is_last && pdv.is_command) {
-            // For command-only messages (like C-ECHO), dataset is empty
-            std::vector<uint8_t> empty_dataset;
+        const auto& [context_id, message] = *added.value();
+        messages_processed_.fetch_add(1, std::memory_order_relaxed);
 
-            // Get transfer syntax for the context
-            auto ts_result = association_.context_transfer_syntax(pdv.context_id);
-            if (ts_result.is_err()) {
-                report_error("Invalid presentation context: " +
-                             ts_result.error().message);
-                continue;
-            }
-
-            // Decode DIMSE command
-            auto dimse_result = dimse::dimse_message::decode(
-                std::span<const uint8_t>(pdv.data),
-                std::span<const uint8_t>(empty_dataset),
-                ts_result.value());
-
-            if (dimse_result.is_err()) {
-                report_error("Failed to decode DIMSE message: " +
-                             dimse_result.error().message);
-                continue;
-            }
-
-            messages_processed_.fetch_add(1, std::memory_order_relaxed);
-
-            // Dispatch to service
-            auto dispatch_result = dispatch_to_service(pdv.context_id, dimse_result.value());
-            if (dispatch_result.is_err()) {
-                report_error("Service dispatch failed: " + dispatch_result.error().message);
-            }
+        // Dispatch to service
+        auto dispatch_result = dispatch_to_service(context_id, message);
+        if (dispatch_result.is_err()) {
+            report_error("Service dispatch failed: " + dispatch_result.error().message);
         }
     }
 }
@@ -755,19 +794,22 @@ void dicom_association_handler::report_error(const std::string& error) {
 }
 
 void dicom_association_handler::close_handler(bool graceful) {
-    handler_state expected = state_.load();
-    if (expected == handler_state::closed) {
+    // exchange() so that the network thread and stop() close only once
+    if (state_.exchange(handler_state::closed, std::memory_order_acq_rel) ==
+        handler_state::closed) {
         return;  // Already closed
     }
 
-    transition_to(handler_state::closed);
-
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // Close the session
+    // Close the session. session_ is set once at construction, so no lock
+    // is taken: this runs inside PDU processing, which holds mutex_.
     try {
-        std::lock_guard<std::mutex> lock(mutex_);
         if (session_) {
-            session_->close();
+            if (session_closer_) {
+                session_closer_(session_);
+            } else {
+                session_->close();
+            }
         }
     } catch (...) {
         // Suppress exceptions during session cleanup

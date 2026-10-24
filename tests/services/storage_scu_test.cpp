@@ -595,9 +595,6 @@ constexpr const char* rle_lossless_uid = "1.2.840.10008.1.2.5";
 /// Port of the in-process dicom_server; no other test uses it
 constexpr uint16_t negotiation_test_port = 11274;
 
-/// No dicom_server listens here, so connect() returns an unpaired SCU
-constexpr uint16_t unserved_port = 104;
-
 /// A temporary directory that no other test process shares
 struct unique_temp_directory {
     std::filesystem::path path;
@@ -692,10 +689,8 @@ paired_storage_associations pair_with_scp(
     scu_config.calling_ae_title = "STORESCU";
     scu_config.called_ae_title = "STRICT_SCP";
     scu_config.proposed_contexts = std::move(proposed);
-    auto connect_result =
-        association::connect("localhost", unserved_port, scu_config);
-    REQUIRE(connect_result.is_ok());
-    auto scu = std::make_unique<association>(std::move(connect_result.value()));
+    // An unpaired SCU awaiting A-ASSOCIATE-AC, paired by hand below
+    auto scu = std::make_unique<association>(association::propose(scu_config));
 
     scp_config config;
     config.ae_title = "STRICT_SCP";
