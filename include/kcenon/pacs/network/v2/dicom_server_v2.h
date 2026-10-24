@@ -194,12 +194,13 @@ public:
     [[nodiscard]] Result<std::monostate> start();
 
     /**
-     * @brief Stop the server gracefully
+     * @brief Stop the server
      *
-     * Stops accepting new connections and waits for active associations
-     * to complete or timeout.
+     * Closes the active associations and their connections, then stops
+     * accepting connections. network_system offers no way to stop accepting
+     * while sessions continue, so active associations are not waited for.
      *
-     * @param timeout Maximum time to wait for associations to close
+     * @param timeout Unused; kept for source compatibility
      */
     void stop(duration timeout = std::chrono::seconds{30});
 
@@ -321,11 +322,11 @@ private:
     /// Create and register a new handler for a session
     void create_handler(std::shared_ptr<kcenon::network::interfaces::i_session> session);
 
-    /// Deliver @p session's data, errors, and disconnection straight to
-    /// @p handler (registered as @p key). network_system reports the same
-    /// id() for every session of a server, so the server-level callbacks
-    /// cannot tell sessions apart. Returns false when the session type has
-    /// no per-session callbacks.
+    /// Deliver @p session's data and errors straight to @p handler
+    /// (registered as @p key). network_system reports the same id() for
+    /// every session of a server, so the server-level callbacks cannot tell
+    /// sessions apart. Returns false when the session type has no
+    /// per-session callbacks.
     bool route_session_events(
         const std::shared_ptr<kcenon::network::interfaces::i_session>& session,
         const std::string& key,
