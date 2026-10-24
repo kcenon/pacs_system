@@ -18,3 +18,4 @@ htj2k_codec lossless with RPCL round-trip
 htj2k_codec lossy 8-bit grayscale
 htj2k_codec lossy 8-bit RGB
 htj2k_codec decode sets output parameters correctly
+codec_factory::is_available matches what the codecs do

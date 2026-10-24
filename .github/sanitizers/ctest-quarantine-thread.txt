@@ -25,9 +25,11 @@ integration::Nested operations with error handling
 integration::No deadlocks under concurrent access
 # Same cycle through the in-memory dicom_server: thread_pool_adapter::shutdown()
 # stops the pool under its mutex while a worker holding the lifecycle lock
-# takes the dicom_server mutex in touch_association()
+# takes the dicom_server mutex in touch_association() or remove_association()
 dicom_server stores over negotiated JPEG-LS contexts
 dicom_server: a response to a destroyed SCU fails cleanly
+dicom_server negotiates exactly the SCP transfer syntax list
+storage_scu sends an HTJ2K file on an HTJ2K context of the pacs_system SCP
 
 # #1254: task_scheduler and study_lock_manager lock their state and stats
 # mutexes in opposite orders (lock-order inversion)
@@ -57,3 +59,4 @@ htj2k_codec lossless with RPCL round-trip
 htj2k_codec lossy 8-bit grayscale
 htj2k_codec lossy 8-bit RGB
 htj2k_codec decode sets output parameters correctly
+codec_factory::is_available matches what the codecs do

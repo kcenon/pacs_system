@@ -47,7 +47,7 @@ jobs:
             # Quarantine (#1257): OpenJPH's AVX-512 encoder makes the HTJ2K
             # encode cases crash in clang builds on runners with AVX-512.
             # Remove when #1257 is fixed.
-            ctest_exclude: '^htj2k_codec (lossless |lossy |decode sets output parameters correctly$)'
+            ctest_exclude: '^(htj2k_codec (lossless |lossy |decode sets output parameters correctly$)|codec_factory::is_available matches what the codecs do$)'
           # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
           # is used instead of Homebrew LLVM Clang, which lacks std::format
           - os: macos-14
