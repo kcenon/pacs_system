@@ -462,7 +462,7 @@ TEST_CASE("time-based stress", "[stress][thread]") {
                     // Simulate work
                     std::atomic<handler_state> state{handler_state::idle};
                     state.store(handler_state::established);
-                    state.load();
+                    [[maybe_unused]] const auto observed = state.load();
 
                     operations.fetch_add(1, std::memory_order_relaxed);
                 }
