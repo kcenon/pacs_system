@@ -214,41 +214,16 @@ void dicom_server_v2::stop(duration timeout) {
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // Phase 1: Stop accepting new connections. This also stops every
-    // session; each session's disconnection reaches its handler, which
-    // closes.
-    if (server_) {
-        try {
-            // Stop the server - this closes the acceptor and the sessions
-            (void)server_->stop();
-        } catch (...) {
-            // Suppress exceptions during server stop
-        }
-    }
+    // network_system's server->stop() destroys the io_context of its
+    // sessions, so every session pointer that the handlers and the closer
+    // hold is dropped first: a socket destroyed after its io_context is a
+    // use-after-free (it crashes on Windows).
+    (void)timeout;
 
-    // Phase 2: Wait for handlers to close. remove_handler() ignores them
-    // while stopping, so the map keeps them until Phase 3.
-    auto deadline = clock::now() + timeout;
-    for (;;) {
-        bool all_closed = true;
-        {
-            std::lock_guard<std::mutex> lock(handlers_mutex_);
-            for (const auto& [session_id, handler] : handlers_) {
-                if (!handler->is_closed()) {
-                    all_closed = false;
-                    break;
-                }
-            }
-        }
-        if (all_closed || clock::now() >= deadline) {
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds{10});
-    }
-
-    // Phase 3: Force stop remaining handlers
-    // Collect handlers first, then stop them without holding the lock
-    // to avoid potential deadlock if handler->stop() triggers callbacks
+    // Phase 1: Close the handlers and drop them. Collect them first, then
+    // stop them without holding the lock, since stop() runs callbacks. A
+    // network callback that is running holds its own reference until it
+    // returns.
     std::vector<std::shared_ptr<dicom_association_handler>> handlers_to_stop;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
@@ -259,7 +234,6 @@ void dicom_server_v2::stop(duration timeout) {
         handlers_.clear();
     }
 
-    // Stop handlers without holding the lock
     for (auto& handler : handlers_to_stop) {
         try {
             handler->stop(false);  // Force abort
@@ -269,8 +243,19 @@ void dicom_server_v2::stop(duration timeout) {
     }
     handlers_to_stop.clear();
 
-    // Close what the handlers queued, then end the closer thread
+    // Phase 2: Close the sessions the handlers queued now, then end the
+    // closer thread
     stop_session_closer();
+
+    // Phase 3: Stop network_system's server: the acceptor, any session left
+    // (a connection that arrived while stopping), and the io_context
+    if (server_) {
+        try {
+            (void)server_->stop();
+        } catch (...) {
+            // Suppress exceptions during server stop
+        }
+    }
 
     // Allow any pending callbacks to complete
     std::this_thread::sleep_for(std::chrono::milliseconds{50});
@@ -350,7 +335,15 @@ void dicom_server_v2::on_error(error_callback callback) {
 void dicom_server_v2::on_connection(
     std::shared_ptr<kcenon::network::interfaces::i_session> session) {
 
-    if (!running_ || !session) {
+    if (!session) {
+        return;
+    }
+
+    if (!running_) {
+#ifdef PACS_WITH_NETWORK_SYSTEM
+        // A connection that arrives while stop() runs gets no handler
+        session->close();
+#endif
         return;
     }
 
@@ -581,23 +574,19 @@ bool dicom_server_v2::route_session_events(
             stats_.last_activity = clock::now();
         });
 
+    // A read error (the peer closing included) comes before the session
+    // stops. The handler reports it through its error callback.
     messaging->set_error_callback(
         [this, handler, key](std::error_code ec) {
-            // The handler reports the error through its error callback
             if (auto target = handler.lock()) {
                 target->handle_error(ec);
             }
             remove_handler(key);
         });
 
-    messaging->set_disconnection_callback(
-        [this, handler, key](const std::string& /*server_id*/) {
-            // Also while stopping, so stop() sees the handler close
-            if (auto target = handler.lock()) {
-                target->handle_disconnect();
-            }
-            remove_handler(key);
-        });
+    // The disconnection callback stays as network_system set it: through it
+    // tcp_server_adapter drops the session it tracks, and a session it kept
+    // past server_->stop() would outlive its io_context.
 
     return true;
 #else
@@ -634,8 +623,9 @@ void dicom_server_v2::close_session_later(
         }
     }
 #ifdef PACS_WITH_NETWORK_SYSTEM
-    // The closer has stopped, which happens only after server_->stop()
-    // stopped every session, so this close returns at once
+    // The closer has stopped, which stop() does only after it closed every
+    // handler; a closed handler does not close again, so this does not run
+    // inside a network_system callback
     session->close();
 #endif
 }
