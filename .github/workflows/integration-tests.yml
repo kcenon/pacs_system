@@ -878,7 +878,7 @@ jobs:
         outcome='${{ steps.binary_tests.outcome }}'
         echo "Binary integration tests: ${outcome} (known failure, quarantined under #1240 and #1258)" >> "$GITHUB_STEP_SUMMARY"
         if [ "$outcome" = failure ]; then
-          echo "::warning title=Known failure (#1240, #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+          echo "::warning title=Known failure (#1240 and #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
         fi
 
   # ============================================================================

@@ -357,7 +357,7 @@ jobs:
         } >> "$GITHUB_STEP_SUMMARY"
         for outcome in "$echo_outcome" "$store_outcome" "$find_outcome" "$move_outcome"; do
           if [ "$outcome" = failure ]; then
-            echo "::warning title=Known failure (#1240, #1258)::DCMTK shell tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+            echo "::warning title=Known failure (#1240 and #1258)::DCMTK shell tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
             break
           fi
         done
