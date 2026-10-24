@@ -1,0 +1,14 @@
+# ThreadSanitizer suppressions for the Sanitizer Tests workflow
+# (.github/workflows/sanitizers.yml loads this file through TSAN_OPTIONS).
+#
+# Only races inside third-party or ecosystem code belong here, each with the
+# upstream issue and the condition for removing it. Never suppress
+# pacs_system code: a pacs_system test that fails under a sanitizer is
+# quarantined in ctest-quarantine-<sanitizer>.txt with its issue instead.
+
+# kcenon/thread_system#761: detail::concurrent_queue publishes node::next
+# without release/acquire ordering (enqueue() writes it under tail_mutex_,
+# try_dequeue() reads it under head_mutex_), so TSan sees no happens-before
+# between producer and consumer. Remove this entry when the thread_system SHA
+# pinned in .github/actions/checkout-kcenon-deps contains the fix for #761.
+race:kcenon::thread::detail::concurrent_queue

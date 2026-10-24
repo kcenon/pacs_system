@@ -152,12 +152,13 @@ jobs:
       shell: bash
       run: |
         cd build
+        # No failure masking: a failed or aborted test fails this step
+        # (the results are still uploaded and published below)
         ctest \
           --output-on-failure \
           --timeout 60 \
           --output-junit unit-test-results.xml \
-          --exclude-regex "integration::" \
-          || echo "Some unit tests failed"
+          --exclude-regex "integration::"
 
     - name: Upload Unit Test Results
       uses: actions/upload-artifact@v7
@@ -172,7 +173,7 @@ jobs:
       if: always()
       with:
         report_paths: pacs_system/build/unit-test-results.xml
-        fail_on_failure: false
+        fail_on_failure: true
         check_name: Unit Tests (${{ matrix.os }})
 
   # ============================================================================
@@ -365,6 +366,11 @@ jobs:
         # Per-test timeout in seconds (2 minutes per test category)
         TEST_TIMEOUT=120
 
+        # Exit status of the test runs: every suite runs and the results are
+        # merged, then the step exits with the last non-zero status, so a failed,
+        # aborted, or timed-out suite fails the step
+        status=0
+
         if [ -f "./bin/pacs_integration_e2e" ]; then
           # Run only data_generator tests (no network dependencies, fast)
           echo "=== Running data_generator tests (no network) ==="
@@ -372,12 +378,12 @@ jobs:
             $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "[data_generator]" \
               --reporter console \
               --reporter junit::out=integration-test-datagen.xml \
-              2>&1 || echo "Data generator tests completed (may have failures)"
+              2>&1 || status=$?
           else
             ./bin/pacs_integration_e2e "[data_generator]" \
               --reporter console \
               --reporter junit::out=integration-test-datagen.xml \
-              2>&1 || echo "Data generator tests completed (may have failures)"
+              2>&1 || status=$?
           fi
 
           # Run TLS config tests (no actual network, just validation)
@@ -386,12 +392,12 @@ jobs:
             $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "[config]" \
               --reporter console \
               --reporter junit::out=integration-test-config.xml \
-              2>&1 || echo "Config tests completed (may have failures)"
+              2>&1 || status=$?
           else
             ./bin/pacs_integration_e2e "[config]" \
               --reporter console \
               --reporter junit::out=integration-test-config.xml \
-              2>&1 || echo "Config tests completed (may have failures)"
+              2>&1 || status=$?
           fi
 
           # Skip network-dependent tests in CI (connectivity, store_query, worklist, etc.)
@@ -420,8 +426,10 @@ jobs:
             --timeout 120 \
             --output-junit integration-test-results.xml \
             --tests-regex "integration::" \
-            || echo "Some integration tests failed"
+            || status=$?
         fi
+
+        exit $status
       env:
         PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
@@ -433,6 +441,10 @@ jobs:
       run: |
         Set-Location build
 
+        # Exit code of the test runs: the step's exit code would otherwise be
+        # that of the last native command only, which hides a failed first suite
+        $status = 0
+
         # Debug: Check binary existence
         Write-Host "=== Debug: Checking binary ==="
         if (Test-Path ".\bin\pacs_integration_e2e.exe") {
@@ -441,12 +453,14 @@ jobs:
           # Run data_generator tests
           Write-Host "=== Running data_generator tests (no network) ==="
           & .\bin\pacs_integration_e2e.exe "[data_generator]" --reporter console --reporter junit::out=integration-test-datagen.xml 2>&1
-          Write-Host "Data generator tests completed"
+          if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
+          Write-Host "Data generator tests completed (exit code $LASTEXITCODE)"
 
           # Run config tests
           Write-Host "=== Running config tests ==="
           & .\bin\pacs_integration_e2e.exe "[config]" --reporter console --reporter junit::out=integration-test-config.xml 2>&1
-          Write-Host "Config tests completed"
+          if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
+          Write-Host "Config tests completed (exit code $LASTEXITCODE)"
 
           Write-Host "=== Skipping network-dependent tests in CI ==="
 
@@ -472,7 +486,10 @@ jobs:
         else {
           Write-Host "Integration test binary not found, running CTest integration tests"
           ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
+          $status = $LASTEXITCODE
         }
+
+        exit $status
       env:
         PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
@@ -489,7 +506,7 @@ jobs:
       if: always()
       with:
         report_paths: pacs_system/build/integration-test-results.xml
-        fail_on_failure: false
+        fail_on_failure: true
         check_name: Integration Tests (${{ matrix.os }})
 
   # ============================================================================
@@ -533,7 +550,8 @@ jobs:
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
-        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
+        # coreutils provides gtimeout; macOS runners have no timeout command
+        brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache coreutils
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -618,16 +636,20 @@ jobs:
           fi
 
           echo "Found stability smoke tests, running..."
-          timeout 240 ./bin/pacs_integration_e2e \
+          # GNU timeout is `timeout` on Ubuntu and `gtimeout` (coreutils) on macOS
+          TIMEOUT_CMD=$(command -v timeout || command -v gtimeout)
+          # No failure masking: a failed test, an abort, or the timeout
+          # fails this step (the results are still uploaded below)
+          "$TIMEOUT_CMD" 240 ./bin/pacs_integration_e2e \
             --reporter junit \
             --out stability-smoke-results.xml \
-            "[stability][smoke]" \
-            || echo "Some stability smoke tests failed"
+            "[stability][smoke]"
         else
           echo "Stability test binary not found"
           echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="stability-smoke" tests="0" failures="0" errors="0" skipped="0"/></testsuites>' > stability-smoke-results.xml
           exit 0
         fi
+      timeout-minutes: 5
 
     - name: Run Stability Smoke Tests (Windows)
       if: runner.os == 'Windows'
@@ -649,7 +671,9 @@ jobs:
 
           Write-Host "Found stability smoke tests, running..."
           & .\bin\pacs_integration_e2e.exe --reporter junit --out stability-smoke-results.xml "[stability][smoke]"
-          Write-Host "Stability smoke tests completed"
+          $status = $LASTEXITCODE
+          Write-Host "Stability smoke tests completed (exit code $status)"
+          exit $status
         }
         else {
           Write-Host "Stability test binary not found"
@@ -829,16 +853,33 @@ jobs:
         fi
 
     - name: Run Binary Integration Tests
+      id: binary_tests
       working-directory: pacs_system
       run: |
         if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
           cd tools/integration_tests/scripts
-          ./run_all_binary_tests.sh -v ../../../build || echo "Some binary tests failed"
+          ./run_all_binary_tests.sh ../../../build --verbose
         else
           echo "Binary integration test scripts not found"
         fi
       timeout-minutes: 10
+      # Known failing, so this step reports failure without failing the job:
+      # every suite runs a pacs_system SCU against a server in another process,
+      # which needs the real TCP client path in association::connect() (#1240),
+      # and the scripts pass arguments the CLI tools no longer accept (#1258).
+      # Remove continue-on-error when both are fixed.
       continue-on-error: true
+
+    - name: Record binary integration test outcome
+      if: always()
+      run: |
+        # continue-on-error above keeps the job green; record the real outcome
+        # so the known failure (#1240, #1258) stays visible in the job summary
+        outcome='${{ steps.binary_tests.outcome }}'
+        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1240 and #1258)" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$outcome" = failure ]; then
+          echo "::warning title=Known failure (#1240 and #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+        fi
 
   # ============================================================================
   # Test Summary

@@ -44,6 +44,10 @@ jobs:
             cc: clang
             cxx: clang++
             triplet: x64-linux
+            # Quarantine (#1257): OpenJPH's AVX-512 encoder makes the HTJ2K
+            # encode cases crash in clang builds on runners with AVX-512.
+            # Remove when #1257 is fixed.
+            ctest_exclude: '^(htj2k_codec (lossless |lossy |decode sets output parameters correctly$)|codec_factory::is_available matches what the codecs do$)'
           # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
           # is used instead of Homebrew LLVM Clang, which lacks std::format
           - os: macos-14
@@ -148,8 +152,14 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
+    # pwsh does not stop when a native command fails, and ctest exits 0 when it
+    # finds no tests: a failed configure or build used to end in "No tests were
+    # found!!!" and a passing step. Both Windows steps therefore check each exit
+    # code and pass --no-tests=error.
     - name: Build application (vcpkg - Windows)
       if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
       id: build_vcpkg_windows
@@ -172,9 +182,11 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
 
     - name: Build application (fallback - Unix)
       if: runner.os != 'Windows' && (steps.vcpkg_install_unix.outcome == 'failure' || steps.build_vcpkg_unix.outcome != 'success')
@@ -197,12 +209,22 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120 || echo "Some tests failed"
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
     - name: Build application (fallback - Windows)
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
+      id: build_fallback_windows
       working-directory: pacs_system
       shell: pwsh
+      # Known failing (#1266), so this step reports failure without failing the
+      # job: the vcpkg manifest build stops at kcenon-logger-system (link errors
+      # on x64-windows), and this fallback turns manifest mode off, so ICU and
+      # the other dependencies are missing. Windows unit tests run in
+      # integration-tests.yml (Build & Unit Tests (windows-2022)). Remove
+      # continue-on-error when #1266 is fixed.
+      continue-on-error: true
       run: |
         Write-Host "vcpkg build failed. Falling back to system libraries..."
         if (Test-Path build) { Remove-Item -Recurse -Force build }
@@ -220,9 +242,24 @@ jobs:
           -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120 || Write-Host "Some tests failed"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
+
+    - name: Record Windows build outcome
+      if: always() && runner.os == 'Windows'
+      shell: bash
+      run: |
+        # continue-on-error above keeps the job green; record the real outcomes
+        # so the known failure (#1266) stays visible in the job summary
+        vcpkg_outcome='${{ steps.build_vcpkg_windows.outcome }}'
+        fallback_outcome='${{ steps.build_fallback_windows.outcome }}'
+        echo "Windows build and tests: vcpkg path ${vcpkg_outcome:-skipped}, fallback ${fallback_outcome:-skipped} (known failure, quarantined under #1266)" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$fallback_outcome" = failure ]; then
+          echo "::warning title=Known failure (#1266)::The Windows build and tests did not run; continue-on-error keeps this job green until #1266 is fixed"
+        fi
 
     - name: Upload test results
       if: always()

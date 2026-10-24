@@ -87,13 +87,37 @@ jobs:
 
     - name: Run tests with ${{ matrix.sanitizer }} sanitizer
       working-directory: pacs_system/build
+      shell: bash
       run: |
-        ctest --output-on-failure --verbose --timeout 300 || echo "Some tests failed"
+        # Tests quarantined for this sanitizer, one exact CTest name per line,
+        # each with the issue that tracks it (they still run in the other CI jobs)
+        quarantine="${GITHUB_WORKSPACE}/pacs_system/.github/sanitizers/ctest-quarantine-${{ matrix.sanitizer }}.txt"
+        exclude=()
+        if [ -f "$quarantine" ]; then
+          names=$(sed -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' "$quarantine")
+          if [ -n "$names" ]; then
+            echo "Quarantined tests (see $quarantine):"
+            echo "$names"
+            # Escape regex metacharacters and anchor the alternation so only
+            # exact test names are excluded
+            regex=$(sed -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' \
+                        -e 's/[][\\.*^$+?(){}|]/\\&/g' "$quarantine" | paste -sd '|' -)
+            exclude=(--exclude-regex "^(${regex})\$")
+          fi
+        fi
+
+        # No failure masking: a sanitizer report, a failed assertion, an
+        # abort, or a timeout fails the test and therefore this step
+        ctest --output-on-failure --verbose --timeout 300 "${exclude[@]}"
       env:
-        # Sanitizer options for better error reporting
-        TSAN_OPTIONS: "halt_on_error=0 second_deadlock_stack=1 history_size=4"
-        ASAN_OPTIONS: "halt_on_error=0 detect_leaks=1 detect_stack_use_after_return=1"
-        UBSAN_OPTIONS: "halt_on_error=0 print_stacktrace=1"
+        # halt_on_error=1: the first sanitizer report aborts the test process
+        # with a non-zero exit, so CTest marks the test failed. UBSan would
+        # otherwise print the report and exit 0; TSan's exit code 66 and ASan's
+        # default abort would fail anyway, but one explicit setting covers all
+        # three. TSan reads third-party suppressions from tsan.supp.
+        TSAN_OPTIONS: "halt_on_error=1 second_deadlock_stack=1 history_size=4 suppressions=${{ github.workspace }}/pacs_system/.github/sanitizers/tsan.supp"
+        ASAN_OPTIONS: "halt_on_error=1 detect_leaks=1 detect_stack_use_after_return=1"
+        UBSAN_OPTIONS: "halt_on_error=1 print_stacktrace=1"
 
     - name: Upload sanitizer logs
       if: failure()

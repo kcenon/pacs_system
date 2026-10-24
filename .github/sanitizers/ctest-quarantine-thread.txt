@@ -1,0 +1,62 @@
+# CTest quarantine for the ThreadSanitizer job (.github/workflows/sanitizers.yml)
+#
+# One exact CTest test name per line; lines starting with # are comments.
+# Each group names the issue that tracks the failure. Remove the lines when
+# the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
+
+# kcenon/thread_system#761: payload races behind the concurrent_queue race;
+# the racing accesses are in test code, so tsan.supp cannot match them
+stress::lockfree_queue memory safety
+
+# #1253: pipeline_coordinator::stop() and thread_pool_adapter::shutdown()
+# stop thread pools while holding their own mutex (lock-order inversion; the
+# thread_system half, the worker lifecycle lock held across do_work(), is
+# kcenon/thread_system#762)
+pipeline_coordinator job submission
+pipeline_coordinator callbacks
+pipeline_coordinator concurrent job submission
+pipeline integration - basic functionality
+pipeline integration - multiple jobs
+pipeline integration - metrics update
+pipeline integration - graceful shutdown
+pipeline integration - job ID uniqueness
+integration::C-MOVE workflow with thread pool
+integration::Nested operations with error handling
+integration::No deadlocks under concurrent access
+# Same cycle through the in-memory dicom_server: thread_pool_adapter::shutdown()
+# stops the pool under its mutex while a worker holding the lifecycle lock
+# takes the dicom_server mutex in touch_association() or remove_association()
+dicom_server stores over negotiated JPEG-LS contexts
+dicom_server: a response to a destroyed SCU fails cleanly
+dicom_server negotiates exactly the SCP transfer syntax list
+storage_scu sends an HTJ2K file on an HTJ2K context of the pacs_system SCP
+
+# #1254: task_scheduler and study_lock_manager lock their state and stats
+# mutexes in opposite orders (lock-order inversion)
+task_scheduler: statistics
+task_scheduler: statistics under concurrent load
+study_lock_manager statistics
+study_lock_manager reset statistics
+study_lock_manager concurrent access
+
+# #1255: rest_server start_async() and stop() race on the Crow app
+rest_server async lifecycle
+
+# #1256: Catch2 assertions on worker threads, loop index captured by
+# reference (pipeline_coordinator concurrent job submission and pipeline
+# integration - job ID uniqueness are listed under #1253)
+thread safety integration
+UidMapping: Thread Safety
+integration::monitoring_adapter thread safety
+
+# #1257: OpenJPH's AVX-512 block encoder stores to unaligned stack arrays
+# (SIGSEGV on runners whose CPU takes the AVX-512 path)
+htj2k_codec lossless 8-bit grayscale round-trip
+htj2k_codec lossless 12-bit grayscale round-trip
+htj2k_codec lossless 16-bit grayscale round-trip
+htj2k_codec lossless 8-bit RGB round-trip
+htj2k_codec lossless with RPCL round-trip
+htj2k_codec lossy 8-bit grayscale
+htj2k_codec lossy 8-bit RGB
+htj2k_codec decode sets output parameters correctly
+codec_factory::is_available matches what the codecs do
