@@ -296,10 +296,15 @@ encoding::transfer_syntax explicit_le() {
     return encoding::transfer_syntax{EXPLICIT_VR_LE};
 }
 
-/// Encoded command set of @p msg
+/// Encoded command set of @p msg, empty when it does not encode. The
+/// scripted peer calls it on its own thread, where Catch2 3.4 assertions
+/// are not safe, so it does not assert; an empty command fails the SCU's
+/// checks instead.
 std::vector<uint8_t> command_bytes(const dimse::dimse_message& msg) {
     auto encoded = dimse::dimse_message::encode(msg, explicit_le());
-    REQUIRE(encoded.is_ok());
+    if (encoded.is_err()) {
+        return {};
+    }
     return encoded.value().first;
 }
 
