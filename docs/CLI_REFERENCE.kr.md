@@ -564,10 +564,10 @@ DICOM Storage SCU - 원격 SCP로 이미지 전송.
 # 디렉토리의 모든 파일 전송 (재귀) + 진행률 표시
 ./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
 
-# Transfer Syntax 선호 설정
-./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+# 비압축 파일에는 Explicit VR Little Endian만 제안
+./build/bin/store_scu -xe localhost 11112 *.dcm
 
-# 상세 출력 + 타임아웃 설정
+# 상세 출력 + 타임아웃 설정 (제안 및 수락된 컨텍스트도 표시)
 ./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
 
 # 전송 리포트 생성
@@ -579,6 +579,15 @@ DICOM Storage SCU - 원격 SCP로 이미지 전송.
 # 도움말 표시
 ./build/bin/store_scu --help
 ```
+
+Transfer Syntax:
+- 각 파일은 자신의 Transfer Syntax 그대로 전송되며, `store_scu`는 Pixel Data를 압축하거나 해제하지 않음
+- 파일들의 (SOP Class, Transfer Syntax) 쌍마다 Presentation Context를 하나씩 제안
+- 압축 파일(JPEG, JPEG-LS, JPEG 2000, HTJ2K, RLE 등)은 자신의 Syntax로만 제안하며, SCP가 그 Syntax를 수락하지 않으면 전송 실패
+- 비압축 파일은 자신의 Syntax를 먼저, 이어서 다른 Little Endian Syntax를 제안(`+xa`, `--propose-all`, 기본값). `-xe`(`--propose-explicit`) 또는 `-xv`(`--propose-implicit`)는 Explicit 또는 Implicit VR Little Endian만 제안
+- Explicit VR Big Endian은 제안하지 않으며, Big Endian 파일은 Little Endian으로 전송
+- `-xs`(`--prefer-lossless`)는 더 이상 사용되지 않으며 효과 없음
+- 하나의 Association은 Presentation Context를 최대 128개까지 담을 수 있음(PS3.8). 이 한도를 넘는 쌍의 파일은 제안된 다른 컨텍스트로 보낼 수 없으면 실패
 
 ### Query SCU
 

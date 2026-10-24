@@ -22,6 +22,7 @@
 
 #include "storage_status.h"
 #include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/di/ilogger.h"
@@ -204,6 +205,11 @@ public:
      * Sends the dataset via C-STORE to the remote SCP. The dataset must
      * contain valid SOP Class UID and SOP Instance UID attributes.
      *
+     * The dataset is treated as native (uncompressed) data: it is sent on an
+     * accepted presentation context for its SOP Class whose transfer syntax
+     * is Implicit or Explicit VR Little Endian. For a dataset whose Pixel
+     * Data is encapsulated, use the overload that takes the transfer syntax.
+     *
      * @param assoc The established association to use
      * @param dataset The DICOM dataset to store
      * @return Result containing store_result on success, or error message
@@ -211,6 +217,34 @@ public:
     [[nodiscard]] network::Result<store_result> store(
         network::association& assoc,
         const core::dicom_dataset& dataset);
+
+    /**
+     * @brief Store a single DICOM dataset encoded in a given transfer syntax
+     *
+     * Sends the dataset on an accepted presentation context for its SOP
+     * Class that carries it without conversion:
+     * - for an encapsulated (compressed) transfer syntax, a context that
+     *   accepted that same transfer syntax;
+     * - for a native transfer syntax, a context that accepted Implicit or
+     *   Explicit VR Little Endian, preferring the dataset's own syntax. The
+     *   DIMSE layer encodes the dataset in the context's VR encoding.
+     *
+     * storage_scu does not transcode Pixel Data. When no accepted context
+     * matches, the dataset is not sent and the error
+     * (error_codes::store_no_accepted_context) names the SOP Class and the
+     * transfer syntax.
+     *
+     * @param assoc The established association to use
+     * @param dataset The DICOM dataset to store
+     * @param transfer_syntax Transfer syntax the dataset's Pixel Data is
+     *        encoded in, such as the transfer syntax of the file it was
+     *        read from
+     * @return Result containing store_result on success, or error message
+     */
+    [[nodiscard]] network::Result<store_result> store(
+        network::association& assoc,
+        const core::dicom_dataset& dataset,
+        const encoding::transfer_syntax& transfer_syntax);
 
     // =========================================================================
     // Batch Operations
@@ -221,6 +255,7 @@ public:
      *
      * Sends multiple datasets via C-STORE operations. If continue_on_error
      * is true (default), continues with remaining datasets after failures.
+     * Each dataset is treated as native data, as in store().
      *
      * @param assoc The established association to use
      * @param datasets Vector of datasets to store
@@ -239,7 +274,10 @@ public:
     /**
      * @brief Store a DICOM file
      *
-     * Reads and parses a DICOM file, then sends it via C-STORE.
+     * Reads and parses a DICOM file, then sends it via C-STORE in the file's
+     * transfer syntax, on a presentation context that matches it (see the
+     * store() overload that takes a transfer syntax). A file that no
+     * accepted context can carry is not sent.
      *
      * @param assoc The established association to use
      * @param file_path Path to the DICOM file
@@ -252,9 +290,10 @@ public:
     /**
      * @brief Store multiple DICOM files
      *
-     * Reads and parses multiple DICOM files, then sends them via C-STORE.
-     * If continue_on_error is true (default), continues with remaining
-     * files after failures.
+     * Reads and parses multiple DICOM files, then sends them via C-STORE as
+     * store_file() does. If continue_on_error is true (default), continues
+     * with remaining files after failures, including a file that no
+     * accepted presentation context can carry.
      *
      * @param assoc The established association to use
      * @param file_paths Vector of paths to DICOM files
@@ -282,6 +321,39 @@ public:
         const std::filesystem::path& directory,
         bool recursive = true,
         store_progress_callback progress_callback = nullptr);
+
+    // =========================================================================
+    // Presentation Context Negotiation
+    // =========================================================================
+
+    /**
+     * @brief Transfer syntaxes to propose for instances in a transfer syntax
+     *
+     * Returns the transfer syntaxes, in order of preference, to propose in a
+     * presentation context that carries instances encoded in
+     * @p transfer_syntax, matching the contexts store() sends them on:
+     * - an encapsulated (compressed) syntax, such as JPEG 2000 or HTJ2K:
+     *   that syntax on its own, because store() sends such instances only
+     *   on a context that accepted it;
+     * - Implicit VR Little Endian: Implicit VR Little Endian, then Explicit
+     *   VR Little Endian;
+     * - any other native syntax (Explicit VR Little Endian, Explicit VR Big
+     *   Endian, Deflated Explicit VR Little Endian): Explicit VR Little
+     *   Endian, then Implicit VR Little Endian.
+     *
+     * Explicit VR Big Endian is never proposed, because the DIMSE layer
+     * encodes datasets only in Implicit or Explicit VR Little Endian.
+     *
+     * Propose one context per (SOP Class, transfer syntax) pair of the
+     * instances to send. PS3.8 allows at most 128 presentation contexts
+     * (odd IDs 1 to 255) in one association.
+     *
+     * @param transfer_syntax Transfer syntax of the instances
+     * @return Transfer syntax UIDs to propose; empty if @p transfer_syntax
+     *         is not a known transfer syntax
+     */
+    [[nodiscard]] static std::vector<std::string> proposed_transfer_syntaxes(
+        const encoding::transfer_syntax& transfer_syntax);
 
     // =========================================================================
     // Statistics
@@ -321,6 +393,7 @@ private:
     [[nodiscard]] network::Result<store_result> store_impl(
         network::association& assoc,
         const core::dicom_dataset& dataset,
+        const encoding::transfer_syntax& transfer_syntax,
         uint16_t message_id);
 
     /**

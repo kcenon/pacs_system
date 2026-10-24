@@ -26,6 +26,7 @@
 
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/services/storage_scu.h"
 
@@ -72,24 +73,8 @@ constexpr size_t max_ae_title_length = 16;
 /// Maximum PDU size
 constexpr size_t default_max_pdu_size = 16384;
 
-// =============================================================================
-// Transfer Syntax Constants
-// =============================================================================
-
-/// Transfer Syntax UIDs
-namespace ts {
-constexpr const char* implicit_vr_le = "1.2.840.10008.1.2";
-constexpr const char* explicit_vr_le = "1.2.840.10008.1.2.1";
-constexpr const char* explicit_vr_be = "1.2.840.10008.1.2.2";
-constexpr const char* jpeg_baseline = "1.2.840.10008.1.2.4.50";
-constexpr const char* jpeg_extended = "1.2.840.10008.1.2.4.51";
-constexpr const char* jpeg_lossless = "1.2.840.10008.1.2.4.70";
-constexpr const char* jpeg_ls_lossless = "1.2.840.10008.1.2.4.80";
-constexpr const char* jpeg_ls_near_lossless = "1.2.840.10008.1.2.4.81";
-constexpr const char* jpeg2000_lossless = "1.2.840.10008.1.2.4.90";
-constexpr const char* jpeg2000_lossy = "1.2.840.10008.1.2.4.91";
-constexpr const char* rle = "1.2.840.10008.1.2.5";
-}  // namespace ts
+/// Presentation contexts one association can carry (PS3.8: odd IDs 1-255)
+constexpr size_t max_presentation_contexts = 128;
 
 // =============================================================================
 // Output Modes
@@ -106,13 +91,14 @@ enum class verbosity_level {
 };
 
 /**
- * @brief Transfer syntax proposal mode
+ * @brief Transfer syntaxes proposed for native (uncompressed) files
+ *
+ * A compressed file is always proposed in its own transfer syntax only.
  */
 enum class transfer_syntax_mode {
-    prefer_lossless,   ///< Prefer lossless transfer syntaxes
     propose_implicit,  ///< Propose only Implicit VR LE
     propose_explicit,  ///< Propose only Explicit VR LE
-    propose_all        ///< Propose all available transfer syntaxes
+    propose_all        ///< Propose the file's syntax, then the other LE syntax
 };
 
 // =============================================================================
@@ -162,6 +148,15 @@ struct options {
     // Help/version flags
     bool show_help{false};
     bool show_version{false};
+};
+
+/**
+ * @brief A DICOM file to send
+ */
+struct dicom_input {
+    std::filesystem::path file_path;
+    std::string sop_class_uid;
+    std::string transfer_syntax_uid;
 };
 
 /**
@@ -253,10 +248,21 @@ Network Options:
 
 Transfer Options:
   -r, --recursive               Recursively process directories
-  -xs, --prefer-lossless        Prefer lossless transfer syntaxes
-  -xv, --propose-implicit       Propose only Implicit VR Little Endian
-  -xe, --propose-explicit       Propose only Explicit VR Little Endian
-  +xa, --propose-all            Propose all transfer syntaxes (default)
+  +xa, --propose-all            Uncompressed files: propose the file's syntax,
+                                then the other Little Endian syntax (default)
+  -xe, --propose-explicit       Uncompressed files: propose only Explicit VR
+                                Little Endian
+  -xv, --propose-implicit       Uncompressed files: propose only Implicit VR
+                                Little Endian
+  -xs, --prefer-lossless        Deprecated, no effect (same as --propose-all)
+
+  Every file is sent in its own transfer syntax; store_scu does not compress
+  or decompress Pixel Data. It proposes one presentation context per
+  (SOP Class, transfer syntax) pair of the files. A compressed file (JPEG,
+  JPEG-LS, JPEG 2000, HTJ2K, RLE, ...) is proposed only in its own syntax and
+  fails if the SCP does not accept that syntax. One association carries at
+  most 128 presentation contexts; a file whose pair does not fit fails unless
+  another proposed context can carry it.
 
 Batch Options:
   --scan-pattern <pattern>      File pattern for directory scan (default: *.dcm)
@@ -287,8 +293,8 @@ Examples:
   # Send with report file
   )" << program_name << R"( --report-file transfer.log localhost 11112 *.dcm
 
-  # Prefer lossless transfer syntax
-  )" << program_name << R"( --prefer-lossless localhost 11112 *.dcm
+  # Send uncompressed files only as Explicit VR Little Endian
+  )" << program_name << R"( -xe localhost 11112 *.dcm
 
 Exit Codes:
   0  Success - All files sent successfully
@@ -444,7 +450,12 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
             continue;
         }
         if (arg == "-xs" || arg == "--prefer-lossless") {
-            opts.ts_mode = transfer_syntax_mode::prefer_lossless;
+            // Files are sent in their own transfer syntax, so there is no
+            // lossless syntax to prefer
+            std::cerr << "Warning: " << arg
+                      << " is deprecated and has no effect: each file is sent"
+                         " in its own transfer syntax (same as --propose-all)\n";
+            opts.ts_mode = transfer_syntax_mode::propose_all;
             continue;
         }
         if (arg == "-xv" || arg == "--propose-implicit") {
@@ -686,27 +697,88 @@ std::string format_duration(std::chrono::milliseconds duration) {
 // =============================================================================
 
 /**
- * @brief Get transfer syntaxes based on mode
+ * @brief Get the transfer syntaxes to propose for files in a transfer syntax
+ *
+ * A compressed file can only go out in its own syntax. A native file can go
+ * out in either Little Endian syntax, because the DIMSE layer re-encodes the
+ * dataset; the mode picks which ones are proposed.
  */
-std::vector<std::string> get_transfer_syntaxes(transfer_syntax_mode mode) {
-    switch (mode) {
-        case transfer_syntax_mode::propose_implicit:
-            return {ts::implicit_vr_le};
-        case transfer_syntax_mode::propose_explicit:
-            return {ts::explicit_vr_le};
-        case transfer_syntax_mode::prefer_lossless:
-            return {ts::jpeg_lossless, ts::jpeg2000_lossless, ts::rle,
-                    ts::jpeg_ls_lossless,
-                    ts::explicit_vr_le, ts::implicit_vr_le};
-        case transfer_syntax_mode::propose_all:
-        default:
-            return {ts::explicit_vr_le,       ts::implicit_vr_le,
-                    ts::explicit_vr_be,       ts::jpeg_baseline,
-                    ts::jpeg_extended,        ts::jpeg_lossless,
-                    ts::jpeg2000_lossless,    ts::jpeg2000_lossy,
-                    ts::rle,                  ts::jpeg_ls_lossless,
-                    ts::jpeg_ls_near_lossless};
+std::vector<std::string> get_transfer_syntaxes(
+    const std::string& transfer_syntax_uid, transfer_syntax_mode mode) {
+    using kcenon::pacs::encoding::transfer_syntax;
+
+    transfer_syntax file_syntax{transfer_syntax_uid};
+    if (file_syntax.is_valid() && !file_syntax.is_encapsulated()) {
+        switch (mode) {
+            case transfer_syntax_mode::propose_implicit:
+                return {std::string(
+                    transfer_syntax::implicit_vr_little_endian.uid())};
+            case transfer_syntax_mode::propose_explicit:
+                return {std::string(
+                    transfer_syntax::explicit_vr_little_endian.uid())};
+            case transfer_syntax_mode::propose_all:
+            default:
+                break;
+        }
     }
+    return kcenon::pacs::services::storage_scu::proposed_transfer_syntaxes(
+        file_syntax);
+}
+
+/**
+ * @brief Build presentation contexts for the files to send
+ *
+ * Proposes one context per distinct (SOP Class, proposed transfer syntaxes)
+ * pair, in the order the files were found, up to max_presentation_contexts.
+ *
+ * @param files Files to send
+ * @param mode Transfer syntax proposal mode for native files
+ * @param[out] files_without_context Number of files whose pair did not fit
+ * @return Proposed presentation contexts
+ */
+std::vector<kcenon::pacs::network::proposed_presentation_context>
+build_presentation_contexts(const std::vector<dicom_input>& files,
+                            transfer_syntax_mode mode,
+                            size_t& files_without_context) {
+    std::vector<kcenon::pacs::network::proposed_presentation_context> contexts;
+    files_without_context = 0;
+
+    for (const auto& file : files) {
+        auto transfer_syntaxes =
+            get_transfer_syntaxes(file.transfer_syntax_uid, mode);
+        if (transfer_syntaxes.empty()) {
+            continue;  // Unknown transfer syntax; storing the file fails
+        }
+
+        auto existing = std::find_if(
+            contexts.begin(), contexts.end(), [&](const auto& context) {
+                return context.abstract_syntax == file.sop_class_uid &&
+                       context.transfer_syntaxes == transfer_syntaxes;
+            });
+        if (existing != contexts.end()) {
+            continue;
+        }
+
+        if (contexts.size() == max_presentation_contexts) {
+            ++files_without_context;
+            continue;
+        }
+
+        // Context IDs must be odd: 1, 3, ..., 255
+        auto context_id = static_cast<uint8_t>(contexts.size() * 2 + 1);
+        contexts.emplace_back(context_id, file.sop_class_uid,
+                              std::move(transfer_syntaxes));
+    }
+
+    return contexts;
+}
+
+/**
+ * @brief Format a transfer syntax UID with its name for display
+ */
+std::string describe_transfer_syntax(const std::string& transfer_syntax_uid) {
+    kcenon::pacs::encoding::transfer_syntax syntax{transfer_syntax_uid};
+    return transfer_syntax_uid + " (" + std::string(syntax.name()) + ")";
 }
 
 // =============================================================================
@@ -791,20 +863,22 @@ void generate_report(const std::string& report_file,
 // =============================================================================
 
 /**
- * @brief Analyze files and collect SOP classes
+ * @brief Analyze files and collect their SOP classes and transfer syntaxes
  */
-std::vector<std::pair<std::filesystem::path, std::string>> analyze_files(
+std::vector<dicom_input> analyze_files(
     const std::vector<std::filesystem::path>& files, bool verbose) {
     using namespace kcenon::pacs::core;
 
-    std::vector<std::pair<std::filesystem::path, std::string>> valid_files;
+    std::vector<dicom_input> valid_files;
 
     for (const auto& file_path : files) {
         auto result = dicom_file::open(file_path);
         if (result.is_ok()) {
             auto sop_class = result.value().sop_class_uid();
             if (!sop_class.empty()) {
-                valid_files.emplace_back(file_path, sop_class);
+                valid_files.push_back(
+                    {file_path, sop_class,
+                     std::string(result.value().transfer_syntax().uid())});
             } else if (verbose) {
                 std::cerr << "Warning: No SOP Class UID in file: "
                           << file_path.string() << "\n";
@@ -862,16 +936,45 @@ int perform_store(const options& opts) {
 
     // Collect unique SOP classes
     std::vector<std::string> sop_classes;
-    for (const auto& [path, sop_class] : valid_files) {
-        if (std::find(sop_classes.begin(), sop_classes.end(), sop_class) ==
-            sop_classes.end()) {
-            sop_classes.push_back(sop_class);
+    for (const auto& file : valid_files) {
+        if (std::find(sop_classes.begin(), sop_classes.end(),
+                      file.sop_class_uid) == sop_classes.end()) {
+            sop_classes.push_back(file.sop_class_uid);
         }
     }
 
+    // Build presentation contexts: one per (SOP Class, transfer syntax) pair
+    size_t files_without_context = 0;
+    auto proposed_contexts = build_presentation_contexts(
+        valid_files, opts.ts_mode, files_without_context);
+
     if (!is_quiet) {
         std::cout << "Valid DICOM files: " << valid_files.size() << "\n";
-        std::cout << "SOP Classes found: " << sop_classes.size() << "\n\n";
+        std::cout << "SOP Classes found: " << sop_classes.size() << "\n";
+        std::cout << "Presentation contexts: " << proposed_contexts.size()
+                  << "\n\n";
+    }
+
+    if (files_without_context > 0) {
+        std::cerr << "Warning: " << files_without_context
+                  << " file(s) need presentation contexts beyond the "
+                  << max_presentation_contexts
+                  << " that one association can carry (PS3.8); they fail"
+                     " unless another proposed context can carry them."
+                     " Send them in a separate run.\n";
+    }
+
+    if (is_verbose) {
+        std::cout << "Proposed presentation contexts:\n";
+        for (const auto& context : proposed_contexts) {
+            std::cout << "  [" << static_cast<int>(context.id) << "] "
+                      << context.abstract_syntax << "\n";
+            for (const auto& syntax : context.transfer_syntaxes) {
+                std::cout << "        " << describe_transfer_syntax(syntax)
+                          << "\n";
+            }
+        }
+        std::cout << "\n";
     }
 
     stats.total_files = valid_files.size();
@@ -897,16 +1000,7 @@ int perform_store(const options& opts) {
     config.called_ae_title = opts.called_ae_title;
     config.implementation_class_uid = "1.2.826.0.1.3680043.2.1545.1";
     config.implementation_version_name = "STORE_SCU_100";
-
-    // Build presentation contexts
-    auto transfer_syntaxes = get_transfer_syntaxes(opts.ts_mode);
-    uint8_t context_id = 1;
-
-    for (const auto& sop_class : sop_classes) {
-        config.proposed_contexts.push_back(
-            {context_id, sop_class, transfer_syntaxes});
-        context_id += 2;  // Context IDs must be odd
-    }
+    config.proposed_contexts = std::move(proposed_contexts);
 
     // Establish association
     auto timeout = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -931,6 +1025,22 @@ int perform_store(const options& opts) {
                   << stats.association_time.count() << " ms\n\n";
     }
 
+    if (is_verbose) {
+        std::cout << "Accepted presentation contexts:\n";
+        for (const auto& context : assoc.accepted_contexts()) {
+            std::cout << "  [" << static_cast<int>(context.id) << "] "
+                      << context.abstract_syntax << ": ";
+            if (context.is_accepted()) {
+                std::cout << describe_transfer_syntax(context.transfer_syntax);
+            } else {
+                std::cout << "rejected (result "
+                          << static_cast<int>(context.result) << ")";
+            }
+            std::cout << "\n";
+        }
+        std::cout << "\n";
+    }
+
     // Create storage SCU
     storage_scu_config scu_config;
     scu_config.continue_on_error = opts.continue_on_error;
@@ -947,11 +1057,11 @@ int perform_store(const options& opts) {
     }
 
     for (size_t i = 0; i < valid_files.size(); ++i) {
-        const auto& [file_path, sop_class] = valid_files[i];
+        const auto& file_path = valid_files[i].file_path;
 
         file_store_result file_result;
         file_result.file_path = file_path;
-        file_result.sop_class_uid = sop_class;
+        file_result.sop_class_uid = valid_files[i].sop_class_uid;
 
         // Get file size
         try {
