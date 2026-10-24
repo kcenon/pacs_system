@@ -226,10 +226,19 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
     # Must use CACHE FORCE because option() clears normal variables.
     set(_pacs_saved_build_shared_libs "${BUILD_SHARED_LIBS}")
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    # 0.21.5 is the first release without the AVX-512 alignment fault (#1257).
+    # In 0.21.0-0.21.4, ojph_block_encoder_avx512.cpp writes the plain stack
+    # arrays cwd/cwd_len (proc_ms_encode(), 0.21.0 lines 686-700) and
+    # tuple/u_q (ojph_encode_codeblock_avx512(), lines 1171-1179) with the
+    # aligned _mm512_store_epi32, so HTJ2K encoding crashes when the CPU takes
+    # the AVX-512 path and the arrays are not 64-byte aligned. Upstream commits
+    # 57e5592 and bfc2436 switched these stores to _mm512_storeu_si512.
+    # A system OpenJPH found above bypasses this pin: on x86-64 it must be
+    # 0.21.5 or later, or be built with -DOJPH_DISABLE_AVX512=ON.
     FetchContent_Declare(
         openjph
         GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
-        GIT_TAG        0.21.0
+        GIT_TAG        0.21.5
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(openjph)
