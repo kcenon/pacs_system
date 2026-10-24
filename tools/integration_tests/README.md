@@ -169,12 +169,41 @@ Tests TLS-encrypted DICOM communication:
 - Client certificate verification
 - Cipher suite negotiation
 
+## Association Transports (C++)
+
+`association::connect()` picks its transport from the target (see the class
+comment in `include/kcenon/pacs/network/association.h`):
+
+- **In-memory hook**: when the host is a loopback host (`localhost`,
+  `127.x.x.x`, `::1`) and a `dicom_server` (v1) of the same process runs on
+  the port, the client association is paired with a server-side association
+  through the in-process registry (`dicom_server::get_server_on_port`), and
+  DIMSE messages pass through in-memory queues. No socket is used. The v1
+  `dicom_server` serves only these associations; its `accept_worker` closes
+  every TCP connection.
+- **TCP**: every other target, including `dicom_server_v2` and DCMTK. The
+  association opens a TCP connection and runs the DICOM upper layer itself:
+  A-ASSOCIATE-RQ/AC/RJ, P-DATA-TF fragmented to the peer's maximum PDU
+  length and reassembled on receipt, A-RELEASE-RQ/RP in both directions, and
+  A-ABORT. It checks each PDU header from the peer before it buffers the
+  body and answers a malformed or unexpected PDU with A-ABORT. The timeout
+  of `connect()` bounds the TCP handshake and the wait for the A-ASSOCIATE
+  response (ARTIM); the timeout of `release()` bounds the wait for
+  A-RELEASE-RP.
+
+Two predicates in `test_fixtures.h` gate the cases that need TCP:
+
+| Predicate | Value | Gates |
+|-----------|-------|-------|
+| `supports_real_tcp_dicom()` | `network::association::tcp_transport_available`, set by the TCP client path (true) | `[v2][stress]` cases; DCMTK cases where a pacs_system SCU talks to a DCMTK SCP |
+| `v1_server_accepts_tcp()` | false: v1 serves only in-process associations | DCMTK cases that run a DCMTK SCU against a v1-based fixture (`test_server`, `storage_test_server`); they run once those fixtures move to `dicom_server_v2` |
+
+`supports_real_tcp_dicom()` reads a build-time flag instead of probing a
+loopback server, because a probe that failed would skip the gated cases and
+hide the regression they exist to report.
+
 ## In-Memory dicom_server Hook (C++)
 
-Until the real TCP client lands, `association::connect()` reaches a
-`dicom_server` only through the in-process registry
-(`dicom_server::get_server_on_port`): the client association is paired with
-a server-side association, and DIMSE messages pass through in-memory queues.
 All `[stress]` coverage in `test_stress.cpp` runs on this hook. Its limits:
 
 - **Two association loops at a time by default.** The server runs one
@@ -240,9 +269,15 @@ The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testi
 | Mixed Operations | `[v2][stress][mixed]` | Concurrent echo and store workers |
 | TLS with V2 | `[tls][v2]` | TLS connections with V2 server |
 
-The `[v2][stress]` cases are skipped while `supports_real_tcp_dicom()` returns
-false: `association::connect()` reaches only the in-memory `dicom_server`
-registry and cannot connect to `dicom_server_v2` over TCP yet.
+The SCUs in these cases reach `dicom_server_v2` over TCP (see
+[Association Transports](#association-transports-c)). CI runs them in the
+`Integration Tests` jobs of `.github/workflows/integration-tests.yml`, and a
+failed case fails the job: Ubuntu runs `"[v2]~[tls]"`, macOS and Windows run
+`"[v2]~[tls]~[stress]"`, and the `Stress Tests` job runs the `[v2][stress]`
+cases on Ubuntu as part of `"[stress]"`. The `[tls][v2]` cases are not run
+in CI: they configure TLS on neither the server nor the client, the client
+fails `configure_tls()` without a client certificate, and the concurrent
+case's AE title is longer than 16 characters.
 
 ### V2 E2E Test Fixtures
 
@@ -441,15 +476,13 @@ The DCMTK interoperability test suite validates bidirectional compatibility betw
 
 > **Note: Current Limitations**
 >
-> The pacs_system currently does not support real TCP connections for DICOM protocol.
-> The `accept_worker` accepts TCP connections but immediately closes them without
-> performing DICOM handshake. This is documented in `accept_worker.cpp`.
->
-> As a result, DCMTK interoperability tests are **automatically skipped** using the
-> `supports_real_tcp_dicom()` check in `test_fixtures.hpp`. The test infrastructure
-> is in place and ready for when real TCP DICOM support is implemented.
->
-> See: `test_fixtures.hpp::supports_real_tcp_dicom()` for details.
+> The cases where a pacs_system SCU talks to a DCMTK SCP (`storescp`,
+> `echoscp`) run over the association TCP client. The cases that run a DCMTK
+> SCU (`echoscu`, `storescu`, `findscu`, `movescu`) against a pacs_system SCP
+> are **skipped**: their fixtures use the v1 `dicom_server`, whose
+> `accept_worker` closes every TCP connection, so they skip on
+> `v1_server_accepts_tcp()` until the fixtures move to `dicom_server_v2`.
+> See [Association Transports](#association-transports-c).
 
 ### Test Scenarios
 

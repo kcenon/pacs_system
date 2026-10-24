@@ -186,9 +186,11 @@ TEST_CASE("C-STORE: pacs_system SCP receives from DCMTK storescu",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP; see
+    // v1_server_accepts_tcp() in test_fixtures.h
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -268,9 +270,9 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU reaches DCMTK over TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
@@ -360,9 +362,10 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // The first step runs storescu against a pacs_system SCP over TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     test_directory original_dir;
@@ -449,9 +452,10 @@ TEST_CASE("C-STORE: Concurrent store operations", "[dcmtk][interop][store][stres
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -509,9 +513,9 @@ TEST_CASE("C-STORE: Error handling", "[dcmtk][interop][store][error]") {
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU tries TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     SECTION("storescu to non-existent server fails gracefully") {
@@ -559,9 +563,10 @@ TEST_CASE("C-STORE: Data integrity verification", "[dcmtk][interop][store][integ
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();

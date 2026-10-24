@@ -260,9 +260,11 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // movescu needs a pacs_system SCP that accepts TCP; see
+    // v1_server_accepts_tcp() in test_fixtures.h
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     // Setup: Ports and AE titles
@@ -384,9 +386,10 @@ TEST_CASE("C-MOVE: Unknown destination AE rejection", "[dcmtk][interop][move][er
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // movescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -447,11 +450,6 @@ TEST_CASE("C-MOVE: Connection error handling", "[dcmtk][interop][move][error]") 
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
-    }
-
     SECTION("movescu to non-existent server fails gracefully") {
         auto port = find_available_port();
 
@@ -481,9 +479,10 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // movescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     auto move_port = find_available_port();
@@ -573,11 +572,6 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
 TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed");
-    }
-
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
     }
 
     // Note: DCMTK doesn't provide a simple move SCP for testing.
