@@ -301,7 +301,12 @@ public:
     }
 
     /**
-     * @brief Start C-ECHO SCP (echoscp) server
+     * @brief Start a C-ECHO SCP server
+     *
+     * DCMTK ships no echoscp tool; storescp answers C-ECHO (Verification
+     * SOP Class), so this starts storescp. A C-ECHO stores no file, so no
+     * output directory is passed.
+     *
      * @param port Port to listen on
      * @param ae_title AE title for server
      * @param startup_timeout Maximum time to wait for server to start
@@ -318,7 +323,7 @@ public:
             std::to_string(port)
         };
 
-        auto pid = start_tool_background("echoscp", args);
+        auto pid = start_tool_background("storescp", args);
         background_process_guard guard(pid);
 
         if (pid > 0) {

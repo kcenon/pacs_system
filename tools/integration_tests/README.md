@@ -476,8 +476,9 @@ The DCMTK interoperability test suite validates bidirectional compatibility betw
 
 > **Note: Current Limitations**
 >
-> The cases where a pacs_system SCU talks to a DCMTK SCP (`storescp`,
-> `echoscp`) run over the association TCP client. The cases that run a DCMTK
+> The cases where a pacs_system SCU talks to a DCMTK SCP (`storescp`; DCMTK
+> has no `echoscp`, so `dcmtk_tool::echoscp()` starts `storescp`, which
+> answers C-ECHO) run over the association TCP client. The cases that run a DCMTK
 > SCU (`echoscu`, `storescu`, `findscu`, `movescu`) against a pacs_system SCP
 > are **skipped**: their fixtures use the v1 `dicom_server`, whose
 > `accept_worker` closes every TCP connection, so they skip on
