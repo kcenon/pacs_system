@@ -4,10 +4,6 @@
 # Each group names the issue that tracks the failure. Remove the lines when
 # the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
 
-# #1252: oauth2_middleware reads a destroyed header string
-# (heap-use-after-free)
-oauth2_middleware authenticate extracts Bearer token
-
 # #1256: the thread lambda reads the loop index after its scope ended
 # (stack-use-after-scope)
 integration::monitoring_adapter thread safety

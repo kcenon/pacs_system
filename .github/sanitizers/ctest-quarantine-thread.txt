@@ -40,10 +40,6 @@ study_lock_manager concurrent access
 # #1255: rest_server start_async() and stop() race on the Crow app
 rest_server async lifecycle
 
-# #1252: oauth2_middleware reads a destroyed header string
-# (heap-use-after-free, also reported by ASan)
-oauth2_middleware authenticate extracts Bearer token
-
 # #1256: Catch2 assertions on worker threads, loop index captured by
 # reference (pipeline_coordinator concurrent job submission and pipeline
 # integration - job ID uniqueness are listed under #1253)
