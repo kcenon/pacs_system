@@ -31,14 +31,6 @@ dicom_server: a response to a destroyed SCU fails cleanly
 dicom_server negotiates exactly the SCP transfer syntax list
 storage_scu sends an HTJ2K file on an HTJ2K context of the pacs_system SCP
 
-# #1254: task_scheduler and study_lock_manager lock their state and stats
-# mutexes in opposite orders (lock-order inversion)
-task_scheduler: statistics
-task_scheduler: statistics under concurrent load
-study_lock_manager statistics
-study_lock_manager reset statistics
-study_lock_manager concurrent access
-
 # #1255: rest_server start_async() and stop() race on the Crow app
 rest_server async lifecycle
 
