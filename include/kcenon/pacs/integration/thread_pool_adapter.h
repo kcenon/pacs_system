@@ -175,7 +175,8 @@ private:
     // Guards pool_ and initialized_. Never held across a thread_pool call
     // that takes the pool's worker lock (start, enqueue_batch, stop,
     // get_idle_worker_count): thread_pool::stop() holds that lock while it
-    // joins workers, and tasks take mutex_ when they submit (#1253)
+    // joins workers, and tasks take mutex_ when they submit (#1253).
+    // pool_ is empty while start() starts the pool
     mutable std::mutex mutex_;
     // Serializes start() and shutdown() and is held across those calls
     std::mutex start_stop_mutex_;

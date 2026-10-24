@@ -75,7 +75,11 @@ auto thread_pool_adapter::start() -> bool {
             kcenon::thread::thread_context context;
             pool_ = std::make_shared<kcenon::thread::thread_pool>(config_.pool_name, context);
         }
-        pool = pool_;
+
+        // Take the pool out while it starts: restarting a stopped pool
+        // replaces its job queue, which thread_pool::enqueue() reads without
+        // a lock, so submit_internal() must not reach the pool meanwhile
+        pool = std::move(pool_);
     }
 
     // Create worker threads
@@ -89,19 +93,19 @@ auto thread_pool_adapter::start() -> bool {
 
     // Enqueue workers
     auto enqueue_result = pool->enqueue_batch(std::move(workers));
-    if (enqueue_result.is_err()) {
-        return false;
-    }
 
     // Start the pool
-    auto start_result = pool->start();
-    if (start_result.is_err()) {
-        return false;
+    bool started = false;
+    if (enqueue_result.is_ok()) {
+        started = pool->start().is_ok();
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
-    initialized_ = true;
-    return true;
+    pool_ = std::move(pool);
+    if (started) {
+        initialized_ = true;
+    }
+    return started;
 }
 
 auto thread_pool_adapter::is_running() const noexcept -> bool {
@@ -208,6 +212,10 @@ void thread_pool_adapter::submit_internal(
         } catch (const std::exception&) {
             throw std::runtime_error("Failed to enqueue task to thread pool");
         }
+    } else {
+        // The pool stopped after the check above and start() is restarting
+        // it; enqueueing into the stopped pool would fail the same way
+        throw std::runtime_error("Failed to enqueue task to thread pool");
     }
 }
 
