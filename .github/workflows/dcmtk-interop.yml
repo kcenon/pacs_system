@@ -112,10 +112,12 @@ jobs:
       run: cmake --build build --parallel
 
     # No failure masking in the four DCMTK test steps: a failed test, an abort,
-    # or the timeout fails the step. Every case currently SKIPs because
-    # pacs_system has no real TCP DICOM path yet (supports_real_tcp_dicom(),
-    # #1240), and Catch2 exits with code 4 when all selected cases skip, so
-    # --allow-running-no-tests accepts an all-skipped run. --warn
+    # or the timeout fails the step. The cases where a pacs_system SCU talks
+    # to a DCMTK SCP run over the association TCP client (#1240); the cases
+    # that run a DCMTK SCU against the v1 dicom_server fixtures skip, because
+    # v1 serves only in-process associations (v1_server_accepts_tcp() in
+    # test_fixtures.h). Catch2 exits with code 4 when all selected cases skip,
+    # so --allow-running-no-tests accepts an all-skipped run. --warn
     # UnmatchedTestSpec still fails the step when the tag filter matches no case.
     - name: Run DCMTK C-ECHO Tests
       working-directory: pacs_system
@@ -212,9 +214,9 @@ jobs:
         report_paths: pacs_system/build/dcmtk-interop-results.xml
         fail_on_failure: true
         # Results are posted as annotations on this job instead of a
-        # separate check run. The cases skip until pacs_system supports
-        # real TCP DICOM connections (#1240); a failed case fails this job
-        # through fail_on_failure.
+        # separate check run. The cases with a DCMTK SCU skip until their
+        # pacs_system SCP fixture serves TCP (see the test steps above); a
+        # failed case fails this job through fail_on_failure.
         annotate_only: true
         check_name: DCMTK C++ Tests (${{ matrix.os }})
 
