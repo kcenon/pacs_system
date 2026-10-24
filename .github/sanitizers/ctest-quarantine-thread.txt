@@ -7,15 +7,3 @@
 # kcenon/thread_system#761: payload races behind the concurrent_queue race;
 # the racing accesses are in test code, so tsan.supp cannot match them
 stress::lockfree_queue memory safety
-
-# #1257: OpenJPH's AVX-512 block encoder stores to unaligned stack arrays
-# (SIGSEGV on runners whose CPU takes the AVX-512 path)
-htj2k_codec lossless 8-bit grayscale round-trip
-htj2k_codec lossless 12-bit grayscale round-trip
-htj2k_codec lossless 16-bit grayscale round-trip
-htj2k_codec lossless 8-bit RGB round-trip
-htj2k_codec lossless with RPCL round-trip
-htj2k_codec lossy 8-bit grayscale
-htj2k_codec lossy 8-bit RGB
-htj2k_codec decode sets output parameters correctly
-codec_factory::is_available matches what the codecs do

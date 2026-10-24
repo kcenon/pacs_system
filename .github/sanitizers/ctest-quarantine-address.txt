@@ -3,15 +3,3 @@
 # One exact CTest test name per line; lines starting with # are comments.
 # Each group names the issue that tracks the failure. Remove the lines when
 # the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
-
-# #1257: OpenJPH's AVX-512 block encoder stores to unaligned stack arrays
-# (SIGSEGV on runners whose CPU takes the AVX-512 path)
-htj2k_codec lossless 8-bit grayscale round-trip
-htj2k_codec lossless 12-bit grayscale round-trip
-htj2k_codec lossless 16-bit grayscale round-trip
-htj2k_codec lossless 8-bit RGB round-trip
-htj2k_codec lossless with RPCL round-trip
-htj2k_codec lossy 8-bit grayscale
-htj2k_codec lossy 8-bit RGB
-htj2k_codec decode sets output parameters correctly
-codec_factory::is_available matches what the codecs do

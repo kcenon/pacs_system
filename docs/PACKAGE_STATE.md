@@ -136,7 +136,7 @@ baseline, and a source install passes `tests/cmake_consumer`.
 ## Dependency provenance
 
 `dependency-manifest.json` records the current FetchContent pins (SQLite
-`sqlite-amalgamation-3450300` / 3.45.3, OpenJPH 0.21.0, Crow v1.3.1, ASIO `asio-1-30-2`) and two
+`sqlite-amalgamation-3450300` / 3.45.3, OpenJPH 0.21.5, Crow v1.3.1, ASIO `asio-1-30-2`) and two
 sets of ecosystem SHAs:
 
 - `internal_ecosystem[].version`: the SHAs CI actually checks out through
