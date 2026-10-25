@@ -23,8 +23,10 @@
 
 #include <atomic>
 #include <filesystem>
+#include <fstream>
 #include <future>
 #include <mutex>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -125,7 +127,25 @@ private:
 };
 
 /**
- * @brief Find all DICOM files in a directory
+ * @brief Whether @p path is a DICOM Part 10 file ("DICM" after the
+ *        128-byte preamble)
+ */
+bool is_part10_file(const fs::path& path) {
+    std::ifstream in(path, std::ios::binary);
+    char header[132] = {};
+    if (!in.read(header, sizeof(header))) {
+        return false;
+    }
+    return std::string_view(header + 128, 4) == "DICM";
+}
+
+/**
+ * @brief Find all DICOM Part 10 files in a directory
+ *
+ * Files are recognized by content, not by extension: storescp names a
+ * received file "<modality>.<SOP Instance UID>" (for example
+ * "CT.1.2.826.0.1.3680043.9.9999.1729.12"), so the extension a path reports
+ * is the last UID component.
  */
 std::vector<fs::path> find_dicom_files(const fs::path& dir) {
     std::vector<fs::path> result;
@@ -134,14 +154,25 @@ std::vector<fs::path> find_dicom_files(const fs::path& dir) {
     }
 
     for (const auto& entry : fs::recursive_directory_iterator(dir)) {
-        if (entry.is_regular_file()) {
-            auto ext = entry.path().extension().string();
-            if (ext == ".dcm" || ext.empty()) {
-                result.push_back(entry.path());
-            }
+        if (entry.is_regular_file() && is_part10_file(entry.path())) {
+            result.push_back(entry.path());
         }
     }
     return result;
+}
+
+/**
+ * @brief Names of the files in @p dir, for failure messages
+ */
+std::string list_directory(const fs::path& dir) {
+    std::string names;
+    if (!fs::exists(dir)) {
+        return "(directory missing)";
+    }
+    for (const auto& entry : fs::recursive_directory_iterator(dir)) {
+        names += entry.path().filename().string() + " ";
+    }
+    return names.empty() ? "(empty)" : names;
 }
 
 /**
@@ -306,12 +337,15 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
         storage_scu scu;
         auto send_result = scu.store(assoc, file_result.value().dataset());
         REQUIRE(send_result.is_ok());
+        INFO("C-STORE status: 0x" << std::hex << send_result.value().status);
+        REQUIRE(send_result.value().is_success());
 
         (void)assoc.release(default_timeout());
 
         // Wait for DCMTK to write the file
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         auto received = find_dicom_files(storage_dir.path());
+        INFO("storescp output: " << list_directory(storage_dir.path()));
         REQUIRE(received.size() >= 1);
     }
 
@@ -342,12 +376,15 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
             auto send_result = scu.store(assoc, files[i].second.dataset());
             INFO("Sending file " << i);
             REQUIRE(send_result.is_ok());
+            INFO("C-STORE status: 0x" << std::hex << send_result.value().status);
+            REQUIRE(send_result.value().is_success());
         }
 
         (void)assoc.release(default_timeout());
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         auto received = find_dicom_files(storage_dir.path());
+        INFO("storescp output: " << list_directory(storage_dir.path()));
         REQUIRE(received.size() >= 3);
     }
 }
