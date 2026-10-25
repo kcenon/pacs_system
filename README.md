@@ -163,7 +163,7 @@ target_link_libraries(my_app PRIVATE kcenon::pacs::core)
 > Optional features and the full package record are in [Package State](docs/PACKAGE_STATE.md#vcpkg-features).
 
 **Planned v1.0 CMake contract** (#1158): the aggregate target `pacs_system::pacs_system`; no
-published package ships it yet. A source install of this branch (`cmake --install`) already provides
+published package ships it yet. A [source install](docs/PACKAGE_STATE.md#source-install) of this branch already provides
 it but reports package version 0.1.0, so request `find_package(pacs_system 0.1 REQUIRED)` until
 v1.0.0 is released. The consumer snippet, component targets, and the legacy alias
 `kcenon::pacs_system` are in [Package State](docs/PACKAGE_STATE.md#cmake-targets-planned-v10-contract).

@@ -77,7 +77,7 @@ vcpkg install kcenon-pacs-system[feature1,feature2,...]
 계획된 v1.0 계약(#1158)은 0.1.0의 `kcenon::pacs::<component>` 이름을 정규 타겟 `pacs_system::pacs_system`으로
 대체합니다. 이 타겟은 필수 및 빌드된 모든 선택적 하위 컴포넌트를 끌어오는 집계 INTERFACE 타겟이므로,
 일반적인 소비자에게는 단일 `target_link_libraries` 호출로 충분합니다. 아직 어떤 게시 패키지에도 포함되지
-않았으며, 현재 트리의 소스 설치본은 이 타겟을 제공하지만 패키지 버전은 0.1.0으로 보고하므로, v1.0.0이
+않았으며, 현재 트리의 [소스 설치](#소스-설치)본은 이 타겟을 제공하지만 패키지 버전은 0.1.0으로 보고하므로, v1.0.0이
 출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로 요청하세요. 출시 이후 다운스트림 프로젝트는
 다음과 같이 의존합니다:
 
@@ -107,6 +107,80 @@ target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
 
 레거시 표기 `kcenon::pacs_system`은 하위 호환성을 위한 별칭으로 유지되지만, 새 코드는
 `pacs_system::pacs_system`을 사용해야 합니다.
+
+## 소스 설치
+
+현재 트리를 `find_package(pacs_system)`로 소비하는 지원 경로는 소스 설치입니다
+([#1241](https://github.com/kcenon/pacs_system/issues/1241)). 각 생태계 의존성을 하나의 prefix에
+독립적으로 설치하고 그 prefix를 대상으로 pacs_system을 빌드하므로, pacs_system export에 나오는 모든 타겟은
+설치된 패키지가 정의합니다. `scripts/check-source-install.sh`가 아래 단계를 실행하고, `Source Install`
+워크플로(`.github/workflows/source-install.yml`)는 `.github/actions/checkout-kcenon-deps`에 고정된 의존성
+SHA로 Ubuntu 24.04에서 이 스크립트를 실행합니다.
+
+1. **서드파티 패키지.** 설치된 의존성 config는 `asio`(network_system), `simdutf`(thread_system),
+   `unofficial-sqlite3`(database_system)에 대해 `find_dependency`를 호출합니다. 이 이름은 vcpkg의
+   `asio`, `simdutf`, `sqlite3` 포트가 설치하는 패키지 이름입니다. `tests/source_install/vcpkg.json`은
+   이들을 생태계가 사용하는 버전으로 고정합니다:
+
+   ```bash
+   vcpkg install --x-manifest-root=tests/source_install --x-install-root=<vcpkg_installed>
+   ```
+
+   나머지 사전 요구사항은 시스템 패키지입니다: C++20 컴파일러, CMake 3.20 이상, OpenSSL, zlib, LZ4,
+   ICU, 그리고 JPEG 코덱용 libjpeg-turbo.
+2. **생태계 의존성.** common_system, thread_system, container_system, logger_system,
+   monitoring_system, network_system, database_system을 pacs_system 체크아웃과 그 상위 디렉터리 밖에
+   나란히 체크아웃합니다. `cmake/dependencies.cmake`는 `<NAME>_ROOT`, `../<name>`, `./<name>`에서 찾은
+   체크아웃을 설치된 패키지 대신 빌드하기 때문입니다. 각 의존성을 이 순서대로 같은 prefix에 테스트와
+   샘플을 끄고 설치합니다(의존성별 옵션은 스크립트에 있습니다). monitoring_system과 database_system은
+   선택 사항입니다.
+
+   ```bash
+   cmake -S <deps>/<name> -B build/<name> -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=<prefix> "-DCMAKE_PREFIX_PATH=<prefix>;<vcpkg_installed>/<triplet>"
+   cmake --build build/<name> --parallel
+   cmake --install build/<name>
+   ```
+
+3. **pacs_system.** 저장소 루트를 같은 prefix를 대상으로 구성하고 그 prefix에 설치합니다:
+
+   ```bash
+   cmake -S . -B build/pacs_system -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=<prefix> "-DCMAKE_PREFIX_PATH=<prefix>;<vcpkg_installed>/<triplet>" \
+         -DPACS_BUILD_TESTS=OFF -DPACS_BUILD_EXAMPLES=OFF
+   cmake --build build/pacs_system --parallel
+   cmake --install build/pacs_system
+   ```
+
+4. **소비자.** 소비 프로젝트를 같은 `CMAKE_PREFIX_PATH`로 구성합니다. 기준 소비자는
+   `tests/cmake_consumer`입니다.
+
+설치된 export는 의존성 패키지가 정의하는 타겟 이름에 링크합니다:
+
+| 의존성 | pacs_system export가 링크하는 타겟 |
+|--------|------------------------------------|
+| common_system | `kcenon::common_system` |
+| container_system | `ContainerSystem::container` (container_system config가 생성) |
+| thread_system | `thread_system::thread_base` (thread_system config가 생성하는 별칭) |
+| logger_system | `logger_system::logger` |
+| network_system | `network_system::network_system` |
+| monitoring_system | `monitoring_system::monitoring_system` |
+| database_system | `database_system::database_system`, `database_system::integrated_database` |
+
+`pacs_system-config.cmake`는 export를 불러오기 전에 이 패키지마다 `find_dependency`를 호출합니다.
+
+CI용으로 고정된 의존성 SHA의 제약은 다음과 같습니다(고정값 이동은 #1164가 소유합니다):
+
+| 의존성 | 고정 SHA의 제약 | 처리 | 상위 저장소 수정 |
+|--------|-----------------|------|------------------|
+| network_system `093691d9` | `messaging_session.h` 등 설치된 공개 헤더가 설치되지 않는 `src/internal/` 헤더를 포함 | 스크립트가 `kcenon-network-system` 레지스트리 포트와 같은 방식으로 `src/internal/` 헤더를 `<prefix>/include/internal/`에, `network-core/include/`를 `<prefix>/include/`에 복사하며, 설치된 헤더가 더 이상 필요로 하지 않으면 이 단계를 건너뜀 | [network_system#945](https://github.com/kcenon/network_system/pull/945), [#949](https://github.com/kcenon/network_system/pull/949), [#1177](https://github.com/kcenon/network_system/pull/1177) |
+| database_system `593a18a7` | `integrated_database`를 빌드하지만 설치도 export도 하지 않음 | pacs_system은 `database_system::integrated_database`가 없는 database_system 패키지를 무시하고(구성 경고) vcpkg 경로와 마찬가지로 database_system 통합 없이 빌드 | [database_system#611](https://github.com/kcenon/database_system/pull/611) |
+
+**형제 디렉터리 빌드는 설치 경로가 아닙니다.** CI는 의존성을 pacs_system 옆에 체크아웃하고 하위
+디렉터리로 추가해 빌드합니다. 이 빌드는 개발과 테스트용입니다. 이 빌드에서 common_system,
+thread_system, network_system은 패키지 config를 설치하지 않고, database_system과 monitoring_system은
+targets 파일 없이 config만 설치하므로, 이 빌드로 만든 설치본은 `find_package(pacs_system)`를 충족할 수
+없습니다. 설치 경로로 만들려면 해당 저장소들을 변경해야 하므로, 위의 독립 설치를 사용하세요.
 
 ## 루트 매니페스트와 오버레이 의존성 집합
 

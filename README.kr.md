@@ -161,7 +161,7 @@ target_link_libraries(my_app PRIVATE kcenon::pacs::core)
 > 선택 기능과 전체 패키지 기록은 [패키지 상태](docs/PACKAGE_STATE.kr.md#vcpkg-기능)를 참조하세요.
 
 **계획된 v1.0 CMake 계약** (#1158): 집계 타겟 `pacs_system::pacs_system`이며, 아직 어떤 게시 패키지에도
-포함되지 않았습니다. 이 브랜치의 소스 설치(`cmake --install`)는 이미 이 타겟을 제공하지만 패키지 버전은
+포함되지 않았습니다. 이 브랜치의 [소스 설치](docs/PACKAGE_STATE.kr.md#소스-설치)는 이미 이 타겟을 제공하지만 패키지 버전은
 0.1.0으로 보고하므로, v1.0.0이 출시되기 전까지는 `find_package(pacs_system 0.1 REQUIRED)`로 요청하세요.
 소비자 예제, 컴포넌트 타겟, 레거시 별칭 `kcenon::pacs_system`은
 [패키지 상태](docs/PACKAGE_STATE.kr.md#cmake-타겟-계획된-v10-계약)에 있습니다.
