@@ -606,6 +606,9 @@ void task_scheduler::clear_history(const task_id& id, std::size_t keep_last) {
 // =============================================================================
 
 auto task_scheduler::get_stats() const -> scheduler_stats {
+    // Lock order: tasks_mutex_ before stats_mutex_, as in schedule() and
+    // execute_cycle(); the opposite order can deadlock against them
+    std::lock_guard<std::mutex> tasks_lock(tasks_mutex_);
     std::lock_guard<std::mutex> lock(stats_mutex_);
 
     scheduler_stats result = stats_;
@@ -618,11 +621,7 @@ auto task_scheduler::get_stats() const -> scheduler_stats {
     }
 
     result.running_tasks = running_count_.load();
-
-    {
-        std::lock_guard<std::mutex> tasks_lock(tasks_mutex_);
-        result.scheduled_tasks = tasks_.size();
-    }
+    result.scheduled_tasks = tasks_.size();
 
     return result;
 }

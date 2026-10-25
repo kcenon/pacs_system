@@ -13,14 +13,6 @@ stress::lockfree_queue memory safety
 pipeline_coordinator concurrent job submission
 pipeline integration - job ID uniqueness
 
-# #1254: task_scheduler and study_lock_manager lock their state and stats
-# mutexes in opposite orders (lock-order inversion)
-task_scheduler: statistics
-task_scheduler: statistics under concurrent load
-study_lock_manager statistics
-study_lock_manager reset statistics
-study_lock_manager concurrent access
-
 # #1255: rest_server start_async() and stop() race on the Crow app
 rest_server async lifecycle
 
