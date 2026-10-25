@@ -1,0 +1,26 @@
+# UndefinedBehaviorSanitizer suppressions for the Sanitizer Tests workflow
+# (.github/workflows/sanitizers.yml loads this file through UBSAN_OPTIONS).
+#
+# Only defects inside third-party or ecosystem code belong here, each with the
+# upstream issue and the condition for removing it. Never suppress
+# pacs_system code: a pacs_system test that fails under a sanitizer is
+# quarantined in ctest-quarantine-<sanitizer>.txt with its issue instead.
+# A pattern matches the source file of the report as a substring.
+
+# OpenJPH 0.21.5 (FetchContent pin in cmake/dependencies.cmake):
+# mem_elastic_allocator::get_buffer() advances its store by
+# needed_bytes + sizeof(coded_lists) without rounding, so each coded_lists
+# after the first is constructed at an arbitrary byte offset
+# (others/ojph_mem.cpp:91-118). The constructor and every later access through
+# such an object are misaligned; the files below are where those accesses
+# are reported. Only the alignment check is suppressed, and only in these
+# OpenJPH files. Fixed upstream by aous72/OpenJPH#262 (commit 0ec2184, first
+# released in 0.27.0); remove these entries when the OpenJPH pin is 0.27.0
+# or later.
+alignment:openjph-src/src/core/others/ojph_mem.cpp
+alignment:openjph-src/src/core/common/ojph_mem.h
+alignment:openjph-src/src/core/coding/ojph_block_encoder
+alignment:openjph-src/src/core/codestream/ojph_bitbuffer_read.h
+alignment:openjph-src/src/core/codestream/ojph_bitbuffer_write.h
+alignment:openjph-src/src/core/codestream/ojph_codeblock.cpp
+alignment:openjph-src/src/core/codestream/ojph_precinct.cpp
