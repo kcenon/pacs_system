@@ -12,6 +12,7 @@
  * @see Issue #759 - Add Catch2 round-trip integrity tests for conversion CLIs
  * @see Issue #756 - Automated CLI Tool Testing (Epic)
  * @see Issue #1276 - dcm_conv transcodes Pixel Data instead of relabeling it
+ * @see Issue #1291 - dicom_file writes sequence items
  * @see Issue #1294 - dcm_conv gives lossy output a new SOP Instance UID
  */
 
@@ -29,7 +30,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -366,36 +370,6 @@ bool is_valid_uid(const std::string& uid) {
         start = end + 1;
     }
     return true;
-}
-
-/**
- * @brief Whether dicom_file writes the items of a sequence (Issue #1291)
- *
- * Until #1291 is fixed, dicom_file writes every SQ element with length 0, so
- * a file keeps its sequences but none of their items.
- */
-bool dicom_file_writes_sequence_items() {
-    using namespace kcenon::pacs::core;
-    using kcenon::pacs::encoding::vr_type;
-
-    dicom_dataset ds;
-    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
-    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.826.0.1.3680043.9.9999.1294.1");
-    dicom_dataset item;
-    item.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
-                    "1.2.826.0.1.3680043.9.9999.1294.2");
-    ds.get_or_create_sequence(source_image_sequence_tag).push_back(std::move(item));
-
-    const auto bytes =
-        dicom_file::create(std::move(ds),
-                           kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian)
-            .to_bytes();
-    auto reopened = dicom_file::from_bytes(bytes);
-    if (reopened.is_err()) {
-        return false;
-    }
-    const auto* items = reopened.value().dataset().get_sequence(source_image_sequence_tag);
-    return items != nullptr && items->size() == 1;
 }
 
 }  // namespace
@@ -881,18 +855,11 @@ TEST_CASE("dcm_conv gives a lossy output a new SOP Instance UID and Image Type D
     CHECK(get_tag(lossy_file, lossy_image_compression_tag) == "01");
     CHECK(get_tag(lossy_file, derivation_description_tag).starts_with("Lossy compression with "));
 
-    // dicom_file writes sequences without their items until #1291 is fixed
-    if (dicom_file_writes_sequence_items()) {
-        const auto* items = lossy_file.dataset().get_sequence(source_image_sequence_tag);
-        REQUIRE(items != nullptr);
-        REQUIRE(items->size() == 1);
-        CHECK(items->front().get_string(tags::referenced_sop_class_uid) == source_class);
-        CHECK(items->front().get_string(tags::referenced_sop_instance_uid) == source_uid);
-    } else {
-        WARN("dicom_file drops sequence items (#1291); only the presence of "
-             "Source Image Sequence is checked");
-        CHECK(lossy_file.dataset().contains(source_image_sequence_tag));
-    }
+    const auto* items = lossy_file.dataset().get_sequence(source_image_sequence_tag);
+    REQUIRE(items != nullptr);
+    REQUIRE(items->size() == 1);
+    CHECK(items->front().get_string(tags::referenced_sop_class_uid) == source_class);
+    CHECK(items->front().get_string(tags::referenced_sop_instance_uid) == source_uid);
 
     SECTION("each lossy conversion gets its own UID") {
         const auto again = tmp.path / "lossy_again.dcm";
@@ -1049,5 +1016,383 @@ TEST_CASE("json_to_dcm and xml_to_dcm keep Pixel Data and Transfer Syntax consis
             CHECK(accepted_file.transfer_syntax() == transfer_syntax::rle_lossless);
             CHECK(decode_frames(accepted_file, spec) == pixels);
         }
+    }
+}
+
+// ============================================================================
+// Sequences (Issue #1291)
+// ============================================================================
+
+namespace {
+
+constexpr kcenon::pacs::core::dicom_tag code_value_tag{0x0008, 0x0100};
+constexpr kcenon::pacs::core::dicom_tag coding_scheme_designator_tag{0x0008, 0x0102};
+constexpr kcenon::pacs::core::dicom_tag code_meaning_tag{0x0008, 0x0104};
+constexpr kcenon::pacs::core::dicom_tag referenced_series_sequence_tag{0x0008, 0x1115};
+constexpr kcenon::pacs::core::dicom_tag referenced_image_sequence_tag{0x0008, 0x1140};
+constexpr kcenon::pacs::core::dicom_tag anatomic_region_sequence_tag{0x0008, 0x2218};
+constexpr kcenon::pacs::core::dicom_tag anatomic_region_modifier_sequence_tag{0x0008, 0x2220};
+
+/**
+ * @brief A code sequence item
+ */
+kcenon::pacs::core::dicom_dataset code_item(const std::string& value,
+                                            const std::string& meaning) {
+    using kcenon::pacs::encoding::vr_type;
+
+    kcenon::pacs::core::dicom_dataset item;
+    item.set_string(code_value_tag, vr_type::SH, value);
+    item.set_string(coding_scheme_designator_tag, vr_type::SH, "SCT");
+    item.set_string(code_meaning_tag, vr_type::LO, meaning);
+    return item;
+}
+
+/**
+ * @brief Write an image whose Anatomic Region Sequence item holds an Anatomic
+ *        Region Modifier Sequence
+ */
+void write_image_with_sequences(const fs::path& path) {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI,
+                  "1.2.826.0.1.3680043.9.9999.1291.1");
+    ds.set_string(tags::patient_name, vr_type::PN, "SEQUENCE^TEST");
+    ds.set_string(tags::patient_id, vr_type::LO, "SQ1291");
+    ds.set_string(tags::modality, vr_type::CS, "OT");
+
+    auto region = code_item("818981001", "Abdomen");
+    region.get_or_create_sequence(anatomic_region_modifier_sequence_tag)
+        .push_back(code_item("7771000", "Left"));
+    ds.get_or_create_sequence(anatomic_region_sequence_tag).push_back(std::move(region));
+
+    auto file = dicom_file::create(
+        std::move(ds), kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+    REQUIRE(file.save(path).is_ok());
+}
+
+/**
+ * @brief Check the sequences that write_image_with_sequences() writes
+ */
+void check_image_sequences(const kcenon::pacs::core::dicom_file& file) {
+    const auto* regions = file.dataset().get_sequence(anatomic_region_sequence_tag);
+    REQUIRE(regions != nullptr);
+    REQUIRE(regions->size() == 1);
+    CHECK((*regions)[0].get_string(code_value_tag) == "818981001");
+    CHECK((*regions)[0].get_string(code_meaning_tag) == "Abdomen");
+
+    const auto* modifiers =
+        (*regions)[0].get_sequence(anatomic_region_modifier_sequence_tag);
+    REQUIRE(modifiers != nullptr);
+    REQUIRE(modifiers->size() == 1);
+    CHECK((*modifiers)[0].get_string(code_value_tag) == "7771000");
+    CHECK((*modifiers)[0].get_string(code_meaning_tag) == "Left");
+}
+
+/**
+ * @brief Little-endian bytes of a data element with a defined length
+ * @param vr Two-character VR; SQ uses the 32-bit length form in explicit VR
+ * @param explicit_vr Explicit VR encoding if true, Implicit VR otherwise
+ */
+std::vector<uint8_t> le_element(kcenon::pacs::core::dicom_tag tag, std::string_view vr,
+                                const std::vector<uint8_t>& value, bool explicit_vr) {
+    std::vector<uint8_t> bytes;
+    auto write_u16 = [&bytes](uint16_t val) {
+        bytes.push_back(static_cast<uint8_t>(val & 0xFF));
+        bytes.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+    auto write_u32 = [&bytes](uint32_t val) {
+        for (int shift = 0; shift < 32; shift += 8) {
+            bytes.push_back(static_cast<uint8_t>((val >> shift) & 0xFF));
+        }
+    };
+
+    const auto length = static_cast<uint32_t>(value.size());
+    write_u16(tag.group());
+    write_u16(tag.element());
+    if (!explicit_vr) {
+        write_u32(length);
+    } else {
+        bytes.push_back(static_cast<uint8_t>(vr[0]));
+        bytes.push_back(static_cast<uint8_t>(vr[1]));
+        if (vr == "SQ") {
+            write_u16(0);
+            write_u32(length);
+        } else {
+            write_u16(static_cast<uint16_t>(length));
+        }
+    }
+    bytes.insert(bytes.end(), value.begin(), value.end());
+    return bytes;
+}
+
+/**
+ * @brief An item (FFFE,E000) with a defined length
+ */
+std::vector<uint8_t> le_item(const std::vector<uint8_t>& dataset) {
+    const auto length = static_cast<uint32_t>(dataset.size());
+    std::vector<uint8_t> bytes = {0xFE, 0xFF, 0x00, 0xE0};
+    for (int shift = 0; shift < 32; shift += 8) {
+        bytes.push_back(static_cast<uint8_t>((length >> shift) & 0xFF));
+    }
+    bytes.insert(bytes.end(), dataset.begin(), dataset.end());
+    return bytes;
+}
+
+/// Referenced SOP Instance UID of the nested item, padded to even length
+const std::vector<uint8_t> nested_uid_value = {'1', '.', '2', '.', '3', '.', '1',
+                                               '2', '9', '1', '.', '5', '.', '1'};
+
+/**
+ * @brief Write a file whose Referenced Series Sequence and the nested
+ *        Referenced Image Sequence have defined lengths
+ */
+void write_defined_length_sequences(const fs::path& path,
+                                    const kcenon::pacs::encoding::transfer_syntax& ts) {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    const bool explicit_vr = ts.vr_type() == kcenon::pacs::encoding::vr_encoding::explicit_vr;
+    auto concat = [](std::vector<uint8_t> a, const std::vector<uint8_t>& b) {
+        a.insert(a.end(), b.begin(), b.end());
+        return a;
+    };
+
+    const auto images = le_item(
+        le_element(tags::referenced_sop_instance_uid, "UI", nested_uid_value, explicit_vr));
+    const auto series = le_item(concat(
+        le_element(referenced_image_sequence_tag, "SQ", images, explicit_vr),
+        le_element(tags::series_instance_uid, "UI",
+                   {'1', '.', '2', '.', '3', '.', '1', '2', '9', '1', '.', '5'},
+                   explicit_vr)));
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI,
+                  "1.2.826.0.1.3680043.9.9999.1291.2");
+    const auto bytes = concat(dicom_file::create(std::move(ds), ts).to_bytes(),
+                              le_element(referenced_series_sequence_tag, "SQ", series,
+                                         explicit_vr));
+
+    std::ofstream out(path, std::ios::binary);
+    REQUIRE(out.write(reinterpret_cast<const char*>(bytes.data()),
+                      static_cast<std::streamsize>(bytes.size())));
+}
+
+/**
+ * @brief Check the sequences that write_defined_length_sequences() writes
+ */
+void check_defined_length_sequences(const kcenon::pacs::core::dicom_file& file) {
+    using namespace kcenon::pacs::core;
+
+    const auto* series = file.dataset().get_sequence(referenced_series_sequence_tag);
+    REQUIRE(series != nullptr);
+    REQUIRE(series->size() == 1);
+    CHECK((*series)[0].get_string(tags::series_instance_uid) == "1.2.3.1291.5");
+
+    const auto* images = (*series)[0].get_sequence(referenced_image_sequence_tag);
+    REQUIRE(images != nullptr);
+    REQUIRE(images->size() == 1);
+    CHECK((*images)[0].get_string(tags::referenced_sop_instance_uid) == "1.2.3.1291.5.1");
+}
+
+/**
+ * @brief The bytes of a file
+ */
+std::vector<uint8_t> read_bytes(const fs::path& path) {
+    std::ifstream in(path, std::ios::binary);
+    return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+}
+
+/**
+ * @brief Find a byte sequence in a buffer
+ */
+bool contains_bytes(const std::vector<uint8_t>& haystack,
+                    const std::vector<uint8_t>& needle) {
+    return std::search(haystack.begin(), haystack.end(), needle.begin(),
+                       needle.end()) != haystack.end();
+}
+
+constexpr kcenon::pacs::core::dicom_tag issuer_of_patient_id_tag{0x0010, 0x0021};
+constexpr kcenon::pacs::core::dicom_tag other_patient_ids_sequence_tag{0x0010, 0x1002};
+constexpr kcenon::pacs::core::dicom_tag referenced_study_sequence_tag{0x0008, 0x1110};
+constexpr kcenon::pacs::core::dicom_tag request_attributes_sequence_tag{0x0040, 0x0275};
+constexpr kcenon::pacs::core::dicom_tag requested_procedure_id_tag{0x0040, 0x1001};
+
+/// Study Instance UID, also referenced from Referenced Study Sequence
+constexpr std::string_view identified_study_uid = "1.2.826.0.1.3680043.9.9999.1291.3.1";
+
+/// Identifiers that write_image_with_identifiers_in_sequences() puts in items
+const std::vector<std::string_view> item_identifiers = {
+    "SSN-987-65-4321", "ACC-777-1291", "RP-555-1291", identified_study_uid};
+
+/**
+ * @brief Write an image with identifiers inside Other Patient IDs Sequence,
+ *        Request Attributes Sequence, and Referenced Study Sequence items
+ */
+void write_image_with_identifiers_in_sequences(const fs::path& path) {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI,
+                  "1.2.826.0.1.3680043.9.9999.1291.3");
+    ds.set_string(tags::study_instance_uid, vr_type::UI, std::string(identified_study_uid));
+    ds.set_string(tags::patient_name, vr_type::PN, "IDENTIFIED^PATIENT");
+    ds.set_string(tags::patient_id, vr_type::LO, "MRN-1291");
+    ds.set_string(tags::modality, vr_type::CS, "OT");
+
+    dicom_dataset other_id;
+    other_id.set_string(tags::patient_id, vr_type::LO, "SSN-987-65-4321");
+    other_id.set_string(issuer_of_patient_id_tag, vr_type::LO, "NATIONAL");
+    ds.get_or_create_sequence(other_patient_ids_sequence_tag).push_back(std::move(other_id));
+
+    dicom_dataset request;
+    request.set_string(tags::accession_number, vr_type::SH, "ACC-777-1291");
+    request.set_string(requested_procedure_id_tag, vr_type::SH, "RP-555-1291");
+    ds.get_or_create_sequence(request_attributes_sequence_tag).push_back(std::move(request));
+
+    dicom_dataset study;
+    study.set_string(tags::referenced_sop_class_uid, vr_type::UI, "1.2.840.10008.3.1.2.3.1");
+    study.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
+                     std::string(identified_study_uid));
+    ds.get_or_create_sequence(referenced_study_sequence_tag).push_back(std::move(study));
+
+    auto file = dicom_file::create(
+        std::move(ds), kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+    REQUIRE(file.save(path).is_ok());
+}
+
+/**
+ * @brief Whether the bytes of a file contain a text
+ */
+bool contains_text(const std::vector<uint8_t>& bytes, std::string_view text) {
+    return contains_bytes(bytes, std::vector<uint8_t>(text.begin(), text.end()));
+}
+
+}  // namespace
+
+TEST_CASE("Tag modification and conversion keep sequence items",
+          "[cli][roundtrip][sequence]") {
+    namespace tags = kcenon::pacs::core::tags;
+
+    temp_dir tmp;
+    const auto src = tmp.path / "sequences.dcm";
+    write_image_with_sequences(src);
+
+    SECTION("dcm_modify") {
+        const auto out = tmp.path / "modified.dcm";
+        auto result = run_cli("dcm_modify", {"-i", "(0010,0010)=MODIFIED^NAME", "-o",
+                                             out.string(), src.string()});
+        INFO("dcm_modify output: " << result.output);
+        REQUIRE(result.exit_code == 0);
+
+        auto modified = read_dicom(out);
+        CHECK(get_tag(modified, tags::patient_name) == "MODIFIED^NAME");
+        check_image_sequences(modified);
+    }
+
+    SECTION("dcm_conv to Implicit VR Little Endian and back") {
+        using kcenon::pacs::encoding::transfer_syntax;
+
+        const auto implicit_path = tmp.path / "implicit.dcm";
+        auto result = run_cli("dcm_conv",
+                              {src.string(), implicit_path.string(), "--implicit"});
+        INFO("dcm_conv --implicit output: " << result.output);
+        REQUIRE(result.exit_code == 0);
+        auto implicit_file = read_dicom(implicit_path);
+        CHECK(implicit_file.transfer_syntax() == transfer_syntax::implicit_vr_little_endian);
+        check_image_sequences(implicit_file);
+
+        const auto explicit_path = tmp.path / "explicit.dcm";
+        result = run_cli("dcm_conv",
+                         {implicit_path.string(), explicit_path.string(), "--explicit"});
+        INFO("dcm_conv --explicit output: " << result.output);
+        REQUIRE(result.exit_code == 0);
+        check_image_sequences(read_dicom(explicit_path));
+    }
+}
+
+TEST_CASE("Anonymization writes no identifiers from sequence items",
+          "[cli][roundtrip][sequence]") {
+    namespace tags = kcenon::pacs::core::tags;
+
+    temp_dir tmp;
+    const auto src = tmp.path / "identified.dcm";
+    const auto out = tmp.path / "anonymized.dcm";
+    write_image_with_identifiers_in_sequences(src);
+
+    // The input carries every identifier in its sequence items
+    const auto source_bytes = read_bytes(src);
+    for (const auto identifier : item_identifiers) {
+        INFO("Identifier: " << identifier);
+        REQUIRE(contains_text(source_bytes, identifier));
+    }
+
+    auto result = run_cli("dcm_anonymize", {src.string(), out.string()});
+    INFO("dcm_anonymize output: " << result.output);
+    REQUIRE(result.exit_code == 0);
+
+    const auto output_bytes = read_bytes(out);
+    for (const auto identifier : item_identifiers) {
+        INFO("Identifier: " << identifier);
+        CHECK_FALSE(contains_text(output_bytes, identifier));
+    }
+
+    // The anonymizer does not process sequence items, so it empties the
+    // sequences and keeps the elements
+    auto anonymized = read_dicom(out);
+    CHECK(get_tag(anonymized, tags::patient_name) != "IDENTIFIED^PATIENT");
+    for (const auto tag : {other_patient_ids_sequence_tag, request_attributes_sequence_tag,
+                           referenced_study_sequence_tag}) {
+        const auto* items = anonymized.dataset().get_sequence(tag);
+        REQUIRE(items != nullptr);
+        CHECK(items->empty());
+    }
+}
+
+TEST_CASE("Transfer Syntax conversion re-encodes defined-length sequences",
+          "[cli][roundtrip][sequence]") {
+    using kcenon::pacs::encoding::transfer_syntax;
+    namespace tags = kcenon::pacs::core::tags;
+
+    temp_dir tmp;
+    // The nested Referenced SOP Instance UID in each VR encoding
+    const auto implicit_uid =
+        le_element(tags::referenced_sop_instance_uid, "UI", nested_uid_value, false);
+    const auto explicit_uid =
+        le_element(tags::referenced_sop_instance_uid, "UI", nested_uid_value, true);
+
+    SECTION("Explicit VR Little Endian to Implicit VR Little Endian") {
+        const auto src = tmp.path / "explicit_defined.dcm";
+        const auto out = tmp.path / "implicit.dcm";
+        write_defined_length_sequences(src, transfer_syntax::explicit_vr_little_endian);
+
+        auto result = run_cli("dcm_conv", {src.string(), out.string(), "--implicit"});
+        INFO("dcm_conv --implicit output: " << result.output);
+        REQUIRE(result.exit_code == 0);
+
+        const auto bytes = read_bytes(out);
+        CHECK(contains_bytes(bytes, implicit_uid));
+        CHECK_FALSE(contains_bytes(bytes, explicit_uid));
+        check_defined_length_sequences(read_dicom(out));
+    }
+
+    SECTION("Implicit VR Little Endian to Explicit VR Little Endian") {
+        const auto src = tmp.path / "implicit_defined.dcm";
+        const auto out = tmp.path / "explicit.dcm";
+        write_defined_length_sequences(src, transfer_syntax::implicit_vr_little_endian);
+
+        auto result = run_cli("dcm_conv", {src.string(), out.string(), "--explicit"});
+        INFO("dcm_conv --explicit output: " << result.output);
+        REQUIRE(result.exit_code == 0);
+
+        const auto bytes = read_bytes(out);
+        CHECK(contains_bytes(bytes, explicit_uid));
+        CHECK_FALSE(contains_bytes(bytes, implicit_uid));
+        check_defined_length_sequences(read_dicom(out));
     }
 }

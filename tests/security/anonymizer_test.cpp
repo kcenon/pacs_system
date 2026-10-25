@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 
@@ -289,6 +290,65 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
         (void)anon.anonymize(dataset);
 
         REQUIRE(dataset.get_string(tags::patient_name) != "DOE^JOHN");
+    }
+}
+
+TEST_CASE("Anonymizer: Sequences without an action are emptied",
+          "[security][anonymization]") {
+    constexpr dicom_tag other_patient_ids_sequence{0x0010, 0x1002};
+    constexpr dicom_tag request_attributes_sequence{0x0040, 0x0275};
+    constexpr dicom_tag requested_procedure_id{0x0040, 0x1001};
+
+    // Identifiers that no profile action reaches inside sequence items
+    auto dataset = create_test_dataset();
+    dicom_dataset other_id;
+    other_id.set_string(tags::patient_id, vr_type::LO, "SSN-987-65-4321");
+    dataset.get_or_create_sequence(other_patient_ids_sequence).push_back(std::move(other_id));
+    dicom_dataset request;
+    request.set_string(tags::accession_number, vr_type::SH, "ACC-777");
+    request.set_string(requested_procedure_id, vr_type::SH, "RP-555");
+    dataset.get_or_create_sequence(request_attributes_sequence).push_back(std::move(request));
+
+    anonymizer anon(anonymization_profile::basic);
+
+    SECTION("their items are removed and the elements are kept") {
+        auto without_sequences = create_test_dataset();
+        auto baseline = anonymizer(anonymization_profile::basic).anonymize(without_sequences);
+        REQUIRE(baseline.is_ok());
+
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        for (const auto tag : {other_patient_ids_sequence, request_attributes_sequence}) {
+            const auto* items = dataset.get_sequence(tag);
+            REQUIRE(items != nullptr);
+            CHECK(items->empty());
+        }
+        CHECK(result.value().tags_emptied == baseline.value().tags_emptied + 2);
+    }
+
+    SECTION("a sequence with its own action follows that action") {
+        anon.add_tag_action(other_patient_ids_sequence, tag_action_config::make_remove());
+        anon.add_tag_action(request_attributes_sequence, tag_action_config::make_keep());
+        REQUIRE(anon.anonymize(dataset).is_ok());
+
+        CHECK_FALSE(dataset.contains(other_patient_ids_sequence));
+        const auto* items = dataset.get_sequence(request_attributes_sequence);
+        REQUIRE(items != nullptr);
+        REQUIRE(items->size() == 1);
+        CHECK((*items)[0].get_string(tags::accession_number) == "ACC-777");
+    }
+
+    SECTION("detailed reporting records each emptied sequence") {
+        anon.set_detailed_reporting(true);
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+
+        const auto& records = result.value().action_records;
+        for (const auto tag : {other_patient_ids_sequence, request_attributes_sequence}) {
+            CHECK(std::any_of(records.begin(), records.end(), [tag](const auto& record) {
+                return record.tag == tag && record.action == tag_action::empty;
+            }));
+        }
     }
 }
 

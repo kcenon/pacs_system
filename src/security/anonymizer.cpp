@@ -163,6 +163,28 @@ auto anonymizer::anonymize_with_mapping(
         }
     }
 
+    // No action reaches into sequence items, so a sequence without an action
+    // of its own is emptied instead of copied with the identifiers its items
+    // may hold
+    std::vector<dicom_tag> sequences_to_empty;
+    for (const auto& [tag, element] : dataset) {
+        if (element.is_sequence() && !profile_actions.contains(tag) &&
+            (!element.sequence_items().empty() || !element.raw_data().empty())) {
+            sequences_to_empty.push_back(tag);
+        }
+    }
+    for (const auto& tag : sequences_to_empty) {
+        dataset.insert(dicom_element{tag, encoding::vr_type::SQ});
+        report.total_tags_processed++;
+        report.tags_emptied++;
+        if (detailed_reporting_) {
+            tag_action_record record;
+            record.tag = tag;
+            record.action = tag_action::empty;
+            report.action_records.push_back(std::move(record));
+        }
+    }
+
     // Remove private tags if configured
     if (private_tag_action_ != private_tag_action::keep) {
         std::vector<dicom_tag> tags_to_remove;

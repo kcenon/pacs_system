@@ -125,6 +125,12 @@ public:
      * @brief Encode the DICOM file to raw bytes
      * @return Vector containing the encoded file data
      *
+     * A sequence (SQ) element is written with undefined length, one item of
+     * defined length per sequence item, and a Sequence Delimitation Item. The
+     * item datasets use the VR encoding and byte order of the Transfer Syntax,
+     * recursively. An SQ element read from a defined-length value that is not
+     * a sequence of items keeps that value and its defined length.
+     *
      * When the Transfer Syntax is encapsulated and the Pixel Data value is a
      * sequence of items (the form the parser produces, or the result of
      * encapsulate_frames()), Pixel Data is written as OB with undefined
@@ -365,17 +371,32 @@ private:
         -> std::vector<uint8_t>;
 
     /**
-     * @brief Parse a sequence with undefined length
-     * @param data The raw byte data starting at sequence value
-     * @param bytes_read Output parameter for bytes consumed
+     * @brief Parse the items of a sequence value
+     * @param data The raw byte data starting at sequence value; for a
+     *        defined-length sequence, exactly its value
+     * @param bytes_read Output parameter for bytes consumed, up to and
+     *        including a Sequence Delimitation Item
      * @param explicit_vr Whether to use explicit VR parsing
      * @param big_endian Whether data is big endian
      * @return Result containing the sequence items or error
      */
-    [[nodiscard]] static auto parse_undefined_length_sequence(
+    [[nodiscard]] static auto parse_sequence_items(
         std::span<const uint8_t> data, size_t& bytes_read,
         bool explicit_vr, bool big_endian)
         -> kcenon::pacs::Result<std::vector<dicom_dataset>>;
+
+    /**
+     * @brief Decode a sequence element with a defined length
+     * @param tag The element tag
+     * @param value The element value
+     * @param explicit_vr Whether to use explicit VR parsing
+     * @param big_endian Whether data is big endian
+     * @return The element with its items, or with value as its raw data if
+     *         value is not a sequence of items
+     */
+    [[nodiscard]] static auto decode_defined_length_sequence(
+        dicom_tag tag, std::span<const uint8_t> value,
+        bool explicit_vr, bool big_endian) -> dicom_element;
 
     /// File Meta Information (Group 0002)
     dicom_dataset meta_info_;

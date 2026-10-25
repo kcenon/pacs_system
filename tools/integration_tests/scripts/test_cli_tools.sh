@@ -327,6 +327,18 @@ test_dcm_dir() {
             "\"${BINARY_DIR}/dcm_dir\" list \"${DICOMDIR_FILE}\""
         assert_contains "dcm_dir: list shows patient/study data" \
             "Patient\|PATIENT\|Study\|STUDY\|TEST" "${output}"
+
+        # Two files of different patients: a PATIENT, STUDY, SERIES, and
+        # IMAGE record for each
+        assert_contains "dcm_dir: list reports both patients" \
+            "Patients: *2$" "${output}"
+        assert_contains "dcm_dir: list reports both studies" \
+            "Studies: *2$" "${output}"
+        assert_contains "dcm_dir: list reports both images" \
+            "Images: *2$" "${output}"
+        output=$("${BINARY_DIR}/dcm_dump" "${DICOMDIR_FILE}" 2>&1)
+        assert_contains "dcm_dir: Directory Record Sequence holds 8 records" \
+            "(0004,1220) SQ .*(8 items)" "${output}"
     fi
 
     # Invalid command
