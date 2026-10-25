@@ -87,6 +87,7 @@ target_link_libraries(my_app PRIVATE pacs_core pacs_encoding)
 | `PACS_BUILD_SAMPLES` | OFF | Build 5 progressive tutorials (sources under `examples/`) |
 | `PACS_BUILD_STORAGE` | ON | Build storage module (requires SQLite3) |
 | `PACS_BUILD_CODECS` | ON | Build compression codecs |
+| `PACS_REQUIRE_CODECS` | OFF | Fail configuration when a codec library (libjpeg-turbo, OpenJPEG, CharLS, OpenJPH) is not found, instead of building without that codec |
 | `PACS_WITH_OPENSSL` | ON | Enable TLS support |
 | `PACS_WITH_REST_API` | ON | Enable DICOMweb REST API |
 
