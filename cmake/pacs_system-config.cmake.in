@@ -42,6 +42,15 @@ endif()
 
 if(@PACS_SYSTEM_WITH_DATABASE_SYSTEM@)
     find_dependency(database_system CONFIG REQUIRED)
+    # pacs_system::storage links database_system::integrated_database, which
+    # database_system packages export only from kcenon/database_system#611 on.
+    if(NOT TARGET database_system::integrated_database)
+        set(pacs_system_FOUND FALSE)
+        string(CONCAT pacs_system_NOT_FOUND_MESSAGE
+            "pacs_system was built with database_system integration, but the database_system "
+            "package in ${database_system_DIR} does not export database_system::integrated_database")
+        return()
+    endif()
 endif()
 
 if(@PACS_SYSTEM_WITH_SQLITE@)
