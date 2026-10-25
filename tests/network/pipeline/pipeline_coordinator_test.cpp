@@ -408,10 +408,13 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     constexpr size_t num_jobs = 100;
     std::atomic<size_t> completed_count{0};
+    std::atomic<size_t> failed_submissions{0};
     std::mutex mutex;
     std::condition_variable cv;
 
-    // Submit jobs concurrently from multiple threads
+    // Submit jobs concurrently from multiple threads. Catch2 assertions are
+    // not thread-safe: the submitters only count failures, and the main
+    // thread asserts after join()
     std::vector<std::thread> threads;
     constexpr size_t num_threads = 4;
     size_t jobs_per_thread = num_jobs / num_threads;
@@ -431,7 +434,9 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
                 auto result = coordinator.submit_to_stage(
                     pipeline_stage::network_receive, std::move(job));
-                REQUIRE(result.is_ok());
+                if (!result.is_ok()) {
+                    failed_submissions.fetch_add(1, std::memory_order_relaxed);
+                }
             }
         });
     }
@@ -439,6 +444,8 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     for (auto& thread : threads) {
         thread.join();
     }
+
+    REQUIRE(failed_submissions.load() == 0);
 
     // Wait for all jobs to complete with timeout
     {
