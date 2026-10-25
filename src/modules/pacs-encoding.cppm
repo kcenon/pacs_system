@@ -10,10 +10,11 @@
  * - vr_type: Value Representation enumeration
  * - vr_info: VR metadata and validation
  * - byte_order: Endianness enumeration
- * - byte_swap: Byte swapping utilities
- * - transfer_syntax: DICOM Transfer Syntax
+ * - byte_swap16/32/64, read_be*, write_be*: Byte swapping utilities
+ * - transfer_syntax: DICOM Transfer Syntax and registry lookups
  * - Codecs: Explicit VR, Implicit VR, Big Endian
- * - Compression codecs: JPEG, JPEG-LS, JPEG 2000, RLE
+ * - Compression codecs: JPEG, JPEG-LS, JPEG 2000, HTJ2K, JPEG XL, RLE,
+ *   Frame Deflate, HEVC
  * - SIMD utilities: CPU feature detection, vectorized operations
  *
  * Part of the kcenon.pacs module.
@@ -51,7 +52,11 @@ module;
 #include <kcenon/pacs/encoding/compression/jpeg_lossless_codec.h>
 #include <kcenon/pacs/encoding/compression/jpeg_ls_codec.h>
 #include <kcenon/pacs/encoding/compression/jpeg2000_codec.h>
+#include <kcenon/pacs/encoding/compression/htj2k_codec.h>
+#include <kcenon/pacs/encoding/compression/jpegxl_codec.h>
 #include <kcenon/pacs/encoding/compression/rle_codec.h>
+#include <kcenon/pacs/encoding/compression/frame_deflate_codec.h>
+#include <kcenon/pacs/encoding/compression/hevc_codec.h>
 
 // SIMD utility headers
 #include <kcenon/pacs/encoding/simd/simd_config.h>
@@ -64,97 +69,123 @@ module;
 export module kcenon.pacs:encoding;
 
 // ============================================================================
-// Re-export pacs::encoding namespace
+// Re-export kcenon::pacs::encoding namespace
 // ============================================================================
 
-export namespace pacs::encoding {
+export namespace kcenon::pacs::encoding {
 
 // Byte order types
-using pacs::encoding::byte_order;
+using kcenon::pacs::encoding::byte_order;
+using kcenon::pacs::encoding::vr_encoding;
 
 // Byte swap utilities
-using pacs::encoding::byte_swap;
+using kcenon::pacs::encoding::byte_swap16;
+using kcenon::pacs::encoding::byte_swap32;
+using kcenon::pacs::encoding::byte_swap64;
+using kcenon::pacs::encoding::read_be16;
+using kcenon::pacs::encoding::read_be32;
+using kcenon::pacs::encoding::read_be64;
+using kcenon::pacs::encoding::write_be16;
+using kcenon::pacs::encoding::write_be32;
+using kcenon::pacs::encoding::write_be64;
 
 // VR types
-using pacs::encoding::vr_type;
-using pacs::encoding::to_string;
-using pacs::encoding::from_string;
+using kcenon::pacs::encoding::vr_type;
+using kcenon::pacs::encoding::to_string;
+using kcenon::pacs::encoding::from_string;
+using kcenon::pacs::encoding::is_string_vr;
+using kcenon::pacs::encoding::is_binary_vr;
+using kcenon::pacs::encoding::is_numeric_vr;
+using kcenon::pacs::encoding::has_explicit_32bit_length;
+using kcenon::pacs::encoding::fixed_length;
+using kcenon::pacs::encoding::is_fixed_length;
+using kcenon::pacs::encoding::padding_char;
 
 // VR info
-using pacs::encoding::vr_info;
-using pacs::encoding::get_vr_info;
+using kcenon::pacs::encoding::vr_info;
+using kcenon::pacs::encoding::get_vr_info;
+using kcenon::pacs::encoding::validate_value;
+using kcenon::pacs::encoding::validate_string;
+using kcenon::pacs::encoding::pad_to_even;
+using kcenon::pacs::encoding::trim_padding;
+using kcenon::pacs::encoding::is_valid_charset;
 
 // Transfer syntax
-using pacs::encoding::transfer_syntax;
-using pacs::encoding::vr_encoding;
-using pacs::encoding::compression_type;
+using kcenon::pacs::encoding::transfer_syntax;
+using kcenon::pacs::encoding::find_transfer_syntax;
+using kcenon::pacs::encoding::supported_transfer_syntaxes;
+using kcenon::pacs::encoding::all_transfer_syntaxes;
 
 // Codecs
-using pacs::encoding::explicit_vr_codec;
-using pacs::encoding::explicit_vr_big_endian_codec;
-using pacs::encoding::implicit_vr_codec;
+using kcenon::pacs::encoding::explicit_vr_codec;
+using kcenon::pacs::encoding::explicit_vr_big_endian_codec;
+using kcenon::pacs::encoding::implicit_vr_codec;
 
-} // namespace pacs::encoding
+} // namespace kcenon::pacs::encoding
 
 // ============================================================================
-// Re-export pacs::encoding::compression namespace
+// Re-export kcenon::pacs::encoding::compression namespace
 // ============================================================================
 
-export namespace pacs::encoding::compression {
+export namespace kcenon::pacs::encoding::compression {
 
 // Image parameters
-using pacs::encoding::compression::photometric_interpretation;
-using pacs::encoding::compression::to_string;
-using pacs::encoding::compression::parse_photometric_interpretation;
-using pacs::encoding::compression::image_params;
+using kcenon::pacs::encoding::compression::photometric_interpretation;
+using kcenon::pacs::encoding::compression::to_string;
+using kcenon::pacs::encoding::compression::parse_photometric_interpretation;
+using kcenon::pacs::encoding::compression::image_params;
 
 // Compression types
-using pacs::encoding::compression::compression_options;
-using pacs::encoding::compression::compression_result;
-using pacs::encoding::compression::codec_result;
+using kcenon::pacs::encoding::compression::compression_options;
+using kcenon::pacs::encoding::compression::compression_result;
+using kcenon::pacs::encoding::compression::codec_result;
 
 // Codec base class
-using pacs::encoding::compression::compression_codec;
+using kcenon::pacs::encoding::compression::compression_codec;
 
 // Codec factory
-using pacs::encoding::compression::codec_factory;
+using kcenon::pacs::encoding::compression::codec_factory;
 
 // JPEG codecs
-using pacs::encoding::compression::jpeg_baseline_codec;
-using pacs::encoding::compression::jpeg_lossless_codec;
-using pacs::encoding::compression::jpeg_ls_codec;
-using pacs::encoding::compression::jpeg2000_codec;
+using kcenon::pacs::encoding::compression::jpeg_baseline_codec;
+using kcenon::pacs::encoding::compression::jpeg_lossless_codec;
+using kcenon::pacs::encoding::compression::jpeg_ls_codec;
+using kcenon::pacs::encoding::compression::jpeg2000_codec;
+using kcenon::pacs::encoding::compression::htj2k_codec;
+using kcenon::pacs::encoding::compression::jpegxl_codec;
 
-// RLE codec
-using pacs::encoding::compression::rle_codec;
+// RLE, Deflate, and HEVC codecs
+using kcenon::pacs::encoding::compression::rle_codec;
+using kcenon::pacs::encoding::compression::frame_deflate_codec;
+using kcenon::pacs::encoding::compression::hevc_codec;
 
-} // namespace pacs::encoding::compression
+} // namespace kcenon::pacs::encoding::compression
 
 // ============================================================================
-// Re-export pacs::encoding::simd namespace
+// Re-export kcenon::pacs::encoding::simd namespace
 // ============================================================================
 
-export namespace pacs::encoding::simd {
+export namespace kcenon::pacs::encoding::simd {
 
 // SIMD feature detection
-using pacs::encoding::simd::simd_feature;
-using pacs::encoding::simd::has_feature;
-using pacs::encoding::simd::detect_features;
-using pacs::encoding::simd::get_features;
-using pacs::encoding::simd::optimal_vector_width;
+using kcenon::pacs::encoding::simd::simd_feature;
+using kcenon::pacs::encoding::simd::has_feature;
+using kcenon::pacs::encoding::simd::detect_features;
+using kcenon::pacs::encoding::simd::get_features;
+using kcenon::pacs::encoding::simd::optimal_vector_width;
 
 // Individual feature checks
-using pacs::encoding::simd::has_sse2;
-using pacs::encoding::simd::has_ssse3;
-using pacs::encoding::simd::has_sse41;
-using pacs::encoding::simd::has_avx;
-using pacs::encoding::simd::has_avx2;
-using pacs::encoding::simd::has_avx512f;
-using pacs::encoding::simd::has_neon;
+using kcenon::pacs::encoding::simd::has_sse2;
+using kcenon::pacs::encoding::simd::has_ssse3;
+using kcenon::pacs::encoding::simd::has_sse41;
+using kcenon::pacs::encoding::simd::has_avx;
+using kcenon::pacs::encoding::simd::has_avx2;
+using kcenon::pacs::encoding::simd::has_avx512f;
+using kcenon::pacs::encoding::simd::has_neon;
 
 // SIMD byte swap operations
-using pacs::encoding::simd::swap_bytes_16_simd;
-using pacs::encoding::simd::swap_bytes_32_simd;
-using pacs::encoding::simd::swap_bytes_64_simd;
+using kcenon::pacs::encoding::simd::swap_bytes_16_simd;
+using kcenon::pacs::encoding::simd::swap_bytes_32_simd;
+using kcenon::pacs::encoding::simd::swap_bytes_64_simd;
 
-} // namespace pacs::encoding::simd
+} // namespace kcenon::pacs::encoding::simd

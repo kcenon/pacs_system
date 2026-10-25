@@ -8,10 +8,10 @@
  *
  * This module partition exports security-related types:
  * - access_control_manager: RBAC implementation
- * - user, role, permission: Identity types
+ * - User, Role, Permission: Identity types
  * - certificate: X.509 certificate management
  * - digital_signature: DICOM digital signatures
- * - anonymizer: DICOM anonymization
+ * - anonymizer, tag_action, anonymization_profile: DICOM anonymization
  * - uid_mapping: UID mapping for anonymization
  *
  * Part of the kcenon.pacs module.
@@ -39,6 +39,8 @@ module;
 #include <kcenon/pacs/security/certificate.h>
 #include <kcenon/pacs/security/digital_signature.h>
 #include <kcenon/pacs/security/signature_types.h>
+#include <kcenon/pacs/security/anonymization_profile.h>
+#include <kcenon/pacs/security/tag_action.h>
 #include <kcenon/pacs/security/anonymizer.h>
 #include <kcenon/pacs/security/uid_mapping.h>
 #include <kcenon/pacs/security/security_storage_interface.h>
@@ -46,33 +48,57 @@ module;
 export module kcenon.pacs:security;
 
 // ============================================================================
-// Re-export pacs::security namespace
+// Re-export kcenon::pacs::security namespace
 // ============================================================================
+// The kcenon::pacs::security::Action bit constants are namespace-scope
+// constexpr variables with internal linkage, which a module cannot export.
+// Include <kcenon/pacs/security/permission.h> to use them.
 
-export namespace pacs::security {
+export namespace kcenon::pacs::security {
 
 // Access control
-using pacs::security::access_control_manager;
-using pacs::security::DicomOperation;
-using pacs::security::AccessCheckResult;
+using kcenon::pacs::security::access_control_manager;
+using kcenon::pacs::security::DicomOperation;
+using kcenon::pacs::security::AccessCheckResult;
+using kcenon::pacs::security::AccessAuditCallback;
 
 // Identity types
-using pacs::security::user;
-using pacs::security::role;
-using pacs::security::permission;
-using pacs::security::user_context;
+using kcenon::pacs::security::User;
+using kcenon::pacs::security::Role;
+using kcenon::pacs::security::parse_role;
+using kcenon::pacs::security::ResourceType;
+using kcenon::pacs::security::Permission;
+using kcenon::pacs::security::user_context;
 
 // Certificates and signatures
-using pacs::security::certificate;
-using pacs::security::digital_signature;
+using kcenon::pacs::security::certificate;
+using kcenon::pacs::security::private_key;
+using kcenon::pacs::security::certificate_chain;
+using kcenon::pacs::security::digital_signature;
+using kcenon::pacs::security::signature_algorithm;
+using kcenon::pacs::security::parse_signature_algorithm;
+using kcenon::pacs::security::signature_status;
+using kcenon::pacs::security::signature_info;
+using kcenon::pacs::security::mac_algorithm;
+using kcenon::pacs::security::to_dicom_uid;
+using kcenon::pacs::security::certificate_type;
+using kcenon::pacs::security::to_dicom_term;
 
 // Anonymization
-using pacs::security::anonymizer;
-using pacs::security::tag_action;
-using pacs::security::anonymization_profile;
-using pacs::security::uid_mapping;
+using kcenon::pacs::security::anonymizer;
+using kcenon::pacs::security::private_tag_action;
+using kcenon::pacs::security::tag_action;
+using kcenon::pacs::security::tag_action_config;
+using kcenon::pacs::security::tag_action_record;
+using kcenon::pacs::security::anonymization_report;
+using kcenon::pacs::security::anonymization_profile;
+using kcenon::pacs::security::profile_from_string;
+using kcenon::pacs::security::uid_mapping;
+
+// to_string overloads (Role, signature and anonymization enums)
+using kcenon::pacs::security::to_string;
 
 // Storage interface
-using pacs::security::security_storage_interface;
+using kcenon::pacs::security::security_storage_interface;
 
-} // namespace pacs::security
+} // namespace kcenon::pacs::security
