@@ -133,6 +133,10 @@ public:
      * Applies the configured profile and any custom tag actions to
      * de-identify the dataset. The dataset is modified in place.
      *
+     * Actions apply to top-level elements only. A sequence (SQ) element
+     * without an action of its own is emptied: its items are removed and the
+     * element is kept with no items, counted in tags_emptied.
+     *
      * @param dataset The dataset to anonymize (modified in place)
      * @return Result containing the anonymization report
      *
@@ -147,7 +151,8 @@ public:
      *
      * Applies de-identification while maintaining consistent UID
      * mappings across multiple datasets. This is essential for
-     * longitudinal studies and research linkage.
+     * longitudinal studies and research linkage. Sequences are handled as in
+     * anonymize().
      *
      * @param dataset The dataset to anonymize (modified in place)
      * @param mapping UID mapping for consistent transformation

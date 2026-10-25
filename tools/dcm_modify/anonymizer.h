@@ -174,6 +174,10 @@ public:
 
         // Additional PHI tags
         remove_additional_phi(dataset);
+
+        // No step above reaches into sequence items, so every sequence is
+        // emptied instead of copied with the identifiers its items may hold
+        empty_sequences(dataset);
     }
 
     /**
@@ -286,6 +290,20 @@ private:
 
         // Device Serial Number
         dataset.remove(core::dicom_tag{0x0018, 0x1000});
+    }
+
+    void empty_sequences(core::dicom_dataset& dataset) {
+        std::vector<core::dicom_tag> sequences;
+
+        for (const auto& [tag, element] : dataset) {
+            if (element.is_sequence()) {
+                sequences.push_back(tag);
+            }
+        }
+
+        for (const auto& tag : sequences) {
+            dataset.insert(core::dicom_element{tag, encoding::vr_type::SQ});
+        }
     }
 
     anonymize_options options_;

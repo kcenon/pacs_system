@@ -1215,9 +1215,67 @@ bool contains_bytes(const std::vector<uint8_t>& haystack,
                        needle.end()) != haystack.end();
 }
 
+constexpr kcenon::pacs::core::dicom_tag issuer_of_patient_id_tag{0x0010, 0x0021};
+constexpr kcenon::pacs::core::dicom_tag other_patient_ids_sequence_tag{0x0010, 0x1002};
+constexpr kcenon::pacs::core::dicom_tag referenced_study_sequence_tag{0x0008, 0x1110};
+constexpr kcenon::pacs::core::dicom_tag request_attributes_sequence_tag{0x0040, 0x0275};
+constexpr kcenon::pacs::core::dicom_tag requested_procedure_id_tag{0x0040, 0x1001};
+
+/// Study Instance UID, also referenced from Referenced Study Sequence
+constexpr std::string_view identified_study_uid = "1.2.826.0.1.3680043.9.9999.1291.3.1";
+
+/// Identifiers that write_image_with_identifiers_in_sequences() puts in items
+const std::vector<std::string_view> item_identifiers = {
+    "SSN-987-65-4321", "ACC-777-1291", "RP-555-1291", identified_study_uid};
+
+/**
+ * @brief Write an image with identifiers inside Other Patient IDs Sequence,
+ *        Request Attributes Sequence, and Referenced Study Sequence items
+ */
+void write_image_with_identifiers_in_sequences(const fs::path& path) {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI,
+                  "1.2.826.0.1.3680043.9.9999.1291.3");
+    ds.set_string(tags::study_instance_uid, vr_type::UI, std::string(identified_study_uid));
+    ds.set_string(tags::patient_name, vr_type::PN, "IDENTIFIED^PATIENT");
+    ds.set_string(tags::patient_id, vr_type::LO, "MRN-1291");
+    ds.set_string(tags::modality, vr_type::CS, "OT");
+
+    dicom_dataset other_id;
+    other_id.set_string(tags::patient_id, vr_type::LO, "SSN-987-65-4321");
+    other_id.set_string(issuer_of_patient_id_tag, vr_type::LO, "NATIONAL");
+    ds.get_or_create_sequence(other_patient_ids_sequence_tag).push_back(std::move(other_id));
+
+    dicom_dataset request;
+    request.set_string(tags::accession_number, vr_type::SH, "ACC-777-1291");
+    request.set_string(requested_procedure_id_tag, vr_type::SH, "RP-555-1291");
+    ds.get_or_create_sequence(request_attributes_sequence_tag).push_back(std::move(request));
+
+    dicom_dataset study;
+    study.set_string(tags::referenced_sop_class_uid, vr_type::UI, "1.2.840.10008.3.1.2.3.1");
+    study.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
+                     std::string(identified_study_uid));
+    ds.get_or_create_sequence(referenced_study_sequence_tag).push_back(std::move(study));
+
+    auto file = dicom_file::create(
+        std::move(ds), kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
+    REQUIRE(file.save(path).is_ok());
+}
+
+/**
+ * @brief Whether the bytes of a file contain a text
+ */
+bool contains_text(const std::vector<uint8_t>& bytes, std::string_view text) {
+    return contains_bytes(bytes, std::vector<uint8_t>(text.begin(), text.end()));
+}
+
 }  // namespace
 
-TEST_CASE("Tag modification, anonymization, and conversion keep sequence items",
+TEST_CASE("Tag modification and conversion keep sequence items",
           "[cli][roundtrip][sequence]") {
     namespace tags = kcenon::pacs::core::tags;
 
@@ -1235,17 +1293,6 @@ TEST_CASE("Tag modification, anonymization, and conversion keep sequence items",
         auto modified = read_dicom(out);
         CHECK(get_tag(modified, tags::patient_name) == "MODIFIED^NAME");
         check_image_sequences(modified);
-    }
-
-    SECTION("dcm_anonymize") {
-        const auto out = tmp.path / "anonymized.dcm";
-        auto result = run_cli("dcm_anonymize", {src.string(), out.string()});
-        INFO("dcm_anonymize output: " << result.output);
-        REQUIRE(result.exit_code == 0);
-
-        auto anonymized = read_dicom(out);
-        CHECK(get_tag(anonymized, tags::patient_name) != "SEQUENCE^TEST");
-        check_image_sequences(anonymized);
     }
 
     SECTION("dcm_conv to Implicit VR Little Endian and back") {
@@ -1266,6 +1313,44 @@ TEST_CASE("Tag modification, anonymization, and conversion keep sequence items",
         INFO("dcm_conv --explicit output: " << result.output);
         REQUIRE(result.exit_code == 0);
         check_image_sequences(read_dicom(explicit_path));
+    }
+}
+
+TEST_CASE("Anonymization writes no identifiers from sequence items",
+          "[cli][roundtrip][sequence]") {
+    namespace tags = kcenon::pacs::core::tags;
+
+    temp_dir tmp;
+    const auto src = tmp.path / "identified.dcm";
+    const auto out = tmp.path / "anonymized.dcm";
+    write_image_with_identifiers_in_sequences(src);
+
+    // The input carries every identifier in its sequence items
+    const auto source_bytes = read_bytes(src);
+    for (const auto identifier : item_identifiers) {
+        INFO("Identifier: " << identifier);
+        REQUIRE(contains_text(source_bytes, identifier));
+    }
+
+    auto result = run_cli("dcm_anonymize", {src.string(), out.string()});
+    INFO("dcm_anonymize output: " << result.output);
+    REQUIRE(result.exit_code == 0);
+
+    const auto output_bytes = read_bytes(out);
+    for (const auto identifier : item_identifiers) {
+        INFO("Identifier: " << identifier);
+        CHECK_FALSE(contains_text(output_bytes, identifier));
+    }
+
+    // The anonymizer does not process sequence items, so it empties the
+    // sequences and keeps the elements
+    auto anonymized = read_dicom(out);
+    CHECK(get_tag(anonymized, tags::patient_name) != "IDENTIFIED^PATIENT");
+    for (const auto tag : {other_patient_ids_sequence_tag, request_attributes_sequence_tag,
+                           referenced_study_sequence_tag}) {
+        const auto* items = anonymized.dataset().get_sequence(tag);
+        REQUIRE(items != nullptr);
+        CHECK(items->empty());
     }
 }
 
