@@ -226,6 +226,22 @@ test_dcm_conv() {
     run_test "dcm_conv: convert to implicit VR" \
         "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${OUTPUT2}\" --implicit"
     assert_file_exists "dcm_conv: implicit output file created" "${OUTPUT2}"
+
+    # Compress to RLE Lossless and back; --verify decodes the Pixel Data
+    local RLE="${WORK_DIR}/conv_rle.dcm"
+    local RLE_BACK="${WORK_DIR}/conv_rle_back.dcm"
+    run_test "dcm_conv: compress to RLE with verification" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${RLE}\" --rle --verify"
+    run_test "dcm_conv: decompress RLE with verification" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${RLE}\" \"${RLE_BACK}\" --explicit --verify"
+    if [[ -f "${RLE_BACK}" ]]; then
+        run_test "dcm_conv: RLE round trip reproduces the file" \
+            "cmp -s \"${DCM}\" \"${RLE_BACK}\""
+    fi
+
+    # A Transfer Syntax without a working codec is refused
+    run_test "dcm_conv: HEVC target is refused" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${WORK_DIR}/conv_hevc.dcm\" -t 1.2.840.10008.1.2.4.107" --expect-fail
 }
 
 test_dcm_modify() {

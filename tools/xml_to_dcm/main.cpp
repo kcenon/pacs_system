@@ -657,7 +657,8 @@ Arguments:
 
 Options:
   -h, --help              Show this help message
-  -t, --transfer-syntax   Transfer Syntax UID (default: Explicit VR Little Endian)
+  -t, --transfer-syntax   Transfer Syntax UID (default: the template's, else
+                          Explicit VR Little Endian)
   --template <dcm>        Template DICOM file (copies pixel data and missing tags)
   --bulk-data-dir <dir>   Directory for BulkData URI resolution
   -v, --verbose           Verbose output
@@ -667,6 +668,12 @@ Transfer Syntax Options:
   1.2.840.10008.1.2      Implicit VR Little Endian
   1.2.840.10008.1.2.1    Explicit VR Little Endian (default)
   1.2.840.10008.1.2.2    Explicit VR Big Endian
+
+  Pixel Data is written as it is; xml_to_dcm never compresses or
+  decompresses it. A compressed (encapsulated) Transfer Syntax is accepted
+  only when the Pixel Data is already encapsulated, in that syntax if it
+  comes from the template, and a native one only when the Pixel Data is
+  native. Use dcm_conv to change the encoding of Pixel Data.
 
 Examples:
   )" << program_name
@@ -694,7 +701,8 @@ Input Format (DICOM Native XML PS3.19):
 Exit Codes:
   0  Success
   1  Invalid arguments
-  2  File error or invalid XML
+  2  File error, invalid XML, or Pixel Data that does not match the
+     Transfer Syntax
 )";
 }
 
@@ -748,6 +756,76 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
     return true;
 }
 
+/**
+ * @brief Check that the Pixel Data matches the output Transfer Syntax
+ * @param dataset The dataset to write
+ * @param ts The output Transfer Syntax
+ * @param template_ts The template's Transfer Syntax when the Pixel Data came
+ *        from the template
+ * @param error Output: the reason on failure
+ * @return true if there is no Pixel Data or it is in the form ts needs
+ *
+ * xml_to_dcm writes Pixel Data as it is and never compresses or decompresses
+ * it. An encapsulated (compressed) Transfer Syntax therefore needs Pixel Data
+ * that is already encapsulated, that is, items that split into Number of
+ * Frames frames, and a native Transfer Syntax needs Pixel Data that is not.
+ * The XML input does not say which compressed syntax its encapsulated Pixel
+ * Data uses, so -t is trusted for it; Pixel Data copied from the template
+ * must keep the template's Transfer Syntax.
+ */
+bool check_pixel_data_encoding(
+    const kcenon::pacs::core::dicom_dataset& dataset,
+    const kcenon::pacs::encoding::transfer_syntax& ts,
+    const std::optional<kcenon::pacs::encoding::transfer_syntax>& template_ts,
+    std::string& error) {
+    using namespace kcenon::pacs::core;
+
+    const auto* pixel_data = dataset.get(tags::pixel_data);
+    if (pixel_data == nullptr) {
+        return true;
+    }
+
+    uint32_t number_of_frames = 1;
+    try {
+        const auto frames = dataset.get_string(dicom_tag{0x0028, 0x0008});
+        if (!frames.empty()) {
+            number_of_frames = static_cast<uint32_t>(std::stoul(frames));
+        }
+    } catch (const std::exception&) {
+        number_of_frames = 1;
+    }
+
+    const auto frames =
+        dicom_file::encapsulated_frames(pixel_data->raw_data(), number_of_frames);
+    const bool encapsulated = frames.is_ok();
+    if (!encapsulated &&
+        frames.error().code != kcenon::pacs::error_codes::invalid_sequence) {
+        error = "Encapsulated Pixel Data: " + frames.error().message;
+        return false;
+    }
+
+    if (ts.is_encapsulated() && !encapsulated) {
+        error = std::string(ts.name()) +
+                " needs encapsulated Pixel Data, but the Pixel Data is native;"
+                " xml_to_dcm does not compress pixel data (use dcm_conv)";
+        return false;
+    }
+    if (!ts.is_encapsulated() && encapsulated) {
+        error = "The Pixel Data is encapsulated, but " + std::string(ts.name()) +
+                " is native; xml_to_dcm does not decompress pixel data (pass -t"
+                " with the Transfer Syntax of the Pixel Data, or use dcm_conv)";
+        return false;
+    }
+    if (encapsulated && template_ts && *template_ts != ts) {
+        error = "The Pixel Data from the template is encoded as " +
+                std::string(template_ts->name()) + ", not " +
+                std::string(ts.name()) +
+                "; xml_to_dcm does not transcode pixel data (use dcm_conv)";
+        return false;
+    }
+    return true;
+}
+
 int convert_file(const options& opts) {
     using namespace kcenon::pacs::core;
     using namespace kcenon::pacs::encoding;
@@ -787,6 +865,7 @@ int convert_file(const options& opts) {
 
     // Load template if specified
     std::optional<dicom_file> template_file;
+    bool pixel_data_from_template = false;
     if (!opts.template_path.empty()) {
         auto result = dicom_file::open(opts.template_path);
         if (result.is_err()) {
@@ -795,6 +874,9 @@ int convert_file(const options& opts) {
             return 2;
         }
         template_file = std::move(result.value());
+        pixel_data_from_template =
+            dataset.get(tags::pixel_data) == nullptr &&
+            template_file->dataset().get(tags::pixel_data) != nullptr;
 
         // Merge template data (XML values override template)
         for (const auto& [tag, element] : template_file->dataset()) {
@@ -816,6 +898,17 @@ int convert_file(const options& opts) {
         }
     } else if (template_file) {
         ts = template_file->transfer_syntax();
+    }
+
+    // Pixel Data is written as it is, so it must already match ts
+    std::optional<transfer_syntax> template_ts;
+    if (pixel_data_from_template) {
+        template_ts = template_file->transfer_syntax();
+    }
+    std::string error;
+    if (!check_pixel_data_encoding(dataset, ts, template_ts, error)) {
+        std::cerr << "Error: " << error << "\n";
+        return 2;
     }
 
     // Create DICOM file

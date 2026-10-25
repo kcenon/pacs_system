@@ -3,10 +3,17 @@
  * @brief DICOM Conversion - Transfer Syntax Conversion Utility
  * @example dcm_conv/main.cpp
  *
- * A command-line utility for converting DICOM files between different
- * Transfer Syntaxes, including compressed and uncompressed formats.
+ * A command-line utility for converting DICOM files between Transfer
+ * Syntaxes. Between native (uncompressed) Transfer Syntaxes only the dataset
+ * encoding changes. When the source or the target is an encapsulated
+ * (compressed) Transfer Syntax, every frame of Pixel Data is decoded with the
+ * source codec and encoded with the target codec, and the attributes that the
+ * new encoding changes are updated. A file fails to convert when this build
+ * does not include a codec it needs or the codec cannot handle the image.
  *
  * @see Issue #280 - dcm_conv: Transfer Syntax conversion utility
+ * @see Issue #1276 - dcm_conv relabels Transfer Syntaxes without transcoding
+ * @see DICOM PS3.5 Section 8 - Encoding of Pixel, Overlay and Waveform Data
  * @see DICOM PS3.5 Section 10 - Transfer Syntax
  *
  * @code{.unparsed}
@@ -15,6 +22,7 @@
  *
  * Example:
  *   dcm_conv image.dcm converted.dcm --explicit
+ *   dcm_conv image.dcm compressed.dcm --rle
  *   dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 90
  *   dcm_conv ./input_dir/ ./output_dir/ --recursive --implicit
  * @endcode
@@ -28,13 +36,31 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
+#include <span>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace {
+
+using kcenon::pacs::core::dicom_tag;
+
+// Attributes without a constant in dicom_tag_constants.h
+constexpr dicom_tag kPlanarConfiguration{0x0028, 0x0006};
+constexpr dicom_tag kNumberOfFrames{0x0028, 0x0008};
+constexpr dicom_tag kLossyImageCompression{0x0028, 0x2110};
+constexpr dicom_tag kLossyImageCompressionRatio{0x0028, 0x2112};
+constexpr dicom_tag kLossyImageCompressionMethod{0x0028, 0x2114};
+constexpr dicom_tag kExtendedOffsetTable{0x7FE0, 0x0001};
+constexpr dicom_tag kExtendedOffsetTableLengths{0x7FE0, 0x0002};
+constexpr dicom_tag kFloatPixelData{0x7FE0, 0x0008};
+constexpr dicom_tag kDoubleFloatPixelData{0x7FE0, 0x0009};
 
 /**
  * @brief Command line options
@@ -83,34 +109,52 @@ Transfer Syntax Options:
   --implicit          Implicit VR Little Endian (1.2.840.10008.1.2)
   --explicit          Explicit VR Little Endian (1.2.840.10008.1.2.1) [default]
   --explicit-be       Explicit VR Big Endian (1.2.840.10008.1.2.2) [retired]
-  --jpeg-baseline     JPEG Baseline (Process 1) - lossy
-  --jpeg-lossless     JPEG Lossless, Non-Hierarchical
-  --jpeg2000          JPEG 2000 Image Compression (Lossless Only)
-  --jpeg2000-lossy    JPEG 2000 Image Compression
-  --htj2k             HTJ2K Lossless Only (1.2.840.10008.1.2.4.201)
-  --htj2k-rpcl        HTJ2K with RPCL Options (1.2.840.10008.1.2.4.202)
-  --htj2k-lossy       HTJ2K Lossy (1.2.840.10008.1.2.4.203)
+  --jpeg-baseline     JPEG Baseline (Process 1), lossy [needs libjpeg-turbo]
+  --jpeg-lossless     JPEG Lossless, Non-Hierarchical, First-Order Prediction
+  --jpeg2000          JPEG 2000 Lossless Only [needs OpenJPEG]
+  --jpeg2000-lossy    JPEG 2000, lossy [needs OpenJPEG]
+  --htj2k             HTJ2K Lossless Only (1.2.840.10008.1.2.4.201) [needs OpenJPH]
+  --htj2k-rpcl        HTJ2K with RPCL Options (1.2.840.10008.1.2.4.202) [needs OpenJPH]
+  --htj2k-lossy       HTJ2K, lossy (1.2.840.10008.1.2.4.203) [needs OpenJPH]
   --rle               RLE Lossless
   -t, --transfer-syntax <uid>  Specify Transfer Syntax by UID
 
+Conversion:
+  Between native syntaxes only the dataset encoding changes. When the source
+  or the target is compressed, every frame of Pixel Data is decoded and
+  re-encoded with the codecs in this build (see --list-syntaxes), and
+  Photometric Interpretation and, for lossy targets, Lossy Image Compression
+  (0028,2110), Ratio (0028,2112), and Method (0028,2114) are updated. A file
+  fails to convert when a codec it needs is not in this build or cannot
+  encode the image (for example, JPEG Lossless with color images).
+
 Compression Options:
-  -q, --quality <1-100>   JPEG quality (default: 90, higher = better quality)
+  -q, --quality <1-100>   Quality for lossy targets (default: 90): JPEG
+                          Baseline quality, JPEG-LS near-lossless NEAR value
+                          (100 = lossless), and JPEG 2000 compression ratio;
+                          lossless targets and HTJ2K ignore it
 
 Processing Options:
   -r, --recursive         Process directory recursively
   --overwrite             Overwrite existing output files
-  --verify                Verify conversion result
+  --verify                Reopen each output and check that its Pixel Data
+                          matches its Transfer Syntax: decode every frame
+                          (compressed) or check the length against Rows,
+                          Columns, Samples per Pixel, Bits Allocated, and
+                          Number of Frames (native)
   -v, --verbose           Verbose output
-  -q, --quiet             Minimal output (errors only)
+  --quiet                 Minimal output (errors only)
   --no-progress           Disable progress display
 
 Information:
-  --list-syntaxes         List all supported Transfer Syntaxes
+  --list-syntaxes         List Transfer Syntaxes and the codecs in this build
   -h, --help              Show this help message
 
 Examples:
   )" << program_name
               << R"( image.dcm converted.dcm --explicit
+  )" << program_name
+              << R"( image.dcm compressed.dcm --rle
   )" << program_name
               << R"( image.dcm compressed.dcm --jpeg-baseline -q 85
   )" << program_name
@@ -123,7 +167,7 @@ Examples:
 Exit Codes:
   0  Success - All files converted successfully
   1  Error - Invalid arguments or help requested
-  2  Error - Conversion failed for one or more files
+  2  Error - Conversion or verification failed for one or more files
 )";
 }
 
@@ -277,6 +321,491 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
 }
 
 /**
+ * @brief Image Pixel attributes that describe the Pixel Data of a dataset
+ */
+struct pixel_description {
+    kcenon::pacs::encoding::compression::image_params params;
+    std::string photometric;  ///< Photometric Interpretation (0028,0004)
+};
+
+/**
+ * @brief Read the Image Pixel attributes of a dataset
+ * @param dataset Dataset with Pixel Data
+ * @param desc Output: the attributes; Number of Frames is 1 when absent
+ * @param error Output: the reason on failure
+ * @return true if Rows, Columns, Bits Allocated, and Number of Frames are valid
+ */
+bool read_pixel_description(const kcenon::pacs::core::dicom_dataset& dataset,
+                            pixel_description& desc, std::string& error) {
+    using namespace kcenon::pacs::core;
+    namespace compression = kcenon::pacs::encoding::compression;
+
+    const auto rows = dataset.get_numeric<uint16_t>(tags::rows);
+    const auto columns = dataset.get_numeric<uint16_t>(tags::columns);
+    const auto bits_allocated = dataset.get_numeric<uint16_t>(tags::bits_allocated);
+    if (!rows || !columns || !bits_allocated || *rows == 0 || *columns == 0 ||
+        *bits_allocated == 0) {
+        error = "Pixel Data needs non-zero Rows, Columns, and Bits Allocated";
+        return false;
+    }
+
+    auto& params = desc.params;
+    params.height = *rows;
+    params.width = *columns;
+    params.bits_allocated = *bits_allocated;
+    params.bits_stored =
+        dataset.get_numeric<uint16_t>(tags::bits_stored).value_or(params.bits_allocated);
+    params.high_bit = dataset.get_numeric<uint16_t>(tags::high_bit)
+                          .value_or(static_cast<uint16_t>(params.bits_stored - 1));
+    params.samples_per_pixel =
+        dataset.get_numeric<uint16_t>(tags::samples_per_pixel).value_or(1);
+    params.pixel_representation =
+        dataset.get_numeric<uint16_t>(tags::pixel_representation).value_or(0);
+    params.planar_configuration =
+        dataset.get_numeric<uint16_t>(kPlanarConfiguration).value_or(0);
+    desc.photometric = dataset.get_string(tags::photometric_interpretation);
+    params.photometric = compression::parse_photometric_interpretation(desc.photometric);
+
+    params.number_of_frames = 1;
+    if (const auto frames = dataset.get_string(kNumberOfFrames); !frames.empty()) {
+        try {
+            const auto value = std::stol(frames);
+            if (value < 1) {
+                throw std::out_of_range(frames);
+            }
+            params.number_of_frames = static_cast<uint32_t>(value);
+        } catch (const std::exception&) {
+            error = "Invalid Number of Frames '" + frames + "'";
+            return false;
+        }
+    }
+
+    if (params.samples_per_pixel == 0) {
+        error = "Samples per Pixel is 0";
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Expected byte length of native Pixel Data (PS3.5 Section 8.1.1)
+ *
+ * Rows x Columns x Samples per Pixel x Bits Allocated x Number of Frames,
+ * in bytes rounded up; YBR_FULL_422 stores two samples per pixel.
+ */
+uint64_t native_pixel_data_length(const pixel_description& desc) {
+    const auto& params = desc.params;
+    const uint64_t samples =
+        desc.photometric == "YBR_FULL_422" ? 2 : params.samples_per_pixel;
+    const uint64_t bits = uint64_t{params.width} * params.height * samples *
+                          params.bits_allocated * params.number_of_frames;
+    return (bits + 7) / 8;
+}
+
+/**
+ * @brief Reorder a color-by-plane frame (Planar Configuration 1) to color-by-pixel
+ */
+std::vector<uint8_t> to_color_by_pixel(
+    std::span<const uint8_t> frame,
+    const kcenon::pacs::encoding::compression::image_params& params) {
+    const size_t pixels = size_t{params.width} * params.height;
+    const size_t samples = params.samples_per_pixel;
+    const size_t sample_bytes = params.bits_allocated / 8;
+
+    std::vector<uint8_t> result(frame.size());
+    for (size_t s = 0; s < samples; ++s) {
+        for (size_t p = 0; p < pixels; ++p) {
+            std::memcpy(result.data() + (p * samples + s) * sample_bytes,
+                        frame.data() + (s * pixels + p) * sample_bytes, sample_bytes);
+        }
+    }
+    return result;
+}
+
+/**
+ * @brief Photometric Interpretation of the pixels a source codec decodes
+ *
+ * The JPEG Baseline decoder returns RGB for color images, and the JPEG 2000
+ * and HTJ2K decoders undo the component transform that YBR_RCT and YBR_ICT
+ * describe. The other codecs return the components as stored.
+ */
+std::string decoded_photometric(const kcenon::pacs::encoding::transfer_syntax& source_ts,
+                                const pixel_description& desc) {
+    if (desc.params.samples_per_pixel != 3) {
+        return desc.photometric;
+    }
+    if (source_ts == kcenon::pacs::encoding::transfer_syntax::jpeg_baseline ||
+        desc.photometric == "YBR_RCT" || desc.photometric == "YBR_ICT") {
+        return "RGB";
+    }
+    return desc.photometric;
+}
+
+/**
+ * @brief Photometric Interpretation of the pixels a target codec encodes
+ * @param target_ts The encapsulated target Transfer Syntax
+ * @param lossy Whether the target codec is lossy
+ * @param desc The native pixels to encode
+ * @param photometric Output: the value to store with the encoded pixels
+ * @param error Output: the reason on failure
+ * @return true if the target can store this Photometric Interpretation
+ *
+ * PS3.5 Section 8.2: the JPEG Baseline encoder converts RGB to YCbCr with
+ * 4:2:2 subsampling (YBR_FULL_422); the HTJ2K encoder applies the reversible
+ * (YBR_RCT) or irreversible (YBR_ICT) component transform to RGB; the JPEG
+ * 2000, JPEG-LS, and RLE encoders store RGB or YBR_FULL components
+ * unchanged. PALETTE COLOR indices are not compressed lossily.
+ */
+bool encoded_photometric(const kcenon::pacs::encoding::transfer_syntax& target_ts,
+                         bool lossy, const pixel_description& desc,
+                         std::string& photometric, std::string& error) {
+    using kcenon::pacs::encoding::transfer_syntax;
+
+    photometric = desc.photometric;
+    if (lossy && desc.photometric == "PALETTE COLOR") {
+        error = "PALETTE COLOR images are not compressed with the lossy " +
+                std::string(target_ts.name());
+        return false;
+    }
+    if (desc.params.samples_per_pixel != 3) {
+        return true;
+    }
+
+    const bool rgb = desc.photometric == "RGB";
+    if (target_ts == transfer_syntax::jpeg_baseline) {
+        photometric = "YBR_FULL_422";
+    } else if (target_ts == transfer_syntax::htj2k_lossless ||
+               target_ts == transfer_syntax::htj2k_rpcl) {
+        photometric = "YBR_RCT";
+    } else if (target_ts == transfer_syntax::htj2k_lossy) {
+        photometric = "YBR_ICT";
+    } else if (rgb || desc.photometric == "YBR_FULL") {
+        return true;
+    }
+
+    if (!rgb) {
+        error = "Photometric Interpretation '" + desc.photometric +
+                "' cannot be encoded as " + std::string(target_ts.name());
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Lossy Image Compression Method (0028,2114) of a lossy target
+ * @return The Defined Term of PS3.3 Section C.7.6.1.1.5.1
+ */
+std::string lossy_compression_method(const kcenon::pacs::encoding::transfer_syntax& target_ts) {
+    using kcenon::pacs::encoding::transfer_syntax;
+
+    if (target_ts == transfer_syntax::jpeg_baseline) {
+        return "ISO_10918_1";
+    }
+    if (target_ts == transfer_syntax::jpeg_ls_near_lossless) {
+        return "ISO_14495_1";
+    }
+    if (target_ts == transfer_syntax::htj2k_lossy) {
+        return "ISO_15444_15";
+    }
+    return "ISO_15444_1";  // JPEG 2000 (irreversible)
+}
+
+/**
+ * @brief Append a value to a multi-valued string attribute
+ */
+void append_value(kcenon::pacs::core::dicom_dataset& dataset, dicom_tag tag,
+                  kcenon::pacs::encoding::vr_type vr, const std::string& value) {
+    const auto existing = dataset.get_string(tag);
+    dataset.set_string(tag, vr, existing.empty() ? value : existing + "\\" + value);
+}
+
+/**
+ * @brief Decode and re-encode Pixel Data for a new Transfer Syntax
+ * @param dataset The dataset to change in place
+ * @param source_ts Transfer Syntax the Pixel Data is encoded in
+ * @param target_ts Transfer Syntax to encode the Pixel Data in
+ * @param opts Conversion options (quality)
+ * @param error Output: the reason on failure
+ * @return true on success; on failure dataset may be partly changed
+ *
+ * Decodes each frame with the source codec (or splits native Pixel Data into
+ * frames), then encodes each frame with the target codec (or concatenates
+ * native frames). Updates Photometric Interpretation and Planar
+ * Configuration, adds Lossy Image Compression attributes for lossy targets,
+ * and removes the Extended Offset Table, which describes the old encoding.
+ * Number of Frames does not change.
+ */
+bool transcode_pixel_data(kcenon::pacs::core::dicom_dataset& dataset,
+                          const kcenon::pacs::encoding::transfer_syntax& source_ts,
+                          const kcenon::pacs::encoding::transfer_syntax& target_ts,
+                          const options& opts, std::string& error) {
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
+
+    const auto* pixel_data = dataset.get(tags::pixel_data);
+    if (pixel_data == nullptr) {
+        return true;
+    }
+
+    pixel_description desc;
+    if (!read_pixel_description(dataset, desc, error)) {
+        return false;
+    }
+    auto& params = desc.params;
+    if (params.bits_allocated % 8 != 0) {
+        error = "Bits Allocated " + std::to_string(params.bits_allocated) +
+                " cannot be compressed or decompressed";
+        return false;
+    }
+    if (params.bits_allocated > 8 &&
+        (source_ts.endianness() == byte_order::big_endian ||
+         target_ts.endianness() == byte_order::big_endian)) {
+        error = "Explicit VR Big Endian Pixel Data with Bits Allocated > 8 "
+                "cannot be compressed or decompressed";
+        return false;
+    }
+    const size_t frame_bytes = params.frame_size_bytes();
+
+    // Native frames, color-by-pixel
+    std::vector<std::vector<uint8_t>> frames;
+    if (source_ts.is_encapsulated()) {
+        auto split = dicom_file::encapsulated_frames(pixel_data->raw_data(),
+                                                     params.number_of_frames);
+        if (split.is_err()) {
+            error = split.error().message;
+            return false;
+        }
+
+        auto codec = compression::codec_factory::create(source_ts);
+        for (size_t i = 0; i < split.value().size(); ++i) {
+            auto decoded = codec->decode(split.value()[i], params);
+            if (decoded.is_err()) {
+                error = "Frame " + std::to_string(i + 1) + ": " +
+                        decoded.error().message;
+                return false;
+            }
+            if (decoded.value().data.size() != frame_bytes) {
+                error = "Frame " + std::to_string(i + 1) + " decoded to " +
+                        std::to_string(decoded.value().data.size()) +
+                        " bytes, expected " + std::to_string(frame_bytes);
+                return false;
+            }
+            frames.push_back(std::move(decoded.value().data));
+        }
+        desc.photometric = decoded_photometric(source_ts, desc);
+    } else {
+        if (desc.photometric == "YBR_FULL_422" ||
+            desc.photometric.starts_with("YBR_PARTIAL")) {
+            error = "Native " + desc.photometric + " Pixel Data cannot be compressed";
+            return false;
+        }
+
+        const auto raw = pixel_data->raw_data();
+        const uint64_t expected = uint64_t{frame_bytes} * params.number_of_frames;
+        if (raw.size() < expected) {
+            error = "Pixel Data has " + std::to_string(raw.size()) +
+                    " bytes, expected " + std::to_string(expected);
+            return false;
+        }
+        for (uint32_t i = 0; i < params.number_of_frames; ++i) {
+            const auto frame = raw.subspan(i * frame_bytes, frame_bytes);
+            if (params.planar_configuration == 1 && params.samples_per_pixel > 1) {
+                frames.push_back(to_color_by_pixel(frame, params));
+            } else {
+                frames.emplace_back(frame.begin(), frame.end());
+            }
+        }
+    }
+    params.planar_configuration = 0;
+    params.photometric = compression::parse_photometric_interpretation(desc.photometric);
+
+    std::string photometric = desc.photometric;
+    if (target_ts.is_encapsulated()) {
+        auto codec = compression::codec_factory::create(target_ts);
+        if (!codec->can_encode(params)) {
+            error = std::string(codec->name()) + " cannot encode images with " +
+                    std::to_string(params.samples_per_pixel) +
+                    " samples per pixel, Bits Allocated " +
+                    std::to_string(params.bits_allocated) + ", and Bits Stored " +
+                    std::to_string(params.bits_stored);
+            return false;
+        }
+        if (!encoded_photometric(target_ts, codec->is_lossy(), desc, photometric,
+                                 error)) {
+            return false;
+        }
+
+        compression::compression_options compression_opts;
+        compression_opts.quality = opts.quality;
+        compression_opts.chroma_subsampling = 1;  // 4:2:2, as YBR_FULL_422 states
+
+        std::vector<std::vector<uint8_t>> encoded_frames;
+        size_t compressed_bytes = 0;
+        for (size_t i = 0; i < frames.size(); ++i) {
+            auto encoded = codec->encode(frames[i], params, compression_opts);
+            if (encoded.is_err()) {
+                error = "Frame " + std::to_string(i + 1) + ": " +
+                        encoded.error().message;
+                return false;
+            }
+            compressed_bytes += encoded.value().data.size();
+            encoded_frames.push_back(std::move(encoded.value().data));
+        }
+
+        const auto value = dicom_file::encapsulate_frames(encoded_frames);
+        dataset.insert(dicom_element{tags::pixel_data, vr_type::OB, value});
+
+        if (codec->is_lossy()) {
+            // PS3.3 Section C.7.6.1.1.5: once lossy, always lossy; ratio and
+            // method values accumulate, one per lossy compression step
+            std::ostringstream ratio;
+            ratio << std::fixed << std::setprecision(2)
+                  << static_cast<double>(frame_bytes * frames.size()) /
+                         static_cast<double>((std::max)(compressed_bytes, size_t{1}));
+            dataset.set_string(kLossyImageCompression, vr_type::CS, "01");
+            append_value(dataset, kLossyImageCompressionRatio, vr_type::DS, ratio.str());
+            append_value(dataset, kLossyImageCompressionMethod, vr_type::CS,
+                         lossy_compression_method(target_ts));
+        }
+    } else {
+        std::vector<uint8_t> value;
+        value.reserve(frame_bytes * frames.size() + 1);
+        for (const auto& frame : frames) {
+            value.insert(value.end(), frame.begin(), frame.end());
+        }
+        if (value.size() % 2 != 0) {
+            value.push_back(0x00);
+        }
+        dataset.insert(dicom_element{
+            tags::pixel_data,
+            params.bits_allocated > 8 ? vr_type::OW : vr_type::OB, value});
+    }
+
+    dataset.set_string(tags::photometric_interpretation, vr_type::CS, photometric);
+    if (params.samples_per_pixel > 1) {
+        dataset.set_numeric<uint16_t>(kPlanarConfiguration, vr_type::US, 0);
+    }
+    dataset.remove(kExtendedOffsetTable);
+    dataset.remove(kExtendedOffsetTableLengths);
+    return true;
+}
+
+/**
+ * @brief Check that the Pixel Data of a file matches its Transfer Syntax
+ * @param file The file to check
+ * @param opts Conversion options (verbose)
+ * @param error Output: the reason on failure
+ * @return true if the file has no Pixel Data or its Pixel Data matches
+ *
+ * Encapsulated Pixel Data must split into Number of Frames frames that this
+ * build's codec decodes to frames of the expected size; when the build has
+ * no codec for the Transfer Syntax, only the encapsulation is checked.
+ * Native Pixel Data must have the length native_pixel_data_length() gives,
+ * plus one padding byte when that is odd.
+ */
+bool verify_pixel_data(const kcenon::pacs::core::dicom_file& file,
+                       const options& opts, std::string& error) {
+    using namespace kcenon::pacs::core;
+    using namespace kcenon::pacs::encoding;
+
+    const auto& dataset = file.dataset();
+    const auto* pixel_data = dataset.get(tags::pixel_data);
+    if (pixel_data == nullptr) {
+        return true;
+    }
+
+    pixel_description desc;
+    if (!read_pixel_description(dataset, desc, error)) {
+        return false;
+    }
+
+    const auto ts = file.transfer_syntax();
+    if (ts.is_encapsulated()) {
+        auto split = dicom_file::encapsulated_frames(pixel_data->raw_data(),
+                                                     desc.params.number_of_frames);
+        if (split.is_err()) {
+            error = "Pixel Data is not encapsulated as " + std::string(ts.name()) +
+                    " requires: " + split.error().message;
+            return false;
+        }
+
+        if (!compression::codec_factory::is_available(ts)) {
+            if (opts.verbose) {
+                std::cout << "    Pixel Data not decoded: this build has no codec for "
+                          << ts.name() << "\n";
+            }
+            return true;
+        }
+
+        auto codec = compression::codec_factory::create(ts);
+        const size_t frame_bytes = desc.params.frame_size_bytes();
+        for (size_t i = 0; i < split.value().size(); ++i) {
+            auto decoded = codec->decode(split.value()[i], desc.params);
+            if (decoded.is_err()) {
+                error = "Frame " + std::to_string(i + 1) + " does not decode as " +
+                        std::string(ts.name()) + ": " + decoded.error().message;
+                return false;
+            }
+            if (decoded.value().data.size() != frame_bytes) {
+                error = "Frame " + std::to_string(i + 1) + " decodes to " +
+                        std::to_string(decoded.value().data.size()) +
+                        " bytes, expected " + std::to_string(frame_bytes);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    const uint64_t expected = native_pixel_data_length(desc);
+    const uint64_t actual = pixel_data->raw_data().size();
+    if (actual != expected && actual != expected + (expected % 2)) {
+        error = "Pixel Data has " + std::to_string(actual) + " bytes, but " +
+                std::string(ts.name()) + " with these Image Pixel attributes needs " +
+                std::to_string(expected);
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Reopen an output file and verify it
+ * @param output_path The written file
+ * @param target_ts The Transfer Syntax it must have
+ * @param opts Conversion options
+ * @return true if the Transfer Syntax and the Pixel Data match
+ */
+bool verify_output(const std::filesystem::path& output_path,
+                   const kcenon::pacs::encoding::transfer_syntax& target_ts,
+                   const options& opts) {
+    using namespace kcenon::pacs::core;
+
+    auto verify_result = dicom_file::open(output_path);
+    if (verify_result.is_err()) {
+        std::cerr << "Error: Verification failed for '" << output_path.string()
+                  << "': " << verify_result.error().message << "\n";
+        return false;
+    }
+
+    auto& verified_file = verify_result.value();
+    if (verified_file.transfer_syntax() != target_ts) {
+        std::cerr << "Error: Verification failed - Transfer Syntax mismatch\n";
+        return false;
+    }
+
+    std::string error;
+    if (!verify_pixel_data(verified_file, opts, error)) {
+        std::cerr << "Error: Verification failed for '" << output_path.string()
+                  << "': " << error << "\n";
+        return false;
+    }
+
+    if (opts.verbose) {
+        std::cout << "    Verified: OK\n";
+    }
+    return true;
+}
+
+/**
  * @brief Convert a single DICOM file to the target transfer syntax
  * @param input_path Input file path
  * @param output_path Output file path
@@ -317,7 +846,7 @@ bool convert_file(const std::filesystem::path& input_path,
         // Just copy the file
         std::filesystem::copy_file(input_path, output_path,
             std::filesystem::copy_options::overwrite_existing);
-        return true;
+        return !opts.verify || verify_output(output_path, target_ts, opts);
     }
 
     // Check if target transfer syntax is supported
@@ -335,17 +864,52 @@ bool convert_file(const std::filesystem::path& input_path,
         return false;
     }
 
+    // dicom_file does not inflate a deflated dataset
+    if (source_ts.is_deflated()) {
+        std::cerr << "Error: Source Transfer Syntax '" << source_ts.name()
+                  << "' is not supported\n";
+        return false;
+    }
+
+    auto& dataset = input_file.dataset();
+
+    // Float and Double Float Pixel Data are never encapsulated
+    if (target_ts.is_encapsulated() &&
+        (dataset.contains(kFloatPixelData) || dataset.contains(kDoubleFloatPixelData))) {
+        std::cerr << "Error: '" << input_path.string()
+                  << "' has Float Pixel Data, which cannot be stored as "
+                  << target_ts.name() << "\n";
+        return false;
+    }
+
+    // Pixel Data is decoded or encoded when either side is encapsulated
+    const bool transcode = dataset.contains(tags::pixel_data) &&
+                           (source_ts.is_encapsulated() || target_ts.is_encapsulated());
+    if (transcode && source_ts.is_encapsulated() &&
+        !compression::codec_factory::is_available(source_ts)) {
+        std::cerr << "Error: Source Transfer Syntax '" << source_ts.name()
+                  << "' needs a codec that this build does not include\n";
+        return false;
+    }
+
     if (opts.verbose) {
         std::cout << "  Converting: " << input_path.filename().string() << "\n";
         std::cout << "    From: " << source_ts.name() << "\n";
         std::cout << "    To:   " << target_ts.name() << "\n";
     }
 
+    if (transcode) {
+        std::string error;
+        if (!transcode_pixel_data(dataset, source_ts, target_ts, opts, error)) {
+            std::cerr << "Error: Cannot convert the Pixel Data of '"
+                      << input_path.string() << "' to " << target_ts.name()
+                      << ": " << error << "\n";
+            return false;
+        }
+    }
+
     // Create output file with new transfer syntax
-    auto output_file = dicom_file::create(
-        std::move(input_file.dataset()),
-        target_ts
-    );
+    auto output_file = dicom_file::create(std::move(dataset), target_ts);
 
     // Ensure output directory exists
     auto output_dir = output_path.parent_path();
@@ -361,27 +925,7 @@ bool convert_file(const std::filesystem::path& input_path,
         return false;
     }
 
-    // Verify if requested
-    if (opts.verify) {
-        auto verify_result = dicom_file::open(output_path);
-        if (verify_result.is_err()) {
-            std::cerr << "Error: Verification failed for '" << output_path.string()
-                      << "': " << verify_result.error().message << "\n";
-            return false;
-        }
-
-        auto& verified_file = verify_result.value();
-        if (verified_file.transfer_syntax() != target_ts) {
-            std::cerr << "Error: Verification failed - Transfer Syntax mismatch\n";
-            return false;
-        }
-
-        if (opts.verbose) {
-            std::cout << "    Verified: OK\n";
-        }
-    }
-
-    return true;
+    return !opts.verify || verify_output(output_path, target_ts, opts);
 }
 
 /**

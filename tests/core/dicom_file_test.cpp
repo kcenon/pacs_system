@@ -9,6 +9,7 @@
 #include <kcenon/pacs/core/dicom_tag_constants.h>
 #include <kcenon/pacs/core/result.h>
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -1336,6 +1337,245 @@ TEST_CASE("dicom_file parses JPEG-LS encapsulated pixel data", "[core][dicom_fil
             CHECK(file.dataset().get_string(tags::patient_name) == "ENCAP^TEST");
             CHECK(file.dataset().contains(tags::pixel_data));
         }
+    }
+}
+
+// ============================================================================
+// Encapsulated Pixel Data Writing (Issue #1276)
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Append an item (FFFE,E000) with the given value to a byte stream
+ */
+void append_item(std::vector<uint8_t>& stream, const std::vector<uint8_t>& value) {
+    const auto length = static_cast<uint32_t>(value.size());
+    const uint8_t header[] = {0xFE, 0xFF, 0x00, 0xE0,
+                              static_cast<uint8_t>(length & 0xFF),
+                              static_cast<uint8_t>((length >> 8) & 0xFF),
+                              static_cast<uint8_t>((length >> 16) & 0xFF),
+                              static_cast<uint8_t>((length >> 24) & 0xFF)};
+    stream.insert(stream.end(), std::begin(header), std::end(header));
+    stream.insert(stream.end(), value.begin(), value.end());
+}
+
+/**
+ * @brief Append a Sequence Delimitation Item (FFFE,E0DD) to a byte stream
+ */
+void append_sequence_delimiter(std::vector<uint8_t>& stream) {
+    const uint8_t delimiter[] = {0xFE, 0xFF, 0xDD, 0xE0, 0x00, 0x00, 0x00, 0x00};
+    stream.insert(stream.end(), std::begin(delimiter), std::end(delimiter));
+}
+
+/**
+ * @brief Little-endian bytes of 32-bit Basic Offset Table entries
+ */
+[[nodiscard]] auto offset_table(std::initializer_list<uint32_t> offsets)
+    -> std::vector<uint8_t> {
+    std::vector<uint8_t> bytes;
+    for (const auto offset : offsets) {
+        for (int shift = 0; shift < 32; shift += 8) {
+            bytes.push_back(static_cast<uint8_t>((offset >> shift) & 0xFF));
+        }
+    }
+    return bytes;
+}
+
+/**
+ * @brief Find a byte sequence in a buffer
+ */
+[[nodiscard]] auto contains_bytes(const std::vector<uint8_t>& haystack,
+                                  const std::vector<uint8_t>& needle) -> bool {
+    return std::search(haystack.begin(), haystack.end(), needle.begin(),
+                       needle.end()) != haystack.end();
+}
+
+/// (7FE0,0010) OB with undefined length, as Explicit VR Little Endian bytes
+const std::vector<uint8_t> kEncapsulatedPixelDataHeader = {
+    0xE0, 0x7F, 0x10, 0x00, 'O', 'B', 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF};
+
+}  // namespace
+
+TEST_CASE("dicom_file writes encapsulated pixel data", "[core][dicom_file][encapsulated]") {
+    SECTION("a file read with encapsulated pixel data is written back byte for byte") {
+        for (std::string_view ts_uid :
+             {"1.2.840.10008.1.2.4.90", "1.2.840.10008.1.2.5", "1.2.840.10008.1.2.4.80"}) {
+            DYNAMIC_SECTION("Transfer Syntax " << ts_uid) {
+                const auto data = create_dicom_with_encapsulated_pixel_data(ts_uid);
+
+                auto result = dicom_file::from_bytes(data);
+                REQUIRE(result.is_ok());
+
+                CHECK(result.value().to_bytes() == data);
+            }
+        }
+    }
+
+    SECTION("saved encapsulated pixel data has undefined length and parses into frames") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.1276");
+        ds.set_numeric<uint16_t>(tags::rows, vr_type::US, 2);
+        ds.set_numeric<uint16_t>(tags::columns, vr_type::US, 2);
+        ds.set_string(dicom_tag{0x0028, 0x0008}, vr_type::IS, "2");
+
+        // The first frame has odd length and is padded
+        const std::vector<std::vector<uint8_t>> frames = {{0x01, 0x02, 0x03},
+                                                          {0x04, 0x05, 0x06, 0x07}};
+        ds.insert(dicom_element{tags::pixel_data, vr_type::OB,
+                                dicom_file::encapsulate_frames(frames)});
+
+        auto file = dicom_file::create(std::move(ds), transfer_syntax::rle_lossless);
+        const auto bytes = file.to_bytes();
+
+        CHECK(contains_bytes(bytes, kEncapsulatedPixelDataHeader));
+        const std::vector<uint8_t> delimiter = {0xFE, 0xFF, 0xDD, 0xE0, 0x00, 0x00, 0x00, 0x00};
+        REQUIRE(bytes.size() > delimiter.size());
+        CHECK(std::equal(delimiter.begin(), delimiter.end(),
+                         bytes.end() - static_cast<std::ptrdiff_t>(delimiter.size())));
+
+        const auto path = create_temp_file_path("test_encapsulated_write_1276.dcm");
+        REQUIRE(file.save(path).is_ok());
+        auto reopened = dicom_file::open(path);
+        std::filesystem::remove(path);
+        REQUIRE(reopened.is_ok());
+
+        const auto* pixel_elem = reopened.value().dataset().get(tags::pixel_data);
+        REQUIRE(pixel_elem != nullptr);
+        auto parsed = dicom_file::encapsulated_frames(pixel_elem->raw_data(), 2);
+        REQUIRE(parsed.is_ok());
+        REQUIRE(parsed.value().size() == 2);
+        CHECK(parsed.value()[0] == std::vector<uint8_t>{0x01, 0x02, 0x03, 0x00});
+        CHECK(parsed.value()[1] == frames[1]);
+    }
+
+    SECTION("native pixel data under an encapsulated transfer syntax keeps its defined length") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.1276.2");
+        const std::vector<uint8_t> native(8, 0x40);
+        ds.insert(dicom_element{tags::pixel_data, vr_type::OB, native});
+
+        auto file = dicom_file::create(std::move(ds), transfer_syntax::rle_lossless);
+        const auto bytes = file.to_bytes();
+
+        CHECK_FALSE(contains_bytes(bytes, kEncapsulatedPixelDataHeader));
+        CHECK(contains_bytes(bytes, {0xE0, 0x7F, 0x10, 0x00, 'O', 'B', 0x00, 0x00,
+                                     0x08, 0x00, 0x00, 0x00}));
+    }
+
+    SECTION("a native transfer syntax never writes undefined-length pixel data") {
+        dicom_dataset ds;
+        ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+        ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.1276.3");
+        ds.insert(dicom_element{tags::pixel_data, vr_type::OB,
+                                dicom_file::encapsulate_frames({{0x01, 0x02}})});
+
+        auto file = dicom_file::create(std::move(ds),
+                                       transfer_syntax::explicit_vr_little_endian);
+
+        CHECK_FALSE(contains_bytes(file.to_bytes(), kEncapsulatedPixelDataHeader));
+    }
+}
+
+TEST_CASE("dicom_file encapsulate_frames layout", "[core][dicom_file][encapsulated]") {
+    const auto value = dicom_file::encapsulate_frames({{0xAA}, {0xBB, 0xCC}});
+
+    std::vector<uint8_t> expected;
+    append_item(expected, offset_table({0, 10}));  // second fragment item at 8 + 2
+    append_item(expected, {0xAA, 0x00});
+    append_item(expected, {0xBB, 0xCC});
+    append_sequence_delimiter(expected);
+
+    CHECK(value == expected);
+}
+
+TEST_CASE("dicom_file encapsulated_frames", "[core][dicom_file][encapsulated]") {
+    SECTION("the Basic Offset Table groups fragments into frames") {
+        std::vector<uint8_t> value;
+        append_item(value, offset_table({0, 24}));
+        append_item(value, {0x11, 0x12, 0x13, 0x14});  // frame 1 at 0
+        append_item(value, {0x15, 0x16, 0x17, 0x18});  // frame 1 at 12
+        append_item(value, {0x21, 0x22});              // frame 2 at 24
+        append_sequence_delimiter(value);
+
+        auto frames = dicom_file::encapsulated_frames(value, 2);
+        REQUIRE(frames.is_ok());
+        REQUIRE(frames.value().size() == 2);
+        CHECK(frames.value()[0] ==
+              std::vector<uint8_t>{0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18});
+        CHECK(frames.value()[1] == std::vector<uint8_t>{0x21, 0x22});
+    }
+
+    SECTION("an empty table with one frame joins all fragments") {
+        std::vector<uint8_t> value;
+        append_item(value, {});
+        append_item(value, {0x01, 0x02});
+        append_item(value, {0x03, 0x04});
+
+        auto frames = dicom_file::encapsulated_frames(value, 1);
+        REQUIRE(frames.is_ok());
+        REQUIRE(frames.value().size() == 1);
+        CHECK(frames.value()[0] == std::vector<uint8_t>{0x01, 0x02, 0x03, 0x04});
+    }
+
+    SECTION("an empty table with one fragment per frame") {
+        std::vector<uint8_t> value;
+        append_item(value, {});
+        append_item(value, {0x01, 0x02});
+        append_item(value, {0x03, 0x04});
+        append_sequence_delimiter(value);
+
+        auto frames = dicom_file::encapsulated_frames(value, 2);
+        REQUIRE(frames.is_ok());
+        REQUIRE(frames.value().size() == 2);
+        CHECK(frames.value()[1] == std::vector<uint8_t>{0x03, 0x04});
+    }
+
+    SECTION("an empty table with fragmented frames splits at codestream markers") {
+        std::vector<uint8_t> value;
+        append_item(value, {});
+        append_item(value, {0xFF, 0xD8, 0xFF, 0xE0});
+        append_item(value, {0x12, 0x34});
+        append_item(value, {0xFF, 0xD8, 0xFF, 0xDB});
+        append_sequence_delimiter(value);
+
+        auto frames = dicom_file::encapsulated_frames(value, 2);
+        REQUIRE(frames.is_ok());
+        REQUIRE(frames.value().size() == 2);
+        CHECK(frames.value()[0] == std::vector<uint8_t>{0xFF, 0xD8, 0xFF, 0xE0, 0x12, 0x34});
+        CHECK(frames.value()[1] == std::vector<uint8_t>{0xFF, 0xD8, 0xFF, 0xDB});
+    }
+
+    SECTION("values that are not items or do not fit the frames are rejected") {
+        const std::vector<uint8_t> native(16, 0x00);
+        CHECK(dicom_file::encapsulated_frames(native, 1).is_err());
+
+        std::vector<uint8_t> truncated;
+        append_item(truncated, {});
+        append_item(truncated, {0x01, 0x02, 0x03, 0x04});
+        truncated.resize(truncated.size() - 2);
+        CHECK(dicom_file::encapsulated_frames(truncated, 1).is_err());
+
+        std::vector<uint8_t> three_fragments;
+        append_item(three_fragments, {});
+        append_item(three_fragments, {0x01, 0x02});
+        append_item(three_fragments, {0x03, 0x04});
+        append_item(three_fragments, {0x05, 0x06});
+        CHECK(dicom_file::encapsulated_frames(three_fragments, 2).is_err());
+
+        std::vector<uint8_t> short_table;
+        append_item(short_table, offset_table({0}));
+        append_item(short_table, {0x01, 0x02});
+        append_item(short_table, {0x03, 0x04});
+        CHECK(dicom_file::encapsulated_frames(short_table, 2).is_err());
+
+        std::vector<uint8_t> bad_offset;
+        append_item(bad_offset, offset_table({0, 4}));
+        append_item(bad_offset, {0x01, 0x02});
+        append_item(bad_offset, {0x03, 0x04});
+        CHECK(dicom_file::encapsulated_frames(bad_offset, 2).is_err());
     }
 }
 
