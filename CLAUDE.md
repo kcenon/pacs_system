@@ -46,6 +46,7 @@ Key CMake options:
 - `PACS_BUILD_BENCHMARKS` (OFF)
 - `PACS_BUILD_STORAGE` (ON) — Requires SQLite3
 - `PACS_BUILD_CODECS` (ON) — JPEG, JPEG2000, JPEG-LS, HTJ2K, RLE
+- `PACS_REQUIRE_CODECS` (OFF) — Configure fails when libjpeg-turbo, OpenJPEG, CharLS, or OpenJPH is missing (CI codec jobs set it)
 - `PACS_WITH_OPENSSL` (ON), `PACS_WITH_REST_API` (ON)
 - `PACS_WITH_AWS_SDK` (OFF), `PACS_WITH_AZURE_SDK` (OFF)
 

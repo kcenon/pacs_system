@@ -266,7 +266,40 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
             SYMBOLIC)
     endif()
 endif()
+
+# A missing codec library only disables that codec (warnings above). With
+# PACS_REQUIRE_CODECS=ON it stops the configure step instead, so a build that
+# is meant to have every codec (the CI jobs that install the libraries)
+# cannot silently fall back to the stub codecs.
+if(PACS_REQUIRE_CODECS)
+    set(_pacs_missing_codec_libraries "")
+    if(NOT PACS_JPEG_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "libjpeg-turbo (JPEG)")
+    endif()
+    if(NOT PACS_JPEG2000_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "OpenJPEG (JPEG 2000)")
+    endif()
+    if(NOT PACS_JPEGLS_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "CharLS (JPEG-LS)")
+    endif()
+    if(NOT PACS_HTJ2K_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "OpenJPH (HTJ2K)")
+    endif()
+    if(_pacs_missing_codec_libraries)
+        list(JOIN _pacs_missing_codec_libraries ", " _pacs_missing_codec_libraries)
+        message(FATAL_ERROR
+            "PACS_REQUIRE_CODECS is ON, but these codec libraries were not found: "
+            "${_pacs_missing_codec_libraries}.\n"
+            "Install them, or configure with -DPACS_REQUIRE_CODECS=OFF to build "
+            "without those codecs.")
+    endif()
+    message(STATUS "")
+    message(STATUS "All codec libraries found (PACS_REQUIRE_CODECS=ON)")
+endif()
 else()
+    if(PACS_REQUIRE_CODECS)
+        message(FATAL_ERROR "PACS_REQUIRE_CODECS=ON requires PACS_BUILD_CODECS=ON")
+    endif()
     message(STATUS "")
     message(STATUS "=== Image codecs disabled (PACS_BUILD_CODECS=OFF) ===")
     set(PACS_JPEG_FOUND FALSE)

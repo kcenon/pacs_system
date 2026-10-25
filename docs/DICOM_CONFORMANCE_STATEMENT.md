@@ -850,7 +850,8 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 
 `PACS_BUILD_CODECS=OFF` disables all four optional codecs. With it on, CMake looks for each library at
 configure time and disables only the codec whose library is missing, with a warning
-(`cmake/dependencies.cmake`); the compile definition in parentheses is set when the codec is
+(`cmake/dependencies.cmake`), unless `PACS_REQUIRE_CODECS=ON` (default OFF) turns a missing library
+into a configure error; the compile definition in parentheses is set when the codec is
 built, and `codec_factory::is_available()` reports it at run time.
 
 ---
