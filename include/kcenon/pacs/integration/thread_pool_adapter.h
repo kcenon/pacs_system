@@ -110,6 +110,20 @@ public:
 
     [[nodiscard]] auto start() -> bool override;
     [[nodiscard]] auto is_running() const noexcept -> bool override;
+
+    /**
+     * @brief Stop the pool
+     *
+     * The pool is stopped without holding the adapter mutex, because a task
+     * that submits to this adapter takes that mutex while its worker holds
+     * the worker lifecycle lock. shutdown() and start() are serialized:
+     * concurrent shutdown() calls all return after the pool is stopped, and
+     * a start() (including the restart on submit) waits until the stop has
+     * finished. A task of this pool therefore must not submit to this
+     * adapter while it is being shut down.
+     *
+     * @param wait_for_completion true to drain queued tasks first
+     */
     void shutdown(bool wait_for_completion = true) override;
 
     // =========================================================================
@@ -158,7 +172,14 @@ public:
 private:
     std::shared_ptr<kcenon::thread::thread_pool> pool_;
     thread_pool_config config_;
+    // Guards pool_ and initialized_. Never held across a thread_pool call
+    // that takes the pool's worker lock (start, enqueue_batch, stop,
+    // get_idle_worker_count): thread_pool::stop() holds that lock while it
+    // joins workers, and tasks take mutex_ when they submit (#1253).
+    // pool_ is empty while start() starts the pool
     mutable std::mutex mutex_;
+    // Serializes start() and shutdown() and is held across those calls
+    std::mutex start_stop_mutex_;
     bool initialized_{false};
 
     /// Internal task submission with priority
