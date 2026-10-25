@@ -28,6 +28,9 @@ jobs:
 
     env:
       BUILD_TYPE: Release
+      # ON in the entries with codecs: true, so configure fails instead of
+      # building the codec stubs when a codec library is not found
+      PACS_REQUIRE_CODECS: ${{ matrix.codecs && 'ON' || 'OFF' }}
 
     strategy:
       fail-fast: false
@@ -39,6 +42,11 @@ jobs:
             cc: gcc
             cxx: g++
             triplet: x64-linux
+            # codecs: true installs OpenJPEG and CharLS, so the JPEG 2000 and
+            # JPEG-LS codecs and their tests are built (#1273). The entries
+            # without it, and the other workflows, build without the two
+            # libraries and run the "without OpenJPEG/CharLS" cases.
+            codecs: true
           - os: ubuntu-24.04
             compiler: clang
             cc: clang
@@ -55,6 +63,7 @@ jobs:
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++
             triplet: arm64-osx
+            codecs: true
           # Windows 2022 with MSVC for cross-platform compatibility
           - os: windows-2022
             compiler: msvc
@@ -82,11 +91,17 @@ jobs:
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt install -y clang lld
         fi
+        if [ "${{ matrix.codecs }}" = "true" ]; then
+          sudo apt install -y libopenjp2-7-dev libcharls-dev
+        fi
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
         brew install ninja pkg-config sqlite3 openssl@3 googletest fmt jpeg-turbo icu4c
+        if [ "${{ matrix.codecs }}" = "true" ]; then
+          brew install openjpeg charls
+        fi
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -147,6 +162,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=OFF \
           -DPACS_BUILD_STORAGE=ON \
+          -DPACS_REQUIRE_CODECS="$PACS_REQUIRE_CODECS" \
           -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" \
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
@@ -205,6 +221,7 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=OFF \
           -DPACS_BUILD_STORAGE=ON \
+          -DPACS_REQUIRE_CODECS="$PACS_REQUIRE_CODECS" \
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
