@@ -1,0 +1,96 @@
+# Source Install Workflow
+# Proves the supported source install (docs/PACKAGE_STATE.md, "Source install"):
+#
+# - Installs each kcenon ecosystem dependency standalone from the pinned
+#   sources (.github/actions/checkout-kcenon-deps) into one prefix
+# - Builds and installs pacs_system against that prefix with find_package
+# - Builds and runs tests/cmake_consumer against the prefix, with no alias
+#   injection and no shim packages
+#
+# The third-party packages that the installed dependencies require (asio,
+# simdutf, unofficial-sqlite3) come from vcpkg (tests/source_install/vcpkg.json).
+
+name: Source Install
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'tests/cmake_consumer/**'
+      - 'tests/source_install/**'
+      - 'scripts/check-source-install.sh'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/source-install.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'tests/cmake_consumer/**'
+      - 'tests/source_install/**'
+      - 'scripts/check-source-install.sh'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/source-install.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  source-install:
+    name: Source install (ubuntu-24.04)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+    # pacs_system goes one level down: cmake/dependencies.cmake builds a
+    # ../<dependency> checkout instead of using the installed package, and the
+    # checkout action clones the dependencies into the workspace root.
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: src/pacs_system
+
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./src/pacs_system/.github/actions/checkout-kcenon-deps
+
+    - name: Install system packages
+      run: |
+        sudo apt update
+        sudo apt install -y cmake build-essential ninja-build pkg-config
+        sudo apt install -y libssl-dev zlib1g-dev liblz4-dev libicu-dev libjpeg-turbo8-dev
+
+    - name: Setup vcpkg
+      uses: kcenon/common_system/.github/actions/setup-vcpkg@main
+      with:
+        extra-cache-key: 'pacs-source-install'
+        manifest-dir: 'src/pacs_system/tests/source_install'
+
+    - name: Cache vcpkg installed
+      uses: actions/cache@v5
+      id: vcpkg-installed
+      with:
+        path: ${{ github.workspace }}/vcpkg_installed
+        key: ${{ runner.os }}-source-install-vcpkg-installed-x64-linux-${{ hashFiles('src/pacs_system/tests/source_install/vcpkg.json') }}
+
+    - name: Install third-party packages with vcpkg
+      if: steps.vcpkg-installed.outputs.cache-hit != 'true'
+      run: |
+        "$VCPKG_ROOT/vcpkg" install \
+          --x-manifest-root=src/pacs_system/tests/source_install \
+          --x-install-root="$GITHUB_WORKSPACE/vcpkg_installed" \
+          --triplet x64-linux
+
+    - name: Install dependencies and pacs_system, build and run tests/cmake_consumer
+      run: |
+        src/pacs_system/scripts/check-source-install.sh \
+          --deps "$GITHUB_WORKSPACE" \
+          --prefix "$RUNNER_TEMP/pacs-prefix" \
+          --build "$RUNNER_TEMP/pacs-build" \
+          --third-party "$GITHUB_WORKSPACE/vcpkg_installed/x64-linux"
