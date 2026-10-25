@@ -13,6 +13,8 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 using namespace kcenon::pacs::core;
@@ -1917,4 +1919,394 @@ TEST_CASE("dicom_file Explicit VR LE unknown VR fallback", "[core][dicom_file][u
         // Element after unknown VRs is preserved
         CHECK(ds.get_string(tags::patient_name) == "MULTI^UNKNOWN");
     }
+}
+
+// ============================================================================
+// Sequence Writing and Parsing (Issue #1291)
+// ============================================================================
+
+namespace {
+
+constexpr dicom_tag kReferencedSeriesSequence{0x0008, 0x1115};
+constexpr dicom_tag kReferencedPatientSequence{0x0008, 0x1120};
+constexpr dicom_tag kReferencedImageSequence{0x0008, 0x1140};
+// Not in the dictionary, so Implicit VR LE reads it by its undefined length
+constexpr dicom_tag kIconImageSequence{0x0088, 0x0200};
+
+const std::vector<uint8_t> kIconPixels = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+                                          0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
+                                          0x0C, 0x0D, 0x0E, 0x0F};
+
+/**
+ * @brief An icon image item: Image Pixel attributes and Pixel Data
+ */
+[[nodiscard]] auto make_icon_item(dicom_element pixel_data) -> dicom_dataset {
+    dicom_dataset icon;
+    icon.set_numeric<uint16_t>(tags::rows, vr_type::US, 4);
+    icon.set_numeric<uint16_t>(tags::columns, vr_type::US, 4);
+    icon.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, 8);
+    icon.insert(std::move(pixel_data));
+    return icon;
+}
+
+/**
+ * @brief A dataset with nested sequences, an empty item, an empty sequence,
+ *        an icon image item, and elements after the sequences
+ */
+[[nodiscard]] auto make_nested_sequence_dataset() -> dicom_dataset {
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.1291.1");
+
+    dicom_dataset series_item;
+    series_item.set_string(tags::series_instance_uid, vr_type::UI, "1.2.3.1291.2");
+    auto& images = series_item.get_or_create_sequence(kReferencedImageSequence);
+    for (std::string_view uid : {"1.2.3.1291.2.1", "1.2.3.1291.2.2"}) {
+        dicom_dataset image_item;
+        image_item.set_string(tags::referenced_sop_class_uid, vr_type::UI,
+                              "1.2.840.10008.5.1.4.1.1.2");
+        image_item.set_string(tags::referenced_sop_instance_uid, vr_type::UI, uid);
+        images.push_back(std::move(image_item));
+    }
+    auto& series = ds.get_or_create_sequence(kReferencedSeriesSequence);
+    series.push_back(std::move(series_item));
+    series.push_back(dicom_dataset{});
+
+    (void)ds.get_or_create_sequence(kReferencedPatientSequence);
+    ds.get_or_create_sequence(kIconImageSequence)
+        .push_back(make_icon_item(dicom_element{tags::pixel_data, vr_type::OB, kIconPixels}));
+
+    ds.set_string(tags::patient_name, vr_type::PN, "SEQUENCE^NESTED");
+    ds.insert(dicom_element{tags::pixel_data, vr_type::OB,
+                            std::vector<uint8_t>{0x10, 0x20, 0x30, 0x40}});
+    return ds;
+}
+
+/**
+ * @brief Check the content of make_nested_sequence_dataset()
+ */
+void check_nested_sequence_dataset(const dicom_dataset& ds) {
+    const auto* series = ds.get_sequence(kReferencedSeriesSequence);
+    REQUIRE(series != nullptr);
+    REQUIRE(series->size() == 2);
+    CHECK((*series)[0].get_string(tags::series_instance_uid) == "1.2.3.1291.2");
+    CHECK((*series)[1].empty());
+
+    const auto* images = (*series)[0].get_sequence(kReferencedImageSequence);
+    REQUIRE(images != nullptr);
+    REQUIRE(images->size() == 2);
+    CHECK((*images)[0].get_string(tags::referenced_sop_class_uid) ==
+          "1.2.840.10008.5.1.4.1.1.2");
+    CHECK((*images)[0].get_string(tags::referenced_sop_instance_uid) == "1.2.3.1291.2.1");
+    CHECK((*images)[1].get_string(tags::referenced_sop_instance_uid) == "1.2.3.1291.2.2");
+
+    const auto* patients = ds.get_sequence(kReferencedPatientSequence);
+    REQUIRE(patients != nullptr);
+    CHECK(patients->empty());
+
+    const auto* icons = ds.get_sequence(kIconImageSequence);
+    REQUIRE(icons != nullptr);
+    REQUIRE(icons->size() == 1);
+    CHECK((*icons)[0].get_numeric<uint16_t>(tags::rows) == 4);
+    CHECK((*icons)[0].get_numeric<uint16_t>(tags::columns) == 4);
+    const auto* icon_pixels = (*icons)[0].get(tags::pixel_data);
+    REQUIRE(icon_pixels != nullptr);
+    CHECK(std::vector<uint8_t>(icon_pixels->raw_data().begin(),
+                               icon_pixels->raw_data().end()) == kIconPixels);
+
+    CHECK(ds.get_string(tags::patient_name) == "SEQUENCE^NESTED");
+    const auto* pixels = ds.get(tags::pixel_data);
+    REQUIRE(pixels != nullptr);
+    CHECK(pixels->length() == 4);
+}
+
+/**
+ * @brief Little-endian bytes of a data element
+ * @param vr Two-character VR; SQ uses the 32-bit length form in explicit VR
+ * @param explicit_vr Explicit VR encoding if true, Implicit VR otherwise
+ */
+[[nodiscard]] auto le_element(dicom_tag tag, std::string_view vr,
+                              const std::vector<uint8_t>& value, bool explicit_vr,
+                              uint32_t length) -> std::vector<uint8_t> {
+    std::vector<uint8_t> bytes;
+    auto write_u16 = [&bytes](uint16_t val) {
+        bytes.push_back(static_cast<uint8_t>(val & 0xFF));
+        bytes.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    };
+    auto write_u32 = [&bytes](uint32_t val) {
+        for (int shift = 0; shift < 32; shift += 8) {
+            bytes.push_back(static_cast<uint8_t>((val >> shift) & 0xFF));
+        }
+    };
+
+    write_u16(tag.group());
+    write_u16(tag.element());
+    if (!explicit_vr) {
+        write_u32(length);
+    } else {
+        bytes.push_back(static_cast<uint8_t>(vr[0]));
+        bytes.push_back(static_cast<uint8_t>(vr[1]));
+        if (vr == "SQ") {
+            write_u16(0);
+            write_u32(length);
+        } else {
+            write_u16(static_cast<uint16_t>(length));
+        }
+    }
+    bytes.insert(bytes.end(), value.begin(), value.end());
+    return bytes;
+}
+
+[[nodiscard]] auto le_element(dicom_tag tag, std::string_view vr,
+                              const std::vector<uint8_t>& value, bool explicit_vr)
+    -> std::vector<uint8_t> {
+    return le_element(tag, vr, value, explicit_vr, static_cast<uint32_t>(value.size()));
+}
+
+/**
+ * @brief A UI value padded to even length
+ */
+[[nodiscard]] auto ui_value(std::string_view uid) -> std::vector<uint8_t> {
+    std::vector<uint8_t> value(uid.begin(), uid.end());
+    if (value.size() % 2 != 0) {
+        value.push_back(0x00);
+    }
+    return value;
+}
+
+/**
+ * @brief Append bytes to a byte stream
+ */
+void append(std::vector<uint8_t>& stream, const std::vector<uint8_t>& bytes) {
+    stream.insert(stream.end(), bytes.begin(), bytes.end());
+}
+
+/**
+ * @brief A Part 10 file with SOP Class and Instance UIDs, followed by
+ *        hand-encoded main dataset bytes
+ */
+[[nodiscard]] auto part10_with(const transfer_syntax& ts,
+                               const std::vector<uint8_t>& trailing_elements)
+    -> std::vector<uint8_t> {
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.1291.3");
+    auto bytes = dicom_file::create(std::move(ds), ts).to_bytes();
+    append(bytes, trailing_elements);
+    return bytes;
+}
+
+/**
+ * @brief A Referenced Series Sequence with defined lengths: one item holding a
+ *        nested Referenced Image Sequence and a Series Instance UID
+ */
+[[nodiscard]] auto defined_length_series_sequence(bool explicit_vr)
+    -> std::vector<uint8_t> {
+    std::vector<uint8_t> image_item;
+    append(image_item, le_element(tags::referenced_sop_class_uid, "UI",
+                                  ui_value("1.2.840.10008.5.1.4.1.1.2"), explicit_vr));
+    append(image_item, le_element(tags::referenced_sop_instance_uid, "UI",
+                                  ui_value("1.2.3.1291.3.1"), explicit_vr));
+    std::vector<uint8_t> images;
+    append_item(images, image_item);
+
+    std::vector<uint8_t> series_item;
+    append(series_item, le_element(kReferencedImageSequence, "SQ", images, explicit_vr));
+    append(series_item, le_element(tags::series_instance_uid, "UI",
+                                   ui_value("1.2.3.1291.3.2"), explicit_vr));
+    std::vector<uint8_t> series;
+    append_item(series, series_item);
+
+    return le_element(kReferencedSeriesSequence, "SQ", series, explicit_vr);
+}
+
+/**
+ * @brief Check the content of defined_length_series_sequence()
+ */
+void check_series_sequence(const dicom_dataset& ds) {
+    const auto* series = ds.get_sequence(kReferencedSeriesSequence);
+    REQUIRE(series != nullptr);
+    REQUIRE(series->size() == 1);
+    CHECK((*series)[0].get_string(tags::series_instance_uid) == "1.2.3.1291.3.2");
+    const auto* images = (*series)[0].get_sequence(kReferencedImageSequence);
+    REQUIRE(images != nullptr);
+    REQUIRE(images->size() == 1);
+    CHECK((*images)[0].get_string(tags::referenced_sop_instance_uid) == "1.2.3.1291.3.1");
+}
+
+}  // namespace
+
+TEST_CASE("dicom_file writes nested sequences", "[core][dicom_file][sequence]") {
+    const std::vector<std::pair<std::string, transfer_syntax>> syntaxes = {
+        {"Explicit VR Little Endian", transfer_syntax::explicit_vr_little_endian},
+        {"Implicit VR Little Endian", transfer_syntax::implicit_vr_little_endian},
+        {"Explicit VR Big Endian", transfer_syntax::explicit_vr_big_endian}};
+
+    for (const auto& [name, ts] : syntaxes) {
+        DYNAMIC_SECTION(name << " save and open keep the items and values") {
+            auto file = dicom_file::create(make_nested_sequence_dataset(), ts);
+
+            const auto path = create_temp_file_path("test_sequences_1291.dcm");
+            REQUIRE(file.save(path).is_ok());
+            auto reopened = dicom_file::open(path);
+            std::filesystem::remove(path);
+            REQUIRE(reopened.is_ok());
+
+            check_nested_sequence_dataset(reopened.value().dataset());
+            CHECK(reopened.value().to_bytes() == file.to_bytes());
+        }
+    }
+}
+
+TEST_CASE("dicom_file writes a parsed sequence back with its items",
+          "[core][dicom_file][sequence]") {
+    const auto data = create_dicom_with_undefined_length_sequence();
+
+    auto result = dicom_file::from_bytes(data);
+    REQUIRE(result.is_ok());
+    const auto output = result.value().to_bytes();
+
+    // The same elements in the same encoding; only the out-of-order Patient
+    // Name moves behind the sequence
+    CHECK(output.size() == data.size());
+
+    auto reopened = dicom_file::from_bytes(output);
+    REQUIRE(reopened.is_ok());
+    const auto* seq = reopened.value().dataset().get_sequence(kReferencedSeriesSequence);
+    REQUIRE(seq != nullptr);
+    REQUIRE(seq->size() == 1);
+    CHECK((*seq)[0].get_string(tags::series_instance_uid) == "1.2.3.4.5.6.7");
+    CHECK(reopened.value().dataset().get_string(tags::patient_name) == "SEQ^TEST");
+}
+
+TEST_CASE("dicom_file re-encodes a defined-length sequence in the output VR encoding",
+          "[core][dicom_file][sequence]") {
+    // (0008,1155) in an item, in each encoding
+    const auto uid = ui_value("1.2.3.1291.3.1");
+    const auto implicit_uid = le_element(tags::referenced_sop_instance_uid, "UI", uid, false);
+    const auto explicit_uid = le_element(tags::referenced_sop_instance_uid, "UI", uid, true);
+
+    SECTION("Explicit VR Little Endian to Implicit VR Little Endian") {
+        auto source = dicom_file::from_bytes(part10_with(
+            transfer_syntax::explicit_vr_little_endian, defined_length_series_sequence(true)));
+        REQUIRE(source.is_ok());
+        check_series_sequence(source.value().dataset());
+
+        const auto output = dicom_file::create(source.value().dataset(),
+                                               transfer_syntax::implicit_vr_little_endian)
+                                .to_bytes();
+        CHECK(contains_bytes(output, implicit_uid));
+        CHECK_FALSE(contains_bytes(output, explicit_uid));
+
+        auto reopened = dicom_file::from_bytes(output);
+        REQUIRE(reopened.is_ok());
+        check_series_sequence(reopened.value().dataset());
+    }
+
+    SECTION("Implicit VR Little Endian to Explicit VR Little Endian") {
+        auto source = dicom_file::from_bytes(part10_with(
+            transfer_syntax::implicit_vr_little_endian, defined_length_series_sequence(false)));
+        REQUIRE(source.is_ok());
+        check_series_sequence(source.value().dataset());
+
+        const auto output = dicom_file::create(source.value().dataset(),
+                                               transfer_syntax::explicit_vr_little_endian)
+                                .to_bytes();
+        CHECK(contains_bytes(output, explicit_uid));
+        CHECK_FALSE(contains_bytes(output, implicit_uid));
+
+        auto reopened = dicom_file::from_bytes(output);
+        REQUIRE(reopened.is_ok());
+        check_series_sequence(reopened.value().dataset());
+    }
+}
+
+TEST_CASE("dicom_file parses items with undefined length", "[core][dicom_file][sequence]") {
+    constexpr uint32_t undefined = 0xFFFFFFFF;
+    const std::vector<uint8_t> item_delimiter = {0xFE, 0xFF, 0x0D, 0xE0, 0x00, 0x00, 0x00, 0x00};
+    const std::vector<uint8_t> undefined_item = {0xFE, 0xFF, 0x00, 0xE0, 0xFF, 0xFF, 0xFF, 0xFF};
+
+    // Explicit VR LE items of undefined length that start with a short-VR
+    // element, one of them holding a nested sequence of undefined length
+    std::vector<uint8_t> images;
+    append(images, undefined_item);
+    append(images, le_element(tags::referenced_sop_instance_uid, "UI",
+                              ui_value("1.2.3.1291.3.1"), true));
+    append(images, item_delimiter);
+    append_sequence_delimiter(images);
+
+    std::vector<uint8_t> items;
+    append(items, undefined_item);
+    append(items, le_element(kReferencedImageSequence, "SQ", images, true, undefined));
+    append(items, le_element(tags::series_instance_uid, "UI", ui_value("1.2.3.1291.3.2"), true));
+    append(items, item_delimiter);
+
+    const auto after = le_element(tags::patient_name, "PN", {'A', 'F', 'T', 'E', 'R', ' '}, true);
+
+    SECTION("in a sequence of undefined length") {
+        auto sequence = items;
+        append_sequence_delimiter(sequence);
+        auto elements = le_element(kReferencedSeriesSequence, "SQ", sequence, true, undefined);
+        append(elements, after);
+
+        auto result = dicom_file::from_bytes(
+            part10_with(transfer_syntax::explicit_vr_little_endian, elements));
+        REQUIRE(result.is_ok());
+        check_series_sequence(result.value().dataset());
+        CHECK(result.value().dataset().get_string(tags::patient_name) == "AFTER");
+    }
+
+    SECTION("in a sequence of defined length") {
+        auto elements = le_element(kReferencedSeriesSequence, "SQ", items, true);
+        append(elements, after);
+
+        auto result = dicom_file::from_bytes(
+            part10_with(transfer_syntax::explicit_vr_little_endian, elements));
+        REQUIRE(result.is_ok());
+        check_series_sequence(result.value().dataset());
+        CHECK(result.value().dataset().get_string(tags::patient_name) == "AFTER");
+    }
+}
+
+TEST_CASE("dicom_file keeps an SQ value that is not a sequence of items",
+          "[core][dicom_file][sequence]") {
+    const auto data = part10_with(
+        transfer_syntax::explicit_vr_little_endian,
+        le_element(kReferencedSeriesSequence, "SQ", {'A', 'B', 'C', 'D'}, true));
+
+    auto result = dicom_file::from_bytes(data);
+    REQUIRE(result.is_ok());
+
+    const auto* element = result.value().dataset().get(kReferencedSeriesSequence);
+    REQUIRE(element != nullptr);
+    CHECK(element->sequence_items().empty());
+    CHECK(element->length() == 4);
+    CHECK(result.value().to_bytes() == data);
+}
+
+TEST_CASE("dicom_file writes encapsulated Pixel Data in a sequence item",
+          "[core][dicom_file][sequence][encapsulated]") {
+    const auto icon_value = dicom_file::encapsulate_frames({{0x01, 0x02, 0x03, 0x04}});
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.1291.4");
+    ds.get_or_create_sequence(kIconImageSequence)
+        .push_back(make_icon_item(dicom_element{tags::pixel_data, vr_type::OB, icon_value}));
+
+    auto file = dicom_file::create(std::move(ds), transfer_syntax::rle_lossless);
+    const auto bytes = file.to_bytes();
+    CHECK(contains_bytes(bytes, kEncapsulatedPixelDataHeader));
+
+    auto reopened = dicom_file::from_bytes(bytes);
+    REQUIRE(reopened.is_ok());
+    const auto* icons = reopened.value().dataset().get_sequence(kIconImageSequence);
+    REQUIRE(icons != nullptr);
+    REQUIRE(icons->size() == 1);
+    const auto* icon_pixels = (*icons)[0].get(tags::pixel_data);
+    REQUIRE(icon_pixels != nullptr);
+    auto frames = dicom_file::encapsulated_frames(icon_pixels->raw_data(), 1);
+    REQUIRE(frames.is_ok());
+    CHECK(frames.value() == std::vector<std::vector<uint8_t>>{{0x01, 0x02, 0x03, 0x04}});
+    CHECK(reopened.value().to_bytes() == bytes);
 }

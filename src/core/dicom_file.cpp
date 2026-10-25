@@ -192,6 +192,37 @@ void write_uint32_be(std::vector<uint8_t>& buffer, uint32_t value) {
     return fragment[1] == 0x4F && fragment[2] == 0xFF && fragment[3] == 0x51;
 }
 
+/**
+ * @brief Write the value of a sequence element (PS3.5 7.5)
+ *
+ * Writes an undefined length, one item per dataset, and a Sequence
+ * Delimitation Item. Items have a defined length, as in the network codecs.
+ * The caller has written the tag and, for explicit VR, the VR and the
+ * reserved bytes.
+ *
+ * @param encode_item Encodes an item dataset with the VR encoding and byte
+ *        order of the enclosing dataset
+ */
+template <typename EncodeItem>
+void write_sequence(std::vector<uint8_t>& buffer,
+                    const std::vector<dicom_dataset>& items, bool big_endian,
+                    const EncodeItem& encode_item) {
+    const auto write_u16 = big_endian ? write_uint16_be : write_uint16_le;
+    const auto write_u32 = big_endian ? write_uint32_be : write_uint32_le;
+
+    write_u32(buffer, kUndefinedLength);
+    for (const auto& item : items) {
+        const auto item_bytes = encode_item(item);
+        write_u16(buffer, kItemTagGroup);
+        write_u16(buffer, kItemTagElement);
+        write_u32(buffer, static_cast<uint32_t>(item_bytes.size()));
+        buffer.insert(buffer.end(), item_bytes.begin(), item_bytes.end());
+    }
+    write_u16(buffer, kItemTagGroup);
+    write_u16(buffer, kSequenceDelimitationElement);
+    write_u32(buffer, 0);
+}
+
 }  // namespace
 
 // ============================================================================
@@ -560,6 +591,18 @@ auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset,
         result.push_back(static_cast<uint8_t>(vr_str[0]));
         result.push_back(static_cast<uint8_t>(vr_str[1]));
 
+        // Sequence: 2 reserved bytes and its items. An SQ element that kept
+        // a raw value (see decode_defined_length_sequence()) is written as is.
+        if (element.is_sequence() && raw_data.empty()) {
+            result.push_back(0x00);
+            result.push_back(0x00);
+            write_sequence(result, element.sequence_items(), false,
+                           [encapsulated_pixel_data](const dicom_dataset& item) {
+                               return encode_explicit_vr_le(item, encapsulated_pixel_data);
+                           });
+            continue;
+        }
+
         const auto length = static_cast<uint32_t>(raw_data.size());
 
         if (encoding::has_explicit_32bit_length(element.vr())) {
@@ -633,7 +676,7 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
             if (vr == encoding::vr_type::SQ) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, false);
 
@@ -696,8 +739,12 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
 
         // Read value and create element
         const auto value_data = data.subspan(offset + header_size, length);
-        dicom_element elem{tag, vr, value_data};
-        dataset.insert(std::move(elem));
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, true, false));
+        } else {
+            dicom_element elem{tag, vr, value_data};
+            dataset.insert(std::move(elem));
+        }
 
         offset += header_size + length;
     }
@@ -770,16 +817,19 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
 
         // Handle undefined length
         if (length == kUndefinedLength) {
-            if (vr == encoding::vr_type::SQ) {
+            // Only a sequence or encapsulated Pixel Data has an undefined
+            // length, so such an element that the dictionary does not know is
+            // a sequence
+            if (vr == encoding::vr_type::SQ || vr == encoding::vr_type::UN) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + kImplicitHeaderSize),
                     seq_bytes_read, false, false);
 
                 if (seq_result.is_ok()) {
                     // Create sequence element with parsed items
-                    dicom_element seq_elem{tag, vr};
+                    dicom_element seq_elem{tag, encoding::vr_type::SQ};
                     for (auto& item : seq_result.value()) {
                         seq_elem.add_sequence_item(std::move(item));
                     }
@@ -834,8 +884,12 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
 
         // Read value and create element
         const auto value_data = data.subspan(offset + kImplicitHeaderSize, length);
-        dicom_element elem{tag, vr, value_data};
-        dataset.insert(std::move(elem));
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, false, false));
+        } else {
+            dicom_element elem{tag, vr, value_data};
+            dataset.insert(std::move(elem));
+        }
 
         offset += kImplicitHeaderSize + length;
     }
@@ -899,7 +953,7 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
             if (vr == encoding::vr_type::SQ) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, true);
 
@@ -958,6 +1012,11 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
 
         // Read value - need to swap bytes for numeric types
         const auto value_data = data.subspan(offset + header_size, length);
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, true, true));
+            offset += header_size + length;
+            continue;
+        }
         std::vector<uint8_t> swapped_data(value_data.begin(), value_data.end());
 
         // Swap bytes for numeric VRs
@@ -1002,8 +1061,16 @@ auto dicom_file::encode_implicit_vr_le(const dicom_dataset& dataset)
         write_uint16_le(result, tag.group());
         write_uint16_le(result, tag.element());
 
-        // Write length (4 bytes in Implicit VR)
         const auto& raw_data = element.raw_data();
+
+        // Sequence: its items (see encode_explicit_vr_le())
+        if (element.is_sequence() && raw_data.empty()) {
+            write_sequence(result, element.sequence_items(), false,
+                           &encode_implicit_vr_le);
+            continue;
+        }
+
+        // Write length (4 bytes in Implicit VR)
         write_uint32_le(result, static_cast<uint32_t>(raw_data.size()));
 
         // Write value
@@ -1029,6 +1096,16 @@ auto dicom_file::encode_explicit_vr_be(const dicom_dataset& dataset)
         result.push_back(static_cast<uint8_t>(vr_str[1]));
 
         const auto& raw_data = element.raw_data();
+
+        // Sequence: 2 reserved bytes and its items (see encode_explicit_vr_le())
+        if (element.is_sequence() && raw_data.empty()) {
+            result.push_back(0x00);
+            result.push_back(0x00);
+            write_sequence(result, element.sequence_items(), true,
+                           &encode_explicit_vr_be);
+            continue;
+        }
+
         const auto length = static_cast<uint32_t>(raw_data.size());
 
         if (encoding::has_explicit_32bit_length(element.vr())) {
@@ -1111,7 +1188,25 @@ auto dicom_file::encode_dataset(const dicom_dataset& dataset,
     return encode_explicit_vr_le(dataset, ts.is_encapsulated());
 }
 
-auto dicom_file::parse_undefined_length_sequence(
+auto dicom_file::decode_defined_length_sequence(
+    dicom_tag tag, std::span<const uint8_t> value,
+    bool explicit_vr, bool big_endian) -> dicom_element {
+    size_t seq_bytes_read = 0;
+    auto seq_result = parse_sequence_items(value, seq_bytes_read, explicit_vr,
+                                           big_endian);
+    if (seq_result.is_err() || seq_bytes_read != value.size()) {
+        // Not a sequence of items: keep the value as read
+        return dicom_element{tag, encoding::vr_type::SQ, value};
+    }
+
+    dicom_element seq_elem{tag, encoding::vr_type::SQ};
+    for (auto& item : seq_result.value()) {
+        seq_elem.add_sequence_item(std::move(item));
+    }
+    return seq_elem;
+}
+
+auto dicom_file::parse_sequence_items(
     std::span<const uint8_t> data, size_t& bytes_read,
     bool explicit_vr, bool big_endian)
     -> kcenon::pacs::Result<std::vector<dicom_dataset>> {
@@ -1122,6 +1217,15 @@ auto dicom_file::parse_undefined_length_sequence(
     // Helper function pointers for reading based on endianness
     auto read_u16 = big_endian ? read_uint16_be : read_uint16_le;
     auto read_u32 = big_endian ? read_uint32_be : read_uint32_le;
+
+    // Item datasets use the VR encoding and byte order of the sequence
+    auto decode_item = [explicit_vr, big_endian](std::span<const uint8_t> item_data,
+                                                 size_t& item_bytes_read) {
+        return explicit_vr
+            ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
+                          : decode_explicit_vr_le(item_data, item_bytes_read))
+            : decode_implicit_vr_le(item_data, item_bytes_read);
+    };
 
     while (offset + 8 <= data.size()) {
         // Read item tag
@@ -1145,36 +1249,23 @@ auto dicom_file::parse_undefined_length_sequence(
         offset += 8;
 
         if (item_length == kUndefinedLength) {
-            // Item with undefined length - find item delimitation tag
-            size_t item_end = offset;
-            while (item_end + 8 <= data.size()) {
-                uint16_t g = read_u16(data.subspan(item_end, 2));
-                uint16_t e = read_u16(data.subspan(item_end + 2, 2));
-                if (g == kItemTagGroup && e == kItemDelimitationElement) {
-                    break;
-                }
-                // Simple skip - move forward by element
-                // This is a simplified approach; full implementation would parse elements
-                item_end += 4;
-                if (item_end + 4 > data.size()) break;
-                uint32_t len = read_u32(data.subspan(item_end, 4));
-                item_end += 4;
-                if (len != kUndefinedLength) {
-                    item_end += len;
-                }
-            }
-            // Parse item content
+            // Item with undefined length: the decoder stops at the Item
+            // Delimitation Item, after any nested sequences
             size_t item_bytes_read = 0;
-            auto item_data = data.subspan(offset, item_end - offset);
-            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
-                ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
-                              : decode_explicit_vr_le(item_data, item_bytes_read))
-                : decode_implicit_vr_le(item_data, item_bytes_read);
+            auto item_result = decode_item(data.subspan(offset), item_bytes_read);
 
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));
             }
-            offset = item_end + 8;  // Skip delimitation item
+            offset += item_bytes_read;
+
+            // Skip the delimitation item; anything else is checked as the
+            // next item or the end of the sequence
+            if (offset + 8 <= data.size() &&
+                read_u16(data.subspan(offset, 2)) == kItemTagGroup &&
+                read_u16(data.subspan(offset + 2, 2)) == kItemDelimitationElement) {
+                offset += 8;
+            }
         } else {
             // Item with defined length
             if (offset + item_length > data.size()) {
@@ -1182,10 +1273,7 @@ auto dicom_file::parse_undefined_length_sequence(
             }
             size_t item_bytes_read = 0;
             auto item_data = data.subspan(offset, item_length);
-            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
-                ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
-                              : decode_explicit_vr_le(item_data, item_bytes_read))
-                : decode_implicit_vr_le(item_data, item_bytes_read);
+            auto item_result = decode_item(item_data, item_bytes_read);
 
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));

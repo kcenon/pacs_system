@@ -137,6 +137,50 @@ TEST_CASE("file_storage: store and retrieve", "[storage][file_storage]") {
     }
 }
 
+TEST_CASE("file_storage: store and retrieve keep sequence items",
+          "[storage][file_storage]") {
+    temp_directory temp_dir;
+
+    file_storage_config config;
+    config.root_path = temp_dir.path();
+
+    file_storage storage{config};
+
+    constexpr dicom_tag referenced_series_sequence{0x0008, 0x1115};
+    constexpr dicom_tag referenced_image_sequence{0x0008, 0x1140};
+
+    // Referenced Series Sequence > Referenced Image Sequence
+    dicom_dataset image_item;
+    image_item.set_string(tags::referenced_sop_class_uid, vr_type::UI,
+                          "1.2.840.10008.5.1.4.1.1.2");
+    image_item.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
+                          "1.2.3.1291.1.1.9");
+    dicom_dataset series_item;
+    series_item.set_string(tags::series_instance_uid, vr_type::UI, "1.2.3.1291.1.9");
+    series_item.get_or_create_sequence(referenced_image_sequence)
+        .push_back(std::move(image_item));
+
+    auto dataset = create_test_dataset("1.2.3.1291", "1.2.3.1291.1", "1.2.3.1291.1.1");
+    dataset.get_or_create_sequence(referenced_series_sequence)
+        .push_back(std::move(series_item));
+
+    REQUIRE(storage.store(dataset).is_ok());
+
+    auto result = storage.retrieve("1.2.3.1291.1.1");
+    REQUIRE(result.is_ok());
+
+    const auto* series = result.value().get_sequence(referenced_series_sequence);
+    REQUIRE(series != nullptr);
+    REQUIRE(series->size() == 1);
+    CHECK((*series)[0].get_string(tags::series_instance_uid) == "1.2.3.1291.1.9");
+
+    const auto* images = (*series)[0].get_sequence(referenced_image_sequence);
+    REQUIRE(images != nullptr);
+    REQUIRE(images->size() == 1);
+    CHECK((*images)[0].get_string(tags::referenced_sop_instance_uid) ==
+          "1.2.3.1291.1.1.9");
+}
+
 TEST_CASE("file_storage: store requires UIDs", "[storage][file_storage]") {
     temp_directory temp_dir;
 
