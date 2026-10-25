@@ -267,6 +267,12 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
              "this case needs a dicom_server_v2 fixture");
     }
 
+    // The case counts the files at the destination
+    if (!move_scp_stores_to_destination()) {
+        SKIP("retrieve_scp opens no association to the C-MOVE destination; "
+             "see move_scp_stores_to_destination() in test_fixtures.h");
+    }
+
     // Setup: Ports and AE titles
     auto move_port = find_available_port();
     auto dest_port = find_available_port(move_port + 1);
@@ -671,6 +677,13 @@ TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
                 INFO("Unexpected status: " << static_cast<int>(rsp.status()));
                 FAIL("Unexpected C-MOVE response status");
             }
+        }
+
+        // The C-MOVE exchange above has run; the destination receives files
+        // only once retrieve_scp performs the sub-operations
+        if (!move_scp_stores_to_destination()) {
+            SKIP("retrieve_scp opens no association to the C-MOVE destination; "
+                 "see move_scp_stores_to_destination() in test_fixtures.h");
         }
 
         // Wait for destination to receive files

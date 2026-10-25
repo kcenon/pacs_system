@@ -191,12 +191,14 @@ comment in `include/kcenon/pacs/network/association.h`):
   response (ARTIM); the timeout of `release()` bounds the wait for
   A-RELEASE-RP.
 
-Two predicates in `test_fixtures.h` gate the cases that need TCP:
+Three predicates in `test_fixtures.h` gate the cases that need a capability
+pacs_system may not have:
 
 | Predicate | Value | Gates |
 |-----------|-------|-------|
 | `supports_real_tcp_dicom()` | `network::association::tcp_transport_available`, set by the TCP client path (true) | `[v2][stress]` cases; DCMTK cases where a pacs_system SCU talks to a DCMTK SCP |
 | `v1_server_accepts_tcp()` | false: v1 serves only in-process associations | DCMTK cases that run a DCMTK SCU against a v1-based fixture (`test_server`, `storage_test_server`); they run once those fixtures move to `dicom_server_v2` |
+| `move_scp_stores_to_destination()` | false: `retrieve_scp` counts C-MOVE sub-operations as successful without opening an association to the destination | the checks of what a C-MOVE destination received (`C-MOVE: pacs_system SCU basic operation` runs its C-MOVE exchange, then skips the destination check) |
 
 `supports_real_tcp_dicom()` reads a build-time flag instead of probing a
 loopback server, because a probe that failed would skip the gated cases and

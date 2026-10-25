@@ -159,6 +159,23 @@ inline bool v1_server_accepts_tcp() {
     return false;
 }
 
+/**
+ * @brief Check if retrieve_scp sends C-MOVE sub-operations to the destination
+ *
+ * Always false: retrieve_scp::handle_c_move() opens no association to the
+ * move destination. Without a store handler it counts every C-STORE
+ * sub-operation as successful and sends nothing
+ * (src/services/retrieve_scp.cpp), so a destination never receives a file.
+ * The C-MOVE cases that check what the destination received skip on this
+ * until retrieve_scp performs the sub-operations.
+ *
+ * @return true if retrieve_scp stores the matching instances at the
+ *         C-MOVE destination
+ */
+inline bool move_scp_stores_to_destination() {
+    return false;
+}
+
 /// Default AE titles
 constexpr const char* test_scp_ae_title = "TEST_SCP";
 constexpr const char* test_scu_ae_title = "TEST_SCU";
