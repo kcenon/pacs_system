@@ -132,7 +132,7 @@ target_link_libraries(my_app PRIVATE pacs_system::pacs_system)
 ## 의존성 출처
 
 `dependency-manifest.json`은 현재 FetchContent 고정값(SQLite `sqlite-amalgamation-3450300` / 3.45.3,
-OpenJPH 0.21.0, Crow v1.3.1, ASIO `asio-1-30-2`)과 두 가지 생태계 SHA 집합을 기록합니다:
+OpenJPH 0.21.5, Crow v1.3.1, ASIO `asio-1-30-2`)과 두 가지 생태계 SHA 집합을 기록합니다:
 
 - `internal_ecosystem[].version`: CI가 `.github/actions/checkout-kcenon-deps`로 실제 체크아웃하는 SHA이며
   `docs/SOUP.md`에도 기록됩니다. `scripts/check_manifest_drift.py`가 세 곳의 일치를 유지합니다.
