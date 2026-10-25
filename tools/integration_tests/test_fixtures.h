@@ -129,33 +129,50 @@ inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
 /**
  * @brief Check if pacs_system supports real TCP DICOM connections
  *
- * Currently returns false because accept_worker immediately closes
- * TCP connections after accepting them. This is a known limitation
- * documented in accept_worker.cpp.
+ * True when association::connect() reaches peers over TCP, which the TCP
+ * client path records in network::association::tcp_transport_available
+ * (Issue #1240). The dicom_server_v2 stress cases and the DCMTK cases that
+ * run a pacs_system SCU against a DCMTK SCP gate on it.
  *
- * When real network I/O support is implemented in the association class,
- * this function should be updated to return true.
+ * This reads a build-time flag rather than probing a loopback server: a
+ * probe that failed would skip the gated cases and hide the very
+ * regression they exist to report.
  *
  * @return true if real TCP DICOM connections are supported
- *
- * @note DCMTK interoperability tests require real TCP DICOM support.
- *       Until this is implemented, those tests will be skipped when
- *       this function returns false.
- *
- * @see accept_worker.cpp - "association doesn't support real network I/O yet"
- * @note Real TCP DICOM connection support is tracked as a separate issue
- *       (TODO: create issue for real TCP DICOM connection).
  */
 inline bool supports_real_tcp_dicom() {
-    // Currently, pacs_system does not support real TCP connections
-    // for DICOM protocol. The accept_worker accepts TCP connections
-    // but immediately closes them without performing DICOM handshake.
-    //
-    // This causes DCMTK clients to receive "Peer aborted Association"
-    // errors when attempting to connect.
-    //
-    // When real TCP support is implemented, update this to return true
-    // or perform an actual connection test.
+    return network::association::tcp_transport_available;
+}
+
+/**
+ * @brief Check if test_server (the v1 dicom_server) accepts TCP associations
+ *
+ * Always false: the v1 dicom_server serves only in-process associations
+ * (its accept_worker closes every TCP connection), and dicom_server_v2 is
+ * the SCP that serves TCP. The DCMTK cases that run a DCMTK SCU against a
+ * v1-based fixture skip on this until their fixtures move to
+ * dicom_server_v2 (follow-up of Issue #1240).
+ *
+ * @return true if the v1 dicom_server serves DICOM over TCP
+ */
+inline bool v1_server_accepts_tcp() {
+    return false;
+}
+
+/**
+ * @brief Check if retrieve_scp sends C-MOVE sub-operations to the destination
+ *
+ * Always false: retrieve_scp::handle_c_move() opens no association to the
+ * move destination. Without a store handler it counts every C-STORE
+ * sub-operation as successful and sends nothing
+ * (src/services/retrieve_scp.cpp), so a destination never receives a file.
+ * The C-MOVE cases that check what the destination received skip on this
+ * until retrieve_scp performs the sub-operations.
+ *
+ * @return true if retrieve_scp stores the matching instances at the
+ *         C-MOVE destination
+ */
+inline bool move_scp_stores_to_destination() {
     return false;
 }
 

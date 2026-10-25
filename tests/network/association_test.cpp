@@ -110,7 +110,7 @@ TEST_CASE("association move semantics", "[association][construction]") {
 // SCU Connection Tests
 // =============================================================================
 
-TEST_CASE("association SCU connect", "[association][scu]") {
+TEST_CASE("association SCU propose", "[association][scu]") {
     association_config config;
     config.calling_ae_title = "TEST_SCU";
     config.called_ae_title = "TEST_SCP";
@@ -124,12 +124,9 @@ TEST_CASE("association SCU connect", "[association][scu]") {
         {EXPLICIT_VR_LE, IMPLICIT_VR_LE}
     });
 
-    auto result = association::connect("localhost", 11112, config);
+    auto assoc = association::propose(config);
 
-    SECTION("returns valid association") {
-        REQUIRE(result.is_ok());
-        auto& assoc = result.value();
-
+    SECTION("returns an association awaiting A-ASSOCIATE-AC") {
         CHECK(assoc.state() == association_state::awaiting_associate_ac);
         CHECK(assoc.calling_ae() == "TEST_SCU");
         CHECK(assoc.called_ae() == "TEST_SCP");
@@ -137,9 +134,6 @@ TEST_CASE("association SCU connect", "[association][scu]") {
     }
 
     SECTION("builds valid A-ASSOCIATE-RQ") {
-        REQUIRE(result.is_ok());
-        auto& assoc = result.value();
-
         auto rq = assoc.build_associate_rq();
         CHECK(rq.calling_ae_title == "TEST_SCU");
         CHECK(rq.called_ae_title == "TEST_SCP");
@@ -313,9 +307,7 @@ TEST_CASE("association process A-ASSOCIATE-AC", "[association][negotiation]") {
         {EXPLICIT_VR_LE, IMPLICIT_VR_LE}
     });
 
-    auto result = association::connect("localhost", 104, config);
-    REQUIRE(result.is_ok());
-    auto& assoc = result.value();
+    auto assoc = association::propose(config);
 
     SECTION("successful negotiation establishes association") {
         associate_ac ac;
@@ -400,9 +392,7 @@ TEST_CASE("association SCU uses an accepted JPEG-LS context", "[association][neg
             config.called_ae_title = "TEST_SCP";
             config.proposed_contexts.push_back({1, CT_IMAGE_STORAGE, {jpeg_ls_uid}});
 
-            auto result = association::connect("localhost", 104, config);
-            REQUIRE(result.is_ok());
-            auto& assoc = result.value();
+            auto assoc = association::propose(config);
 
             associate_ac ac;
             ac.calling_ae_title = "TEST_SCU";
@@ -436,9 +426,7 @@ TEST_CASE("association process A-ASSOCIATE-RJ", "[association][rejection]") {
     config.calling_ae_title = "TEST_SCU";
     config.called_ae_title = "TEST_SCP";
 
-    auto result = association::connect("localhost", 104, config);
-    REQUIRE(result.is_ok());
-    auto& assoc = result.value();
+    auto assoc = association::propose(config);
 
     associate_rj rj{
         reject_result::rejected_permanent,

@@ -194,6 +194,9 @@ add_library(pacs_network
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
     src/network/detail/accept_worker.cpp
+    # TCP client path of association::connect() (Issue #1240)
+    src/network/detail/dimse_framing.cpp
+    src/network/detail/tcp_stream.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
     # Pipeline infrastructure (Issue #517)

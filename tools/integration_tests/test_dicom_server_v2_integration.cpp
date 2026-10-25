@@ -494,10 +494,9 @@ TEST_CASE("dicom_server_v2 C-STORE integration", "[v2][integration][store]") {
 // =============================================================================
 
 TEST_CASE("dicom_server_v2 concurrent storage stress test", "[v2][stress][concurrent]") {
-    // association::connect() reaches only the in-memory dicom_server
-    // registry, so it cannot connect to dicom_server_v2 over TCP yet
+    // The SCUs reach dicom_server_v2 over TCP (see supports_real_tcp_dicom())
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
@@ -598,10 +597,9 @@ TEST_CASE("dicom_server_v2 concurrent storage stress test", "[v2][stress][concur
 }
 
 TEST_CASE("dicom_server_v2 rapid sequential connections", "[v2][stress][sequential]") {
-    // association::connect() reaches only the in-memory dicom_server
-    // registry, so it cannot connect to dicom_server_v2 over TCP yet
+    // The SCUs reach dicom_server_v2 over TCP (see supports_real_tcp_dicom())
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
@@ -635,10 +633,9 @@ TEST_CASE("dicom_server_v2 rapid sequential connections", "[v2][stress][sequenti
 }
 
 TEST_CASE("dicom_server_v2 max associations handling", "[v2][stress][limits]") {
-    // association::connect() reaches only the in-memory dicom_server
-    // registry, so it cannot connect to dicom_server_v2 over TCP yet
+    // The SCUs reach dicom_server_v2 over TCP (see supports_real_tcp_dicom())
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
@@ -892,10 +889,9 @@ TEST_CASE("dicom_server_v2 callback invocation", "[v2][callbacks]") {
 // =============================================================================
 
 TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
-    // association::connect() reaches only the in-memory dicom_server
-    // registry, so it cannot connect to dicom_server_v2 over TCP yet
+    // The SCUs reach dicom_server_v2 over TCP (see supports_real_tcp_dicom())
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
