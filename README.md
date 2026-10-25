@@ -206,9 +206,9 @@ licenses, and safety classifications are in the [IEC 62304 SOUP register](docs/S
 
 The [layer diagram](docs/ARCHITECTURE.md#layer-overview) runs from the REST/DICOMweb, AI, and
 workflow front ends through IHE actors, DICOM services, network and security, and core/encoding to
-the kcenon ecosystem libraries. C++20 module interfaces for `kcenon.pacs` exist under `src/modules/`,
-but the module build does not compile at this revision and no CI job builds with
-`PACS_BUILD_MODULES=ON`; use the header-based interface ([status and the 12 partitions](docs/ARCHITECTURE.md#c20-module-architecture)).
+the kcenon ecosystem libraries. The C++20 module `kcenon.pacs` under `src/modules/` re-exports the header
+API; the [C++20 Modules workflow](.github/workflows/modules.yml) builds it with Clang 18 and CMake 3.31 on
+Ubuntu 24.04 and runs `module_example` ([status and the 15 partitions](docs/ARCHITECTURE.md#c20-module-architecture)).
 
 ## Project Structure
 
@@ -269,7 +269,7 @@ or when the copy in `README.kr.md` differs.
 | **Test Cases** | 2667+ tests |
 | **Example Programs** | 5 apps |
 | **Documentation** | 109 markdown files |
-| **CI/CD Workflows** | 23 workflows |
+| **CI/CD Workflows** | 24 workflows |
 | **Version** | 0.1.0 |
 
 <!-- STATS_END -->

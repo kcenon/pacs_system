@@ -9,68 +9,129 @@
  * Usage:
  *   ./module_example [dicom_file]
  *
+ * The program checks the values it prints and exits with 1 if one of them
+ * is wrong, so CI can run it as a smoke test of the module interface.
+ *
  * @note Requires CMake 3.28+ and a module-capable compiler
  *       (Clang 16+, GCC 14+, or MSVC 2022 17.4+)
  */
 
 #ifdef KCENON_USE_MODULES
 
-// Import the pacs module (replaces all header includes)
-import kcenon.pacs;
-
+#include <iomanip>
 #include <iostream>
 #include <string>
 
+// Import the pacs module (replaces the pacs_system header includes)
+import kcenon.pacs;
+
+namespace core = kcenon::pacs::core;
+namespace encoding = kcenon::pacs::encoding;
+
+namespace {
+
+int failures = 0;
+
+void check(bool condition, const char* what) {
+    if (!condition) {
+        std::cout << "  CHECK FAILED: " << what << "\n";
+        ++failures;
+    }
+}
+
+}  // namespace
+
 int main(int argc, char* argv[]) {
-    std::cout << "=== PACS System C++20 Module Example ===\n\n";
+    std::cout << "=== PACS System C++20 Module Example ===\n";
+    std::cout << "Module: " << kcenon::pacs::module_version::module_name
+              << " " << kcenon::pacs::module_version::string << "\n\n";
 
     // Demonstrate core module usage
     std::cout << "1. Core Module Demo\n";
     std::cout << "-------------------\n";
 
     // Create DICOM tags using module-exported types
-    kcenon::pacs::core::dicom_tag patient_name_tag(0x0010, 0x0010);
-    kcenon::pacs::core::dicom_tag patient_id_tag(0x0010, 0x0020);
-    kcenon::pacs::core::dicom_tag study_uid_tag(0x0020, 0x000D);
+    core::dicom_tag patient_name_tag(0x0010, 0x0010);
+    check(patient_name_tag == core::tags::patient_name,
+          "dicom_tag(0x0010, 0x0010) == tags::patient_name");
 
-    std::cout << "Patient Name Tag: (" << std::hex
-              << patient_name_tag.group() << ","
-              << patient_name_tag.element() << ")\n";
+    std::cout << "Patient Name Tag: (" << std::hex << std::setfill('0')
+              << std::setw(4) << patient_name_tag.group() << ","
+              << std::setw(4) << patient_name_tag.element() << std::dec
+              << std::setfill(' ') << ")\n";
+
+    const auto info = core::dicom_dictionary::instance().find(patient_name_tag);
+    check(info.has_value() && info->keyword == "PatientName",
+          "dictionary keyword for (0010,0010) is PatientName");
+    if (info) {
+        std::cout << "Dictionary keyword: " << info->keyword << "\n";
+    }
 
     // Create a DICOM dataset
-    kcenon::pacs::core::dicom_dataset dataset;
-    std::cout << "Created empty dataset (size: " << std::dec
-              << dataset.size() << " elements)\n\n";
+    core::dicom_dataset dataset;
+    dataset.set_string(core::tags::patient_name, encoding::vr_type::PN,
+                       "DOE^JOHN");
+    dataset.set_string(core::tags::patient_id, encoding::vr_type::LO, "12345");
+    check(dataset.size() == 2, "dataset holds two elements");
+    check(dataset.get_string(core::tags::patient_name) == "DOE^JOHN",
+          "PatientName reads back as DOE^JOHN");
+    std::cout << "Dataset elements: " << dataset.size()
+              << ", PatientName: " << dataset.get_string(core::tags::patient_name)
+              << "\n\n";
 
     // Demonstrate encoding module usage
     std::cout << "2. Encoding Module Demo\n";
     std::cout << "-----------------------\n";
 
-    auto implicit_le = kcenon::pacs::encoding::transfer_syntax::implicit_vr_little_endian();
-    auto explicit_le = kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian();
+    // Standard transfer syntaxes are static data members
+    const auto& implicit_le = encoding::transfer_syntax::implicit_vr_little_endian;
+    const auto& explicit_le = encoding::transfer_syntax::explicit_vr_little_endian;
 
-    std::cout << "Implicit VR LE - Little Endian: "
-              << (implicit_le.is_little_endian() ? "Yes" : "No") << "\n";
-    std::cout << "Explicit VR LE - Implicit VR: "
-              << (explicit_le.is_implicit_vr() ? "Yes" : "No") << "\n\n";
+    const bool implicit_is_le =
+        implicit_le.endianness() == encoding::byte_order::little_endian;
+    const bool explicit_is_implicit_vr =
+        explicit_le.vr_type() == encoding::vr_encoding::implicit;
+    check(implicit_le.uid() == "1.2.840.10008.1.2",
+          "Implicit VR Little Endian UID");
+    check(implicit_is_le, "Implicit VR Little Endian is little endian");
+    check(!explicit_is_implicit_vr, "Explicit VR Little Endian uses explicit VR");
+
+    std::cout << implicit_le.name() << " (" << implicit_le.uid() << ")"
+              << " - Little Endian: " << (implicit_is_le ? "Yes" : "No") << "\n";
+    std::cout << explicit_le.name() << " (" << explicit_le.uid() << ")"
+              << " - Implicit VR: " << (explicit_is_implicit_vr ? "Yes" : "No")
+              << "\n";
+
+    const auto found = encoding::find_transfer_syntax("1.2.840.10008.1.2.1");
+    check(found.has_value() && *found == explicit_le,
+          "find_transfer_syntax finds Explicit VR Little Endian");
+    std::cout << "Supported transfer syntaxes: "
+              << encoding::supported_transfer_syntaxes().size() << "\n";
 
     // If a DICOM file is provided, read and display it
     if (argc > 1) {
-        std::cout << "3. File Operations Demo\n";
+        std::cout << "\n3. File Operations Demo\n";
         std::cout << "-----------------------\n";
 
         std::string filepath = argv[1];
         std::cout << "Reading DICOM file: " << filepath << "\n";
 
-        kcenon::pacs::core::dicom_file file;
-        auto result = file.read(filepath);
-
-        if (result) {
+        auto result = core::dicom_file::open(filepath);
+        if (result.is_ok()) {
             std::cout << "Successfully read DICOM file\n";
-            std::cout << "Dataset elements: " << file.dataset().size() << "\n";
+            std::cout << "Dataset elements: " << result.value().dataset().size()
+                      << "\n";
         } else {
-            std::cout << "Failed to read DICOM file\n";
+            std::cout << "Failed to read DICOM file: " << result.error().message
+                      << "\n";
+            ++failures;
         }
+    }
+
+    if (failures != 0) {
+        std::cout << "\n=== Module Example FAILED (" << failures
+                  << " check(s)) ===\n";
+        return 1;
     }
 
     std::cout << "\n=== Module Example Complete ===\n";

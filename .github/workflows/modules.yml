@@ -1,0 +1,108 @@
+# C++20 Module Build Workflow for PACS System
+# Configures with PACS_BUILD_MODULES=ON, builds the pacs_system_modules target,
+# module_example, and module_tests, and runs the example and the module tests.
+#
+# The module partitions under src/modules/ re-export names from the public
+# headers, so a header change can break them; this job keeps them compiling
+# (issue #1239).
+
+name: C++20 Modules
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/modules/**'
+      - 'include/**'
+      - 'tools/module_example/**'
+      - 'tests/modules/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/modules.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/modules/**'
+      - 'include/**'
+      - 'tools/module_example/**'
+      - 'tests/modules/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/modules.yml'
+  workflow_dispatch:
+
+# Ensure only one workflow runs per branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  modules:
+    name: Modules (ubuntu-24.04 / clang-18 / Ninja)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout pacs_system
+      uses: actions/checkout@v4
+      with:
+        path: pacs_system
+
+    - name: Checkout kcenon dependencies (pinned versions)
+      uses: ./pacs_system/.github/actions/checkout-kcenon-deps
+      with:
+        patch-werror: 'true'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        # clang-tools-18 provides clang-scan-deps-18, which CMake needs to
+        # scan module dependencies
+        sudo apt-get install -y ninja-build pkg-config clang-18 clang-tools-18 lld-18
+        sudo apt-get install -y libsqlite3-dev libssl-dev libfmt-dev
+        sudo apt-get install -y libgtest-dev libgmock-dev
+        sudo apt-get install -y libjpeg-turbo8-dev libicu-dev
+
+    - name: Show tool versions
+      run: |
+        cmake --version
+        ninja --version
+        clang++-18 --version
+        clang-scan-deps-18 --version
+
+    - name: Configure CMake with PACS_BUILD_MODULES=ON
+      working-directory: pacs_system
+      run: |
+        cmake -S . -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=clang-18 \
+          -DCMAKE_CXX_COMPILER=clang++-18 \
+          -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS="$(command -v clang-scan-deps-18)" \
+          -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+          -DPACS_WARNINGS_AS_ERRORS=OFF \
+          -DPACS_BUILD_MODULES=ON \
+          -DPACS_BUILD_EXAMPLES=ON \
+          -DPACS_BUILD_TESTS=ON
+
+    - name: Build pacs_system_modules, module_example, and module_tests
+      working-directory: pacs_system
+      run: |
+        cmake --build build --parallel \
+          --target pacs_system_modules module_example module_tests
+
+    - name: Run module_example
+      working-directory: pacs_system
+      run: |
+        ./build/bin/module_example
+        ./build/bin/module_example tools/integration_tests/test_data/ct_minimal.dcm
+
+    - name: Run module tests
+      working-directory: pacs_system
+      run: |
+        ctest --test-dir build -L modules --output-on-failure --timeout 120 --no-tests=error

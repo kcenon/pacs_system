@@ -95,6 +95,6 @@ pacs_system        (Tier 5)  <-- this project
 - libjpeg-turbo cannot be built via FetchContent (must be system package)
 - `PACS_USE_MOCK_S3` prohibited in Release builds (CMake FATAL_ERROR)
 - Linux static linking: circular dependency requires `--start-group/--end-group` linker flags
-- C++20 modules experimental (CMake 3.28+, Clang 16+/GCC 14+)
+- C++20 modules experimental (CMake 3.28+; CI builds them only with Clang 18 in `modules.yml`; AppleClang cannot)
 - UWP/Xbox unsupported
 - Test framework: Catch2 (differs from ecosystem's Google Test convention)

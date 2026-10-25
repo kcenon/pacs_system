@@ -898,29 +898,34 @@ auto& file = result.value();
 ## C++20 모듈 아키텍처
 
 PACS System은 헤더 기반 인터페이스의 대안으로 C++20 모듈 인터페이스(`src/modules/`)를 정의합니다.
+기본 모듈 `kcenon.pacs`는 공개 헤더가 선언하는 이름을 같은 `kcenon::pacs::` 네임스페이스로 재노출합니다.
 
-> **상태**: 현재 리비전에서는 모듈 빌드가 컴파일되지 않습니다. 파티션은 여전히 접두사 없는 `pacs::`
-> 네임스페이스의 이름을 재노출하지만(예: `using pacs::core::dicom_tag;`) 공개 헤더는 이 이름들을
-> `kcenon::pacs::`에 선언하므로, `pacs_system_modules` 빌드는 비어 있는 `:ai` 파티션을 제외한 모든
-> 파티션에서 실패합니다. `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업은 없습니다. 헤더 기반
-> 인터페이스를 사용하세요.
+> **상태**: [C++20 Modules 워크플로우](../.github/workflows/modules.yml)가 Ubuntu 24.04에서
+> Clang 18(`clang-scan-deps-18`), Ninja, CMake 3.31(러너 이미지의 CMake. 작성 시점에는 18.1.3과
+> 3.31.6이며, 작업이 사용한 버전을 출력합니다)로 `-DPACS_BUILD_MODULES=ON` 구성을 하고,
+> `pacs_system_modules`, `module_example`, `module_tests`를 빌드한 뒤 `module_example`과 모듈 테스트를
+> 실행합니다. CI에서 모듈 타깃을 빌드하는 다른 컴파일러는 없습니다. GCC와 MSVC의 모듈 빌드는
+> 검증되지 않았고, AppleClang은 모듈 의존성 스캐너가 없어 CMake가 구성 단계에서 타깃을 거부하므로
+> 빌드할 수 없습니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
 
 ### 모듈 요구사항
 
-- **CMake 3.28+**
-- **Clang 16+, GCC 14+ 또는 MSVC 2022 17.4+**
+- **CMake 3.28+**, C++20 모듈을 지원하는 제너레이터(Ninja)
+- **CMake가 모듈을 지원하는 컴파일러**(Clang 16+, GCC 14+ 또는 MSVC 2022 17.4+). CI는 Clang 18로만
+  빌드합니다.
 
 ### 모듈로 빌드하기
 
 ```bash
-cmake -B build -DPACS_BUILD_MODULES=ON
-cmake --build build
+cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-18 \
+  -DPACS_BUILD_MODULES=ON -DPACS_BUILD_EXAMPLES=ON
+cmake --build build --target pacs_system_modules module_example
+./build/bin/module_example
 ```
 
 ### 모듈 사용하기
 
-아래 예제는 공개 헤더가 선언하는 이름을 사용하며, 파티션이 이 이름들을 export한 뒤에야 빌드됩니다
-(위의 상태 안내 참조).
+CI가 빌드하고 실행하는 전체 예제는 `tools/module_example/main.cpp`입니다.
 
 ```cpp
 import kcenon.pacs;
@@ -940,19 +945,38 @@ int main() {
 
 | 모듈 | 내용 |
 |--------|----------|
-| `kcenon.pacs` | 기본 모듈 (모든 파티션 임포트) |
-| `kcenon.pacs:core` | 핵심 DICOM 데이터 구조 및 유틸리티 |
-| `kcenon.pacs:network` | DICOM 네트워크 프로토콜 (DIMSE) |
-| `kcenon.pacs:storage` | DICOM 파일 스토리지 및 검색 |
-| `kcenon.pacs:encoding` | 전송 구문 및 코덱 지원 |
-| `kcenon.pacs:services` | DICOM 서비스 구현 (C-STORE, C-FIND 등) |
-| `kcenon.pacs:security` | TLS 및 인증 |
-| `kcenon.pacs:web` | DICOMweb REST API |
-| `kcenon.pacs:workflow` | 워크플로우 관리 |
-| `kcenon.pacs:integration` | 에코시스템 어댑터 |
-| `kcenon.pacs:ai` | AI 서비스 커넥터 (`KCENON_WITH_AI`가 정의되지 않으면 비어 있으며, 빌드는 이를 정의하지 않음) |
-| `kcenon.pacs:monitoring` | 헬스 체크 및 메트릭 |
+| `kcenon.pacs` | 기본 모듈 (모든 파티션 임포트, `kcenon::pacs::module_version`) |
+| `kcenon.pacs:core` | 태그, 엘리먼트, 데이터셋, Part 10 파일, 사전, `tags::` 상수, 이벤트, `Result<T>` 헬퍼 |
+| `kcenon.pacs:encoding` | VR 타입, 전송 구문, VR 코덱, 압축 코덱, SIMD 기능 확인 |
+| `kcenon.pacs:storage` | 파일·S3·Azure·HSM 스토리지, 인덱스 데이터베이스, 레코드와 쿼리 (`pacs_storage` 필요) |
+| `kcenon.pacs:security` | RBAC, 인증서와 디지털 서명, 익명화 |
+| `kcenon.pacs:network` | 연결(Association), PDU 타입, PDU 인코더/디코더와 버퍼 풀, `dicom_server`, v2 서버 |
+| `kcenon.pacs:network_dimse` | DIMSE 메시지, 명령 필드, 상태 확인, 메시지 팩토리 |
+| `kcenon.pacs:services` | SCP/SCU 구현, SOP 클래스 레지스트리와 UID, 저장 상태 |
+| `kcenon.pacs:services_cache` | 쿼리 캐시와 LRU 캐시. `PACS_WITH_DATABASE_SYSTEM`이 정의되면 커서, 스트리밍, 병렬 쿼리 |
+| `kcenon.pacs:services_validation` | IOD 검증기 |
+| `kcenon.pacs:workflow` | 작업 스케줄러, 자동 프리페치, 스터디 잠금 (`pacs_workflow` 필요) |
+| `kcenon.pacs:web` | REST 서버와 DICOMweb 헬퍼 (`pacs_web` 필요) |
+| `kcenon.pacs:integration` | 에코시스템 어댑터 (`pacs_integration` 필요) |
+| `kcenon.pacs:ai` | AI 서비스 커넥터, 결과 핸들러, AIRA 평가 (`pacs_ai` 필요) |
+| `kcenon.pacs:monitoring` | 헬스 체크, 메트릭, 수집기 (`pacs_monitoring` 필요) |
 | `kcenon.pacs:di` | 의존성 주입 유틸리티 |
+
+"`pacs_<name>` 필요"로 표시된 파티션은 해당 라이브러리 타깃이 빌드될 때만 이름을 export합니다. 이때
+`cmake/targets.cmake`가 라이브러리를 `pacs_system_modules`에 링크하고 `PACS_MODULES_WITH_<NAME>`을
+정의하며, 그렇지 않으면 파티션은 비어 있습니다. 파티션은 모듈 내부 단위이므로 소비자는
+`import kcenon.pacs;`를 사용합니다(`kcenon.pacs:core` 같은 파티션은 모듈 밖에서 임포트할 수 없습니다).
+`src/modules/` 아래의 `.cppm` 파일이 타깃에서 빠지면 구성이 실패합니다.
+
+### 모듈이 export하지 않는 이름
+
+- `inline` 없이 선언된 네임스페이스 범위 `constexpr` 변수는 내부 링키지를 가지므로 모듈이 export할
+  수 없습니다. `kcenon::pacs::error_codes`, DIMSE `status_*` 코드와 `tag_*`·`priority_*` 명령 상수,
+  `kcenon::pacs::security::Action`, `pdu_types.h`의 PDU 한계값이 이에 해당합니다. 이 이름들을 쓰려면
+  `import kcenon.pacs;` 옆에 해당 헤더를 include하세요.
+- 접두사 없는 `pacs::` 네임스페이스: 헤더와 마찬가지로 모듈도 `kcenon::pacs::`만 선언합니다. 아직
+  `pacs::`를 쓰는 코드는 `<kcenon/pacs/compat/namespace_compat.h>`를 include하며, 이는 임포트와 함께
+  써도 동작합니다.
 
 > **참고**: C++20 모듈은 실험적입니다. 헤더 기반 인터페이스가 기본 API로 유지됩니다.
 

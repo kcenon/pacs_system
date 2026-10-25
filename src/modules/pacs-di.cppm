@@ -44,54 +44,54 @@ module;
 export module kcenon.pacs:di;
 
 // ============================================================================
-// Re-export pacs::di namespace
+// Re-export kcenon::pacs::di namespace
 // ============================================================================
 
-export namespace pacs::di {
+export namespace kcenon::pacs::di {
 
 // Logger interface and implementations
-using pacs::di::ILogger;
-using pacs::di::NullLogger;
-using pacs::di::LoggerService;
-using pacs::di::null_logger;
+using kcenon::pacs::di::ILogger;
+using kcenon::pacs::di::NullLogger;
+using kcenon::pacs::di::LoggerService;
+using kcenon::pacs::di::null_logger;
 
 // Service interfaces
-using pacs::di::IDicomStorage;
-using pacs::di::IDicomCodec;
-using pacs::di::IDicomNetwork;
-using pacs::di::DicomNetworkService;
+using kcenon::pacs::di::IDicomStorage;
+using kcenon::pacs::di::IDicomCodec;
+using kcenon::pacs::di::IDicomNetwork;
+using kcenon::pacs::di::DicomNetworkService;
 
 // Registration configuration
-using pacs::di::registration_config;
+using kcenon::pacs::di::registration_config;
 
 // Registration functions
-using pacs::di::register_services;
-using pacs::di::register_storage;
-using pacs::di::register_storage_instance;
-using pacs::di::register_network;
-using pacs::di::register_network_instance;
-using pacs::di::register_logger;
-using pacs::di::register_logger_instance;
-using pacs::di::create_container;
+using kcenon::pacs::di::register_services;
+using kcenon::pacs::di::register_storage;
+using kcenon::pacs::di::register_storage_instance;
+using kcenon::pacs::di::register_network;
+using kcenon::pacs::di::register_network_instance;
+using kcenon::pacs::di::register_logger;
+using kcenon::pacs::di::register_logger_instance;
+using kcenon::pacs::di::create_container;
 
-} // namespace pacs::di
+} // namespace kcenon::pacs::di
 
 // ============================================================================
-// Re-export pacs::di::test namespace
+// Re-export kcenon::pacs::di::test namespace
 // ============================================================================
 
-export namespace pacs::di::test {
+export namespace kcenon::pacs::di::test {
 
 // Mock implementations
-using pacs::di::test::MockStorage;
-using pacs::di::test::MockNetwork;
+using kcenon::pacs::di::test::MockStorage;
+using kcenon::pacs::di::test::MockNetwork;
 
 // Test container builder
-using pacs::di::test::TestContainerBuilder;
+using kcenon::pacs::di::test::TestContainerBuilder;
 
 // Convenience functions
-using pacs::di::test::create_test_container;
-using pacs::di::test::register_mock_storage;
-using pacs::di::test::register_mock_network;
+using kcenon::pacs::di::test::create_test_container;
+using kcenon::pacs::di::test::register_mock_storage;
+using kcenon::pacs::di::test::register_mock_network;
 
-} // namespace pacs::di::test
+} // namespace kcenon::pacs::di::test

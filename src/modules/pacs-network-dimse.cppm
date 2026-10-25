@@ -6,11 +6,12 @@
  * @file pacs-network-dimse.cppm
  * @brief C++20 module partition for DIMSE message types.
  *
- * This module partition exports comprehensive DIMSE types:
- * - dimse_message: Base message class with factory functions
- * - command_field: DIMSE command field enumeration
- * - status_codes: All DIMSE status codes and categories
- * - N-* service types: N-ACTION, N-CREATE, N-DELETE, N-EVENT-REPORT, N-GET, N-SET
+ * This module partition exports DIMSE types:
+ * - dimse_message: Base message class
+ * - command_field: DIMSE command field enumeration and helpers
+ * - status_code: Status code type and category checks
+ * - Factory functions: C-ECHO, C-STORE, C-FIND, and the N-* services
+ *   (N-ACTION, N-CREATE, N-DELETE, N-EVENT-REPORT, N-GET, N-SET)
  *
  * Part of the kcenon.pacs module.
  */
@@ -39,112 +40,95 @@ module;
 export module kcenon.pacs:network_dimse;
 
 // ============================================================================
-// Re-export pacs::network::dimse namespace (full)
+// Re-export kcenon::pacs::network::dimse namespace
 // ============================================================================
+// The status_* codes (status_codes.h) and the tag_*, priority_*, and
+// command_data_set_type_* constants (dimse_message.h) are namespace-scope
+// constexpr variables with internal linkage, which a module cannot export.
+// Use the is_success() / is_pending() / ... helpers, or include the header.
 
-export namespace pacs::network::dimse {
+export namespace kcenon::pacs::network::dimse {
 
 // ==========================================================================
 // Core Message Types
 // ==========================================================================
 
 // DIMSE message class
-using pacs::network::dimse::dimse_message;
+using kcenon::pacs::network::dimse::dimse_message;
+using kcenon::pacs::network::dimse::dimse_error;
+using kcenon::pacs::network::dimse::dimse_result;
 
-// Command field enumeration
-using pacs::network::dimse::command_field;
+// Command field enumeration and helpers
+using kcenon::pacs::network::dimse::command_field;
+using kcenon::pacs::network::dimse::is_request;
+using kcenon::pacs::network::dimse::is_response;
+using kcenon::pacs::network::dimse::is_dimse_c;
+using kcenon::pacs::network::dimse::is_dimse_n;
+using kcenon::pacs::network::dimse::get_response_command;
+using kcenon::pacs::network::dimse::get_request_command;
+
+// to_string overloads (command_field, dimse_error)
+using kcenon::pacs::network::dimse::to_string;
 
 // ==========================================================================
 // Status Codes
 // ==========================================================================
 
 // Status code type
-using pacs::network::dimse::status_code;
-
-// General status codes
-using pacs::network::dimse::status_success;
-using pacs::network::dimse::status_pending;
-using pacs::network::dimse::status_pending_warning;
-using pacs::network::dimse::status_cancel;
-
-// Failure status codes
-using pacs::network::dimse::status_refused_out_of_resources;
-using pacs::network::dimse::status_refused_out_of_resources_matches;
-using pacs::network::dimse::status_refused_out_of_resources_subops;
-using pacs::network::dimse::status_refused_move_destination_unknown;
-using pacs::network::dimse::status_refused_sop_class_not_supported;
-using pacs::network::dimse::status_error_dataset_mismatch;
-using pacs::network::dimse::status_error_cannot_understand;
-using pacs::network::dimse::status_error_unable_to_process;
-using pacs::network::dimse::status_error_duplicate_sop_instance;
-using pacs::network::dimse::status_error_missing_attribute;
-using pacs::network::dimse::status_error_missing_attribute_value;
-
-// Warning status codes
-using pacs::network::dimse::status_warning_coercion;
-using pacs::network::dimse::status_warning_elements_discarded;
-using pacs::network::dimse::status_warning_dataset_mismatch;
+using kcenon::pacs::network::dimse::status_code;
 
 // Status category checks
-using pacs::network::dimse::is_success;
-using pacs::network::dimse::is_pending;
-using pacs::network::dimse::is_warning;
-using pacs::network::dimse::is_failure;
-using pacs::network::dimse::status_to_string;
+using kcenon::pacs::network::dimse::is_success;
+using kcenon::pacs::network::dimse::is_pending;
+using kcenon::pacs::network::dimse::is_cancel;
+using kcenon::pacs::network::dimse::is_warning;
+using kcenon::pacs::network::dimse::is_failure;
+using kcenon::pacs::network::dimse::is_final;
+using kcenon::pacs::network::dimse::status_description;
+using kcenon::pacs::network::dimse::status_category;
 
 // ==========================================================================
 // C-* Message Factory Functions
 // ==========================================================================
 
 // C-ECHO
-using pacs::network::dimse::make_c_echo_rq;
-using pacs::network::dimse::make_c_echo_rsp;
+using kcenon::pacs::network::dimse::make_c_echo_rq;
+using kcenon::pacs::network::dimse::make_c_echo_rsp;
 
 // C-STORE
-using pacs::network::dimse::make_c_store_rq;
-using pacs::network::dimse::make_c_store_rsp;
+using kcenon::pacs::network::dimse::make_c_store_rq;
+using kcenon::pacs::network::dimse::make_c_store_rsp;
 
 // C-FIND
-using pacs::network::dimse::make_c_find_rq;
-using pacs::network::dimse::make_c_find_rsp;
-
-// C-MOVE
-using pacs::network::dimse::make_c_move_rq;
-using pacs::network::dimse::make_c_move_rsp;
-
-// C-GET
-using pacs::network::dimse::make_c_get_rq;
-using pacs::network::dimse::make_c_get_rsp;
-
-// C-CANCEL
-using pacs::network::dimse::make_c_cancel_rq;
+using kcenon::pacs::network::dimse::make_c_find_rq;
+using kcenon::pacs::network::dimse::make_c_find_rsp;
 
 // ==========================================================================
 // N-* Message Factory Functions
 // ==========================================================================
 
 // N-ACTION
-using pacs::network::dimse::make_n_action_rq;
-using pacs::network::dimse::make_n_action_rsp;
+using kcenon::pacs::network::dimse::make_n_action_rq;
+using kcenon::pacs::network::dimse::make_n_action_rsp;
 
 // N-CREATE
-using pacs::network::dimse::make_n_create_rq;
-using pacs::network::dimse::make_n_create_rsp;
+using kcenon::pacs::network::dimse::make_n_create_rq;
+using kcenon::pacs::network::dimse::make_n_create_rsp;
 
 // N-DELETE
-using pacs::network::dimse::make_n_delete_rq;
-using pacs::network::dimse::make_n_delete_rsp;
+using kcenon::pacs::network::dimse::make_n_delete_rq;
+using kcenon::pacs::network::dimse::make_n_delete_rsp;
 
 // N-EVENT-REPORT
-using pacs::network::dimse::make_n_event_report_rq;
-using pacs::network::dimse::make_n_event_report_rsp;
+using kcenon::pacs::network::dimse::make_n_event_report_rq;
+using kcenon::pacs::network::dimse::make_n_event_report_rsp;
 
 // N-GET
-using pacs::network::dimse::make_n_get_rq;
-using pacs::network::dimse::make_n_get_rsp;
+using kcenon::pacs::network::dimse::make_n_get_rq;
+using kcenon::pacs::network::dimse::make_n_get_rsp;
 
 // N-SET
-using pacs::network::dimse::make_n_set_rq;
-using pacs::network::dimse::make_n_set_rsp;
+using kcenon::pacs::network::dimse::make_n_set_rq;
+using kcenon::pacs::network::dimse::make_n_set_rsp;
 
-} // namespace pacs::network::dimse
+} // namespace kcenon::pacs::network::dimse

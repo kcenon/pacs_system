@@ -46,39 +46,114 @@ module;
 export module kcenon.pacs:services;
 
 // ============================================================================
-// Re-export pacs::services namespace
+// Re-export kcenon::pacs::services namespace
 // ============================================================================
 
-export namespace pacs::services {
+export namespace kcenon::pacs::services {
 
 // SCP base
-using pacs::services::scp_service;
+using kcenon::pacs::services::scp_service;
+using kcenon::pacs::services::scp_service_ptr;
 
-// SCP implementations
-using pacs::services::storage_scp;
-using pacs::services::storage_scp_config;
-using pacs::services::duplicate_policy;
-using pacs::services::query_scp;
-using pacs::services::retrieval_scp;
-using pacs::services::verification_scp;
-using pacs::services::mpps_scp;
-using pacs::services::worklist_scp;
+// Storage SCP
+using kcenon::pacs::services::storage_scp;
+using kcenon::pacs::services::storage_scp_config;
+using kcenon::pacs::services::duplicate_policy;
+using kcenon::pacs::services::storage_handler;
+using kcenon::pacs::services::pre_store_handler;
+using kcenon::pacs::services::post_store_handler;
+using kcenon::pacs::services::get_standard_storage_sop_classes;
+using kcenon::pacs::services::ct_image_storage_uid;
+using kcenon::pacs::services::enhanced_ct_image_storage_uid;
+using kcenon::pacs::services::mr_image_storage_uid;
+using kcenon::pacs::services::enhanced_mr_image_storage_uid;
+using kcenon::pacs::services::cr_image_storage_uid;
+using kcenon::pacs::services::dx_image_storage_presentation_uid;
+using kcenon::pacs::services::dx_image_storage_processing_uid;
+using kcenon::pacs::services::us_image_storage_uid;
+using kcenon::pacs::services::secondary_capture_image_storage_uid;
+using kcenon::pacs::services::rt_image_storage_uid;
+using kcenon::pacs::services::rt_dose_storage_uid;
+using kcenon::pacs::services::rt_structure_set_storage_uid;
+using kcenon::pacs::services::rt_plan_storage_uid;
 
-// SCU implementations
-using pacs::services::storage_scu;
-using pacs::services::query_scu;
-using pacs::services::query_scu_config;
-using pacs::services::query_model;
-using pacs::services::query_result;
-using pacs::services::patient_query_keys;
-using pacs::services::study_query_keys;
-using pacs::services::series_query_keys;
-using pacs::services::instance_query_keys;
+// Query SCP
+using kcenon::pacs::services::query_scp;
+using kcenon::pacs::services::query_level;
+using kcenon::pacs::services::parse_query_level;
+using kcenon::pacs::services::query_handler;
+using kcenon::pacs::services::cancel_check;
+using kcenon::pacs::services::patient_root_find_sop_class_uid;
+using kcenon::pacs::services::study_root_find_sop_class_uid;
+using kcenon::pacs::services::patient_study_only_find_sop_class_uid;
+using kcenon::pacs::services::modality_worklist_find_sop_class_uid;
+
+// Retrieve SCP (C-MOVE / C-GET)
+using kcenon::pacs::services::retrieve_scp;
+using kcenon::pacs::services::sub_operation_stats;
+using kcenon::pacs::services::retrieve_handler;
+using kcenon::pacs::services::destination_resolver;
+using kcenon::pacs::services::store_sub_operation;
+using kcenon::pacs::services::retrieve_cancel_check;
+using kcenon::pacs::services::patient_root_move_sop_class_uid;
+using kcenon::pacs::services::study_root_move_sop_class_uid;
+using kcenon::pacs::services::patient_root_get_sop_class_uid;
+using kcenon::pacs::services::study_root_get_sop_class_uid;
+
+// Verification SCP
+using kcenon::pacs::services::verification_scp;
+using kcenon::pacs::services::verification_sop_class_uid;
+
+// MPPS SCP
+using kcenon::pacs::services::mpps_scp;
+using kcenon::pacs::services::mpps_status;
+using kcenon::pacs::services::parse_mpps_status;
+using kcenon::pacs::services::mpps_instance;
+using kcenon::pacs::services::mpps_create_handler;
+using kcenon::pacs::services::mpps_set_handler;
+using kcenon::pacs::services::mpps_sop_class_uid;
+
+// Worklist SCP
+using kcenon::pacs::services::worklist_scp;
+using kcenon::pacs::services::worklist_handler;
+using kcenon::pacs::services::worklist_cancel_check;
+using kcenon::pacs::services::worklist_find_sop_class_uid;
+
+// Storage SCU
+using kcenon::pacs::services::storage_scu;
+using kcenon::pacs::services::storage_scu_config;
+using kcenon::pacs::services::store_result;
+using kcenon::pacs::services::store_progress_callback;
+
+// Query SCU
+using kcenon::pacs::services::query_scu;
+using kcenon::pacs::services::query_scu_config;
+using kcenon::pacs::services::query_model;
+using kcenon::pacs::services::get_find_sop_class_uid;
+using kcenon::pacs::services::query_result;
+using kcenon::pacs::services::query_streaming_callback;
+using kcenon::pacs::services::patient_query_keys;
+using kcenon::pacs::services::study_query_keys;
+using kcenon::pacs::services::series_query_keys;
+using kcenon::pacs::services::instance_query_keys;
 
 // Registry
-using pacs::services::sop_class_registry;
+using kcenon::pacs::services::sop_class_registry;
+using kcenon::pacs::services::sop_class_category;
+using kcenon::pacs::services::modality_type;
+using kcenon::pacs::services::sop_class_info;
+using kcenon::pacs::services::is_storage_sop_class;
+using kcenon::pacs::services::get_storage_modality;
+using kcenon::pacs::services::get_sop_class_name;
 
 // Status
-using pacs::services::storage_status;
+using kcenon::pacs::services::storage_status;
+using kcenon::pacs::services::is_success;
+using kcenon::pacs::services::is_warning;
+using kcenon::pacs::services::is_failure;
+using kcenon::pacs::services::to_status_code;
 
-} // namespace pacs::services
+// to_string overloads (query, MPPS, and storage status enums)
+using kcenon::pacs::services::to_string;
+
+} // namespace kcenon::pacs::services

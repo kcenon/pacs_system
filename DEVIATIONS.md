@@ -38,12 +38,18 @@ Authoritative in-repo sources cited below:
   (alias `kcenon::pacs_modules`) via a `FILE_SET CXX_MODULES`, and the build
   **self-disables** the target with a warning if CMake is older than 3.28.
 - The module is real, not a placeholder: `src/modules/pacs.cppm` is the primary
-  interface unit `kcenon.pacs`, aggregating 12 partitions
-  (`core`, `encoding`, `storage`, `security`, `network`, `services`,
-  `workflow`, `web`, `integration`, `ai` [guarded by `KCENON_WITH_AI`],
-  `monitoring`, `di`). The partitions re-export the existing header library API
-  (e.g. `pacs-core.cppm` re-exports `pacs::core` and the `Result<T>` pattern);
-  the header-based interface remains the primary, fully supported API.
+  interface unit `kcenon.pacs`, aggregating 15 partitions
+  (`core`, `encoding`, `storage`, `security`, `network`, `network_dimse`,
+  `services`, `services_cache`, `services_validation`, `workflow`, `web`,
+  `integration`, `ai`, `monitoring`, `di`; the `storage`, `workflow`, `web`,
+  `integration`, `ai`, and `monitoring` partitions are empty unless their
+  library target is built). The partitions re-export the existing header
+  library API (e.g. `pacs-core.cppm` re-exports `kcenon::pacs::core` and the
+  `Result<T>` pattern); the header-based interface remains the primary, fully
+  supported API.
+- The `C++20 Modules` workflow (`.github/workflows/modules.yml`) builds
+  `pacs_system_modules`, `module_example`, and `module_tests` with Clang 18 on
+  Ubuntu 24.04 (#1239). No CI job builds the modules target with GCC or MSVC.
 - **Experimental status is declared in the repository**: the `cmake/targets.cmake`
   module note and `README.md` ("C++20 modules are experimental. The header-based
   interface remains the primary API.").
@@ -73,10 +79,12 @@ concrete dates are intentionally omitted.
 - [ ] **CI matrix green.** A clean configure + build + test of
       `pacs_system_modules` passes on all three named compilers (GCC, Clang,
       MSVC) at or above the declared minimum versions, on the CI runners, with
-      CMake 3.28+. (Today the modules target is opt-in and not part of the
-      default CI build matrix.)
-- [ ] **CMake floor exercised.** The CI toolchain provides CMake 3.28+ for the
-      modules job so the target is actually built rather than self-disabled.
+      CMake 3.28+. (Today the modules target is opt-in; only the Clang 18 job
+      in `modules.yml` builds it.)
+- [x] **CMake floor exercised.** The CI toolchain provides CMake 3.28+ for the
+      modules job so the target is actually built rather than self-disabled
+      (`modules.yml` uses the runner image's CMake, 3.31.6 when this was
+      written).
 - [ ] **Exported surface frozen.** The partition layout and exported surface of
       `kcenon.pacs` (`src/modules/*.cppm`) are declared stable, matching the
       header library's public API. The exact frozen surface is **TBD** and must

@@ -8,12 +8,15 @@
  *
  * This is the main module interface for the pacs_system library.
  * It aggregates all module partitions to provide a single import point.
+ * The partitions re-export the names that the public headers declare, in
+ * the same kcenon::pacs namespaces.
  *
  * Usage:
  * @code
  * import kcenon.pacs;
  *
- * using namespace pacs;
+ * namespace core = kcenon::pacs::core;
+ * namespace encoding = kcenon::pacs::encoding;
  *
  * // Create a DICOM dataset
  * core::dicom_dataset ds;
@@ -25,14 +28,22 @@
  * - kcenon.pacs:encoding - Transfer syntax and compression codecs
  * - kcenon.pacs:storage - Storage backends and database adapters
  * - kcenon.pacs:security - RBAC, encryption, anonymization
- * - kcenon.pacs:network - DICOM network protocol (PDU, Association, DIMSE)
- * - kcenon.pacs:services - SCP service implementations
+ * - kcenon.pacs:network - DICOM network protocol (PDU, Association)
+ * - kcenon.pacs:network_dimse - DIMSE messages, command fields, status checks
+ * - kcenon.pacs:services - SCP/SCU service implementations
+ * - kcenon.pacs:services_cache - Query cache, cursors, streaming
+ * - kcenon.pacs:services_validation - IOD validators
  * - kcenon.pacs:workflow - Task scheduling and prefetching
  * - kcenon.pacs:web - REST API and DICOMweb endpoints
  * - kcenon.pacs:integration - External system adapters
- * - kcenon.pacs:ai - AI/ML service integration (optional)
+ * - kcenon.pacs:ai - AI/ML service integration
  * - kcenon.pacs:monitoring - Health checks and metrics
  * - kcenon.pacs:di - Dependency injection utilities
+ *
+ * The storage, workflow, web, integration, ai, and monitoring partitions
+ * export their names only when the matching library target is built
+ * (PACS_MODULES_WITH_<NAME>, see cmake/targets.cmake); otherwise they are
+ * empty.
  */
 
 export module kcenon.pacs;
@@ -47,9 +58,12 @@ export import :security;
 
 // Tier 3: Protocol (depends on core, encoding)
 export import :network;
+export import :network_dimse;
 
 // Tier 4: Services (depends on core, network, storage)
 export import :services;
+export import :services_cache;
+export import :services_validation;
 
 // Tier 5: Application (depends on services)
 export import :workflow;
@@ -57,14 +71,11 @@ export import :web;
 export import :integration;
 
 // Tier 6: Optional features
-#ifdef KCENON_WITH_AI
 export import :ai;
-#endif
-
 export import :monitoring;
 export import :di;
 
-export namespace pacs {
+export namespace kcenon::pacs {
 
 /**
  * @brief Version information for pacs_system module.
@@ -78,4 +89,4 @@ struct module_version {
     static constexpr const char* module_name = "kcenon.pacs";
 };
 
-} // namespace pacs
+} // namespace kcenon::pacs
