@@ -92,6 +92,14 @@ for dir in "${THIRD_PARTY[@]+"${THIRD_PARTY[@]}"}"; do
     PREFIX_PATH="${PREFIX_PATH};$(cd "${dir}" && pwd)"
 done
 
+# Every package is found through CMAKE_PREFIX_PATH. A toolchain file from the
+# environment (vcpkg's, for example) would run vcpkg manifest mode for each
+# dependency's vcpkg.json and pull registry ports instead.
+if [[ -n "${CMAKE_TOOLCHAIN_FILE:-}" ]]; then
+    echo "note: ignoring CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} from the environment"
+    unset CMAKE_TOOLCHAIN_FILE
+fi
+
 GENERATOR_ARGS=()
 if [[ -z "${CMAKE_GENERATOR:-}" ]] && command -v ninja > /dev/null; then
     GENERATOR_ARGS=(-G Ninja)

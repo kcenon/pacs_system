@@ -128,8 +128,11 @@ script on Ubuntu 24.04 against the dependency SHAs pinned in `.github/actions/ch
    vcpkg install --x-manifest-root=tests/source_install --x-install-root=<vcpkg_installed>
    ```
 
-   The remaining prerequisites are system packages: a C++20 compiler, CMake 3.20 or later,
-   OpenSSL, zlib, LZ4 and ICU, plus libjpeg-turbo for the JPEG codec.
+   The steps below find them through `CMAKE_PREFIX_PATH`; do not configure with vcpkg's toolchain
+   file, which would run manifest mode for each dependency's own `vcpkg.json` and pull registry
+   ports instead of the sources being installed. The remaining prerequisites are system packages:
+   a C++20 compiler, CMake 3.20 or later, OpenSSL, zlib, LZ4 and ICU, plus libjpeg-turbo for the
+   JPEG codec.
 2. **Ecosystem dependencies.** Check out common_system, thread_system, container_system,
    logger_system, monitoring_system, network_system and database_system side by side, outside the
    pacs_system checkout and its parent directory: `cmake/dependencies.cmake` builds a checkout found

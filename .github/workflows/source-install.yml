@@ -87,6 +87,8 @@ jobs:
           --x-install-root="$GITHUB_WORKSPACE/vcpkg_installed" \
           --triplet x64-linux
 
+    # setup-vcpkg exports CMAKE_TOOLCHAIN_FILE; the script ignores it and passes
+    # the vcpkg tree as a prefix instead.
     - name: Install dependencies and pacs_system, build and run tests/cmake_consumer
       run: |
         src/pacs_system/scripts/check-source-install.sh \

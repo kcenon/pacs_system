@@ -126,8 +126,10 @@ SHA로 Ubuntu 24.04에서 이 스크립트를 실행합니다.
    vcpkg install --x-manifest-root=tests/source_install --x-install-root=<vcpkg_installed>
    ```
 
-   나머지 사전 요구사항은 시스템 패키지입니다: C++20 컴파일러, CMake 3.20 이상, OpenSSL, zlib, LZ4,
-   ICU, 그리고 JPEG 코덱용 libjpeg-turbo.
+   아래 단계는 이 패키지들을 `CMAKE_PREFIX_PATH`로 찾습니다. vcpkg의 toolchain 파일로 구성하지
+   마세요. 그러면 각 의존성의 `vcpkg.json`에 대해 manifest 모드가 실행되어, 설치하려는 소스 대신
+   레지스트리 포트를 가져옵니다. 나머지 사전 요구사항은 시스템 패키지입니다: C++20 컴파일러,
+   CMake 3.20 이상, OpenSSL, zlib, LZ4, ICU, 그리고 JPEG 코덱용 libjpeg-turbo.
 2. **생태계 의존성.** common_system, thread_system, container_system, logger_system,
    monitoring_system, network_system, database_system을 pacs_system 체크아웃과 그 상위 디렉터리 밖에
    나란히 체크아웃합니다. `cmake/dependencies.cmake`는 `<NAME>_ROOT`, `../<name>`, `./<name>`에서 찾은
