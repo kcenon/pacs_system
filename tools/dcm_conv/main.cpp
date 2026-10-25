@@ -8,11 +8,14 @@
  * encoding changes. When the source or the target is an encapsulated
  * (compressed) Transfer Syntax, every frame of Pixel Data is decoded with the
  * source codec and encoded with the target codec, and the attributes that the
- * new encoding changes are updated. A file fails to convert when this build
+ * new encoding changes are updated. A lossy target makes a new, derived image
+ * with its own SOP Instance UID. A file fails to convert when this build
  * does not include a codec it needs or the codec cannot handle the image.
  *
  * @see Issue #280 - dcm_conv: Transfer Syntax conversion utility
  * @see Issue #1276 - dcm_conv relabels Transfer Syntaxes without transcoding
+ * @see Issue #1294 - dcm_conv keeps the SOP Instance UID after lossy compression
+ * @see DICOM PS3.3 Section C.7.6.1.1.5 - Lossy Image Compression
  * @see DICOM PS3.5 Section 8 - Encoding of Pixel, Overlay and Waveform Data
  * @see DICOM PS3.5 Section 10 - Transfer Syntax
  *
@@ -41,17 +44,25 @@
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
 
 using kcenon::pacs::core::dicom_tag;
 
+/// Root of the UIDs dcm_conv creates, next to the pacs_system roots of the
+/// other file tools (dcm_modify .2, dcm_dir .3, img_to_dcm .4)
+constexpr std::string_view kUidRoot = "1.2.826.0.1.3680043.8.1055.5";
+
 // Attributes without a constant in dicom_tag_constants.h
+constexpr dicom_tag kDerivationDescription{0x0008, 0x2111};
+constexpr dicom_tag kSourceImageSequence{0x0008, 0x2112};
 constexpr dicom_tag kPlanarConfiguration{0x0028, 0x0006};
 constexpr dicom_tag kNumberOfFrames{0x0028, 0x0008};
 constexpr dicom_tag kLossyImageCompression{0x0028, 0x2110};
@@ -127,6 +138,13 @@ Conversion:
   (0028,2110), Ratio (0028,2112), and Method (0028,2114) are updated. A file
   fails to convert when a codec it needs is not in this build or cannot
   encode the image (for example, JPEG Lossless with color images).
+
+  A lossy target makes a new image (PS3.3 C.7.6.1.1.5): the output gets a
+  new SOP Instance UID, which Media Storage SOP Instance UID repeats; Value 1
+  of Image Type (0008,0008) becomes DERIVED; Source Image Sequence (0008,2112)
+  references the source instance; and Derivation Description (0008,2111)
+  names the compression and its ratio. Lossless targets and decompression
+  keep the SOP Instance UID and Image Type.
 
 Compression Options:
   -q, --quality <1-100>   Quality for lossy targets (default: 90): JPEG
@@ -520,6 +538,80 @@ void append_value(kcenon::pacs::core::dicom_dataset& dataset, dicom_tag tag,
 }
 
 /**
+ * @brief Generate a new UID under kUidRoot
+ * @return <root>.<milliseconds since the epoch>.<random>, at most 58 characters
+ *
+ * The random component keeps UIDs apart that two dcm_conv processes create
+ * in the same millisecond. Each thread owns its engine, seeded once from
+ * std::random_device.
+ */
+std::string generate_uid() {
+    static thread_local std::mt19937_64 gen{std::random_device{}()};
+    static thread_local std::uniform_int_distribution<uint64_t> dist{
+        0, 999'999'999'999'999};
+
+    const auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+                               std::chrono::system_clock::now().time_since_epoch())
+                               .count();
+    return std::string(kUidRoot) + "." + std::to_string(timestamp) + "." +
+           std::to_string(dist(gen));
+}
+
+/**
+ * @brief Give a lossy compressed image the identity of a derived image
+ * @param dataset The dataset whose Pixel Data was just compressed lossily
+ * @param target_ts The lossy target Transfer Syntax
+ * @param ratio The compression ratio of this step, as in (0028,2112)
+ *
+ * PS3.3 Section C.7.6.1.1.5: Value 1 of Image Type becomes DERIVED and the
+ * image receives a new SOP Instance UID, which dicom_file::create() repeats
+ * in Media Storage SOP Instance UID. Image Type has VM 2-n, so an absent or
+ * single-valued Image Type becomes the two values DERIVED and SECONDARY.
+ * Source Image Sequence is replaced by one item that references the source
+ * instance, and Derivation Description names the compression, followed by
+ * the previous description in brackets.
+ */
+void derive_lossy_instance(kcenon::pacs::core::dicom_dataset& dataset,
+                           const kcenon::pacs::encoding::transfer_syntax& target_ts,
+                           const std::string& ratio) {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    const auto image_type = dataset.get_string(tags::image_type);
+    const auto separator = image_type.find('\\');
+    dataset.set_string(tags::image_type, vr_type::CS,
+                       separator == std::string::npos
+                           ? std::string("DERIVED\\SECONDARY")
+                           : "DERIVED" + image_type.substr(separator));
+
+    const auto sop_class_uid = dataset.get_string(tags::sop_class_uid);
+    const auto sop_instance_uid = dataset.get_string(tags::sop_instance_uid);
+    dataset.remove(kSourceImageSequence);
+    if (!sop_class_uid.empty() && !sop_instance_uid.empty()) {
+        dicom_dataset source;
+        source.set_string(tags::referenced_sop_class_uid, vr_type::UI, sop_class_uid);
+        source.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
+                          sop_instance_uid);
+        dataset.get_or_create_sequence(kSourceImageSequence).push_back(std::move(source));
+    }
+
+    // Derivation Description is ST, at most 1024 characters
+    std::string description = "Lossy compression with " + std::string(target_ts.name()) +
+                              ", ratio " + ratio + ":1";
+    if (const auto previous = dataset.get_string(kDerivationDescription);
+        !previous.empty()) {
+        description += " [" + previous + "]";
+        if (description.size() > 1024) {
+            description.resize(1020);
+            description += "...]";
+        }
+    }
+    dataset.set_string(kDerivationDescription, vr_type::ST, description);
+
+    dataset.set_string(tags::sop_instance_uid, vr_type::UI, generate_uid());
+}
+
+/**
  * @brief Decode and re-encode Pixel Data for a new Transfer Syntax
  * @param dataset The dataset to change in place
  * @param source_ts Transfer Syntax the Pixel Data is encoded in
@@ -531,9 +623,10 @@ void append_value(kcenon::pacs::core::dicom_dataset& dataset, dicom_tag tag,
  * Decodes each frame with the source codec (or splits native Pixel Data into
  * frames), then encodes each frame with the target codec (or concatenates
  * native frames). Updates Photometric Interpretation and Planar
- * Configuration, adds Lossy Image Compression attributes for lossy targets,
- * and removes the Extended Offset Table, which describes the old encoding.
- * Number of Frames does not change.
+ * Configuration, adds Lossy Image Compression attributes and makes a derived
+ * instance (derive_lossy_instance()) for lossy targets, and removes the
+ * Extended Offset Table, which describes the old encoding. Number of Frames
+ * does not change.
  */
 bool transcode_pixel_data(kcenon::pacs::core::dicom_dataset& dataset,
                           const kcenon::pacs::encoding::transfer_syntax& source_ts,
@@ -666,6 +759,12 @@ bool transcode_pixel_data(kcenon::pacs::core::dicom_dataset& dataset,
             append_value(dataset, kLossyImageCompressionRatio, vr_type::DS, ratio.str());
             append_value(dataset, kLossyImageCompressionMethod, vr_type::CS,
                          lossy_compression_method(target_ts));
+
+            derive_lossy_instance(dataset, target_ts, ratio.str());
+            if (opts.verbose) {
+                std::cout << "    New SOP Instance UID: "
+                          << dataset.get_string(tags::sop_instance_uid) << "\n";
+            }
         }
     } else {
         std::vector<uint8_t> value;
