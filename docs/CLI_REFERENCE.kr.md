@@ -168,18 +168,44 @@ Transfer Syntax 변환 유틸리티.
 # Implicit VR Little Endian으로 변환
 ./build/bin/dcm_conv image.dcm output.dcm --implicit
 
+# RLE Lossless로 압축 (모든 빌드에 내장)
+./build/bin/dcm_conv image.dcm compressed.dcm --rle
+
 # JPEG Baseline으로 변환 (품질 설정 포함)
 ./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
 
 # 디렉토리 재귀 변환 및 검증
 ./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
 
-# 지원되는 Transfer Syntax 목록 표시
+# Transfer Syntax 목록과 이 빌드에 포함된 코덱 표시
 ./build/bin/dcm_conv --list-syntaxes
 
 # Transfer Syntax UID 직접 지정
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+비압축(native) Transfer Syntax 사이의 변환에서는 데이터셋 인코딩만 바뀝니다.
+원본이나 대상이 압축(encapsulated) Transfer Syntax이면 `dcm_conv`는 모든 프레임을
+원본 코덱으로 디코딩한 뒤 대상 코덱으로 인코딩하고, 캡슐화된 Pixel Data(PS3.5
+Annex A.4)를 기록합니다. 대상 코덱이 Photometric Interpretation을 바꾸는 경우
+(컬러 JPEG Baseline은 YBR_FULL_422, 컬러 HTJ2K는 YBR_RCT 또는 YBR_ICT) 이 값을
+갱신하고, 손실 압축 대상이면 Lossy Image Compression (0028,2110), Lossy Image
+Compression Ratio (0028,2112), Lossy Image Compression Method (0028,2114)를
+갱신합니다. Number of Frames는 바뀌지 않습니다.
+
+- 필요한 코덱이 이 빌드에 없거나(JPEG Baseline은 libjpeg-turbo, JPEG 2000은
+  OpenJPEG, JPEG-LS는 CharLS, HTJ2K는 OpenJPH가 필요하며 RLE와 JPEG Lossless는
+  내장) 코덱이 해당 영상을 인코딩할 수 없으면(예: 컬러 영상의 JPEG Lossless) 그
+  파일의 변환은 실패하고 종료 코드는 2입니다.
+- `-q`/`--quality`(1-100, 기본값 90)는 JPEG Baseline 품질, JPEG-LS near-lossless의
+  NEAR 값, JPEG 2000 손실 압축률을 정합니다. 무손실 대상과 HTJ2K는 이 값을
+  사용하지 않습니다.
+- `--verify`는 각 출력 파일을 다시 열어 Pixel Data가 Transfer Syntax와 맞는지
+  확인합니다. 압축 Pixel Data는 모든 프레임을 디코딩하고, 비압축 Pixel Data는
+  길이를 Rows x Columns x Samples per Pixel x Bits Allocated / 8 x Number of
+  Frames와 비교합니다.
+- JPEG Lossless 디코더는 다른 인코더가 만든 스트림을 디코딩하지 못할 수 있습니다
+  ([DICOM Conformance Statement 부록 B](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations) 참고).
 
 ### DCM Anonymize
 
@@ -332,6 +358,12 @@ DICOM PS3.18 형식의 JSON 파일을 DICOM 파일로 변환.
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
 ```
 
+`json_to_dcm`은 Pixel Data를 그대로 기록하며 압축하거나 압축을 풀지 않습니다.
+압축(encapsulated) Transfer Syntax는 Pixel Data가 이미 캡슐화되어 있을 때만
+(템플릿에서 가져온 Pixel Data라면 그 Transfer Syntax와 같을 때만) 허용되고,
+비압축 Transfer Syntax는 Pixel Data가 비압축일 때만 허용됩니다. 그렇지 않으면
+종료 코드 2로 끝납니다. Pixel Data의 인코딩을 바꾸려면 `dcm_conv`를 사용하십시오.
+
 ### DCM to XML
 
 DICOM 파일을 DICOM Native XML 형식(PS3.19)으로 변환.
@@ -391,6 +423,10 @@ XML 파일(DICOM Native XML PS3.19 형식)을 DICOM 형식으로 변환.
 # BulkData URI 해석을 위한 디렉토리 지정
 ./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
+
+`xml_to_dcm`도 `json_to_dcm`과 같은 Pixel Data 규칙을 따릅니다. Pixel Data를
+압축하거나 압축을 풀지 않으므로 Transfer Syntax는 기록하는 Pixel Data의 형태와
+맞아야 합니다.
 
 ### Img to DCM
 

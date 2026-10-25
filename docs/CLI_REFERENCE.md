@@ -168,18 +168,45 @@ Transfer Syntax conversion utility.
 # Convert to Implicit VR Little Endian
 ./build/bin/dcm_conv image.dcm output.dcm --implicit
 
+# Compress with RLE Lossless (built into every build)
+./build/bin/dcm_conv image.dcm compressed.dcm --rle
+
 # Convert to JPEG Baseline with quality setting
 ./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
 
 # Convert directory recursively with verification
 ./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
 
-# List all supported Transfer Syntaxes
+# List Transfer Syntaxes and the codecs in this build
 ./build/bin/dcm_conv --list-syntaxes
 
 # Convert with explicit Transfer Syntax UID
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+Between native (uncompressed) Transfer Syntaxes only the dataset encoding
+changes. When the source or the target is a compressed (encapsulated)
+Transfer Syntax, `dcm_conv` decodes every frame with the source codec and
+encodes it with the target codec, writes encapsulated Pixel Data (PS3.5
+Annex A.4), and updates Photometric Interpretation where the target codec
+changes it (YBR_FULL_422 for color JPEG Baseline, YBR_RCT or YBR_ICT for
+color HTJ2K) and, for lossy targets, Lossy Image Compression (0028,2110),
+Lossy Image Compression Ratio (0028,2112), and Lossy Image Compression
+Method (0028,2114). Number of Frames does not change.
+
+- A file fails to convert, with exit code 2, when a codec it needs is not in
+  this build (JPEG Baseline needs libjpeg-turbo, JPEG 2000 needs OpenJPEG,
+  JPEG-LS needs CharLS, HTJ2K needs OpenJPH; RLE and JPEG Lossless are built
+  in) or cannot encode the image, for example JPEG Lossless with color images.
+- `-q`/`--quality` (1-100, default 90) sets the JPEG Baseline quality, the
+  JPEG-LS near-lossless NEAR value, and the JPEG 2000 lossy compression ratio;
+  lossless targets and HTJ2K ignore it.
+- `--verify` reopens each output and checks that its Pixel Data matches its
+  Transfer Syntax: it decodes every frame of compressed Pixel Data, and checks
+  native Pixel Data against Rows x Columns x Samples per Pixel x Bits
+  Allocated / 8 x Number of Frames.
+- The JPEG Lossless decoder may fail on streams from other encoders (see
+  [Appendix B of the DICOM Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations)).
 
 ### DCM Anonymize
 
@@ -332,6 +359,13 @@ Convert JSON files (DICOM PS3.18 format) back to DICOM format.
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
 ```
 
+`json_to_dcm` writes Pixel Data as it is and never compresses or decompresses
+it. A compressed (encapsulated) Transfer Syntax is accepted only when the
+Pixel Data is already encapsulated, in that syntax if it comes from the
+template, and a native Transfer Syntax only when the Pixel Data is native;
+otherwise the tool exits with code 2. Use `dcm_conv` to change the encoding of
+Pixel Data.
+
 ### DCM to XML
 
 Convert DICOM files to DICOM Native XML format (PS3.19).
@@ -391,6 +425,10 @@ Convert XML files (DICOM Native XML PS3.19 format) back to DICOM format.
 # Resolve BulkData URI from specific directory
 ./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
+
+`xml_to_dcm` follows the same Pixel Data rule as `json_to_dcm`: it never
+compresses or decompresses Pixel Data, so the Transfer Syntax must match the
+form of the Pixel Data it writes.
 
 ### Img to DCM
 
