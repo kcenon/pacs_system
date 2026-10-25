@@ -194,6 +194,20 @@ color HTJ2K) and, for lossy targets, Lossy Image Compression (0028,2110),
 Lossy Image Compression Ratio (0028,2112), and Lossy Image Compression
 Method (0028,2114). Number of Frames does not change.
 
+A lossy target makes a new image, as PS3.3 Section C.7.6.1.1.5 requires. The
+output gets a new SOP Instance UID under the root
+`1.2.826.0.1.3680043.8.1055.5`, and Media Storage SOP Instance UID
+(0002,0003) repeats it. Value 1 of Image Type (0008,0008) becomes `DERIVED`
+and the other values stay; an absent or single-valued Image Type becomes
+`DERIVED\SECONDARY`, because Image Type has at least two values. Source Image
+Sequence (0008,2112) is replaced by one item with the SOP Class UID and SOP
+Instance UID of the source, and Derivation Description (0008,2111) names the
+target Transfer Syntax and the compression ratio, followed by the previous
+description in brackets. Lossless targets and decompression keep the SOP
+Instance UID and Image Type, and a decompressed lossy image keeps Lossy Image
+Compression `01`. Until [#1291](https://github.com/kcenon/pacs_system/issues/1291)
+is fixed, files are written without the Source Image Sequence item.
+
 - A file fails to convert, with exit code 2, when a codec it needs is not in
   this build (JPEG Baseline needs libjpeg-turbo, JPEG 2000 needs OpenJPEG,
   JPEG-LS needs CharLS, HTJ2K needs OpenJPH; RLE and JPEG Lossless are built

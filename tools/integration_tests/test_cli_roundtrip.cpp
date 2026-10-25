@@ -12,6 +12,7 @@
  * @see Issue #759 - Add Catch2 round-trip integrity tests for conversion CLIs
  * @see Issue #756 - Automated CLI Tool Testing (Epic)
  * @see Issue #1276 - dcm_conv transcodes Pixel Data instead of relabeling it
+ * @see Issue #1294 - dcm_conv gives lossy output a new SOP Instance UID
  */
 
 #include <kcenon/pacs/core/dicom_file.h>
@@ -21,6 +22,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstdint>
@@ -164,6 +166,11 @@ constexpr kcenon::pacs::core::dicom_tag planar_configuration_tag{0x0028, 0x0006}
 constexpr kcenon::pacs::core::dicom_tag number_of_frames_tag{0x0028, 0x0008};
 constexpr kcenon::pacs::core::dicom_tag lossy_image_compression_tag{0x0028, 0x2110};
 constexpr kcenon::pacs::core::dicom_tag lossy_image_compression_method_tag{0x0028, 0x2114};
+constexpr kcenon::pacs::core::dicom_tag derivation_description_tag{0x0008, 0x2111};
+constexpr kcenon::pacs::core::dicom_tag source_image_sequence_tag{0x0008, 0x2112};
+
+/// Prefix of the UIDs that dcm_conv creates
+constexpr const char* dcm_conv_uid_prefix = "1.2.826.0.1.3680043.8.1055.5.";
 
 /**
  * @brief Image Pixel attributes of a generated test image
@@ -177,6 +184,7 @@ struct image_spec {
     uint32_t frames;
     std::string photometric;
     uint16_t planar_configuration{0};
+    std::string image_type{};  ///< Image Type (0008,0008); absent when empty
 };
 
 /**
@@ -235,6 +243,9 @@ void write_image(const fs::path& path, const image_spec& spec,
     ds.set_string(tags::patient_name, vr_type::PN, "TRANSCODE^TEST");
     ds.set_string(tags::patient_id, vr_type::LO, "TC1276");
     ds.set_string(tags::modality, vr_type::CS, "OT");
+    if (!spec.image_type.empty()) {
+        ds.set_string(tags::image_type, vr_type::CS, spec.image_type);
+    }
     ds.set_numeric<uint16_t>(tags::samples_per_pixel, vr_type::US, spec.samples_per_pixel);
     ds.set_string(tags::photometric_interpretation, vr_type::CS, spec.photometric);
     if (spec.samples_per_pixel > 1) {
@@ -314,6 +325,77 @@ std::string first_unavailable_codec() {
         }
     }
     return {};
+}
+
+/**
+ * @brief First lossy codec that this build includes
+ * @return Its Transfer Syntax UID, or an empty string if none is built
+ *
+ * JPEG Baseline comes first because CI builds it with libjpeg-turbo. HTJ2K
+ * comes last: its encoder crashes on AVX-512 runners (#1257).
+ */
+std::string first_available_lossy_codec() {
+    using kcenon::pacs::encoding::compression::codec_factory;
+    for (const char* uid : {"1.2.840.10008.1.2.4.50", "1.2.840.10008.1.2.4.91",
+                            "1.2.840.10008.1.2.4.81", "1.2.840.10008.1.2.4.203"}) {
+        if (codec_factory::is_available(uid)) {
+            return uid;
+        }
+    }
+    return {};
+}
+
+/**
+ * @brief Whether a UID has valid syntax (PS3.5 Section 9.1)
+ *
+ * At most 64 characters; components of digits separated by periods, none
+ * empty and none with a leading zero.
+ */
+bool is_valid_uid(const std::string& uid) {
+    if (uid.empty() || uid.size() > 64) {
+        return false;
+    }
+    size_t start = 0;
+    while (start <= uid.size()) {
+        const auto end = (std::min)(uid.find('.', start), uid.size());
+        const auto component = uid.substr(start, end - start);
+        if (component.empty() || (component.size() > 1 && component[0] == '0') ||
+            component.find_first_not_of("0123456789") != std::string::npos) {
+            return false;
+        }
+        start = end + 1;
+    }
+    return true;
+}
+
+/**
+ * @brief Whether dicom_file writes the items of a sequence (Issue #1291)
+ *
+ * Until #1291 is fixed, dicom_file writes every SQ element with length 0, so
+ * a file keeps its sequences but none of their items.
+ */
+bool dicom_file_writes_sequence_items() {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.826.0.1.3680043.9.9999.1294.1");
+    dicom_dataset item;
+    item.set_string(tags::referenced_sop_instance_uid, vr_type::UI,
+                    "1.2.826.0.1.3680043.9.9999.1294.2");
+    ds.get_or_create_sequence(source_image_sequence_tag).push_back(std::move(item));
+
+    const auto bytes =
+        dicom_file::create(std::move(ds),
+                           kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian)
+            .to_bytes();
+    auto reopened = dicom_file::from_bytes(bytes);
+    if (reopened.is_err()) {
+        return false;
+    }
+    const auto* items = reopened.value().dataset().get_sequence(source_image_sequence_tag);
+    return items != nullptr && items->size() == 1;
 }
 
 }  // namespace
@@ -757,6 +839,164 @@ TEST_CASE("dcm_conv --quality reaches the JPEG Baseline encoder",
     auto back_file = read_dicom(color_back);
     CHECK(get_tag(back_file, tags::photometric_interpretation) == "RGB");
     CHECK(get_tag(back_file, lossy_image_compression_tag) == "01");
+}
+
+TEST_CASE("dcm_conv gives a lossy output a new SOP Instance UID and Image Type DERIVED",
+          "[cli][roundtrip][transcode]") {
+    using namespace kcenon::pacs::core;
+    using kcenon::pacs::encoding::vr_type;
+
+    const auto lossy_ts = first_available_lossy_codec();
+    if (lossy_ts.empty()) {
+        WARN("No lossy codec built; the derived instance is not exercised");
+        return;
+    }
+    INFO("Lossy target: " << lossy_ts);
+
+    temp_dir tmp;
+    image_spec gray{64, 64, 8, 8, 1, 1, "MONOCHROME2"};
+    gray.image_type = "ORIGINAL\\PRIMARY\\AXIAL";
+    const auto src = tmp.path / "original.dcm";
+    const auto lossy = tmp.path / "lossy.dcm";
+    write_image(src, gray, make_pixels(gray));
+    const auto source = read_dicom(src);
+    const auto source_class = get_tag(source, tags::sop_class_uid);
+    const auto source_uid = get_tag(source, tags::sop_instance_uid);
+
+    auto result = run_cli("dcm_conv",
+        {src.string(), lossy.string(), "-t", lossy_ts, "--verify"});
+    INFO("dcm_conv lossy output: " << result.output);
+    REQUIRE(result.exit_code == 0);
+
+    // PS3.3 C.7.6.1.1.5: new SOP Instance UID and Image Type Value 1 DERIVED
+    const auto lossy_file = read_dicom(lossy);
+    const auto lossy_uid = get_tag(lossy_file, tags::sop_instance_uid);
+    CHECK(lossy_uid != source_uid);
+    CHECK(lossy_uid.starts_with(dcm_conv_uid_prefix));
+    CHECK(is_valid_uid(lossy_uid));
+    CHECK(lossy_file.meta_information().get_string(tags::media_storage_sop_instance_uid) ==
+          lossy_uid);
+    CHECK(get_tag(lossy_file, tags::sop_class_uid) == source_class);
+    CHECK(get_tag(lossy_file, tags::image_type) == "DERIVED\\PRIMARY\\AXIAL");
+    CHECK(get_tag(lossy_file, lossy_image_compression_tag) == "01");
+    CHECK(get_tag(lossy_file, derivation_description_tag).starts_with("Lossy compression with "));
+
+    // dicom_file writes sequences without their items until #1291 is fixed
+    if (dicom_file_writes_sequence_items()) {
+        const auto* items = lossy_file.dataset().get_sequence(source_image_sequence_tag);
+        REQUIRE(items != nullptr);
+        REQUIRE(items->size() == 1);
+        CHECK(items->front().get_string(tags::referenced_sop_class_uid) == source_class);
+        CHECK(items->front().get_string(tags::referenced_sop_instance_uid) == source_uid);
+    } else {
+        WARN("dicom_file drops sequence items (#1291); only the presence of "
+             "Source Image Sequence is checked");
+        CHECK(lossy_file.dataset().contains(source_image_sequence_tag));
+    }
+
+    SECTION("each lossy conversion gets its own UID") {
+        const auto again = tmp.path / "lossy_again.dcm";
+        REQUIRE(run_cli("dcm_conv", {src.string(), again.string(), "-t", lossy_ts})
+                    .exit_code == 0);
+        CHECK(get_tag(read_dicom(again), tags::sop_instance_uid) != lossy_uid);
+    }
+
+    SECTION("decompression keeps the UID and Lossy Image Compression") {
+        const auto native = tmp.path / "native.dcm";
+        auto to_native = run_cli("dcm_conv",
+            {lossy.string(), native.string(), "--explicit", "--verify"});
+        INFO("dcm_conv --explicit output: " << to_native.output);
+        REQUIRE(to_native.exit_code == 0);
+
+        const auto native_file = read_dicom(native);
+        CHECK(get_tag(native_file, tags::sop_instance_uid) == lossy_uid);
+        CHECK(native_file.meta_information().get_string(
+                  tags::media_storage_sop_instance_uid) == lossy_uid);
+        CHECK(get_tag(native_file, lossy_image_compression_tag) == "01");
+        CHECK(get_tag(native_file, tags::image_type) == "DERIVED\\PRIMARY\\AXIAL");
+    }
+
+    SECTION("lossless recompression keeps the UID") {
+        const auto rle = tmp.path / "rle.dcm";
+        REQUIRE(run_cli("dcm_conv", {lossy.string(), rle.string(), "--rle"}).exit_code == 0);
+        CHECK(get_tag(read_dicom(rle), tags::sop_instance_uid) == lossy_uid);
+    }
+
+    SECTION("an absent or single-valued Image Type becomes DERIVED\\SECONDARY") {
+        for (const std::string image_type : {"", "ORIGINAL"}) {
+            INFO("Source Image Type: '" << image_type << "'");
+            image_spec spec = gray;
+            spec.image_type = image_type;
+            const auto input = tmp.path / "image_type.dcm";
+            const auto output = tmp.path / "image_type_lossy.dcm";
+            write_image(input, spec, make_pixels(spec));
+
+            REQUIRE(run_cli("dcm_conv",
+                {input.string(), output.string(), "-t", lossy_ts, "--overwrite"})
+                        .exit_code == 0);
+            CHECK(get_tag(read_dicom(output), tags::image_type) == "DERIVED\\SECONDARY");
+        }
+    }
+
+    SECTION("a previous Derivation Description follows in brackets") {
+        auto file = read_dicom(src);
+        auto dataset = file.dataset();
+        dataset.set_string(derivation_description_tag, vr_type::ST, std::string(1100, 'x'));
+        REQUIRE(dicom_file::create(std::move(dataset), file.transfer_syntax())
+                    .save(src).is_ok());
+
+        const auto derived = tmp.path / "derived.dcm";
+        REQUIRE(run_cli("dcm_conv", {src.string(), derived.string(), "-t", lossy_ts})
+                    .exit_code == 0);
+
+        // Derivation Description is ST, at most 1024 characters
+        const auto description = get_tag(read_dicom(derived), derivation_description_tag);
+        CHECK(description.size() == 1024);
+        CHECK(description.starts_with("Lossy compression with "));
+        CHECK(description.find(" [xxx") != std::string::npos);
+        CHECK(description.ends_with("x...]"));
+    }
+}
+
+TEST_CASE("dcm_conv lossless conversions keep the SOP Instance UID and Image Type",
+          "[cli][roundtrip][transcode]") {
+    using kcenon::pacs::encoding::compression::codec_factory;
+    namespace tags = kcenon::pacs::core::tags;
+
+    temp_dir tmp;
+    image_spec gray{32, 32, 16, 12, 1, 1, "MONOCHROME2"};
+    gray.image_type = "ORIGINAL\\PRIMARY";
+    const auto src = tmp.path / "original.dcm";
+    write_image(src, gray, make_pixels(gray));
+    const auto source_uid = get_tag(read_dicom(src), tags::sop_instance_uid);
+
+    // Implicit VR, RLE, JPEG Lossless, JPEG-LS Lossless, and JPEG 2000
+    // Lossless; HTJ2K Lossless is left out because its encoder crashes on
+    // AVX-512 runners (#1257)
+    for (const std::string uid : {"1.2.840.10008.1.2", "1.2.840.10008.1.2.5",
+                                  "1.2.840.10008.1.2.4.70", "1.2.840.10008.1.2.4.80",
+                                  "1.2.840.10008.1.2.4.90"}) {
+        DYNAMIC_SECTION(uid) {
+            const kcenon::pacs::encoding::transfer_syntax target{uid};
+            if (target.is_encapsulated() && !codec_factory::is_available(uid)) {
+                WARN("Codec not built: " << uid);
+                continue;
+            }
+            const auto out = tmp.path / "lossless.dcm";
+            auto result = run_cli("dcm_conv", {src.string(), out.string(), "-t", uid});
+            INFO("dcm_conv output: " << result.output);
+            REQUIRE(result.exit_code == 0);
+
+            const auto file = read_dicom(out);
+            CHECK(get_tag(file, tags::sop_instance_uid) == source_uid);
+            CHECK(file.meta_information().get_string(tags::media_storage_sop_instance_uid) ==
+                  source_uid);
+            CHECK(get_tag(file, tags::image_type) == "ORIGINAL\\PRIMARY");
+            CHECK(get_tag(file, lossy_image_compression_tag).empty());
+            CHECK_FALSE(file.dataset().contains(source_image_sequence_tag));
+            CHECK_FALSE(file.dataset().contains(derivation_description_tag));
+        }
+    }
 }
 
 TEST_CASE("json_to_dcm and xml_to_dcm keep Pixel Data and Transfer Syntax consistent",

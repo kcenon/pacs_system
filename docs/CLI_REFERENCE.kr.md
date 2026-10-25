@@ -193,6 +193,19 @@ Annex A.4)를 기록합니다. 대상 코덱이 Photometric Interpretation을 �
 Compression Ratio (0028,2112), Lossy Image Compression Method (0028,2114)를
 갱신합니다. Number of Frames는 바뀌지 않습니다.
 
+손실 압축 대상은 PS3.3 Section C.7.6.1.1.5가 요구하는 대로 새 영상을 만듭니다.
+출력은 `1.2.826.0.1.3680043.8.1055.5` root 아래의 새 SOP Instance UID를 받고,
+Media Storage SOP Instance UID (0002,0003)도 같은 값이 됩니다. Image Type
+(0008,0008)의 Value 1은 `DERIVED`가 되고 나머지 값은 유지됩니다. Image Type은 값이
+둘 이상이어야 하므로, Image Type이 없거나 값이 하나뿐이면 `DERIVED\SECONDARY`가
+됩니다. Source Image Sequence (0008,2112)는 원본의 SOP Class UID와 SOP Instance
+UID를 담은 항목 하나로 바뀌고, Derivation Description (0008,2111)에는 대상
+Transfer Syntax와 압축률이 기록되며 기존 설명은 그 뒤에 대괄호로 붙습니다. 무손실
+대상과 압축 해제는 SOP Instance UID와 Image Type을 유지하고, 손실 압축 영상을
+압축 해제해도 Lossy Image Compression `01`은 유지됩니다.
+[#1291](https://github.com/kcenon/pacs_system/issues/1291)이 해결되기 전까지는
+Source Image Sequence 항목이 파일에 기록되지 않습니다.
+
 - 필요한 코덱이 이 빌드에 없거나(JPEG Baseline은 libjpeg-turbo, JPEG 2000은
   OpenJPEG, JPEG-LS는 CharLS, HTJ2K는 OpenJPH가 필요하며 RLE와 JPEG Lossless는
   내장) 코덱이 해당 영상을 인코딩할 수 없으면(예: 컬러 영상의 JPEG Lossless) 그
