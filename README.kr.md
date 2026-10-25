@@ -204,9 +204,9 @@ store, find, move, get, print), 서버(Query/Retrieve, worklist, MPPS, `pacs_ser
 
 [계층 다이어그램](docs/ARCHITECTURE.kr.md#계층-개요)은 REST/DICOMweb, AI, 워크플로우 프런트엔드에서 IHE 액터,
 DICOM 서비스, 네트워크 및 보안, 코어/인코딩을 거쳐 kcenon 에코시스템 라이브러리까지 이어집니다.
-`kcenon.pacs`의 C++20 모듈 인터페이스가 `src/modules/` 아래에 있지만, 현재 리비전에서는 모듈 빌드가
-컴파일되지 않으며 `PACS_BUILD_MODULES=ON`으로 빌드하는 CI 작업도 없으므로 헤더 기반 인터페이스를
-사용하세요([상태와 12개 파티션](docs/ARCHITECTURE.kr.md#c20-모듈-아키텍처)).
+`src/modules/` 아래의 C++20 모듈 `kcenon.pacs`는 헤더 API를 재노출하며, [C++20 Modules 워크플로우](.github/workflows/modules.yml)가
+Ubuntu 24.04에서 Clang 18과 CMake 3.31로 이를 빌드하고 `module_example`을 실행합니다
+([상태와 15개 파티션](docs/ARCHITECTURE.kr.md#c20-모듈-아키텍처)).
 
 ## 프로젝트 구조
 
@@ -267,7 +267,7 @@ pacs_system/
 | **테스트 케이스** | 2667+ 테스트 |
 | **예제 프로그램** | 5 앱 |
 | **문서** | 109 마크다운 파일 |
-| **CI/CD 워크플로우** | 23 워크플로우 |
+| **CI/CD 워크플로우** | 24 워크플로우 |
 | **버전** | 0.1.0 |
 
 <!-- STATS_END -->

@@ -993,12 +993,18 @@ auto& file = result.value();
 ## C++20 Module Architecture
 
 PACS System defines C++20 module interfaces (`src/modules/`) as an alternative to the header-based interface.
+The primary module `kcenon.pacs` re-exports the names that the public headers declare, in the same
+`kcenon::pacs::` namespaces.
 
-> **Status**: the module build does not compile at this revision. The partitions still re-export
-> names from a bare `pacs::` namespace (for example `using pacs::core::dicom_tag;`), while the
-> public headers declare them in `kcenon::pacs::`, so building `pacs_system_modules` fails in every
-> partition except the empty `:ai` partition. No CI job builds with `PACS_BUILD_MODULES=ON`. Use
-> the header-based interface.
+> **Status**: the [C++20 Modules workflow](../.github/workflows/modules.yml) configures with
+> `-DPACS_BUILD_MODULES=ON` on Ubuntu 24.04 with Clang 18 (`clang-scan-deps-18`), Ninja, and
+> CMake 3.31 (the runner image's CMake; 18.1.3 and 3.31.6 when this was written, and the job
+> prints the versions it uses), builds `pacs_system_modules`, `module_example`, and
+> `module_tests`, and runs `module_example` and the module tests. No other compiler builds the
+> module target in CI:
+> GCC and MSVC module builds are untested, and AppleClang cannot build it (CMake rejects the target
+> at configure time because AppleClang has no module dependency scanner). The header-based
+> interface remains the primary API.
 
 ### Module Structure
 
@@ -1006,19 +1012,39 @@ PACS System defines C++20 module interfaces (`src/modules/`) as an alternative t
 
 | Module | Contents |
 |--------|----------|
-| `kcenon.pacs` | Primary module (imports all partitions) |
-| `kcenon.pacs:core` | Core DICOM data structures and utilities |
-| `kcenon.pacs:network` | DICOM network protocol (DIMSE) |
-| `kcenon.pacs:storage` | DICOM file storage and retrieval |
-| `kcenon.pacs:encoding` | Transfer syntax and codec support |
-| `kcenon.pacs:services` | DICOM service implementations (C-STORE, C-FIND, etc.) |
-| `kcenon.pacs:security` | TLS and authentication |
-| `kcenon.pacs:web` | DICOMweb REST API |
-| `kcenon.pacs:workflow` | Workflow management |
-| `kcenon.pacs:integration` | Ecosystem adapters |
-| `kcenon.pacs:ai` | AI service connector (empty unless `KCENON_WITH_AI` is defined; the build does not define it) |
-| `kcenon.pacs:monitoring` | Health checks and metrics |
+| `kcenon.pacs` | Primary module (imports all partitions; `kcenon::pacs::module_version`) |
+| `kcenon.pacs:core` | Tags, elements, datasets, Part 10 files, dictionary, `tags::` constants, events, `Result<T>` helpers |
+| `kcenon.pacs:encoding` | VR types, transfer syntaxes, VR codecs, compression codecs, SIMD feature checks |
+| `kcenon.pacs:storage` | File, S3, Azure, and HSM storage, index database, records and queries (needs `pacs_storage`) |
+| `kcenon.pacs:security` | RBAC, certificates and digital signatures, anonymization |
+| `kcenon.pacs:network` | Association, PDU types, PDU encoder/decoder and buffer pool, `dicom_server`, v2 server |
+| `kcenon.pacs:network_dimse` | DIMSE messages, command fields, status checks, message factories |
+| `kcenon.pacs:services` | SCP/SCU implementations, SOP class registry and UIDs, storage status |
+| `kcenon.pacs:services_cache` | Query and LRU caches; cursors, streaming, and parallel queries when `PACS_WITH_DATABASE_SYSTEM` is defined |
+| `kcenon.pacs:services_validation` | IOD validators |
+| `kcenon.pacs:workflow` | Task scheduler, auto prefetch, study locks (needs `pacs_workflow`) |
+| `kcenon.pacs:web` | REST server and DICOMweb helpers (needs `pacs_web`) |
+| `kcenon.pacs:integration` | Ecosystem adapters (needs `pacs_integration`) |
+| `kcenon.pacs:ai` | AI service connector, result handler, AIRA assessments (needs `pacs_ai`) |
+| `kcenon.pacs:monitoring` | Health checks, metrics, collectors (needs `pacs_monitoring`) |
 | `kcenon.pacs:di` | Dependency injection utilities |
+
+A partition marked "needs `pacs_<name>`" exports its names only when that library target is
+built: `cmake/targets.cmake` then links the library into `pacs_system_modules` and defines
+`PACS_MODULES_WITH_<NAME>`; otherwise the partition is empty. Partitions are internal to the
+module, so consumers write `import kcenon.pacs;` (a partition such as `kcenon.pacs:core` cannot be
+imported from outside the module). Configuring fails if a `.cppm` file under `src/modules/` is
+missing from the target.
+
+### Names the Module Does Not Export
+
+- Namespace-scope `constexpr` variables declared without `inline` have internal linkage, and a
+  module cannot export them: `kcenon::pacs::error_codes`, the DIMSE `status_*` codes and the
+  `tag_*` and `priority_*` command constants, `kcenon::pacs::security::Action`, and the PDU limits
+  in `pdu_types.h`. Include the declaring header next to `import kcenon.pacs;` to use them.
+- The bare `pacs::` namespace: like the headers, the module declares only `kcenon::pacs::`. Code
+  that still uses `pacs::` includes `<kcenon/pacs/compat/namespace_compat.h>`, which also works
+  next to the import.
 
 ### Module Tier Hierarchy
 
@@ -1031,10 +1057,10 @@ PACS System defines C++20 module interfaces (`src/modules/`) as an alternative t
 │                  (workflow, web, integration)                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                        Tier 4: Services                          │
-│                         (services)                               │
+│      (services, services_cache, services_validation)             │
 ├─────────────────────────────────────────────────────────────────┤
 │                        Tier 3: Protocol                          │
-│                         (network)                                │
+│                  (network, network_dimse)                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                       Tier 2: Infrastructure                     │
 │                (encoding, storage, security)                     │
@@ -1048,14 +1074,15 @@ PACS System defines C++20 module interfaces (`src/modules/`) as an alternative t
 
 **Building with Modules:**
 ```bash
-cmake -B build -DPACS_BUILD_MODULES=ON
-cmake --build build
+cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-18 \
+  -DPACS_BUILD_MODULES=ON -DPACS_BUILD_EXAMPLES=ON
+cmake --build build --target pacs_system_modules module_example
+./build/bin/module_example
 ```
 
 **Using in Application Code:**
 
-The example uses names that the public headers declare; it builds only once the partitions
-export them (see the status note above).
+`tools/module_example/main.cpp` is the full example that CI builds and runs.
 
 ```cpp
 import kcenon.pacs;
@@ -1073,8 +1100,9 @@ int main() {
 
 > **Note**: These are additional requirements beyond the [base build requirements](#build-requirements) and apply only when building with C++20 modules enabled (`-DPACS_BUILD_MODULES=ON`).
 
-- CMake 3.28 or later
-- Clang 16+, GCC 14+, or MSVC 2022 17.4+
+- CMake 3.28 or later, with a generator that supports C++20 modules (Ninja)
+- A compiler that CMake supports for modules (Clang 16+, GCC 14+, or MSVC 2022 17.4+); CI builds
+  only with Clang 18
 - C++20 standard enabled
 
 > **Note**: C++20 modules are experimental. The header-based interface remains the primary API.
