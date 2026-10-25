@@ -78,7 +78,7 @@ Feature selection examples:
 The planned v1.0 contract (#1158) replaces the 0.1.0 `kcenon::pacs::<component>` names with the
 canonical target `pacs_system::pacs_system`, an aggregate INTERFACE target that pulls in every
 required and built optional sub-component, so a single `target_link_libraries` call is enough for
-typical consumers. No published package ships it yet; a source install of the current tree
+typical consumers. No published package ships it yet; a [source install](#source-install) of the current tree
 provides the targets but reports package version 0.1.0, so request
 `find_package(pacs_system 0.1 REQUIRED)` until v1.0.0 is released. After that, downstream projects
 depend on it as follows:
@@ -109,6 +109,85 @@ For fine-grained control, link individual components instead:
 
 The legacy spelling `kcenon::pacs_system` is preserved as an alias for backward compatibility,
 but new code should use `pacs_system::pacs_system`.
+
+## Source install
+
+A source install is the supported way to consume the current tree with `find_package(pacs_system)`
+([#1241](https://github.com/kcenon/pacs_system/issues/1241)). Each ecosystem dependency is
+installed standalone into one prefix, and pacs_system is built against that prefix, so every target
+in the pacs_system export is defined by an installed package. `scripts/check-source-install.sh` runs
+the steps below, and the `Source Install` workflow (`.github/workflows/source-install.yml`) runs that
+script on Ubuntu 24.04 against the dependency SHAs pinned in `.github/actions/checkout-kcenon-deps`.
+
+1. **Third-party packages.** The installed dependency configs call `find_dependency` for `asio`
+   (network_system), `simdutf` (thread_system) and `unofficial-sqlite3` (database_system), the
+   package names that vcpkg's `asio`, `simdutf` and `sqlite3` ports install.
+   `tests/source_install/vcpkg.json` pins them to the versions the ecosystem uses:
+
+   ```bash
+   vcpkg install --x-manifest-root=tests/source_install --x-install-root=<vcpkg_installed>
+   ```
+
+   The steps below find them through `CMAKE_PREFIX_PATH`; do not configure with vcpkg's toolchain
+   file, which would run manifest mode for each dependency's own `vcpkg.json` and pull registry
+   ports instead of the sources being installed. The remaining prerequisites are system packages:
+   a C++20 compiler, CMake 3.20 or later, OpenSSL, zlib, LZ4 and ICU, plus libjpeg-turbo for the
+   JPEG codec.
+2. **Ecosystem dependencies.** Check out common_system, thread_system, container_system,
+   logger_system, monitoring_system, network_system and database_system side by side, outside the
+   pacs_system checkout and its parent directory: `cmake/dependencies.cmake` builds a checkout found
+   through `<NAME>_ROOT`, `../<name>` or `./<name>` instead of using the installed package. Install
+   each one into the same prefix, in that order, with tests and samples off (the options per
+   dependency are in the script). monitoring_system and database_system are optional.
+
+   ```bash
+   cmake -S <deps>/<name> -B build/<name> -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=<prefix> "-DCMAKE_PREFIX_PATH=<prefix>;<vcpkg_installed>/<triplet>"
+   cmake --build build/<name> --parallel
+   cmake --install build/<name>
+   ```
+
+3. **pacs_system.** Configure the repository root against the same prefix and install it there:
+
+   ```bash
+   cmake -S . -B build/pacs_system -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=<prefix> "-DCMAKE_PREFIX_PATH=<prefix>;<vcpkg_installed>/<triplet>" \
+         -DPACS_BUILD_TESTS=OFF -DPACS_BUILD_EXAMPLES=OFF
+   cmake --build build/pacs_system --parallel
+   cmake --install build/pacs_system
+   ```
+
+4. **Consumer.** Configure the consuming project with the same `CMAKE_PREFIX_PATH`;
+   `tests/cmake_consumer` is the reference consumer.
+
+The installed export links the target names that the dependency packages define:
+
+| Dependency | Target linked by the pacs_system export |
+|------------|------------------------------------------|
+| common_system | `kcenon::common_system` |
+| container_system | `ContainerSystem::container` (created by the container_system config) |
+| thread_system | `thread_system::thread_base` (alias created by the thread_system config) |
+| logger_system | `logger_system::logger` |
+| network_system | `network_system::network_system` |
+| monitoring_system | `monitoring_system::monitoring_system` |
+| database_system | `database_system::database_system` and `database_system::integrated_database` |
+
+`pacs_system-config.cmake` calls `find_dependency` for each of these packages before it loads the
+export.
+
+Limitations of the dependency SHAs pinned for CI (moving the pins is owned by #1164):
+
+| Dependency | Limitation at the pinned SHA | Handling | Fixed upstream |
+|------------|------------------------------|----------|----------------|
+| network_system `093691d9` | Installed public headers such as `messaging_session.h` include `src/internal/` headers that are not installed | The script copies `src/internal/` headers to `<prefix>/include/internal/` and `network-core/include/` to `<prefix>/include/`, as the `kcenon-network-system` registry port does, and skips this once the installed headers no longer need it | [network_system#945](https://github.com/kcenon/network_system/pull/945), [#949](https://github.com/kcenon/network_system/pull/949), [#1177](https://github.com/kcenon/network_system/pull/1177) |
+| database_system `593a18a7` | `integrated_database` is built but neither installed nor exported | pacs_system ignores a database_system package without `database_system::integrated_database` (configure warning) and builds without database_system integration, as the vcpkg route does | [database_system#611](https://github.com/kcenon/database_system/pull/611) |
+
+**The sibling-directory build is not an install path.** CI builds pacs_system with the
+dependencies checked out next to it and added as subdirectories. That build is for development and
+tests: from it, common_system, thread_system and network_system install no package config, and
+database_system and monitoring_system install configs without targets files, so an install
+produced by it cannot satisfy `find_package(pacs_system)`. Making it one needs changes in those
+repositories; use the standalone installs above.
 
 ## Root manifest and overlay dependency sets
 
