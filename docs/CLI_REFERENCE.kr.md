@@ -168,18 +168,57 @@ Transfer Syntax 변환 유틸리티.
 # Implicit VR Little Endian으로 변환
 ./build/bin/dcm_conv image.dcm output.dcm --implicit
 
+# RLE Lossless로 압축 (모든 빌드에 내장)
+./build/bin/dcm_conv image.dcm compressed.dcm --rle
+
 # JPEG Baseline으로 변환 (품질 설정 포함)
 ./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
 
 # 디렉토리 재귀 변환 및 검증
 ./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
 
-# 지원되는 Transfer Syntax 목록 표시
+# Transfer Syntax 목록과 이 빌드에 포함된 코덱 표시
 ./build/bin/dcm_conv --list-syntaxes
 
 # Transfer Syntax UID 직접 지정
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+비압축(native) Transfer Syntax 사이의 변환에서는 데이터셋 인코딩만 바뀝니다.
+원본이나 대상이 압축(encapsulated) Transfer Syntax이면 `dcm_conv`는 모든 프레임을
+원본 코덱으로 디코딩한 뒤 대상 코덱으로 인코딩하고, 캡슐화된 Pixel Data(PS3.5
+Annex A.4)를 기록합니다. 대상 코덱이 Photometric Interpretation을 바꾸는 경우
+(컬러 JPEG Baseline은 YBR_FULL_422, 컬러 HTJ2K는 YBR_RCT 또는 YBR_ICT) 이 값을
+갱신하고, 손실 압축 대상이면 Lossy Image Compression (0028,2110), Lossy Image
+Compression Ratio (0028,2112), Lossy Image Compression Method (0028,2114)를
+갱신합니다. Number of Frames는 바뀌지 않습니다.
+
+손실 압축 대상은 PS3.3 Section C.7.6.1.1.5가 요구하는 대로 새 영상을 만듭니다.
+출력은 `1.2.826.0.1.3680043.8.1055.5` root 아래의 새 SOP Instance UID를 받고,
+Media Storage SOP Instance UID (0002,0003)도 같은 값이 됩니다. Image Type
+(0008,0008)의 Value 1은 `DERIVED`가 되고 나머지 값은 유지됩니다. Image Type은 값이
+둘 이상이어야 하므로, Image Type이 없거나 값이 하나뿐이면 `DERIVED\SECONDARY`가
+됩니다. Source Image Sequence (0008,2112)는 원본의 SOP Class UID와 SOP Instance
+UID를 담은 항목 하나로 바뀌고, Derivation Description (0008,2111)에는 대상
+Transfer Syntax와 압축률이 기록되며 기존 설명은 그 뒤에 대괄호로 붙습니다. 무손실
+대상과 압축 해제는 SOP Instance UID와 Image Type을 유지하고, 손실 압축 영상을
+압축 해제해도 Lossy Image Compression `01`은 유지됩니다.
+[#1291](https://github.com/kcenon/pacs_system/issues/1291)이 해결되기 전까지는
+Source Image Sequence 항목이 파일에 기록되지 않습니다.
+
+- 필요한 코덱이 이 빌드에 없거나(JPEG Baseline은 libjpeg-turbo, JPEG 2000은
+  OpenJPEG, JPEG-LS는 CharLS, HTJ2K는 OpenJPH가 필요하며 RLE와 JPEG Lossless는
+  내장) 코덱이 해당 영상을 인코딩할 수 없으면(예: 컬러 영상의 JPEG Lossless) 그
+  파일의 변환은 실패하고 종료 코드는 2입니다.
+- `-q`/`--quality`(1-100, 기본값 90)는 JPEG Baseline 품질, JPEG-LS near-lossless의
+  NEAR 값, JPEG 2000 손실 압축률을 정합니다. 무손실 대상과 HTJ2K는 이 값을
+  사용하지 않습니다.
+- `--verify`는 각 출력 파일을 다시 열어 Pixel Data가 Transfer Syntax와 맞는지
+  확인합니다. 압축 Pixel Data는 모든 프레임을 디코딩하고, 비압축 Pixel Data는
+  길이를 Rows x Columns x Samples per Pixel x Bits Allocated / 8 x Number of
+  Frames와 비교합니다.
+- JPEG Lossless 디코더는 다른 인코더가 만든 스트림을 디코딩하지 못할 수 있습니다
+  ([DICOM Conformance Statement 부록 B](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations) 참고).
 
 ### DCM Anonymize
 
@@ -332,6 +371,12 @@ DICOM PS3.18 형식의 JSON 파일을 DICOM 파일로 변환.
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
 ```
 
+`json_to_dcm`은 Pixel Data를 그대로 기록하며 압축하거나 압축을 풀지 않습니다.
+압축(encapsulated) Transfer Syntax는 Pixel Data가 이미 캡슐화되어 있을 때만
+(템플릿에서 가져온 Pixel Data라면 그 Transfer Syntax와 같을 때만) 허용되고,
+비압축 Transfer Syntax는 Pixel Data가 비압축일 때만 허용됩니다. 그렇지 않으면
+종료 코드 2로 끝납니다. Pixel Data의 인코딩을 바꾸려면 `dcm_conv`를 사용하십시오.
+
 ### DCM to XML
 
 DICOM 파일을 DICOM Native XML 형식(PS3.19)으로 변환.
@@ -391,6 +436,10 @@ XML 파일(DICOM Native XML PS3.19 형식)을 DICOM 형식으로 변환.
 # BulkData URI 해석을 위한 디렉토리 지정
 ./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
+
+`xml_to_dcm`도 `json_to_dcm`과 같은 Pixel Data 규칙을 따릅니다. Pixel Data를
+압축하거나 압축을 풀지 않으므로 Transfer Syntax는 기록하는 Pixel Data의 형태와
+맞아야 합니다.
 
 ### Img to DCM
 
@@ -564,10 +613,10 @@ DICOM Storage SCU - 원격 SCP로 이미지 전송.
 # 디렉토리의 모든 파일 전송 (재귀) + 진행률 표시
 ./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
 
-# Transfer Syntax 선호 설정
-./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+# 비압축 파일에는 Explicit VR Little Endian만 제안
+./build/bin/store_scu -xe localhost 11112 *.dcm
 
-# 상세 출력 + 타임아웃 설정
+# 상세 출력 + 타임아웃 설정 (제안 및 수락된 컨텍스트도 표시)
 ./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
 
 # 전송 리포트 생성
@@ -579,6 +628,15 @@ DICOM Storage SCU - 원격 SCP로 이미지 전송.
 # 도움말 표시
 ./build/bin/store_scu --help
 ```
+
+Transfer Syntax:
+- 각 파일은 자신의 Transfer Syntax 그대로 전송되며, `store_scu`는 Pixel Data를 압축하거나 해제하지 않음
+- 파일들의 (SOP Class, Transfer Syntax) 쌍마다 Presentation Context를 하나씩 제안
+- 압축 파일(JPEG, JPEG-LS, JPEG 2000, HTJ2K, RLE 등)은 자신의 Syntax로만 제안하며, SCP가 그 Syntax를 수락하지 않으면 전송 실패
+- 비압축 파일은 자신의 Syntax를 먼저, 이어서 다른 Little Endian Syntax를 제안(`+xa`, `--propose-all`, 기본값). `-xe`(`--propose-explicit`) 또는 `-xv`(`--propose-implicit`)는 Explicit 또는 Implicit VR Little Endian만 제안
+- Explicit VR Big Endian은 제안하지 않으며, Big Endian 파일은 Little Endian으로 전송
+- `-xs`(`--prefer-lossless`)는 더 이상 사용되지 않으며 효과 없음
+- 하나의 Association은 Presentation Context를 최대 128개까지 담을 수 있음(PS3.8). 이 한도를 넘는 쌍의 파일은 제안된 다른 컨텍스트로 보낼 수 없으면 실패
 
 ### Query SCU
 

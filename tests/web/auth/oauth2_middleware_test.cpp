@@ -15,12 +15,14 @@
 #include <kcenon/pacs/web/auth/oauth2_middleware.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <chrono>
 #include <cstdint>
 #include <string>
 
 using namespace kcenon::pacs::web::auth;
+using Catch::Matchers::ContainsSubstring;
 
 // ============================================================================
 // Test Helpers
@@ -318,6 +320,58 @@ TEST_CASE("oauth2_middleware authenticate extracts Bearer token",
         auto ctx = middleware.authenticate(req, res);
         CHECK_FALSE(ctx.has_value());
         CHECK(res.code == 401);
+    }
+}
+
+TEST_CASE("oauth2_middleware authenticate decodes the whole Bearer token",
+          "[web][auth][middleware]") {
+
+    // Regression test for #1252: extract_bearer_token() returned a view into
+    // a header copy that was destroyed before jwt_validator::decode() read it.
+    // Allocators commonly overwrite the start of a freed block, so a dangling
+    // token turns into a decode error here even without a sanitizer. The
+    // error messages prove that decoding and claim validation saw the intact
+    // token.
+    auto config = test_config();
+    oauth2_middleware middleware(config);
+
+    SECTION("valid token reaches signature verification") {
+        auto token = make_test_token(valid_header(), valid_payload());
+        crow::request req;
+        req.add_header("Authorization", "Bearer " + token);
+        crow::response res;
+
+        // No JWKS provider set, so only signature verification fails
+        auto ctx = middleware.authenticate(req, res);
+        CHECK_FALSE(ctx.has_value());
+        CHECK(res.code == 401);
+        CHECK_THAT(res.body,
+                   ContainsSubstring("Token signature verification failed"));
+    }
+
+    SECTION("expired token is rejected for its expiry") {
+        auto token = make_test_token(valid_header(), valid_payload(-3600));
+        crow::request req;
+        req.add_header("Authorization", "Bearer " + token);
+        crow::response res;
+
+        auto ctx = middleware.authenticate(req, res);
+        CHECK_FALSE(ctx.has_value());
+        CHECK(res.code == 401);
+        CHECK_THAT(res.body, ContainsSubstring("JWT token has expired"));
+    }
+
+    SECTION("Bearer prefix stays case-sensitive") {
+        auto token = make_test_token(valid_header(), valid_payload());
+        crow::request req;
+        req.add_header("Authorization", "bearer " + token);
+        crow::response res;
+
+        auto ctx = middleware.authenticate(req, res);
+        CHECK_FALSE(ctx.has_value());
+        CHECK(res.code == 401);
+        CHECK_THAT(res.body,
+                   ContainsSubstring("Missing or invalid Authorization header"));
     }
 }
 

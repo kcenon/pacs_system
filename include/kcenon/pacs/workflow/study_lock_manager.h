@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "kcenon/pacs/core/result.h"
+
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -28,14 +30,8 @@
 #include <optional>
 #include <shared_mutex>
 #include <string>
+#include <variant>
 #include <vector>
-
-// Forward declarations for kcenon ecosystem
-namespace kcenon::common {
-template <typename T>
-class Result;
-struct error_info;
-}  // namespace kcenon::common
 
 namespace kcenon::pacs::workflow {
 

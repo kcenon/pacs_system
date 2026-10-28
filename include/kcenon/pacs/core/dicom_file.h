@@ -124,8 +124,58 @@ public:
     /**
      * @brief Encode the DICOM file to raw bytes
      * @return Vector containing the encoded file data
+     *
+     * A sequence (SQ) element is written with undefined length, one item of
+     * defined length per sequence item, and a Sequence Delimitation Item. The
+     * item datasets use the VR encoding and byte order of the Transfer Syntax,
+     * recursively. An SQ element read from a defined-length value that is not
+     * a sequence of items keeps that value and its defined length.
+     *
+     * When the Transfer Syntax is encapsulated and the Pixel Data value is a
+     * sequence of items (the form the parser produces, or the result of
+     * encapsulate_frames()), Pixel Data is written as OB with undefined
+     * length, its items, and a Sequence Delimitation Item (PS3.5 A.4). Any
+     * other Pixel Data value is written unchanged with its defined length.
      */
     [[nodiscard]] auto to_bytes() const -> std::vector<uint8_t>;
+
+    // ========================================================================
+    // Encapsulated Pixel Data (PS3.5 Annex A.4)
+    // ========================================================================
+
+    /**
+     * @brief Build the value of an encapsulated Pixel Data element
+     * @param frames Compressed frames, in frame order
+     * @return A Basic Offset Table item, one fragment item per frame, and a
+     *         Sequence Delimitation Item: the form in which dicom_file stores
+     *         encapsulated Pixel Data after parsing
+     *
+     * Fragments of odd length are padded with a trailing zero byte. The Basic
+     * Offset Table holds the offset of each frame, or is empty when an offset
+     * does not fit in 32 bits.
+     */
+    [[nodiscard]] static auto encapsulate_frames(
+        const std::vector<std::vector<uint8_t>>& frames) -> std::vector<uint8_t>;
+
+    /**
+     * @brief Split the value of an encapsulated Pixel Data element into frames
+     * @param value The Pixel Data value: a Basic Offset Table item and fragment
+     *        items, optionally followed by a Sequence Delimitation Item
+     * @param number_of_frames Number of Frames (0028,0008); 1 if absent
+     * @return The compressed data of each frame (the fragments of a frame
+     *         concatenated); error_codes::invalid_sequence if value is not a
+     *         sequence of items, error_codes::decode_error if its fragments
+     *         cannot be assigned to number_of_frames frames
+     *
+     * Fragments are assigned to frames by the Basic Offset Table when it is
+     * not empty. With an empty table, all fragments form the frame of a
+     * single-frame image, each fragment is a frame when there are as many
+     * fragments as frames, and otherwise a frame starts at each fragment that
+     * begins with a JPEG SOI or JPEG 2000 SOC marker.
+     */
+    [[nodiscard]] static auto encapsulated_frames(std::span<const uint8_t> value,
+                                                  uint32_t number_of_frames)
+        -> kcenon::pacs::Result<std::vector<std::vector<uint8_t>>>;
 
     // ========================================================================
     // Accessors
@@ -240,9 +290,12 @@ private:
     /**
      * @brief Encode a dataset using Explicit VR Little Endian
      * @param dataset The dataset to encode
+     * @param encapsulated_pixel_data Write Pixel Data in encapsulated form
+     *        (see to_bytes()); true for encapsulated Transfer Syntaxes
      * @return Encoded byte data
      */
-    [[nodiscard]] static auto encode_explicit_vr_le(const dicom_dataset& dataset)
+    [[nodiscard]] static auto encode_explicit_vr_le(
+        const dicom_dataset& dataset, bool encapsulated_pixel_data = false)
         -> std::vector<uint8_t>;
 
     /**
@@ -318,26 +371,32 @@ private:
         -> std::vector<uint8_t>;
 
     /**
-     * @brief Parse a sequence with undefined length
-     * @param data The raw byte data starting at sequence value
-     * @param bytes_read Output parameter for bytes consumed
+     * @brief Parse the items of a sequence value
+     * @param data The raw byte data starting at sequence value; for a
+     *        defined-length sequence, exactly its value
+     * @param bytes_read Output parameter for bytes consumed, up to and
+     *        including a Sequence Delimitation Item
      * @param explicit_vr Whether to use explicit VR parsing
      * @param big_endian Whether data is big endian
      * @return Result containing the sequence items or error
      */
-    [[nodiscard]] static auto parse_undefined_length_sequence(
+    [[nodiscard]] static auto parse_sequence_items(
         std::span<const uint8_t> data, size_t& bytes_read,
         bool explicit_vr, bool big_endian)
         -> kcenon::pacs::Result<std::vector<dicom_dataset>>;
 
     /**
-     * @brief Parse encapsulated pixel data frames
-     * @param data The raw encapsulated pixel data
-     * @return Vector of frame data
+     * @brief Decode a sequence element with a defined length
+     * @param tag The element tag
+     * @param value The element value
+     * @param explicit_vr Whether to use explicit VR parsing
+     * @param big_endian Whether data is big endian
+     * @return The element with its items, or with value as its raw data if
+     *         value is not a sequence of items
      */
-    [[nodiscard]] static auto parse_encapsulated_frames(
-        std::span<const uint8_t> data)
-        -> std::vector<std::vector<uint8_t>>;
+    [[nodiscard]] static auto decode_defined_length_sequence(
+        dicom_tag tag, std::span<const uint8_t> value,
+        bool explicit_vr, bool big_endian) -> dicom_element;
 
     /// File Meta Information (Group 0002)
     dicom_dataset meta_info_;

@@ -408,10 +408,13 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
     constexpr size_t num_jobs = 100;
     std::atomic<size_t> completed_count{0};
+    std::atomic<size_t> failed_submissions{0};
     std::mutex mutex;
     std::condition_variable cv;
 
-    // Submit jobs concurrently from multiple threads
+    // Submit jobs concurrently from multiple threads. Catch2 assertions are
+    // not thread-safe: the submitters only count failures, and the main
+    // thread asserts after join()
     std::vector<std::thread> threads;
     constexpr size_t num_threads = 4;
     size_t jobs_per_thread = num_jobs / num_threads;
@@ -431,7 +434,9 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
 
                 auto result = coordinator.submit_to_stage(
                     pipeline_stage::network_receive, std::move(job));
-                REQUIRE(result.is_ok());
+                if (!result.is_ok()) {
+                    failed_submissions.fetch_add(1, std::memory_order_relaxed);
+                }
             }
         });
     }
@@ -439,6 +444,8 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     for (auto& thread : threads) {
         thread.join();
     }
+
+    REQUIRE(failed_submissions.load() == 0);
 
     // Wait for all jobs to complete with timeout
     {
@@ -452,4 +459,82 @@ TEST_CASE("pipeline_coordinator concurrent job submission", "[network][pipeline]
     CHECK(completed_count.load(std::memory_order_acquire) == num_jobs);
 
     static_cast<void>(coordinator.stop());
+}
+
+TEST_CASE("pipeline_coordinator stop races with stop and with submissions",
+          "[network][pipeline][coordinator]") {
+    pipeline_config config;
+    config.net_io_workers = 1;
+    config.protocol_workers = 1;
+    config.execution_workers = 1;
+    config.encode_workers = 1;
+
+    pipeline_coordinator coordinator(config);
+    REQUIRE(coordinator.start().is_ok());
+
+    // The worker threads only count; the main thread asserts after join()
+    // because Catch2 assertions are not thread-safe
+    constexpr size_t num_submitters = 2;
+    std::atomic<size_t> accepted{0};
+    std::atomic<size_t> rejected{0};
+    std::atomic<size_t> unexpected_errors{0};
+    std::atomic<size_t> executed{0};
+
+    // Each submitter submits until the coordinator rejects a job
+    std::vector<std::thread> submitters;
+    for (size_t t = 0; t < num_submitters; ++t) {
+        submitters.emplace_back([&]() {
+            for (;;) {
+                auto job = std::make_unique<test_job>(
+                    0, [&]() { executed.fetch_add(1); });
+                auto result = coordinator.submit_to_stage(
+                    pipeline_stage::network_receive, std::move(job));
+                if (result.is_ok()) {
+                    accepted.fetch_add(1);
+                    continue;
+                }
+                if (result.error().code !=
+                    kcenon::pacs::error_codes::not_initialized) {
+                    unexpected_errors.fetch_add(1);
+                }
+                rejected.fetch_add(1);
+                return;
+            }
+        });
+    }
+
+    while (accepted.load() < 10 && rejected.load() < num_submitters) {
+        std::this_thread::yield();
+    }
+
+    // Stop from two threads at once while the submitters keep submitting
+    std::atomic<size_t> failed_stops{0};
+    std::vector<std::thread> stoppers;
+    for (int t = 0; t < 2; ++t) {
+        stoppers.emplace_back([&]() {
+            if (!coordinator.stop().is_ok()) {
+                failed_stops.fetch_add(1);
+            }
+        });
+    }
+    for (auto& thread : stoppers) {
+        thread.join();
+    }
+    CHECK_FALSE(coordinator.is_running());
+
+    for (auto& thread : submitters) {
+        thread.join();
+    }
+
+    CHECK(failed_stops.load() == 0);
+    CHECK(rejected.load() == num_submitters);
+    CHECK(unexpected_errors.load() == 0);
+    // A stopping pool cancels the jobs still queued, so some accepted jobs
+    // may not run; none runs twice, and the sanitizer jobs check that the
+    // discarded ones are freed
+    CHECK(executed.load() <= accepted.load());
+
+    auto late = coordinator.submit_to_stage(
+        pipeline_stage::network_receive, std::make_unique<test_job>(1));
+    CHECK_FALSE(late.is_ok());
 }

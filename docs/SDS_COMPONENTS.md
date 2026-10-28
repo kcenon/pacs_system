@@ -1754,8 +1754,8 @@ private:
 **Threading Model:**
 
 ```
-Before Migration                    After Migration (v1.1.0)
-────────────────                    ─────────────────────────
+Before Migration                    After Migration (in v0.1.0)
+────────────────                    ───────────────────────────
 
 std::thread accept_thread_          accept_worker (thread_base)
     │                                   │

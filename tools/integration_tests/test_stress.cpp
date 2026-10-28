@@ -17,6 +17,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "kcenon/pacs/integration/thread_pool_adapter.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/services/storage_scu.h"
@@ -54,7 +55,17 @@ namespace {
  */
 class stress_test_server {
 public:
-    explicit stress_test_server(uint16_t port, const std::string& ae_title = "STRESS_SCP")
+    /**
+     * @param concurrent_associations Server-side message loops that run at
+     *        once. dicom_server runs one loop per association on its thread
+     *        pool, and the default pool has two threads, so a test with more
+     *        concurrent SCUs passes its SCU count.
+     */
+    explicit stress_test_server(
+        uint16_t port,
+        const std::string& ae_title = "STRESS_SCP",
+        std::size_t concurrent_associations =
+            kcenon::pacs::integration::thread_pool_config{}.min_threads)
         : port_(port)
         , ae_title_(ae_title)
         , test_dir_("stress_test_")
@@ -71,8 +82,14 @@ public:
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.7";
         config.implementation_version_name = "STRESS_SCP";
 
-        server_ = std::make_unique<dicom_server>(config);
-        
+        kcenon::pacs::integration::thread_pool_config pool_config;
+        pool_config.min_threads = concurrent_associations;
+        pool_config.max_threads = concurrent_associations;
+        pool_config.pool_name = "stress_scp_pool";
+        server_ = std::make_unique<dicom_server>(
+            config,
+            std::make_shared<kcenon::pacs::integration::thread_pool_adapter>(pool_config));
+
         file_storage_config fs_conf;
         fs_conf.root_path = storage_dir_;
         file_storage_ = std::make_unique<file_storage>(fs_conf);
@@ -83,6 +100,14 @@ public:
         } else {
             throw std::runtime_error("Failed to open database: " + db_result.error().message);
         }
+    }
+
+    // Stop the server before any member is destroyed: its association
+    // threads call handle_store(), which uses database_, file_storage_, and
+    // the counters, all declared after server_ and so destroyed before it.
+    // This also runs when a REQUIRE throws mid-test.
+    ~stress_test_server() {
+        server_->stop();
     }
 
     bool initialize() {
@@ -345,16 +370,16 @@ worker_result run_storage_worker(
 // =============================================================================
 
 TEST_CASE("Concurrent storage from multiple SCUs", "[stress][concurrent]") {
-    auto port = find_available_port();
-    stress_test_server server(port, "STRESS_SCP");
-
-    REQUIRE(server.initialize());
-    REQUIRE(server.start());
-
     // Test parameters - reduced for CI/testing
     constexpr int num_workers = 5;
     constexpr int files_per_worker = 10;
     constexpr int total_expected = num_workers * files_per_worker;
+
+    auto port = find_available_port();
+    stress_test_server server(port, "STRESS_SCP", num_workers);
+
+    REQUIRE(server.initialize());
+    REQUIRE(server.start());
 
     std::latch start_latch(num_workers + 1);  // +1 for main thread
     std::vector<std::future<worker_result>> futures;
@@ -606,8 +631,12 @@ TEST_CASE("Connection pool exhaustion recovery", "[stress][exhaustion]") {
 }
 
 TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
+    constexpr int num_echo_workers = 3;
+    constexpr int num_store_workers = 2;
+
     auto port = find_available_port();
-    stress_test_server server(port, "STRESS_SCP");
+    stress_test_server server(
+        port, "STRESS_SCP", num_echo_workers + num_store_workers);
 
     REQUIRE(server.initialize());
     REQUIRE(server.start());
@@ -619,7 +648,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
     std::vector<std::thread> threads;
 
     // Echo workers
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < num_echo_workers; ++i) {
         threads.emplace_back([&, i]() {
             for (int j = 0; j < num_iterations; ++j) {
                 association_config config;
@@ -653,7 +682,7 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
     }
 
     // Store workers
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < num_store_workers; ++i) {
         threads.emplace_back([&, i]() {
             for (int j = 0; j < num_iterations; ++j) {
                 association_config config;
@@ -689,8 +718,8 @@ TEST_CASE("Mixed operations stress test", "[stress][mixed]") {
     INFO("Echo success: " << echo_success.load());
     INFO("Store success: " << store_success.load());
 
-    REQUIRE(echo_success == 3 * num_iterations);
-    REQUIRE(store_success == 2 * num_iterations);
+    REQUIRE(echo_success == num_echo_workers * num_iterations);
+    REQUIRE(store_success == num_store_workers * num_iterations);
 
     server.stop();
 }

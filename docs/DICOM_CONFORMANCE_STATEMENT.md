@@ -57,6 +57,8 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-10-24 | 1.7.0 | Section 4 states PACS_SCP negotiation and codec support per transfer syntax: Explicit VR Big Endian, Deflated Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate are not negotiated, and the last four have no working codec; Appendix B lists these and the JPEG Lossless decoder limitation |
+| 2026-10-23 | 1.6.0 | Add JPEG-LS Lossless and Near-Lossless transfer syntaxes; list all optional codec libraries in Appendix B |
 | 2026-03-05 | 1.5.0 | Add HEVC, JPEG XL, Frame Deflate transfer syntaxes; Heightmap/Label Map Segmentation, Waveform PS/Annotation SOP classes; TLS 1.3 BCP 195 profiles; OAuth 2.0 and DICOMweb Storage Commitment |
 | 2026-03-04 | 1.4.0 | Add CT For Processing Image Storage SOP Class (multi-energy/spectral CT) |
 | 2026-03-04 | 1.3.0 | Add HTJ2K Transfer Syntax support (Supplement 235) |
@@ -476,33 +478,56 @@ Workstation (Print SCU)                      Printer (Print SCP)
 
 ## 4. Supported Transfer Syntaxes
 
+The tables list every transfer syntax in the registry (`src/encoding/transfer_syntax.cpp`).
+The **PACS_SCP negotiation** column states whether PACS_SCP accepts the syntax in a presentation
+context during association negotiation, for every SOP Class in Section 3. Both server
+implementations take that list from `include/kcenon/pacs/network/detail/scp_transfer_syntaxes.h`,
+and `tests/network/scp_transfer_syntaxes_test.cpp` fails when the list and this section disagree.
+`transfer_syntax::is_supported()` is false exactly for the rows whose last column is "Not
+supported" or "Not implemented".
+
 ### 4.1 Uncompressed
 
-| Transfer Syntax | UID | Support |
-|----------------|-----|---------|
-| Implicit VR Little Endian | 1.2.840.10008.1.2 | Full |
-| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | Full |
-| Explicit VR Big Endian (Retired) | 1.2.840.10008.1.2.2 | Full |
-| Deflated Explicit VR Little Endian | 1.2.840.10008.1.2.1.99 | Full |
+| Transfer Syntax | UID | PACS_SCP negotiation | Part 10 files |
+|----------------|-----|----------------------|---------------|
+| Implicit VR Little Endian | 1.2.840.10008.1.2 | Accepted | Read and write |
+| Explicit VR Little Endian | 1.2.840.10008.1.2.1 | Accepted | Read and write |
+| Explicit VR Big Endian (Retired) | 1.2.840.10008.1.2.2 | Not accepted | Read and write |
+| Deflated Explicit VR Little Endian | 1.2.840.10008.1.2.1.99 | Not accepted | Not supported |
+
+DIMSE messages carry datasets only in Implicit and Explicit VR Little Endian, so PACS_SCP does
+not accept Explicit VR Big Endian; the `dicom_file` Part 10 reader and writer handle it.
+pacs_system has no inflate or deflate code, so it does not support Deflated Explicit VR Little
+Endian at all.
 
 ### 4.2 Compressed (Encapsulated Pixel Data)
 
-| Transfer Syntax | UID | Type | Support |
-|----------------|-----|------|---------|
-| JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | Lossy | Full |
-| JPEG Lossless, Non-Hierarchical, First-Order Prediction | 1.2.840.10008.1.2.4.70 | Lossless | Full |
-| JPEG 2000 Image Compression (Lossless Only) | 1.2.840.10008.1.2.4.90 | Lossless | Full |
-| JPEG 2000 Image Compression | 1.2.840.10008.1.2.4.91 | Lossy | Full |
-| RLE Lossless | 1.2.840.10008.1.2.5 | Lossless | Full |
-| High-Throughput JPEG 2000 (Lossless Only) | 1.2.840.10008.1.2.4.201 | Lossless | Full |
-| High-Throughput JPEG 2000 with RPCL (Lossless Only) | 1.2.840.10008.1.2.4.202 | Lossless | Full |
-| High-Throughput JPEG 2000 | 1.2.840.10008.1.2.4.203 | Lossless/Lossy | Full |
-| HEVC/H.265 Main Profile / Level 5.1 | 1.2.840.10008.1.2.4.107 | Lossy | Full |
-| HEVC/H.265 Main 10 Profile / Level 5.1 | 1.2.840.10008.1.2.4.108 | Lossy | Full |
-| JPEG XL Lossless | 1.2.840.10008.1.2.4.110 | Lossless | Full |
-| JPEG XL JPEG Recompression | 1.2.840.10008.1.2.4.111 | Lossless | Full |
-| JPEG XL | 1.2.840.10008.1.2.4.112 | Lossless/Lossy | Full |
-| Frame Deflate | 1.2.840.10008.1.2.11 | Lossless | Full |
+| Transfer Syntax | UID | Type | PACS_SCP negotiation | Pixel data encoding and decoding |
+|----------------|-----|------|----------------------|----------------------------------|
+| JPEG Baseline (Process 1) | 1.2.840.10008.1.2.4.50 | Lossy | Accepted | Requires libjpeg-turbo |
+| JPEG Lossless, Non-Hierarchical, First-Order Prediction | 1.2.840.10008.1.2.4.70 | Lossless | Accepted | Built in |
+| JPEG-LS Lossless Image Compression | 1.2.840.10008.1.2.4.80 | Lossless | Accepted | Requires CharLS |
+| JPEG-LS Lossy (Near-Lossless) Image Compression | 1.2.840.10008.1.2.4.81 | Lossy (near-lossless) | Accepted | Requires CharLS |
+| JPEG 2000 Image Compression (Lossless Only) | 1.2.840.10008.1.2.4.90 | Lossless | Accepted | Requires OpenJPEG |
+| JPEG 2000 Image Compression | 1.2.840.10008.1.2.4.91 | Lossy | Accepted | Requires OpenJPEG |
+| RLE Lossless | 1.2.840.10008.1.2.5 | Lossless | Accepted | Built in |
+| High-Throughput JPEG 2000 (Lossless Only) | 1.2.840.10008.1.2.4.201 | Lossless | Accepted | Requires OpenJPH |
+| High-Throughput JPEG 2000 with RPCL (Lossless Only) | 1.2.840.10008.1.2.4.202 | Lossless | Accepted | Requires OpenJPH |
+| High-Throughput JPEG 2000 | 1.2.840.10008.1.2.4.203 | Lossless/Lossy | Accepted | Requires OpenJPH |
+| HEVC/H.265 Main Profile / Level 5.1 | 1.2.840.10008.1.2.4.107 | Lossy | Not accepted | Not implemented (stub codec) |
+| HEVC/H.265 Main 10 Profile / Level 5.1 | 1.2.840.10008.1.2.4.108 | Lossy | Not accepted | Not implemented (stub codec) |
+| JPEG XL Lossless | 1.2.840.10008.1.2.4.110 | Lossless | Not accepted | Not implemented (stub codec) |
+| JPEG XL JPEG Recompression | 1.2.840.10008.1.2.4.111 | Lossless | Not accepted | Not implemented (stub codec) |
+| JPEG XL | 1.2.840.10008.1.2.4.112 | Lossless/Lossy | Not accepted | Not implemented (stub codec) |
+| Frame Deflate | 1.2.840.10008.1.2.11 | Lossless | Not accepted | Not implemented (stub codec) |
+
+PACS_SCP accepts the codec-backed syntaxes whether or not the build includes the codec: it
+stores the pixel data without decoding it. Encoding and decoding need the library named in the
+last column at build time ([Appendix B](#appendix-b-known-limitations)), and
+`codec_factory::is_available()` reports which codecs a given build includes. The built-in JPEG
+Lossless decoder has a limitation listed in Appendix B. HEVC, JPEG XL, and Frame Deflate are in
+the registry, but their codecs are stubs whose encoding and decoding always fail, and PACS_SCP
+does not accept them.
 
 ### 4.3 Default Transfer Syntax
 
@@ -812,9 +837,22 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
 | Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
-| HTJ2K Codec | Requires OpenJPH library at build time (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
+| JPEG Baseline Codec | Requires libjpeg-turbo at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG_CODEC`) | Optional dependency |
+| JPEG 2000 Codec | Requires OpenJPEG at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG2000_CODEC`) | Optional dependency |
+| JPEG-LS Codec | Requires CharLS at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEGLS_CODEC`) | Optional dependency |
+| HTJ2K Codec | Requires OpenJPH at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library or, with `PACS_FETCH_OPENJPH=ON` (default), fetches it from GitHub (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
+| JPEG Lossless Decoder | Decodes with its built-in Huffman table and ignores DHT segments, so it decodes the streams it encodes but may fail on streams from encoders that use other tables | Section 4.2 |
+| HEVC, JPEG XL, Frame Deflate | Stub codecs: encoding and decoding always fail, and PACS_SCP does not negotiate these transfer syntaxes | Section 4.2 |
+| Explicit VR Big Endian | Not negotiated by PACS_SCP; Part 10 files only | Section 4.1 |
+| Deflated Explicit VR Little Endian | Not implemented and not negotiated | Section 4.1 |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
 | Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
+
+`PACS_BUILD_CODECS=OFF` disables all four optional codecs. With it on, CMake looks for each library at
+configure time and disables only the codec whose library is missing, with a warning
+(`cmake/dependencies.cmake`), unless `PACS_REQUIRE_CODECS=ON` (default OFF) turns a missing library
+into a configure error; the compile definition in parentheses is set when the codec is
+built, and `codec_factory::is_available()` reports it at run time.
 
 ---
 

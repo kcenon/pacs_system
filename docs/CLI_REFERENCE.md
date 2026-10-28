@@ -168,18 +168,59 @@ Transfer Syntax conversion utility.
 # Convert to Implicit VR Little Endian
 ./build/bin/dcm_conv image.dcm output.dcm --implicit
 
+# Compress with RLE Lossless (built into every build)
+./build/bin/dcm_conv image.dcm compressed.dcm --rle
+
 # Convert to JPEG Baseline with quality setting
 ./build/bin/dcm_conv image.dcm compressed.dcm --jpeg-baseline -q 85
 
 # Convert directory recursively with verification
 ./build/bin/dcm_conv ./input_dir/ ./output_dir/ --recursive --verify
 
-# List all supported Transfer Syntaxes
+# List Transfer Syntaxes and the codecs in this build
 ./build/bin/dcm_conv --list-syntaxes
 
 # Convert with explicit Transfer Syntax UID
 ./build/bin/dcm_conv image.dcm output.dcm -t 1.2.840.10008.1.2.4.50
 ```
+
+Between native (uncompressed) Transfer Syntaxes only the dataset encoding
+changes. When the source or the target is a compressed (encapsulated)
+Transfer Syntax, `dcm_conv` decodes every frame with the source codec and
+encodes it with the target codec, writes encapsulated Pixel Data (PS3.5
+Annex A.4), and updates Photometric Interpretation where the target codec
+changes it (YBR_FULL_422 for color JPEG Baseline, YBR_RCT or YBR_ICT for
+color HTJ2K) and, for lossy targets, Lossy Image Compression (0028,2110),
+Lossy Image Compression Ratio (0028,2112), and Lossy Image Compression
+Method (0028,2114). Number of Frames does not change.
+
+A lossy target makes a new image, as PS3.3 Section C.7.6.1.1.5 requires. The
+output gets a new SOP Instance UID under the root
+`1.2.826.0.1.3680043.8.1055.5`, and Media Storage SOP Instance UID
+(0002,0003) repeats it. Value 1 of Image Type (0008,0008) becomes `DERIVED`
+and the other values stay; an absent or single-valued Image Type becomes
+`DERIVED\SECONDARY`, because Image Type has at least two values. Source Image
+Sequence (0008,2112) is replaced by one item with the SOP Class UID and SOP
+Instance UID of the source, and Derivation Description (0008,2111) names the
+target Transfer Syntax and the compression ratio, followed by the previous
+description in brackets. Lossless targets and decompression keep the SOP
+Instance UID and Image Type, and a decompressed lossy image keeps Lossy Image
+Compression `01`. Until [#1291](https://github.com/kcenon/pacs_system/issues/1291)
+is fixed, files are written without the Source Image Sequence item.
+
+- A file fails to convert, with exit code 2, when a codec it needs is not in
+  this build (JPEG Baseline needs libjpeg-turbo, JPEG 2000 needs OpenJPEG,
+  JPEG-LS needs CharLS, HTJ2K needs OpenJPH; RLE and JPEG Lossless are built
+  in) or cannot encode the image, for example JPEG Lossless with color images.
+- `-q`/`--quality` (1-100, default 90) sets the JPEG Baseline quality, the
+  JPEG-LS near-lossless NEAR value, and the JPEG 2000 lossy compression ratio;
+  lossless targets and HTJ2K ignore it.
+- `--verify` reopens each output and checks that its Pixel Data matches its
+  Transfer Syntax: it decodes every frame of compressed Pixel Data, and checks
+  native Pixel Data against Rows x Columns x Samples per Pixel x Bits
+  Allocated / 8 x Number of Frames.
+- The JPEG Lossless decoder may fail on streams from other encoders (see
+  [Appendix B of the DICOM Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations)).
 
 ### DCM Anonymize
 
@@ -332,6 +373,13 @@ Convert JSON files (DICOM PS3.18 format) back to DICOM format.
 ./build/bin/json_to_dcm metadata.json output.dcm --bulk-data-dir ./bulk/
 ```
 
+`json_to_dcm` writes Pixel Data as it is and never compresses or decompresses
+it. A compressed (encapsulated) Transfer Syntax is accepted only when the
+Pixel Data is already encapsulated, in that syntax if it comes from the
+template, and a native Transfer Syntax only when the Pixel Data is native;
+otherwise the tool exits with code 2. Use `dcm_conv` to change the encoding of
+Pixel Data.
+
 ### DCM to XML
 
 Convert DICOM files to DICOM Native XML format (PS3.19).
@@ -391,6 +439,10 @@ Convert XML files (DICOM Native XML PS3.19 format) back to DICOM format.
 # Resolve BulkData URI from specific directory
 ./build/bin/xml_to_dcm metadata.xml output.dcm --bulk-data-dir ./bulk/
 ```
+
+`xml_to_dcm` follows the same Pixel Data rule as `json_to_dcm`: it never
+compresses or decompresses Pixel Data, so the Transfer Syntax must match the
+form of the Pixel Data it writes.
 
 ### Img to DCM
 
@@ -564,10 +616,10 @@ DICOM Storage SCU for sending images to a remote SCP.
 # Send all files in directory (recursive) with progress
 ./build/bin/store_scu -r --progress localhost 11112 ./dicom_folder/
 
-# Specify transfer syntax preference
-./build/bin/store_scu --prefer-lossless localhost 11112 *.dcm
+# Propose only Explicit VR Little Endian for uncompressed files
+./build/bin/store_scu -xe localhost 11112 *.dcm
 
-# Verbose output with timeout
+# Verbose output with timeout (also lists proposed and accepted contexts)
 ./build/bin/store_scu -v -to 60 localhost 11112 image.dcm
 
 # Generate transfer report
@@ -579,6 +631,15 @@ DICOM Storage SCU for sending images to a remote SCP.
 # Show help
 ./build/bin/store_scu --help
 ```
+
+Transfer syntaxes:
+- Each file is sent in its own transfer syntax; `store_scu` does not compress or decompress Pixel Data
+- One presentation context is proposed per (SOP Class, transfer syntax) pair of the files
+- A compressed file (JPEG, JPEG-LS, JPEG 2000, HTJ2K, RLE, ...) is proposed only in its own syntax and fails if the SCP does not accept that syntax
+- An uncompressed file is proposed in its own syntax first, then the other Little Endian syntax (`+xa`, `--propose-all`, the default); `-xe` (`--propose-explicit`) or `-xv` (`--propose-implicit`) proposes only Explicit or Implicit VR Little Endian
+- Explicit VR Big Endian is not proposed; a Big Endian file is sent as Little Endian
+- `-xs` (`--prefer-lossless`) is deprecated and has no effect
+- One association carries at most 128 presentation contexts (PS3.8); a file whose pair does not fit fails unless another proposed context can carry it
 
 ### Query SCU
 

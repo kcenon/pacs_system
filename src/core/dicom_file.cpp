@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <limits>
+#include <optional>
 
 namespace kcenon::pacs::core {
 
@@ -131,6 +133,94 @@ void write_uint32_be(std::vector<uint8_t>& buffer, uint32_t value) {
     }
 
     return kcenon::pacs::Result<std::vector<uint8_t>>::ok(std::move(buffer));
+}
+
+/**
+ * @brief Measure the items of an encapsulated Pixel Data value
+ * @param value Items, optionally followed by a Sequence Delimitation Item as
+ *        the last 8 bytes
+ * @return Byte length of the items without the delimiter, or std::nullopt if
+ *         value is not a non-empty sequence of complete items
+ */
+[[nodiscard]] auto encapsulated_items_length(std::span<const uint8_t> value)
+    -> std::optional<size_t> {
+    size_t offset = 0;
+    while (offset + 8 <= value.size()) {
+        const uint16_t group = read_uint16_le(value.subspan(offset, 2));
+        const uint16_t element = read_uint16_le(value.subspan(offset + 2, 2));
+        if (group != kItemTagGroup) {
+            return std::nullopt;
+        }
+
+        if (element == kSequenceDelimitationElement) {
+            if (offset == 0 || offset + 8 != value.size()) {
+                return std::nullopt;
+            }
+            return offset;
+        }
+
+        if (element != kItemTagElement) {
+            return std::nullopt;
+        }
+
+        const uint32_t length = read_uint32_le(value.subspan(offset + 4, 4));
+        if (length == kUndefinedLength || length > value.size() - offset - 8) {
+            return std::nullopt;
+        }
+        offset += 8 + length;
+    }
+
+    if (offset == 0 || offset != value.size()) {
+        return std::nullopt;
+    }
+    return offset;
+}
+
+/**
+ * @brief Check whether a fragment starts a JPEG or JPEG 2000 codestream
+ *
+ * JPEG and JPEG-LS start with SOI (FFD8) followed by a marker, JPEG 2000 and
+ * HTJ2K with SOC (FF4F) followed by SIZ (FF51).
+ */
+[[nodiscard]] auto starts_codestream(std::span<const uint8_t> fragment) -> bool {
+    if (fragment.size() < 4 || fragment[0] != 0xFF) {
+        return false;
+    }
+    if (fragment[1] == 0xD8) {
+        return fragment[2] == 0xFF;
+    }
+    return fragment[1] == 0x4F && fragment[2] == 0xFF && fragment[3] == 0x51;
+}
+
+/**
+ * @brief Write the value of a sequence element (PS3.5 7.5)
+ *
+ * Writes an undefined length, one item per dataset, and a Sequence
+ * Delimitation Item. Items have a defined length, as in the network codecs.
+ * The caller has written the tag and, for explicit VR, the VR and the
+ * reserved bytes.
+ *
+ * @param encode_item Encodes an item dataset with the VR encoding and byte
+ *        order of the enclosing dataset
+ */
+template <typename EncodeItem>
+void write_sequence(std::vector<uint8_t>& buffer,
+                    const std::vector<dicom_dataset>& items, bool big_endian,
+                    const EncodeItem& encode_item) {
+    const auto write_u16 = big_endian ? write_uint16_be : write_uint16_le;
+    const auto write_u32 = big_endian ? write_uint32_be : write_uint32_le;
+
+    write_u32(buffer, kUndefinedLength);
+    for (const auto& item : items) {
+        const auto item_bytes = encode_item(item);
+        write_u16(buffer, kItemTagGroup);
+        write_u16(buffer, kItemTagElement);
+        write_u32(buffer, static_cast<uint32_t>(item_bytes.size()));
+        buffer.insert(buffer.end(), item_bytes.begin(), item_bytes.end());
+    }
+    write_u16(buffer, kItemTagGroup);
+    write_u16(buffer, kSequenceDelimitationElement);
+    write_u32(buffer, 0);
 }
 
 }  // namespace
@@ -462,12 +552,36 @@ auto dicom_file::generate_meta_information(const dicom_dataset& dataset,
     return meta_info;
 }
 
-auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset)
+auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset,
+                                       bool encapsulated_pixel_data)
     -> std::vector<uint8_t> {
     std::vector<uint8_t> result;
     result.reserve(65536);  // Initial estimate
 
     for (const auto& [tag, element] : dataset) {
+        const auto& raw_data = element.raw_data();
+
+        // Encapsulated Pixel Data: OB with undefined length, the items, and a
+        // Sequence Delimitation Item (PS3.5 A.4)
+        if (encapsulated_pixel_data && tag == tags::pixel_data) {
+            if (const auto items_length = encapsulated_items_length(raw_data)) {
+                write_uint16_le(result, tag.group());
+                write_uint16_le(result, tag.element());
+                result.push_back('O');
+                result.push_back('B');
+                result.push_back(0x00);
+                result.push_back(0x00);
+                write_uint32_le(result, kUndefinedLength);
+                result.insert(result.end(), raw_data.begin(),
+                              raw_data.begin() +
+                                  static_cast<std::ptrdiff_t>(*items_length));
+                write_uint16_le(result, kItemTagGroup);
+                write_uint16_le(result, kSequenceDelimitationElement);
+                write_uint32_le(result, 0);
+                continue;
+            }
+        }
+
         // Write tag (4 bytes, little-endian)
         write_uint16_le(result, tag.group());
         write_uint16_le(result, tag.element());
@@ -477,7 +591,18 @@ auto dicom_file::encode_explicit_vr_le(const dicom_dataset& dataset)
         result.push_back(static_cast<uint8_t>(vr_str[0]));
         result.push_back(static_cast<uint8_t>(vr_str[1]));
 
-        const auto& raw_data = element.raw_data();
+        // Sequence: 2 reserved bytes and its items. An SQ element that kept
+        // a raw value (see decode_defined_length_sequence()) is written as is.
+        if (element.is_sequence() && raw_data.empty()) {
+            result.push_back(0x00);
+            result.push_back(0x00);
+            write_sequence(result, element.sequence_items(), false,
+                           [encapsulated_pixel_data](const dicom_dataset& item) {
+                               return encode_explicit_vr_le(item, encapsulated_pixel_data);
+                           });
+            continue;
+        }
+
         const auto length = static_cast<uint32_t>(raw_data.size());
 
         if (encoding::has_explicit_32bit_length(element.vr())) {
@@ -551,7 +676,7 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
             if (vr == encoding::vr_type::SQ) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, false);
 
@@ -614,8 +739,12 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
 
         // Read value and create element
         const auto value_data = data.subspan(offset + header_size, length);
-        dicom_element elem{tag, vr, value_data};
-        dataset.insert(std::move(elem));
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, true, false));
+        } else {
+            dicom_element elem{tag, vr, value_data};
+            dataset.insert(std::move(elem));
+        }
 
         offset += header_size + length;
     }
@@ -688,16 +817,19 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
 
         // Handle undefined length
         if (length == kUndefinedLength) {
-            if (vr == encoding::vr_type::SQ) {
+            // Only a sequence or encapsulated Pixel Data has an undefined
+            // length, so such an element that the dictionary does not know is
+            // a sequence
+            if (vr == encoding::vr_type::SQ || vr == encoding::vr_type::UN) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + kImplicitHeaderSize),
                     seq_bytes_read, false, false);
 
                 if (seq_result.is_ok()) {
                     // Create sequence element with parsed items
-                    dicom_element seq_elem{tag, vr};
+                    dicom_element seq_elem{tag, encoding::vr_type::SQ};
                     for (auto& item : seq_result.value()) {
                         seq_elem.add_sequence_item(std::move(item));
                     }
@@ -752,8 +884,12 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
 
         // Read value and create element
         const auto value_data = data.subspan(offset + kImplicitHeaderSize, length);
-        dicom_element elem{tag, vr, value_data};
-        dataset.insert(std::move(elem));
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, false, false));
+        } else {
+            dicom_element elem{tag, vr, value_data};
+            dataset.insert(std::move(elem));
+        }
 
         offset += kImplicitHeaderSize + length;
     }
@@ -817,7 +953,7 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
             if (vr == encoding::vr_type::SQ) {
                 // Parse undefined length sequence
                 size_t seq_bytes_read = 0;
-                auto seq_result = parse_undefined_length_sequence(
+                auto seq_result = parse_sequence_items(
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, true);
 
@@ -876,6 +1012,11 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
 
         // Read value - need to swap bytes for numeric types
         const auto value_data = data.subspan(offset + header_size, length);
+        if (vr == encoding::vr_type::SQ) {
+            dataset.insert(decode_defined_length_sequence(tag, value_data, true, true));
+            offset += header_size + length;
+            continue;
+        }
         std::vector<uint8_t> swapped_data(value_data.begin(), value_data.end());
 
         // Swap bytes for numeric VRs
@@ -920,8 +1061,16 @@ auto dicom_file::encode_implicit_vr_le(const dicom_dataset& dataset)
         write_uint16_le(result, tag.group());
         write_uint16_le(result, tag.element());
 
-        // Write length (4 bytes in Implicit VR)
         const auto& raw_data = element.raw_data();
+
+        // Sequence: its items (see encode_explicit_vr_le())
+        if (element.is_sequence() && raw_data.empty()) {
+            write_sequence(result, element.sequence_items(), false,
+                           &encode_implicit_vr_le);
+            continue;
+        }
+
+        // Write length (4 bytes in Implicit VR)
         write_uint32_le(result, static_cast<uint32_t>(raw_data.size()));
 
         // Write value
@@ -947,6 +1096,16 @@ auto dicom_file::encode_explicit_vr_be(const dicom_dataset& dataset)
         result.push_back(static_cast<uint8_t>(vr_str[1]));
 
         const auto& raw_data = element.raw_data();
+
+        // Sequence: 2 reserved bytes and its items (see encode_explicit_vr_le())
+        if (element.is_sequence() && raw_data.empty()) {
+            result.push_back(0x00);
+            result.push_back(0x00);
+            write_sequence(result, element.sequence_items(), true,
+                           &encode_explicit_vr_be);
+            continue;
+        }
+
         const auto length = static_cast<uint32_t>(raw_data.size());
 
         if (encoding::has_explicit_32bit_length(element.vr())) {
@@ -1025,11 +1184,29 @@ auto dicom_file::encode_dataset(const dicom_dataset& dataset,
         return encode_explicit_vr_be(dataset);
     }
 
-    // Explicit VR Little Endian (default)
-    return encode_explicit_vr_le(dataset);
+    // Explicit VR Little Endian (default and encapsulated transfer syntaxes)
+    return encode_explicit_vr_le(dataset, ts.is_encapsulated());
 }
 
-auto dicom_file::parse_undefined_length_sequence(
+auto dicom_file::decode_defined_length_sequence(
+    dicom_tag tag, std::span<const uint8_t> value,
+    bool explicit_vr, bool big_endian) -> dicom_element {
+    size_t seq_bytes_read = 0;
+    auto seq_result = parse_sequence_items(value, seq_bytes_read, explicit_vr,
+                                           big_endian);
+    if (seq_result.is_err() || seq_bytes_read != value.size()) {
+        // Not a sequence of items: keep the value as read
+        return dicom_element{tag, encoding::vr_type::SQ, value};
+    }
+
+    dicom_element seq_elem{tag, encoding::vr_type::SQ};
+    for (auto& item : seq_result.value()) {
+        seq_elem.add_sequence_item(std::move(item));
+    }
+    return seq_elem;
+}
+
+auto dicom_file::parse_sequence_items(
     std::span<const uint8_t> data, size_t& bytes_read,
     bool explicit_vr, bool big_endian)
     -> kcenon::pacs::Result<std::vector<dicom_dataset>> {
@@ -1040,6 +1217,15 @@ auto dicom_file::parse_undefined_length_sequence(
     // Helper function pointers for reading based on endianness
     auto read_u16 = big_endian ? read_uint16_be : read_uint16_le;
     auto read_u32 = big_endian ? read_uint32_be : read_uint32_le;
+
+    // Item datasets use the VR encoding and byte order of the sequence
+    auto decode_item = [explicit_vr, big_endian](std::span<const uint8_t> item_data,
+                                                 size_t& item_bytes_read) {
+        return explicit_vr
+            ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
+                          : decode_explicit_vr_le(item_data, item_bytes_read))
+            : decode_implicit_vr_le(item_data, item_bytes_read);
+    };
 
     while (offset + 8 <= data.size()) {
         // Read item tag
@@ -1063,36 +1249,23 @@ auto dicom_file::parse_undefined_length_sequence(
         offset += 8;
 
         if (item_length == kUndefinedLength) {
-            // Item with undefined length - find item delimitation tag
-            size_t item_end = offset;
-            while (item_end + 8 <= data.size()) {
-                uint16_t g = read_u16(data.subspan(item_end, 2));
-                uint16_t e = read_u16(data.subspan(item_end + 2, 2));
-                if (g == kItemTagGroup && e == kItemDelimitationElement) {
-                    break;
-                }
-                // Simple skip - move forward by element
-                // This is a simplified approach; full implementation would parse elements
-                item_end += 4;
-                if (item_end + 4 > data.size()) break;
-                uint32_t len = read_u32(data.subspan(item_end, 4));
-                item_end += 4;
-                if (len != kUndefinedLength) {
-                    item_end += len;
-                }
-            }
-            // Parse item content
+            // Item with undefined length: the decoder stops at the Item
+            // Delimitation Item, after any nested sequences
             size_t item_bytes_read = 0;
-            auto item_data = data.subspan(offset, item_end - offset);
-            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
-                ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
-                              : decode_explicit_vr_le(item_data, item_bytes_read))
-                : decode_implicit_vr_le(item_data, item_bytes_read);
+            auto item_result = decode_item(data.subspan(offset), item_bytes_read);
 
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));
             }
-            offset = item_end + 8;  // Skip delimitation item
+            offset += item_bytes_read;
+
+            // Skip the delimitation item; anything else is checked as the
+            // next item or the end of the sequence
+            if (offset + 8 <= data.size() &&
+                read_u16(data.subspan(offset, 2)) == kItemTagGroup &&
+                read_u16(data.subspan(offset + 2, 2)) == kItemDelimitationElement) {
+                offset += 8;
+            }
         } else {
             // Item with defined length
             if (offset + item_length > data.size()) {
@@ -1100,10 +1273,7 @@ auto dicom_file::parse_undefined_length_sequence(
             }
             size_t item_bytes_read = 0;
             auto item_data = data.subspan(offset, item_length);
-            kcenon::pacs::Result<dicom_dataset> item_result = explicit_vr
-                ? (big_endian ? decode_explicit_vr_be(item_data, item_bytes_read)
-                              : decode_explicit_vr_le(item_data, item_bytes_read))
-                : decode_implicit_vr_le(item_data, item_bytes_read);
+            auto item_result = decode_item(item_data, item_bytes_read);
 
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));
@@ -1116,55 +1286,166 @@ auto dicom_file::parse_undefined_length_sequence(
     return kcenon::pacs::Result<std::vector<dicom_dataset>>::ok(std::move(items));
 }
 
-auto dicom_file::parse_encapsulated_frames(std::span<const uint8_t> data)
-    -> std::vector<std::vector<uint8_t>> {
+// ============================================================================
+// Encapsulated Pixel Data
+// ============================================================================
 
-    std::vector<std::vector<uint8_t>> frames;
-    size_t offset = 0;
+auto dicom_file::encapsulate_frames(
+    const std::vector<std::vector<uint8_t>>& frames) -> std::vector<uint8_t> {
+    // Offset of each fragment's Item Tag from the first fragment's Item Tag
+    std::vector<uint32_t> offsets;
+    offsets.reserve(frames.size());
+    uint64_t position = 0;
+    bool offsets_fit = true;
+    for (const auto& frame : frames) {
+        if (position > std::numeric_limits<uint32_t>::max()) {
+            offsets_fit = false;
+        }
+        offsets.push_back(static_cast<uint32_t>(position));
+        position += 8 + frame.size() + (frame.size() % 2);
+    }
 
-    // First item is Basic Offset Table (may be empty)
-    if (offset + 8 <= data.size()) {
-        const uint16_t group = read_uint16_le(data.subspan(offset, 2));
-        const uint16_t element = read_uint16_le(data.subspan(offset + 2, 2));
+    std::vector<uint8_t> value;
+    value.reserve(static_cast<size_t>(16 + offsets.size() * 4 + position));
 
-        if (group == kItemTagGroup && element == kItemTagElement) {
-            uint32_t bot_length = read_uint32_le(data.subspan(offset + 4, 4));
-            offset += 8 + bot_length;  // Skip BOT
+    // Basic Offset Table item
+    write_uint16_le(value, kItemTagGroup);
+    write_uint16_le(value, kItemTagElement);
+    if (offsets_fit) {
+        write_uint32_le(value, static_cast<uint32_t>(offsets.size() * 4));
+        for (const auto offset : offsets) {
+            write_uint32_le(value, offset);
+        }
+    } else {
+        write_uint32_le(value, 0);
+    }
+
+    // One fragment per frame, padded to even length
+    for (const auto& frame : frames) {
+        const auto padded_length =
+            static_cast<uint32_t>(frame.size() + (frame.size() % 2));
+        write_uint16_le(value, kItemTagGroup);
+        write_uint16_le(value, kItemTagElement);
+        write_uint32_le(value, padded_length);
+        value.insert(value.end(), frame.begin(), frame.end());
+        if (padded_length != frame.size()) {
+            value.push_back(0x00);
         }
     }
 
-    // Parse fragment items
-    while (offset + 8 <= data.size()) {
-        const uint16_t group = read_uint16_le(data.subspan(offset, 2));
-        const uint16_t element = read_uint16_le(data.subspan(offset + 2, 2));
+    // Sequence Delimitation Item
+    write_uint16_le(value, kItemTagGroup);
+    write_uint16_le(value, kSequenceDelimitationElement);
+    write_uint32_le(value, 0);
 
-        // Check for sequence delimitation
-        if (group == kItemTagGroup && element == kSequenceDelimitationElement) {
-            break;
-        }
+    return value;
+}
 
-        // Must be an item tag
-        if (group != kItemTagGroup || element != kItemTagElement) {
-            break;
-        }
+auto dicom_file::encapsulated_frames(std::span<const uint8_t> value,
+                                     uint32_t number_of_frames)
+    -> kcenon::pacs::Result<std::vector<std::vector<uint8_t>>> {
+    using frame_list = std::vector<std::vector<uint8_t>>;
 
-        uint32_t fragment_length = read_uint32_le(data.subspan(offset + 4, 4));
-        offset += 8;
-
-        if (offset + fragment_length > data.size()) {
-            break;
-        }
-
-        // Copy fragment data
-        std::vector<uint8_t> fragment(
-            data.begin() + static_cast<std::ptrdiff_t>(offset),
-            data.begin() + static_cast<std::ptrdiff_t>(offset + fragment_length));
-        frames.push_back(std::move(fragment));
-
-        offset += fragment_length;
+    const auto items_length = encapsulated_items_length(value);
+    if (!items_length) {
+        return kcenon::pacs::pacs_error<frame_list>(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Pixel Data is not a sequence of items (PS3.5 A.4)");
+    }
+    if (number_of_frames == 0) {
+        return kcenon::pacs::pacs_error<frame_list>(
+            kcenon::pacs::error_codes::decode_error,
+            "Number of Frames is 0");
     }
 
-    return frames;
+    // The first item is the Basic Offset Table
+    const uint32_t table_length = read_uint32_le(value.subspan(4, 4));
+    if (table_length % 4 != 0) {
+        return kcenon::pacs::pacs_error<frame_list>(
+            kcenon::pacs::error_codes::decode_error,
+            "Basic Offset Table length " + std::to_string(table_length) +
+                " is not a multiple of 4");
+    }
+    std::vector<uint32_t> offset_table;
+    for (uint32_t i = 0; i < table_length / 4; ++i) {
+        offset_table.push_back(read_uint32_le(value.subspan(8 + i * 4, 4)));
+    }
+
+    // Fragments, each with the offset of its Item Tag from the first one
+    struct fragment {
+        size_t offset;
+        std::span<const uint8_t> data;
+    };
+    std::vector<fragment> fragments;
+    const size_t first_fragment = 8 + static_cast<size_t>(table_length);
+    for (size_t offset = first_fragment; offset < *items_length;) {
+        const uint32_t length = read_uint32_le(value.subspan(offset + 4, 4));
+        fragments.push_back({offset - first_fragment, value.subspan(offset + 8, length)});
+        offset += 8 + length;
+    }
+    if (fragments.empty()) {
+        return kcenon::pacs::pacs_error<frame_list>(
+            kcenon::pacs::error_codes::decode_error,
+            "Pixel Data has no fragments");
+    }
+
+    // Index of the first fragment of each frame
+    std::vector<size_t> frame_starts;
+    if (!offset_table.empty()) {
+        if (offset_table.size() != number_of_frames) {
+            return kcenon::pacs::pacs_error<frame_list>(
+                kcenon::pacs::error_codes::decode_error,
+                "Basic Offset Table has " + std::to_string(offset_table.size()) +
+                    " entries for " + std::to_string(number_of_frames) + " frames");
+        }
+        for (const auto frame_offset : offset_table) {
+            const auto it = std::find_if(
+                fragments.begin(), fragments.end(),
+                [frame_offset](const fragment& f) { return f.offset == frame_offset; });
+            const auto index = static_cast<size_t>(it - fragments.begin());
+            if (it == fragments.end() ||
+                (frame_starts.empty() ? index != 0 : index <= frame_starts.back())) {
+                return kcenon::pacs::pacs_error<frame_list>(
+                    kcenon::pacs::error_codes::decode_error,
+                    "Basic Offset Table entry " + std::to_string(frame_offset) +
+                        " does not start a frame");
+            }
+            frame_starts.push_back(index);
+        }
+    } else if (number_of_frames == 1) {
+        frame_starts.push_back(0);
+    } else if (fragments.size() == number_of_frames) {
+        for (size_t i = 0; i < fragments.size(); ++i) {
+            frame_starts.push_back(i);
+        }
+    } else {
+        for (size_t i = 0; i < fragments.size(); ++i) {
+            if (starts_codestream(fragments[i].data)) {
+                frame_starts.push_back(i);
+            }
+        }
+        if (frame_starts.size() != number_of_frames || frame_starts.front() != 0) {
+            return kcenon::pacs::pacs_error<frame_list>(
+                kcenon::pacs::error_codes::decode_error,
+                "Cannot assign " + std::to_string(fragments.size()) +
+                    " fragments to " + std::to_string(number_of_frames) +
+                    " frames without a Basic Offset Table");
+        }
+    }
+
+    frame_list frames;
+    frames.reserve(frame_starts.size());
+    for (size_t i = 0; i < frame_starts.size(); ++i) {
+        const size_t end =
+            (i + 1 < frame_starts.size()) ? frame_starts[i + 1] : fragments.size();
+        std::vector<uint8_t> frame;
+        for (size_t f = frame_starts[i]; f < end; ++f) {
+            frame.insert(frame.end(), fragments[f].data.begin(), fragments[f].data.end());
+        }
+        frames.push_back(std::move(frame));
+    }
+
+    return kcenon::pacs::Result<frame_list>::ok(std::move(frames));
 }
 
 }  // namespace kcenon::pacs::core

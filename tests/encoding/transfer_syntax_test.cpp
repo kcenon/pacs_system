@@ -2,6 +2,8 @@
 
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 
+#include <algorithm>
+
 using namespace kcenon::pacs::encoding;
 
 TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
@@ -53,7 +55,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK_FALSE(ts.is_encapsulated());
         CHECK(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK_FALSE(ts.is_supported());  // Not supported in Phase 1
+        CHECK_FALSE(ts.is_supported());  // No inflate or deflate code
     }
 
     SECTION("JPEG Baseline") {
@@ -65,7 +67,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());  // Supported since Phase 3
+        CHECK(ts.is_supported());  // jpeg_baseline_codec (libjpeg-turbo)
     }
 
     SECTION("JPEG Lossless") {
@@ -73,7 +75,33 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.70");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // Built-in jpeg_lossless_codec
+    }
+
+    SECTION("JPEG-LS Lossless") {
+        const auto& ts = transfer_syntax::jpeg_ls_lossless;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.80");
+        CHECK(ts.name() == "JPEG-LS Lossless Image Compression");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());  // jpeg_ls_codec (CharLS)
+    }
+
+    SECTION("JPEG-LS Near-Lossless") {
+        const auto& ts = transfer_syntax::jpeg_ls_near_lossless;
+
+        CHECK(ts.uid() == "1.2.840.10008.1.2.4.81");
+        CHECK(ts.name() == "JPEG-LS Lossy (Near-Lossless) Image Compression");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts.is_valid());
+        CHECK(ts.is_supported());  // jpeg_ls_codec (CharLS)
     }
 
     SECTION("JPEG 2000 Lossless") {
@@ -81,7 +109,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.90");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // jpeg2000_codec (OpenJPEG)
     }
 
     SECTION("JPEG 2000 Lossy") {
@@ -89,7 +117,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
 
         CHECK(ts.uid() == "1.2.840.10008.1.2.4.91");
         CHECK(ts.is_encapsulated());
-        CHECK_FALSE(ts.is_supported());
+        CHECK(ts.is_supported());  // jpeg2000_codec (OpenJPEG)
     }
 
     SECTION("HTJ2K Lossless") {
@@ -139,7 +167,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("JPEG XL JPEG Recompression") {
@@ -152,7 +180,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("JPEG XL Lossy") {
@@ -165,7 +193,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 
     SECTION("Frame Deflate") {
@@ -178,7 +206,7 @@ TEST_CASE("transfer_syntax properties", "[encoding][transfer_syntax]") {
         CHECK(ts.is_encapsulated());
         CHECK_FALSE(ts.is_deflated());
         CHECK(ts.is_valid());
-        CHECK(ts.is_supported());
+        CHECK_FALSE(ts.is_supported());  // Stub codec
     }
 }
 
@@ -235,6 +263,51 @@ TEST_CASE("transfer_syntax construction from HTJ2K UID", "[encoding][transfer_sy
     }
 }
 
+TEST_CASE("transfer_syntax lookup of JPEG-LS UIDs", "[encoding][transfer_syntax][jpegls]") {
+    SECTION("JPEG-LS Lossless UID creates valid transfer_syntax") {
+        transfer_syntax ts{"1.2.840.10008.1.2.4.80"};
+
+        CHECK(ts.is_valid());
+        CHECK(ts.name() == "JPEG-LS Lossless Image Compression");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts == transfer_syntax::jpeg_ls_lossless);
+    }
+
+    SECTION("JPEG-LS Near-Lossless UID creates valid transfer_syntax") {
+        transfer_syntax ts{"1.2.840.10008.1.2.4.81"};
+
+        CHECK(ts.is_valid());
+        CHECK(ts.name() == "JPEG-LS Lossy (Near-Lossless) Image Compression");
+        CHECK(ts.endianness() == byte_order::little_endian);
+        CHECK(ts.vr_type() == vr_encoding::explicit_vr);
+        CHECK(ts.is_encapsulated());
+        CHECK_FALSE(ts.is_deflated());
+        CHECK(ts == transfer_syntax::jpeg_ls_near_lossless);
+    }
+
+    SECTION("find_transfer_syntax finds both JPEG-LS UIDs") {
+        auto lossless = find_transfer_syntax("1.2.840.10008.1.2.4.80");
+        REQUIRE(lossless.has_value());
+        CHECK(lossless->name() == "JPEG-LS Lossless Image Compression");
+        CHECK(lossless->is_encapsulated());
+
+        auto near_lossless = find_transfer_syntax("1.2.840.10008.1.2.4.81");
+        REQUIRE(near_lossless.has_value());
+        CHECK(near_lossless->name() == "JPEG-LS Lossy (Near-Lossless) Image Compression");
+        CHECK(near_lossless->is_encapsulated());
+    }
+
+    SECTION("all_transfer_syntaxes lists both JPEG-LS UIDs") {
+        auto all = all_transfer_syntaxes();
+
+        CHECK(std::find(all.begin(), all.end(), transfer_syntax::jpeg_ls_lossless) != all.end());
+        CHECK(std::find(all.begin(), all.end(), transfer_syntax::jpeg_ls_near_lossless) != all.end());
+    }
+}
+
 TEST_CASE("transfer_syntax lookup", "[encoding][transfer_syntax]") {
     SECTION("find_transfer_syntax with valid UID") {
         auto ts = find_transfer_syntax("1.2.840.10008.1.2.1");
@@ -261,8 +334,10 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("supported_transfer_syntaxes returns only supported ones") {
         auto supported = supported_transfer_syntaxes();
 
-        // Uncompressed (3) + JPEG Baseline (1) + RLE Lossless (1) + HTJ2K (3) + HEVC (2) + JPEG XL (3) + Frame Deflate (1)
-        CHECK(supported.size() == 14);
+        // Uncompressed (3) + JPEG Baseline and Lossless (2) + JPEG-LS (2) +
+        // JPEG 2000 (2) + RLE Lossless (1) + HTJ2K (3); the HEVC, JPEG XL,
+        // and Frame Deflate codecs are stubs
+        CHECK(supported.size() == 13);
 
         for (const auto& ts : supported) {
             CHECK(ts.is_supported());
@@ -273,7 +348,7 @@ TEST_CASE("transfer_syntax support enumeration", "[encoding][transfer_syntax]") 
     SECTION("all_transfer_syntaxes returns all registered") {
         auto all = all_transfer_syntaxes();
 
-        CHECK(all.size() >= 18);
+        CHECK(all.size() >= 20);
 
         for (const auto& ts : all) {
             CHECK(ts.is_valid());

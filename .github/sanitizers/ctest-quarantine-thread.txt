@@ -1,0 +1,9 @@
+# CTest quarantine for the ThreadSanitizer job (.github/workflows/sanitizers.yml)
+#
+# One exact CTest test name per line; lines starting with # are comments.
+# Each group names the issue that tracks the failure. Remove the lines when
+# the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.
+
+# kcenon/thread_system#761: payload races behind the concurrent_queue race;
+# the racing accesses are in test code, so tsan.supp cannot match them
+stress::lockfree_queue memory safety

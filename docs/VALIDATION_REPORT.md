@@ -1323,12 +1323,15 @@ storage_root/
 
 **Thread System Migration Performance (2025-12-07):**
 
-| Metric | Baseline Target | Measured | Improvement |
-|--------|-----------------|----------|-------------|
-| C-ECHO throughput | >100 msg/s | 89,964 msg/s | 900x |
-| C-STORE throughput | >20 store/s | 31,759 store/s | 1,500x |
-| Concurrent operations | >50 ops/s | 124 ops/s | 2.5x |
-| Graceful shutdown | <5,000 ms | 110 ms | 45x faster |
+The baseline column holds the pass thresholds, not measurements from before the migration, so the
+table reports pass or fail rather than a ratio.
+
+| Metric | Baseline Target | Measured | Status |
+|--------|-----------------|----------|--------|
+| C-ECHO throughput | >100 msg/s | 89,964 msg/s | ✅ PASS |
+| C-STORE throughput | >20 store/s | 31,759 store/s | ✅ PASS |
+| Concurrent operations | >50 ops/s | 124 ops/s | ✅ PASS |
+| Graceful shutdown (5 active connections) | <5,000 ms | 107 ms | ✅ PASS |
 
 *See [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) for detailed benchmark data.*
 
@@ -1565,7 +1568,7 @@ This validation confirms that the PACS System:
 3. ✅ **Passes all user acceptance scenarios** - Real-world DICOM workflows validated
 4. ✅ **Complies with DICOM standards** - Interoperability ensured
 5. ✅ **Ready for production deployment** - Quality gates passed
-6. ✅ **Thread system migration complete** - 45x faster graceful shutdown, unified monitoring
+6. ✅ **Thread system migration complete** - graceful shutdown within target (107 ms with 5 active connections, threshold < 5000 ms), unified monitoring
 
 **Validation Status: PASSED**
 

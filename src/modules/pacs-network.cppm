@@ -13,7 +13,8 @@
  * - pdu_buffer_pool: Buffer pooling for PDU I/O
  * - dicom_server: DICOM server implementation
  * - v2 implementation: network_system integration
- * - DIMSE message types (basic exports, see :network-dimse for full)
+ *
+ * DIMSE message types are exported by the :network_dimse partition.
  *
  * Part of the kcenon.pacs module.
  */
@@ -49,89 +50,94 @@ module;
 #include <kcenon/pacs/network/v2/dicom_association_handler.h>
 #include <kcenon/pacs/network/v2/dicom_server_v2.h>
 
-// PACS network headers - DIMSE (basic)
-#include <kcenon/pacs/network/dimse/dimse_message.h>
-#include <kcenon/pacs/network/dimse/command_field.h>
-#include <kcenon/pacs/network/dimse/status_codes.h>
-
 export module kcenon.pacs:network;
 
 // ============================================================================
-// Re-export pacs::network namespace
+// Re-export kcenon::pacs::network namespace
 // ============================================================================
+// The DICOM_PROTOCOL_VERSION, AE_TITLE_LENGTH, and *_MAX_PDU_LENGTH constants
+// in pdu_types.h have internal linkage, which a module cannot export.
 
-export namespace pacs::network {
+export namespace kcenon::pacs::network {
 
 // Association
-using pacs::network::association;
-using pacs::network::association_state;
-using pacs::network::presentation_context;
+using kcenon::pacs::network::association;
+using kcenon::pacs::network::association_state;
+using kcenon::pacs::network::association_error;
+using kcenon::pacs::network::proposed_presentation_context;
+using kcenon::pacs::network::accepted_presentation_context;
+using kcenon::pacs::network::association_config;
+using kcenon::pacs::network::scp_config;
+using kcenon::pacs::network::rejection_info;
 
 // PDU types and enums
-using pacs::network::pdu_type;
-using pacs::network::item_type;
-using pacs::network::rejection_result;
-using pacs::network::rejection_source;
-using pacs::network::rejection_reason;
-using pacs::network::abort_source;
-using pacs::network::abort_reason;
+using kcenon::pacs::network::pdu_type;
+using kcenon::pacs::network::item_type;
+using kcenon::pacs::network::presentation_context_result;
+using kcenon::pacs::network::abort_source;
+using kcenon::pacs::network::abort_reason;
+using kcenon::pacs::network::reject_result;
+using kcenon::pacs::network::reject_source;
+using kcenon::pacs::network::reject_reason_user;
+using kcenon::pacs::network::reject_reason_provider_acse;
+using kcenon::pacs::network::reject_reason_provider_presentation;
+using kcenon::pacs::network::presentation_data_value;
+using kcenon::pacs::network::presentation_context_rq;
+using kcenon::pacs::network::presentation_context_ac;
+using kcenon::pacs::network::scp_scu_role_selection;
+using kcenon::pacs::network::user_information;
+using kcenon::pacs::network::associate_rq;
+using kcenon::pacs::network::associate_ac;
+using kcenon::pacs::network::associate_rj;
+using kcenon::pacs::network::release_rq_pdu;
+using kcenon::pacs::network::release_rp_pdu;
+using kcenon::pacs::network::abort_pdu;
+using kcenon::pacs::network::p_data_tf_pdu;
+using kcenon::pacs::network::pdu;
 
 // PDU encoder/decoder
-using pacs::network::pdu_encoder;
-using pacs::network::pdu_decoder;
+using kcenon::pacs::network::pdu_encoder;
+using kcenon::pacs::network::pdu_decoder;
+using kcenon::pacs::network::pdu_decode_error;
 
 // Buffer pool
-using pacs::network::pdu_buffer_pool;
-using pacs::network::pooled_buffer;
+using kcenon::pacs::network::pdu_pool_statistics;
+using kcenon::pacs::network::pooled_buffer;
+using kcenon::pacs::network::tracked_pdu_pool;
+using kcenon::pacs::network::pdu_buffer_pool;
+using kcenon::pacs::network::make_pooled_pdu_buffer;
+using kcenon::pacs::network::make_pooled_pdv;
+using kcenon::pacs::network::make_pooled_p_data_tf;
 
 // Server configuration
-using pacs::network::server_config;
-using pacs::network::tls_config;
+using kcenon::pacs::network::server_config;
+using kcenon::pacs::network::server_statistics;
 
 // Server
-using pacs::network::dicom_server;
+using kcenon::pacs::network::dicom_server;
 
-} // namespace pacs::network
+// to_string overloads (association and PDU enums)
+using kcenon::pacs::network::to_string;
+
+} // namespace kcenon::pacs::network
 
 // ============================================================================
-// Re-export pacs::network::v2 namespace
+// Re-export kcenon::pacs::network::v2 namespace
 // ============================================================================
 
-export namespace pacs::network::v2 {
+export namespace kcenon::pacs::network::v2 {
 
 // Handler state
-using pacs::network::v2::handler_state;
-using pacs::network::v2::to_string;
+using kcenon::pacs::network::v2::handler_state;
+using kcenon::pacs::network::v2::to_string;
 
 // Association handler
-using pacs::network::v2::dicom_association_handler;
+using kcenon::pacs::network::v2::association_established_callback;
+using kcenon::pacs::network::v2::association_closed_callback;
+using kcenon::pacs::network::v2::handler_error_callback;
+using kcenon::pacs::network::v2::dicom_association_handler;
 
 // Server v2
-using pacs::network::v2::dicom_server_v2;
+using kcenon::pacs::network::v2::dicom_server_v2;
 
-} // namespace pacs::network::v2
-
-// ============================================================================
-// Re-export pacs::network::dimse namespace (basic types)
-// ============================================================================
-
-export namespace pacs::network::dimse {
-
-// Message types
-using pacs::network::dimse::dimse_message;
-using pacs::network::dimse::command_field;
-
-// Status codes
-using pacs::network::dimse::status_code;
-using pacs::network::dimse::status_success;
-using pacs::network::dimse::status_pending;
-using pacs::network::dimse::status_pending_warning;
-using pacs::network::dimse::status_cancel;
-
-// Status category checks
-using pacs::network::dimse::is_success;
-using pacs::network::dimse::is_pending;
-using pacs::network::dimse::is_warning;
-using pacs::network::dimse::is_failure;
-
-} // namespace pacs::network::dimse
+} // namespace kcenon::pacs::network::v2

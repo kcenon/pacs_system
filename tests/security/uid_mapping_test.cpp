@@ -7,6 +7,7 @@
 
 #include "kcenon/pacs/security/uid_mapping.h"
 
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -240,19 +241,31 @@ TEST_CASE("UidMapping: Thread Safety", "[security][anonymization]") {
     constexpr int num_threads = 4;
     constexpr int ops_per_thread = 100;
 
+    // Catch2 assertions are not thread-safe: the workers only count
+    // failures, and the main thread asserts after join()
+    std::atomic<int> create_failures{0};
+    std::atomic<int> missing_lookups{0};
+    std::atomic<int> mismatched_lookups{0};
+
     std::vector<std::thread> threads;
 
     for (int t = 0; t < num_threads; ++t) {
-        threads.emplace_back([&mapping, t]() {
+        threads.emplace_back([&, t]() {
             for (int i = 0; i < ops_per_thread; ++i) {
                 std::string uid = "uid." + std::to_string(t) + "." + std::to_string(i);
                 auto result = mapping.get_or_create(uid);
-                REQUIRE(result.is_ok());
+                if (!result.is_ok()) {
+                    create_failures.fetch_add(1);
+                    continue;
+                }
 
                 // Verify consistency
                 auto lookup = mapping.get_anonymized(uid);
-                REQUIRE(lookup.has_value());
-                REQUIRE(lookup.value() == result.value());
+                if (!lookup.has_value()) {
+                    missing_lookups.fetch_add(1);
+                } else if (lookup.value() != result.value()) {
+                    mismatched_lookups.fetch_add(1);
+                }
             }
         });
     }
@@ -261,5 +274,8 @@ TEST_CASE("UidMapping: Thread Safety", "[security][anonymization]") {
         thread.join();
     }
 
+    REQUIRE(create_failures.load() == 0);
+    REQUIRE(missing_lookups.load() == 0);
+    REQUIRE(mismatched_lookups.load() == 0);
     REQUIRE(mapping.size() == num_threads * ops_per_thread);
 }

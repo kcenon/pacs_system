@@ -38,8 +38,8 @@ The README links here instead of quoting figures.
 | Thread performance | `benchmarks/thread_performance/` | `thread_performance_benchmarks` | Association setup, C-ECHO and C-STORE throughput, concurrent load, shutdown time |
 | SIMD performance | `benchmarks/simd_performance/` | `simd_performance_benchmarks`, `photometric_benchmark`, `windowing_benchmark` | Byte swapping, RLE, photometric conversion, window/level |
 
-The codec, storage, and query categories below define targets only; the repository has no
-benchmark source for them yet.
+The codec, storage, and query categories below are planned: they define targets only, and the
+repository has no benchmark source for them yet.
 
 See also [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) for the thread migration baseline
 targets and [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) for the full report of the recorded run.
@@ -57,7 +57,7 @@ table that the README carried until #1212.
 | Item | Record |
 |------|--------|
 | Environment | macOS 26.2 (Darwin), Apple M4 Max (ARM64), 36 GB memory, Apple Clang 17.0.0, Release build, C++20 ([Test Environment](PERFORMANCE_RESULTS.md#test-environment)) |
-| Date | Not recorded reliably. The report states 2024-12-05, but the commit that added it (`501957b0`, PR #171) is dated 2025-12-05, and macOS 26.2 and Apple Clang 17.0.0 were not available on 2024-12-05. |
+| Date | Not recorded reliably. The report originally stated 2024-12-05, but the benchmark sources were added on 2025-12-04 (`7c59a5d7`, PR #164), the commit that added the report (`501957b0`, PR #171) is dated 2025-12-05, and macOS 26.2 and Apple Clang 17.0.0 were not available on 2024-12-05. |
 | Command | Not recorded. The report names the four `thread_performance_benchmarks` suites (association, throughput, concurrent load, shutdown); [Running Benchmarks](#running-benchmarks) lists commands that run them. |
 | Result file | [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) (summary tables). Raw benchmark output is not recorded in the repository. |
 | Setup | Client and `benchmark_server` fixture in one process over `localhost` (`benchmarks/thread_performance/benchmark_common.h`). The report attributes the high single-worker rates to in-memory benchmark operations, so these values are not network throughput between hosts. |
@@ -89,9 +89,8 @@ under-load value (3 workers) with the active-connections label; the active-conne
 
 ### SIMD benchmarks
 
-No SIMD result with an environment and date is recorded in the repository.
-[FEATURES.md](FEATURES.md#simd-optimization) lists a byte-swap speedup range without a
-measurement record.
+No SIMD result with an environment and date is recorded in the repository, so
+[FEATURES.md](FEATURES.md#simd-optimization) gives no SIMD speedup figure.
 
 ### Earlier reference platform
 
@@ -119,9 +118,11 @@ exchange, and data transfer (`benchmarks/thread_performance/`).
 | C-STORE throughput | > 20 store/s | Small images (64x64) |
 | Data rate (512x512) | > 5 MB/s | Large image transfer |
 
-### Codec Performance
+### Codec Performance (Planned)
 
-Targets only; no codec benchmark source exists yet.
+No codec benchmark source exists yet, so this table defines targets only. The SIMD
+suite's `rle_simd_benchmark.cpp` measures the SIMD helper steps that the RLE codec uses (RGB
+planar conversion, 16-bit plane split and merge), not RLE compression or decompression.
 
 | Codec | Operation | Target | Notes |
 |-------|-----------|--------|-------|
@@ -134,9 +135,9 @@ Targets only; no codec benchmark source exists yet.
 | RLE | Compress | Measured per image | Lossless, DICOM standard RLE |
 | RLE | Decompress | Measured per image | - |
 
-### Storage Performance
+### Storage Performance (Planned)
 
-Targets only; no storage benchmark source exists yet.
+No storage benchmark source exists yet, so this table defines targets only.
 
 | Backend | Operation | Metric | Description |
 |---------|-----------|--------|-------------|
@@ -146,9 +147,9 @@ Targets only; no storage benchmark source exists yet.
 | Cloud (S3) | Download | Latency (ms) | Single object download latency |
 | Database | Index | ops/s | Metadata indexing speed |
 
-### Query Performance
+### Query Performance (Planned)
 
-Targets only; no query benchmark source exists yet.
+No query benchmark source exists yet, so this table defines targets only.
 
 | Query Type | Target | Description |
 |------------|--------|-------------|

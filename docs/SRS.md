@@ -1187,7 +1187,7 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | **Priority** | Must Have |
 | **Phase** | 2 |
 | **Traces To** | IR-1 |
-| **Status** | ✅ Fully Implemented (v1.1.0) |
+| **Status** | ✅ Fully Implemented (in `v0.1.0`) |
 
 **Acceptance Criteria:**
 1. Worker pool for DIMSE processing ✅
@@ -1204,7 +1204,7 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 |-----------|-------|-------------|
 | Accept Worker | `accept_worker` | Inherits from `thread_base`, manages accept loop with jthread and cancellation_token |
 | Thread Pool | `thread_adapter` | Manages association worker threads with load balancing |
-| Shutdown | Cooperative | Uses `cancellation_token` for clean shutdown (~110ms with active connections) |
+| Shutdown | Cooperative | Uses `cancellation_token` for clean shutdown (107 ms with 5 active connections) |
 
 **Related Issues:** #153, #156, #157, #158, #159, #160
 

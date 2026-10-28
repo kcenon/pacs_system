@@ -19,11 +19,18 @@ category: "FEAT"
 This document provides comprehensive details on all features available in the PACS system.
 
 > **Phase Definitions**: See [PRD Development Phases](PRD.md#development-phases) for the authoritative phase definitions. Feature sections below correspond to phases as follows:
-> - **Phase 1** (Complete): DICOM Core Features
-> - **Phase 2** (Complete): Network Protocol Features, Compression Codecs
-> - **Phase 3** (Complete): DICOM Services, Storage Backend
-> - **Phase 4** (Complete): Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
+> - **Phase 1**: DICOM Core Features
+> - **Phase 2**: Network Protocol Features, Compression Codecs
+> - **Phase 3**: DICOM Services, Storage Backend
+> - **Phase 4**: Security, Monitoring, Workflow, Ecosystem Integration (advanced), Error Handling
 > - **Phase 5** (Planned): Enterprise Features — Enhanced Metrics (see [Planned Features](#planned-features))
+>
+> **Release status**: the components listed for Phases 1-4 are in the `v0.1.0` tag. The feature
+> descriptions on this page were written before that tag and do not cover later work on the
+> default branch (for example the IHE XDS.b actors under `include/kcenon/pacs/ihe/xds/`, the
+> `include/kcenon/pacs/` header layout, and the `pacs_system::pacs_system` CMake contract), which is
+> unreleased. The code examples use the headers and the `kcenon::pacs::` namespace of the default
+> branch, so they do not build against the `v0.1.0` tag, whose headers are under `include/pacs/`.
 >
 > **Note**: Connection Pooling was originally listed as a Phase 5 feature but is already fully implemented in the Client Module (`remote_node_manager`). See [Remote Node Manager](#remote-node-manager-connection-pooling) for details.
 
@@ -65,21 +72,23 @@ This document provides comprehensive details on all features available in the PA
 
 **Example**:
 ```cpp
-#include <pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
+using kcenon::pacs::encoding::vr_type;
 
 // Create a Patient Name element
-auto patient_name = dicom_element::create(
-    tags::PatientName,           // (0010,0010)
+auto patient_name = dicom_element::from_string(
+    tags::patient_name,          // (0010,0010)
     vr_type::PN,                 // Person Name
     "Doe^John"                   // Value
 );
 
 // Access element properties
-auto tag = patient_name.tag();           // 0x00100010
-auto vr = patient_name.vr();             // PN
-auto value = patient_name.as_string();   // "Doe^John"
+auto tag = patient_name.tag();           // (0010,0010)
+auto vr = patient_name.vr();             // vr_type::PN
+auto value = patient_name.as_string();   // Result<std::string> holding "Doe^John"
 ```
 
 ### Value Representation Types
@@ -118,32 +127,34 @@ All 34 DICOM VR types are supported with appropriate container_system mappings:
 
 **Example**:
 ```cpp
-#include <pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
+using kcenon::pacs::encoding::vr_type;
 
 // Create a data set
 dicom_dataset dataset;
 
 // Add elements
-dataset.set_string(tags::PatientName, "Doe^John");
-dataset.set_string(tags::PatientID, "12345");
-dataset.set_string(tags::StudyDate, "20250130");
-dataset.set_uint16(tags::Rows, 512);
-dataset.set_uint16(tags::Columns, 512);
+dataset.set_string(tags::patient_name, vr_type::PN, "Doe^John");
+dataset.set_string(tags::patient_id, vr_type::LO, "12345");
+dataset.set_string(tags::study_date, vr_type::DA, "20250130");
+dataset.set_numeric<uint16_t>(tags::rows, vr_type::US, 512);
+dataset.set_numeric<uint16_t>(tags::columns, vr_type::US, 512);
 
 // Get values
-auto name = dataset.get_string(tags::PatientName);
-auto rows = dataset.get_uint16(tags::Rows);
+auto name = dataset.get_string(tags::patient_name);
+auto rows = dataset.get_numeric<uint16_t>(tags::rows).value_or(0);
 
 // Check existence
-if (dataset.contains(tags::PixelData)) {
-    auto pixels = dataset.get_bytes(tags::PixelData);
+if (dataset.contains(tags::pixel_data)) {
+    auto pixels = dataset.get(tags::pixel_data)->raw_data();
 }
 
-// Iterate all elements
-for (const auto& element : dataset) {
-    std::cout << element.tag() << ": " << element.as_string() << "\n";
+// Iterate all elements (ordered by tag)
+for (const auto& [tag, element] : dataset) {
+    std::cout << tag.to_string() << ": " << element.as_string().unwrap_or("") << "\n";
 }
 ```
 
@@ -166,27 +177,30 @@ for (const auto& element : dataset) {
 
 **Example**:
 ```cpp
-#include <pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/dicom_file.h>
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
+using kcenon::pacs::encoding::transfer_syntax;
+using kcenon::pacs::encoding::vr_type;
 
 // Read DICOM file
-auto result = dicom_file::read("/path/to/image.dcm");
+auto result = dicom_file::open("/path/to/image.dcm");
 if (result.is_ok()) {
     auto& file = result.value();
     auto& dataset = file.dataset();
-    auto transfer_syntax = file.transfer_syntax();
+    auto ts = file.transfer_syntax();
 
-    std::cout << "Patient: " << dataset.get_string(tags::PatientName) << "\n";
-    std::cout << "Transfer Syntax: " << transfer_syntax.uid() << "\n";
+    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+    std::cout << "Transfer Syntax: " << ts.uid() << "\n";
 }
 
-// Write DICOM file
-dicom_file file;
-file.set_dataset(dataset);
-file.set_transfer_syntax(transfer_syntax::explicit_vr_little_endian());
+// Write DICOM file (File Meta Information is generated from the dataset)
+dicom_dataset dataset;
+dataset.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+dataset.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5");
+auto file = dicom_file::create(std::move(dataset), transfer_syntax::explicit_vr_little_endian);
 
-auto write_result = file.write("/path/to/output.dcm");
+auto write_result = file.save("/path/to/output.dcm");
 if (write_result.is_err()) {
     std::cerr << "Write failed: " << write_result.error().message << "\n";
 }
@@ -229,9 +243,9 @@ if (write_result.is_err()) {
 
 **Example**:
 ```cpp
-#include <pacs/core/dicom_file.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // Read DICOM file with undefined length sequences
 auto result = dicom_file::open("compressed_image.dcm");
@@ -239,15 +253,16 @@ if (result.is_ok()) {
     auto& file = result.value();
 
     // Access sequence with undefined length
-    if (file.dataset().has_sequence(tags::referenced_series_sequence)) {
-        auto* seq = file.dataset().get_sequence(tags::referenced_series_sequence);
+    if (file.dataset().has_sequence(tags::referenced_sop_sequence)) {
+        const auto* seq = file.dataset().get_sequence(tags::referenced_sop_sequence);
         for (const auto& item : *seq) {
-            std::cout << "Series UID: " << item.get_string(tags::series_instance_uid) << "\n";
+            std::cout << "Referenced SOP Instance UID: "
+                      << item.get_string(tags::referenced_sop_instance_uid) << "\n";
         }
     }
 
     // Access encapsulated pixel data
-    if (auto* pixel_elem = file.dataset().get(tags::pixel_data)) {
+    if (const auto* pixel_elem = file.dataset().get(tags::pixel_data)) {
         auto raw_data = pixel_elem->raw_data();
         // raw_data contains the encapsulated fragments
     }
@@ -319,21 +334,24 @@ if (result.is_ok()) {
 
 **Example**:
 ```cpp
-#include <pacs/network/association.h>
+#include <kcenon/pacs/network/association.h>
+#include <kcenon/pacs/services/sop_classes/ct_storage.h>
 
-using namespace pacs::network;
+using namespace kcenon::pacs::network;
+using kcenon::pacs::services::sop_classes::ct_image_storage_uid;
 
 // Configure association
 association_config config;
 config.calling_ae_title = "MY_SCU";
 config.called_ae_title = "PACS_SCP";
-config.max_pdu_size = 16384;
+config.max_pdu_length = 16384;
 
-// Add presentation contexts
-config.add_context(
-    sop_class::ct_image_storage,
-    {transfer_syntax::explicit_vr_little_endian()}
-);
+// Add presentation contexts (context IDs are odd numbers)
+config.proposed_contexts.push_back({
+    1,
+    std::string(ct_image_storage_uid),
+    {"1.2.840.10008.1.2.1"}  // Explicit VR Little Endian
+});
 
 // Create association
 auto result = association::connect("192.168.1.100", 11112, config);
@@ -342,7 +360,7 @@ if (result.is_ok()) {
 
     // Perform DIMSE operations...
 
-    assoc.release();  // Graceful release
+    auto release_result = assoc.release();  // Graceful release
 }
 ```
 
@@ -387,18 +405,38 @@ if (result.is_ok()) {
 
 **SOP Class**: Verification SOP Class (1.2.840.10008.1.1)
 
+The SCP side is `verification_scp`, registered on a `dicom_server`. There is no separate
+verification SCU class: an SCU sends C-ECHO-RQ over an `association`, as `tools/echo_scu` does.
+
 **Example**:
 ```cpp
-#include <pacs/services/verification_scu.h>
+#include <kcenon/pacs/network/association.h>
+#include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/services/verification_scp.h>
 
-using namespace pacs::services;
+using namespace kcenon::pacs::network;
+using kcenon::pacs::services::verification_sop_class_uid;
+
+// Propose the Verification SOP Class
+association_config config;
+config.calling_ae_title = "MY_SCU";
+config.called_ae_title = "PACS_SCP";
+config.proposed_contexts.push_back({
+    1, std::string(verification_sop_class_uid), {"1.2.840.10008.1.2.1"}});
 
 // Test connectivity
-verification_scu scu("MY_SCU");
-auto result = scu.echo("PACS_SCP", "192.168.1.100", 11112);
-
+auto result = association::connect("192.168.1.100", 11112, config);
 if (result.is_ok()) {
-    std::cout << "DICOM Echo successful!\n";
+    auto& assoc = result.value();
+    if (auto context_id = assoc.accepted_context_id(verification_sop_class_uid)) {
+        auto sent = assoc.send_dimse(*context_id, dimse::make_c_echo_rq(1));
+        auto response = assoc.receive_dimse();
+        if (sent.is_ok() && response.is_ok() &&
+            response.value().second.status() == dimse::status_success) {
+            std::cout << "DICOM Echo successful!\n";
+        }
+    }
+    auto release_result = assoc.release();
 } else {
     std::cerr << "Echo failed: " << result.error().message << "\n";
 }
@@ -461,24 +499,39 @@ if (result.is_ok()) {
 
 **Example**:
 ```cpp
-#include <pacs/services/storage_scp.h>
+#include <kcenon/pacs/network/dicom_server.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/storage/file_storage.h>
 
-using namespace pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::services;
+namespace core = kcenon::pacs::core;
+namespace storage = kcenon::pacs::storage;
 
-// Configure Storage SCP
-storage_scp_config config;
+// Configure the server (AE title, port, association limit)
+server_config config;
 config.ae_title = "PACS_SCP";
 config.port = 11112;
-config.storage_path = "/data/dicom";
 config.max_associations = 10;
 
+// Files go to /data/dicom through file_storage
+storage::file_storage_config storage_config;
+storage_config.root_path = "/data/dicom";
+storage::file_storage file_store{storage_config};
+
+// Configure Storage SCP
+auto storage_service = std::make_shared<storage_scp>(storage_scp_config{});
+storage_service->set_handler(
+    [&file_store](const core::dicom_dataset& dataset, const std::string& calling_ae,
+                  const std::string& sop_class_uid, const std::string& sop_instance_uid) {
+        std::cout << "Received: " << sop_instance_uid << "\n";
+        return file_store.store(dataset).is_ok() ? storage_status::success
+                                                 : storage_status::out_of_resources;
+    });
+
 // Start server
-storage_scp server(config);
-server.set_handler([](const dicom_dataset& dataset) {
-    std::cout << "Received: "
-              << dataset.get_string(tags::SOPInstanceUID) << "\n";
-    return storage_status::success;
-});
+dicom_server server{config};
+server.register_service(storage_service);
 
 auto result = server.start();
 if (result.is_ok()) {
@@ -505,24 +558,42 @@ if (result.is_ok()) {
 
 **Example**:
 ```cpp
-#include <pacs/services/query_scu.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/services/query_scu.h>
 
-using namespace pacs::services;
+using namespace kcenon::pacs::network;
+using namespace kcenon::pacs::services;
+using kcenon::pacs::encoding::vr_type;
+namespace tags = kcenon::pacs::core::tags;
 
-// Query for studies
-query_scu scu("MY_SCU");
-auto assoc = scu.connect("PACS_SCP", "192.168.1.100", 11112);
+// Open an association that proposes Study Root C-FIND
+association_config config;
+config.calling_ae_title = "MY_SCU";
+config.called_ae_title = "PACS_SCP";
+config.proposed_contexts.push_back({
+    1, std::string(study_root_find_sop_class_uid), {"1.2.840.10008.1.2.1"}});
 
-// Build query
-dicom_dataset query;
-query.set_string(tags::PatientName, "Doe*");
-query.set_string(tags::StudyDate, "20250101-20250130");
-query.set_string(tags::QueryRetrieveLevel, "STUDY");
+auto assoc_result = association::connect("192.168.1.100", 11112, config);
+if (assoc_result.is_ok()) {
+    auto& assoc = assoc_result.value();
 
-// Execute query
-auto results = scu.find(assoc, query);
-for (const auto& study : results) {
-    std::cout << "Study: " << study.get_string(tags::StudyInstanceUID) << "\n";
+    // Build query
+    kcenon::pacs::core::dicom_dataset query;
+    query.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+    query.set_string(tags::patient_name, vr_type::PN, "Doe*");
+    query.set_string(tags::study_date, vr_type::DA, "20250101-20250130");
+    query.set_string(tags::study_instance_uid, vr_type::UI, "");
+
+    // Execute query
+    query_scu scu;
+    auto result = scu.find(assoc, query);
+    if (result.is_ok()) {
+        for (const auto& study : result.value().matches) {
+            std::cout << "Study: " << study.get_string(tags::study_instance_uid) << "\n";
+        }
+    }
+
+    auto release_result = assoc.release();
 }
 ```
 
@@ -716,15 +787,17 @@ CREATE TABLE instance (
 
 **Configuration**:
 ```cpp
-#include <pacs/storage/s3_storage.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/storage/s3_storage.h>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
+namespace core = kcenon::pacs::core;
 
 cloud_storage_config config;
 config.bucket_name = "my-dicom-bucket";
 config.region = "us-east-1";
-config.access_key_id = "AKIAIOSFODNN7EXAMPLE";
-config.secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+config.access_key_id = "<access-key-id>";          // Load from your secret store
+config.secret_access_key = "<secret-access-key>";  // Never commit real keys
 
 // For MinIO local testing
 config.endpoint_url = "http://localhost:9000";
@@ -751,7 +824,7 @@ if (store_result.is_ok()) {
 auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
 if (retrieve_result.is_ok()) {
     auto& dataset = retrieve_result.value();
-    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+    std::cout << "Patient: " << dataset.get_string(core::tags::patient_name) << "\n";
 }
 
 // Store with progress tracking
@@ -759,7 +832,7 @@ auto progress = [](std::size_t transferred, std::size_t total) -> bool {
     std::cout << "Progress: " << (100 * transferred / total) << "%\n";
     return true;  // Continue upload
 };
-storage.store_with_progress(ds, progress);
+auto progress_result = storage.store_with_progress(ds, progress);
 ```
 
 **Object Key Structure**:
@@ -789,9 +862,11 @@ storage.store_with_progress(ds, progress);
 
 **Configuration**:
 ```cpp
-#include <pacs/storage/azure_blob_storage.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/storage/azure_blob_storage.h>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
+namespace core = kcenon::pacs::core;
 
 azure_storage_config config;
 config.container_name = "dicom-container";
@@ -825,18 +900,18 @@ if (store_result.is_ok()) {
 auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
 if (retrieve_result.is_ok()) {
     auto& dataset = retrieve_result.value();
-    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+    std::cout << "Patient: " << dataset.get_string(core::tags::patient_name) << "\n";
 }
 
 // Change access tier for archival
-storage.set_access_tier("1.2.3.4.5.6.7.8.9", "Archive");
+auto tier_result = storage.set_access_tier("1.2.3.4.5.6.7.8.9", "Archive");
 
 // Store with progress tracking
 auto progress = [](std::size_t transferred, std::size_t total) -> bool {
     std::cout << "Progress: " << (100 * transferred / total) << "%\n";
     return true;  // Continue upload
 };
-storage.store_with_progress(ds, progress);
+auto progress_result = storage.store_with_progress(ds, progress);
 ```
 
 **Blob Naming Structure**:
@@ -874,33 +949,37 @@ storage.store_with_progress(ds, progress);
 
 **Configuration**:
 ```cpp
-#include <pacs/storage/hsm_storage.hpp>
-#include <pacs/storage/hsm_types.hpp>
+#include <kcenon/pacs/storage/azure_blob_storage.h>
+#include <kcenon/pacs/storage/file_storage.h>
+#include <kcenon/pacs/storage/hsm_storage.h>
+#include <kcenon/pacs/storage/s3_storage.h>
 
-using namespace pacs::storage;
+using namespace kcenon::pacs::storage;
+namespace core = kcenon::pacs::core;
 
-// Configure tier policies
-tier_policy hot_policy;
-hot_policy.tier = storage_tier::hot;
-hot_policy.migration_age = std::chrono::days{30};   // Migrate after 30 days
+// Configure the age thresholds for automatic migration
+hsm_storage_config config;
+config.policy.hot_to_warm = std::chrono::days{30};    // Hot to warm after 30 days
+config.policy.warm_to_cold = std::chrono::days{180};  // Warm to cold after 180 days
+config.policy.auto_migrate = true;
 
-tier_policy warm_policy;
-warm_policy.tier = storage_tier::warm;
-warm_policy.migration_age = std::chrono::days{180}; // Migrate after 180 days
+// Configure the tier backends (warm and cold may also be nullptr)
+file_storage_config hot_config;
+hot_config.root_path = "/data/dicom/hot";
 
-tier_policy cold_policy;
-cold_policy.tier = storage_tier::cold;
-// No migration from cold tier (final destination)
+cloud_storage_config warm_config;
+warm_config.bucket_name = "dicom-warm";
+
+azure_storage_config cold_config;
+cold_config.container_name = "dicom-archive";
+cold_config.access_tier = "Archive";
 
 // Create HSM storage with backends
-auto hot_backend = std::make_shared<file_storage>(hot_path);
-auto warm_backend = std::make_shared<s3_storage>(warm_config);
-auto cold_backend = std::make_shared<azure_blob_storage>(cold_config);
-
 hsm_storage storage{
-    hot_backend, hot_policy,
-    warm_backend, warm_policy,
-    cold_backend, cold_policy
+    std::make_unique<file_storage>(hot_config),
+    std::make_unique<s3_storage>(warm_config),
+    std::make_unique<azure_blob_storage>(cold_config),
+    config
 };
 ```
 
@@ -915,34 +994,32 @@ auto store_result = storage.store(ds);
 auto retrieve_result = storage.retrieve("1.2.3.4.5.6.7.8.9");
 if (retrieve_result.is_ok()) {
     auto& dataset = retrieve_result.value();
-    std::cout << "Patient: " << dataset.get_string(tags::patient_name) << "\n";
+    std::cout << "Patient: " << dataset.get_string(core::tags::patient_name) << "\n";
 }
 
 // Check which tier contains the instance
-auto tier_result = storage.get_tier("1.2.3.4.5.6.7.8.9");
-if (tier_result.is_ok()) {
-    std::cout << "Stored in: " << to_string(tier_result.value()) << "\n";
+if (auto tier = storage.get_tier("1.2.3.4.5.6.7.8.9")) {
+    std::cout << "Stored in: " << to_string(*tier) << "\n";
 }
 
 // Manual migration to specific tier
-storage.migrate("1.2.3.4.5.6.7.8.9", storage_tier::cold);
+auto migrate_result = storage.migrate("1.2.3.4.5.6.7.8.9", storage_tier::cold);
 
 // Get storage statistics
-auto stats = storage.get_statistics();
-std::cout << "Hot tier: " << stats.hot_count << " instances\n";
-std::cout << "Warm tier: " << stats.warm_count << " instances\n";
-std::cout << "Cold tier: " << stats.cold_count << " instances\n";
+auto stats = storage.get_hsm_statistics();
+std::cout << "Hot tier: " << stats.hot.instance_count << " instances\n";
+std::cout << "Warm tier: " << stats.warm.instance_count << " instances\n";
+std::cout << "Cold tier: " << stats.cold.instance_count << " instances\n";
 ```
 
 **Background Migration Service**:
 ```cpp
-#include <pacs/storage/hsm_migration_service.hpp>
+#include <kcenon/pacs/storage/hsm_migration_service.h>
 
 // Configure migration service
 migration_service_config config;
 config.migration_interval = std::chrono::hours{1};  // Run every hour
 config.max_concurrent_migrations = 4;
-config.auto_start = true;
 
 config.on_cycle_complete = [](const migration_result& r) {
     std::cout << "Migrated " << r.instances_migrated << " instances\n";
@@ -958,8 +1035,9 @@ hsm_migration_service service{storage, config};
 service.start();
 
 // Monitor progress
-auto time_left = service.time_until_next_cycle();
-std::cout << "Next cycle in: " << time_left->count() << " seconds\n";
+if (auto time_left = service.time_until_next_cycle()) {
+    std::cout << "Next cycle in: " << time_left->count() << " seconds\n";
+}
 
 // Trigger immediate migration
 service.trigger_cycle();
@@ -972,14 +1050,17 @@ std::cout << "Total migrated: " << stats.instances_migrated << "\n";
 service.stop();
 ```
 
-**Migration Result Structure**:
+**Migration Result Structure** (from `include/kcenon/pacs/storage/hsm_types.h`):
 ```cpp
 struct migration_result {
-    std::size_t instances_migrated{0};   // Successfully migrated
-    std::size_t bytes_migrated{0};       // Total bytes transferred
-    std::chrono::milliseconds duration;  // Time taken
-    std::size_t instances_skipped{0};    // Not yet eligible
-    std::vector<std::string> failed_uids; // Failed migrations
+    std::size_t instances_migrated{0};      // Successfully migrated
+    std::size_t bytes_migrated{0};          // Total bytes transferred
+    std::chrono::milliseconds duration{0};  // Time taken
+    std::vector<std::string> failed_uids;   // Failed migrations
+    std::size_t instances_skipped{0};       // Not yet eligible
+
+    [[nodiscard]] auto is_success() const noexcept -> bool;         // No failures
+    [[nodiscard]] auto total_processed() const noexcept -> std::size_t;
 };
 ```
 
@@ -999,18 +1080,25 @@ struct migration_result {
 
 **Optimized Operations**:
 
-| Operation | SIMD Support | Speedup |
-|-----------|--------------|---------|
-| Byte swap (16-bit) | AVX2, SSSE3, NEON | 8-16x |
-| Byte swap (32-bit) | AVX2, SSSE3, NEON | 8-16x |
-| Byte swap (64-bit) | AVX2, SSSE3, NEON | 8-16x |
+| Operation | SIMD Support |
+|-----------|--------------|
+| Byte swap (16-bit) | AVX2, SSSE3, NEON |
+| Byte swap (32-bit) | AVX2, SSSE3, NEON |
+| Byte swap (64-bit) | AVX2, SSSE3, NEON |
+
+No SIMD speedup measurement is recorded in the repository. The 8-16x range that this table used
+to list was the expected speedup stated when SIMD byte swapping was added, not a measured result.
+`benchmarks/simd_performance/` contains the byte swap benchmark; see
+[Benchmarks](BENCHMARKS.md#simd-benchmarks).
 
 **Usage**:
 ```cpp
-#include <pacs/encoding/byte_swap.hpp>
-#include <pacs/encoding/simd/simd_config.hpp>
+#include <kcenon/pacs/encoding/byte_swap.h>
+#include <kcenon/pacs/encoding/simd/simd_config.h>
 
-using namespace pacs::encoding;
+using namespace kcenon::pacs::encoding;
+
+std::vector<uint8_t> pixel_data(512 * 512 * 2);  // 16-bit OW pixel data
 
 // Automatic SIMD dispatch for bulk byte swapping
 auto swapped = swap_ow_bytes(pixel_data);  // Uses best available SIMD
@@ -1025,10 +1113,10 @@ if (simd::has_avx2()) {
 size_t width = simd::optimal_vector_width();  // 16, 32, or 64 bytes
 ```
 
-**Classes**:
-- `simd_config.hpp` - CPU feature detection
-- `simd_types.hpp` - Portable SIMD type wrappers
-- `simd_utils.hpp` - SIMD utility functions
+**Headers** (under `include/kcenon/pacs/encoding/simd/`):
+- `simd_config.h` - CPU feature detection
+- `simd_types.h` - Portable SIMD type wrappers
+- `simd_utils.h` - SIMD utility functions
 
 ### container_system Integration
 
@@ -1042,16 +1130,24 @@ size_t width = simd::optimal_vector_width();  // 16, 32, or 64 bytes
 
 **Example**:
 ```cpp
-#include <pacs/integration/container_adapter.h>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/integration/container_adapter.h>
+
+using kcenon::pacs::integration::container_adapter;
+namespace core = kcenon::pacs::core;
+
+core::dicom_dataset dataset;
+dataset.set_string(core::tags::patient_id, kcenon::pacs::encoding::vr_type::LO, "12345");
 
 // Convert DICOM dataset to container
-auto container = container_adapter::to_container(dataset);
+auto container = container_adapter::serialize_dataset(dataset);
 
-// Serialize
-auto binary = container->serialize();
+// Serialize to binary
+auto binary = container_adapter::to_binary(dataset);
 
 // Convert back
-auto restored_dataset = container_adapter::from_container(container);
+auto restored_dataset = container_adapter::deserialize_dataset(*container);
+auto restored_from_binary = container_adapter::from_binary(binary);
 ```
 
 ### network_system Integration
@@ -1068,7 +1164,7 @@ auto restored_dataset = container_adapter::from_container(container);
 
 **Purpose**: Concurrent processing of DICOM operations.
 
-**Status:** ✅ **Fully Migrated (v1.1.0)** - See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md)
+**Status:** ✅ **Fully Migrated (in `v0.1.0`)** - See [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md)
 
 **Integration Points**:
 - `accept_worker` (inherits from `thread_base`) for accept loop with jthread support
@@ -1080,22 +1176,34 @@ auto restored_dataset = container_adapter::from_container(container);
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
-| Graceful shutdown | ~5,000 ms | 110 ms | 45x faster |
 | Thread management | Manual lifecycle | Automatic jthread | Zero leaks |
 | Monitoring | None | Unified statistics | Full visibility |
 | Cancellation | Not supported | cancellation_token | Cooperative |
 
-**Example (v1.1.0+):**
-```cpp
-#include <pacs/network/dicom_server.hpp>
+Shutdown time was not measured before the migration, so no before/after ratio exists. After the
+migration, [Performance Results](PERFORMANCE_RESULTS.md#4-shutdown-time) records 107 ms with 5 active
+connections (pass threshold `< 5000 ms`) and 110 ms under load with 3 workers (pass threshold
+`< 10000 ms`).
 
-// Server now uses thread_system internally
+**Example:**
+```cpp
+#include <kcenon/pacs/network/dicom_server.h>
+#include <kcenon/pacs/services/verification_scp.h>
+
+using namespace kcenon::pacs::network;
+using kcenon::pacs::services::verification_scp;
+
+server_config config;
+config.ae_title = "PACS_SCP";
+config.port = 11112;
+
+// Server uses thread_system internally
 dicom_server server{config};
-server.register_service(std::make_unique<verification_scp>());
-server.start();
+server.register_service(std::make_shared<verification_scp>());
+auto start_result = server.start();
 
 // Graceful shutdown with timeout (uses cancellation_token)
-server.stop(std::chrono::seconds{5});  // Typically completes in ~110ms
+server.stop(std::chrono::seconds{5});
 ```
 
 ### network_system V2 Integration (Optional)
@@ -1112,12 +1220,20 @@ server.stop(std::chrono::seconds{5});  // Typically completes in ~110ms
 
 **Example:**
 ```cpp
-#include <pacs/network/v2/dicom_server_v2.hpp>
+#include <kcenon/pacs/network/v2/dicom_server_v2.h>
+#include <kcenon/pacs/services/verification_scp.h>
+
+using namespace kcenon::pacs::network;
+using kcenon::pacs::services::verification_scp;
+
+server_config config;
+config.ae_title = "PACS_SCP";
+config.port = 11112;
 
 // Same API, different implementation
-dicom_server_v2 server{config};
-server.register_service(std::make_unique<verification_scp>());
-server.start();
+v2::dicom_server_v2 server{config};
+server.register_service(std::make_shared<verification_scp>());
+auto start_result = server.start();
 ```
 
 ### logger_system Integration
@@ -1149,17 +1265,24 @@ All DICOM services support injectable logging via `ILogger` interface:
 
 **Example**:
 ```cpp
+#include <kcenon/pacs/di/service_registration.h>
+#include <kcenon/pacs/services/storage_scp.h>
+#include <kcenon/pacs/services/verification_scp.h>
+
+using namespace kcenon::pacs::services;
+namespace di = kcenon::pacs::di;
+
 // Default: silent (NullLogger)
 verification_scp scp;
 
 // With logging via LoggerService
-auto logger = std::make_shared<pacs::di::LoggerService>();
+auto logger = std::make_shared<di::LoggerService>();
 verification_scp scp_with_logging(logger);
 
 // Via DI container
-auto container = pacs::di::create_container();
-auto logger = container->resolve<pacs::di::ILogger>().value();
-storage_scp scp_via_di(logger);
+auto container = di::create_container();
+auto di_logger = container->resolve<di::ILogger>().value();
+storage_scp scp_via_di(di_logger);
 ```
 
 ### monitoring_system Integration
@@ -1262,18 +1385,19 @@ pacs_pool_pdu_buffer_misses_total{}
 - Object pool monitoring (element, dataset, PDU buffer pools)
 
 **Usage**:
-{% raw %}
 ```cpp
-#include <pacs/monitoring/pacs_monitor.hpp>
-using namespace pacs::monitoring;
+#include <kcenon/pacs/monitoring/pacs_monitor.h>
+using namespace kcenon::pacs::monitoring;
 
-// Get the global monitor instance
+// Get the global monitor instance and set the AE title used in metric labels
 auto& monitor = pacs_monitor::global_monitor();
-monitor.initialize({{"ae_title", "PACS_SCP"}});
+pacs_monitor_config config;
+config.ae_title = "PACS_SCP";
+monitor.update_config(config);
 
 // Collect all metrics
 auto snapshot = monitor.get_metrics();
-for (const auto& m : snapshot.association_metrics) {
+for (const auto& m : snapshot.metrics) {
     std::cout << m.name << ": " << m.value << "\n";
 }
 
@@ -1282,13 +1406,12 @@ std::string prometheus_output = monitor.to_prometheus();
 
 // Register custom health checks
 monitor.register_health_check("database", []() {
-    return database_is_healthy();
+    return true;  // Replace with a real database probe
 });
 
 // Check overall health
-bool healthy = monitor.is_healthy();
+bool healthy = monitor.check_health().is_healthy();
 ```
-{% endraw %}
 
 **Integration with IMonitor**:
 The `pacs_monitor` class follows the same interface pattern as `IMonitor` from `common_system`, enabling seamless integration with the monitoring infrastructure:
@@ -1297,10 +1420,10 @@ The `pacs_monitor` class follows the same interface pattern as `IMonitor` from `
 // Record custom metrics
 monitor.record_metric("custom_gauge", 42.0);
 
-// Health check with timing
-auto result = monitor.check_health("database");
-std::cout << "Database: " << (result.healthy ? "OK" : "FAIL")
-          << " (" << result.latency.count() << "ms)\n";
+// Run all registered health checks, with timing
+auto result = monitor.check_health();
+std::cout << "Health: " << (result.is_healthy() ? "OK" : "FAIL")
+          << " (" << result.check_duration.count() << "ms)\n";
 ```
 
 ### Object Pool Memory Management
@@ -1319,8 +1442,12 @@ std::cout << "Database: " << (result.healthy ? "OK" : "FAIL")
 
 **Usage**:
 ```cpp
-#include <pacs/core/pool_manager.hpp>
-#include <pacs/network/pdu_buffer_pool.hpp>
+#include <kcenon/pacs/core/dicom_tag_constants.h>
+#include <kcenon/pacs/core/pool_manager.h>
+#include <kcenon/pacs/network/pdu_buffer_pool.h>
+
+using namespace kcenon::pacs::core;
+using kcenon::pacs::encoding::vr_type;
 
 // Acquire pooled DICOM element
 auto elem = make_pooled_element(tags::patient_name, vr_type::PN, "DOE^JOHN");
@@ -1330,20 +1457,21 @@ auto dataset = make_pooled_dataset();
 dataset->set_string(tags::patient_id, vr_type::LO, "12345");
 
 // Acquire pooled PDU buffer
-auto buffer = make_pooled_pdu_buffer(16384);
+auto buffer = kcenon::pacs::network::make_pooled_pdu_buffer(16384);
 
 // Objects automatically return to pool when destroyed
 ```
 
 **Performance Benefits**:
-- ~90% reduction in allocation latency
 - Reduced memory fragmentation
 - Better cache locality
 - Lower GC pressure
 
+No allocation latency measurement with and without the pools is recorded in the repository.
+
 **Monitoring**:
 ```cpp
-auto& stats = pool_manager::get().element_statistics();
+const auto& stats = pool_manager::get().element_statistics();
 double hit_ratio = stats.hit_ratio();  // 0.0 - 1.0
 ```
 
@@ -1382,9 +1510,10 @@ double hit_ratio = stats.hit_ratio();  // 0.0 - 1.0
 
 **Example**:
 ```cpp
-#include <pacs/web/rest_server.hpp>
+#include <kcenon/pacs/monitoring/health_checker.h>
+#include <kcenon/pacs/web/rest_server.h>
 
-using namespace pacs::web;
+using namespace kcenon::pacs::web;
 
 // Configure and start REST server
 rest_server_config config;
@@ -1393,7 +1522,7 @@ config.concurrency = 4;
 config.enable_cors = true;
 
 rest_server server(config);
-server.set_health_checker(health_checker_instance);
+server.set_health_checker(std::make_shared<kcenon::pacs::monitoring::health_checker>());
 server.start_async();  // Non-blocking
 
 // Later: graceful shutdown
@@ -1439,10 +1568,13 @@ server.stop();
 
 **Example**:
 ```cpp
-#include <pacs/workflow/auto_prefetch_service.hpp>
-#include <pacs/workflow/prefetch_config.hpp>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/workflow/auto_prefetch_service.h>
 
-using namespace pacs::workflow;
+using namespace kcenon::pacs::workflow;
+
+// `database` is an open kcenon::pacs::storage::index_database
+// (see storage::index_database::open)
 
 // Configure prefetch service
 prefetch_service_config config;
@@ -1469,8 +1601,11 @@ config.on_cycle_complete = [](const prefetch_result& result) {
 auto_prefetch_service service{database, config};
 service.start();
 
-// Trigger prefetch for worklist items
-service.trigger_for_worklist(worklist_items);
+// Trigger prefetch for scheduled worklist items
+auto worklist = database.query_worklist({});
+if (worklist.is_ok()) {
+    service.trigger_for_worklist(worklist.value());
+}
 
 // Manual prefetch for a specific patient
 auto result = service.prefetch_priors("PATIENT123", std::chrono::days{180});
@@ -1553,10 +1688,12 @@ service.stop();
 
 **Example**:
 ```cpp
-#include <pacs/workflow/task_scheduler.hpp>
-#include <pacs/workflow/task_scheduler_config.hpp>
+#include <kcenon/pacs/storage/index_database.h>
+#include <kcenon/pacs/workflow/task_scheduler.h>
 
-using namespace pacs::workflow;
+using namespace kcenon::pacs::workflow;
+
+// `database` is an open kcenon::pacs::storage::index_database
 
 // Configure scheduler
 task_scheduler_config config;
@@ -1696,9 +1833,10 @@ auto custom = cron_schedule::parse("0 2 * * 1-5");  // 2:00 AM weekdays
 
 **Example**:
 ```cpp
-#include <pacs/workflow/study_lock_manager.hpp>
+#include <kcenon/pacs/core/result.h>
+#include <kcenon/pacs/workflow/study_lock_manager.h>
 
-using namespace pacs::workflow;
+using namespace kcenon::pacs::workflow;
 
 // Configure lock manager
 study_lock_manager_config config;
@@ -1716,7 +1854,7 @@ if (result.is_ok()) {
     // Perform modifications...
 
     // Release lock
-    manager.unlock(token);
+    auto unlock_result = manager.unlock(token);
 }
 
 // Acquire shared lock for reading
@@ -1737,7 +1875,7 @@ if (manager.is_locked("1.2.3.4.5")) {
 }
 
 // Force unlock (admin operation)
-manager.force_unlock("1.2.3.4.5", "Emergency release");
+auto force_result = manager.force_unlock("1.2.3.4.5", "Emergency release");
 
 // Get lock statistics
 auto stats = manager.get_stats();
@@ -1783,22 +1921,29 @@ std::cout << "Contentions: " << stats.contention_count << "\n";
 
 **Example**:
 ```cpp
-#include <pacs/client/remote_node_manager.hpp>
+#include <kcenon/pacs/client/remote_node_manager.h>
+#include <kcenon/pacs/network/association.h>
+#include <kcenon/pacs/services/query_scp.h>
 
-using namespace pacs::client;
+using namespace kcenon::pacs::client;
+
+// `repo` is a std::shared_ptr<kcenon::pacs::storage::node_repository>
+// that persists the registered nodes
 
 // Configure remote node manager with connection pool settings
-remote_node_manager_config config;
+node_manager_config config;
 config.local_ae_title = "MY_SCU";
 config.max_pool_connections_per_node = 8;
 config.pool_connection_ttl = std::chrono::seconds{600};
 
-remote_node_manager manager{config, logger};
+remote_node_manager manager{repo, config};
 
-// Acquire association (reuses pooled connection if available)
+// Acquire association for a registered node ID (reuses pooled connection if available)
+std::vector<std::string> sop_classes{
+    std::string(kcenon::pacs::services::study_root_find_sop_class_uid)};
 auto result = manager.acquire_association("REMOTE_PACS", sop_classes);
 if (result.is_ok()) {
-    auto& assoc = result.value();
+    auto assoc = std::move(result.value());
 
     // Perform DIMSE operations...
 
@@ -1820,26 +1965,26 @@ See [Object Pool Memory Management](#object-pool-memory-management) for details 
 
 ---
 
-## Recently Completed Features (v1.2.0 - 2025-12-13)
+## Features Added in December 2025
 
-| Feature | Description | Issue | Status |
-|---------|-------------|-------|--------|
-| Study Lock Manager | Thread-safe lock manager for concurrent access control | #208 | ✅ Complete |
-| Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | ✅ Complete |
-| Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | ✅ Complete |
-| Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | ✅ Complete |
-| Azure Blob Storage | Azure Blob storage backend (mock + full Azure SDK via `PACS_WITH_AZURE_SDK`) | #199 | ✅ Complete |
-| Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | ✅ Complete |
-| Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | ✅ Complete |
-| RLE Lossless Codec | RLE compression codec (pure C++) | #182 | ✅ Complete |
-| REST API Server | Web administration API with Crow framework | #194 | ✅ Complete |
-| S3 Cloud Storage | S3-compatible storage backend (mock + full AWS SDK via `PACS_WITH_AWS_SDK`) | #198 | ✅ Complete |
-| Thread System Migration | std::thread → thread_system | #153 | ✅ Complete |
-| Network System V2 | Optional messaging_server integration | #163 | ✅ Complete |
-| DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | ✅ Complete |
-| Ultrasound Storage | US, US-MF SOP classes | #128 | ✅ Complete |
-| XA Image Storage | XA, Enhanced XA, XRF SOP classes | #129 | ✅ Complete |
-| Explicit VR Big Endian | Transfer syntax support | #126 | ✅ Complete |
+| Feature | Description | Issue | In `v0.1.0` |
+|---------|-------------|-------|-------------|
+| Study Lock Manager | Thread-safe lock manager for concurrent access control | #208 | Yes |
+| Task Scheduler Service | Automated task scheduling for cleanup, archive, and verification | #207 | Yes |
+| Auto Prefetch Service | Automatic prior study prefetch based on worklist queries | #206 | Yes |
+| Hierarchical Storage Management | Three-tier HSM with automatic age-based migration | #200 | Yes |
+| Azure Blob Storage | Azure Blob storage backend (mock + full Azure SDK via `PACS_WITH_AZURE_SDK`) | #199 | Yes |
+| Segmentation (SEG) and Structured Report (SR) | SEG/SR SOP classes for AI/CAD outputs with IOD validation | #187 | Yes |
+| Radiation Therapy (RT) Modality | RT Plan, RT Dose, RT Structure Set support with IOD validation | #186 | Yes |
+| RLE Lossless Codec | RLE compression codec (pure C++) | #182 | Yes |
+| REST API Server | Web administration API with Crow framework | #194 | Yes |
+| S3 Cloud Storage | S3-compatible storage backend (mock + full AWS SDK via `PACS_WITH_AWS_SDK`) | #198 | Yes |
+| Thread System Migration | std::thread → thread_system | #153 | Yes |
+| Network System V2 | Optional messaging_server integration | #163 | Yes |
+| DIMSE-N Services | N-GET, N-ACTION, N-EVENT-REPORT, N-DELETE | #127 | Yes |
+| Ultrasound Storage | US, US-MF SOP classes | #128 | Yes |
+| XA Image Storage | XA, Enhanced XA, XRF SOP classes | #129 | Yes |
+| Explicit VR Big Endian | Transfer syntax support | #126 | Yes |
 
 ---
 
@@ -1873,18 +2018,18 @@ See [Object Pool Memory Management](#object-pool-memory-management) for details 
 | -880 to -889 | Worklist Service | Modality Worklist operations |
 | -890 to -899 | General Service | Common service errors |
 
-**Classes and Types**:
-- `pacs::Result<T>` - Result type alias
-- `pacs::VoidResult` - Result for void operations
-- `pacs::error_info` - Error information structure
-- `pacs::error_codes` - Standardized error codes
+**Classes and Types** (in `include/kcenon/pacs/core/result.h`):
+- `kcenon::pacs::Result<T>` - Result type alias
+- `kcenon::pacs::VoidResult` - Result for void operations
+- `kcenon::pacs::error_info` - Error information structure
+- `kcenon::pacs::error_codes` - Standardized error codes
 
 **Example**:
 ```cpp
-#include <pacs/core/result.hpp>
-#include <pacs/core/dicom_file.hpp>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/result.h>
 
-using namespace pacs::core;
+using namespace kcenon::pacs::core;
 
 // Reading a DICOM file with Result<T>
 auto result = dicom_file::open("image.dcm");
@@ -1898,13 +2043,14 @@ if (result.is_ok()) {
 
 // Using monadic operations
 auto sop_uid = dicom_file::open("image.dcm")
-    .map([](dicom_file& f) { return f.sop_instance_uid(); })
+    .map([](const dicom_file& f) { return f.sop_instance_uid(); })
     .unwrap_or("unknown");
 
-// Using PACS_ASSIGN_OR_RETURN macro
-pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
-    PACS_ASSIGN_OR_RETURN(auto file, dicom_file::open(path));
-    return pacs::Result<std::string>::ok(
+// Using PACS_ASSIGN_OR_RETURN macro (the first argument must name a declared variable)
+kcenon::pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
+    dicom_file file;
+    PACS_ASSIGN_OR_RETURN(file, dicom_file::open(path));
+    return kcenon::pacs::Result<std::string>::ok(
         file.dataset().get_string(tags::patient_name));
 }
 ```
@@ -1913,17 +2059,17 @@ pacs::Result<std::string> get_patient_name(const std::filesystem::path& path) {
 
 ## Planned Features
 
-### Completed (Previously Planned)
+### Previously Planned, in `v0.1.0`
 
-| Feature | Description | Completed Phase |
-|---------|-------------|-----------------|
-| ~~Additional SOP Classes (PET/NM)~~ | NM, PET support | Phase 4 ✅ |
-| ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 ✅ |
-| ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 ✅ |
-| ~~AI Integration~~ | External AI service connector + result handler | Phase 4 ✅ |
-| ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 ✅ |
-| ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 ✅ |
-| ~~Connection Pooling~~ | DICOM association reuse via `remote_node_manager` | Phase 4 ✅ |
+| Feature | Description | Phase | In `v0.1.0` |
+|---------|-------------|-------|-------------|
+| ~~Additional SOP Classes (PET/NM)~~ | NM, PET support | Phase 4 | Yes |
+| ~~Additional SOP Classes (RT)~~ | RT Plan, RT Structure Set, etc. | Phase 4 | Yes |
+| ~~DICOMweb (WADO-RS, STOW-RS, QIDO-RS)~~ | DICOMweb support per PS3.18 | Phase 4 | Yes |
+| ~~AI Integration~~ | External AI service connector + result handler | Phase 4 | Yes |
+| ~~Full AWS S3 SDK~~ | Production AWS SDK integration (`PACS_WITH_AWS_SDK`) | Phase 4 | Yes |
+| ~~Full Azure SDK~~ | Production Azure SDK integration (`PACS_WITH_AZURE_SDK`) | Phase 4 | Yes |
+| ~~Connection Pooling~~ | DICOM association reuse via `remote_node_manager` | Phase 4 | Yes |
 
 ### Phase 5: Enterprise Features (Future)
 

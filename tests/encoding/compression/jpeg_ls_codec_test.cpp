@@ -706,6 +706,57 @@ TEST_CASE("jpeg_ls_codec compression options", "[encoding][compression][jpegls]"
     }
 }
 
+TEST_CASE("jpeg_ls_codec round-trip by registered transfer syntax UID", "[encoding][compression][jpegls]") {
+    uint16_t width = 32;
+    uint16_t height = 32;
+    auto original = create_gradient_image_8bit(width, height);
+
+    image_params params;
+    params.width = width;
+    params.height = height;
+    params.bits_allocated = 8;
+    params.bits_stored = 8;
+    params.high_bit = 7;
+    params.samples_per_pixel = 1;
+    params.photometric = photometric_interpretation::monochrome2;
+
+    SECTION("JPEG-LS Lossless (1.2.840.10008.1.2.4.80) is exact") {
+        auto ts = kcenon::pacs::encoding::find_transfer_syntax("1.2.840.10008.1.2.4.80");
+        REQUIRE(ts.has_value());
+
+        auto codec = codec_factory::create(*ts);
+        REQUIRE(codec != nullptr);
+
+        auto encode_result = codec->encode(original, params);
+        REQUIRE(encode_result.is_ok() == true);
+
+        auto decode_result = codec->decode(encode_result.value().data, params);
+        REQUIRE(decode_result.is_ok() == true);
+        REQUIRE(images_identical(original, decode_result.value().data));
+    }
+
+    SECTION("JPEG-LS Near-Lossless (1.2.840.10008.1.2.4.81) stays within NEAR") {
+        auto ts = kcenon::pacs::encoding::find_transfer_syntax("1.2.840.10008.1.2.4.81");
+        REQUIRE(ts.has_value());
+
+        auto codec = codec_factory::create(*ts);
+        REQUIRE(codec != nullptr);
+        REQUIRE(codec->is_lossy() == true);
+
+        auto encode_result = codec->encode(original, params);
+        REQUIRE(encode_result.is_ok() == true);
+
+        auto decode_result = codec->decode(encode_result.value().data, params);
+        REQUIRE(decode_result.is_ok() == true);
+
+        // Default options (quality 75) encode with NEAR 2
+        int max_error = compute_max_error(original, decode_result.value().data);
+        INFO("Max error: " << max_error);
+        REQUIRE(max_error >= 0);
+        REQUIRE(max_error <= jpeg_ls_codec::kDefaultNearLosslessValue);
+    }
+}
+
 #else  // !PACS_WITH_JPEGLS_CODEC
 
 TEST_CASE("jpeg_ls_codec without CharLS returns error", "[encoding][compression][jpegls]") {
@@ -763,6 +814,8 @@ TEST_CASE("codec_factory creates jpeg_ls_codec", "[encoding][compression][jpegls
 
     SECTION("create by transfer_syntax - lossless") {
         kcenon::pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.80");
+        REQUIRE(ts.is_valid());
+        REQUIRE(ts.is_encapsulated());
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);
@@ -771,6 +824,8 @@ TEST_CASE("codec_factory creates jpeg_ls_codec", "[encoding][compression][jpegls
 
     SECTION("create by transfer_syntax - near-lossless") {
         kcenon::pacs::encoding::transfer_syntax ts("1.2.840.10008.1.2.4.81");
+        REQUIRE(ts.is_valid());
+        REQUIRE(ts.is_encapsulated());
         auto codec = codec_factory::create(ts);
 
         REQUIRE(codec != nullptr);

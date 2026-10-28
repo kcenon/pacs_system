@@ -28,6 +28,9 @@ jobs:
 
     env:
       BUILD_TYPE: Release
+      # ON in the entries with codecs: true, so configure fails instead of
+      # building the codec stubs when a codec library is not found
+      PACS_REQUIRE_CODECS: ${{ matrix.codecs && 'ON' || 'OFF' }}
 
     strategy:
       fail-fast: false
@@ -39,6 +42,11 @@ jobs:
             cc: gcc
             cxx: g++
             triplet: x64-linux
+            # codecs: true installs OpenJPEG and CharLS, so the JPEG 2000 and
+            # JPEG-LS codecs and their tests are built (#1273). The entries
+            # without it, and the other workflows, build without the two
+            # libraries and run the "without OpenJPEG/CharLS" cases.
+            codecs: true
           - os: ubuntu-24.04
             compiler: clang
             cc: clang
@@ -51,6 +59,7 @@ jobs:
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++
             triplet: arm64-osx
+            codecs: true
           # Windows 2022 with MSVC for cross-platform compatibility
           - os: windows-2022
             compiler: msvc
@@ -78,11 +87,17 @@ jobs:
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt install -y clang lld
         fi
+        if [ "${{ matrix.codecs }}" = "true" ]; then
+          sudo apt install -y libopenjp2-7-dev libcharls-dev
+        fi
 
     - name: Install dependencies (macOS)
       if: runner.os == 'macOS'
       run: |
         brew install ninja pkg-config sqlite3 openssl@3 googletest fmt jpeg-turbo icu4c
+        if [ "${{ matrix.codecs }}" = "true" ]; then
+          brew install openjpeg charls
+        fi
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
@@ -143,13 +158,20 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=OFF \
           -DPACS_BUILD_STORAGE=ON \
+          -DPACS_REQUIRE_CODECS="$PACS_REQUIRE_CODECS" \
           -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" \
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
+    # pwsh does not stop when a native command fails, and ctest exits 0 when it
+    # finds no tests: a failed configure or build used to end in "No tests were
+    # found!!!" and a passing step. Both Windows steps therefore check each exit
+    # code and pass --no-tests=error.
     - name: Build application (vcpkg - Windows)
       if: runner.os == 'Windows' && steps.vcpkg_install_windows.outcome != 'failure'
       id: build_vcpkg_windows
@@ -172,9 +194,11 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ env.CMAKE_TOOLCHAIN_FILE }}" `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
 
     - name: Build application (fallback - Unix)
       if: runner.os != 'Windows' && (steps.vcpkg_install_unix.outcome == 'failure' || steps.build_vcpkg_unix.outcome != 'success')
@@ -193,16 +217,27 @@ jobs:
           -DPACS_BUILD_TESTS=ON \
           -DPACS_BUILD_EXAMPLES=OFF \
           -DPACS_BUILD_STORAGE=ON \
+          -DPACS_REQUIRE_CODECS="$PACS_REQUIRE_CODECS" \
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
         cmake --build . --parallel
-        ctest --output-on-failure --timeout 120 || echo "Some tests failed"
+        ctest --output-on-failure --timeout 120 --no-tests=error ${CTEST_EXCLUDE:+--exclude-regex "$CTEST_EXCLUDE"}
+      env:
+        CTEST_EXCLUDE: ${{ matrix.ctest_exclude }}
 
     - name: Build application (fallback - Windows)
       if: runner.os == 'Windows' && (steps.vcpkg_install_windows.outcome == 'failure' || steps.build_vcpkg_windows.outcome != 'success')
+      id: build_fallback_windows
       working-directory: pacs_system
       shell: pwsh
+      # Known failing (#1266), so this step reports failure without failing the
+      # job: the vcpkg manifest build stops at kcenon-logger-system (link errors
+      # on x64-windows), and this fallback turns manifest mode off, so ICU and
+      # the other dependencies are missing. Windows unit tests run in
+      # integration-tests.yml (Build & Unit Tests (windows-2022)). Remove
+      # continue-on-error when #1266 is fixed.
+      continue-on-error: true
       run: |
         Write-Host "vcpkg build failed. Falling back to system libraries..."
         if (Test-Path build) { Remove-Item -Recurse -Force build }
@@ -220,9 +255,24 @@ jobs:
           -DVCPKG_MANIFEST_MODE=OFF `
           -DCMAKE_CXX_FLAGS="/std:c++20 /permissive- /Zc:__cplusplus /EHsc" `
           -DCMAKE_TRY_COMPILE_TARGET_TYPE="STATIC_LIBRARY"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         cmake --build . --config Release --parallel
-        ctest -C Release --output-on-failure --timeout 120 || Write-Host "Some tests failed"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        ctest -C Release --output-on-failure --timeout 120 --no-tests=error
+
+    - name: Record Windows build outcome
+      if: always() && runner.os == 'Windows'
+      shell: bash
+      run: |
+        # continue-on-error above keeps the job green; record the real outcomes
+        # so the known failure (#1266) stays visible in the job summary
+        vcpkg_outcome='${{ steps.build_vcpkg_windows.outcome }}'
+        fallback_outcome='${{ steps.build_fallback_windows.outcome }}'
+        echo "Windows build and tests: vcpkg path ${vcpkg_outcome:-skipped}, fallback ${fallback_outcome:-skipped} (known failure, quarantined under #1266)" >> "$GITHUB_STEP_SUMMARY"
+        if [ "$fallback_outcome" = failure ]; then
+          echo "::warning title=Known failure (#1266)::The Windows build and tests did not run; continue-on-error keeps this job green until #1266 is fixed"
+        fi
 
     - name: Upload test results
       if: always()

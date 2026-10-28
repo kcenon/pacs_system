@@ -58,7 +58,7 @@ All goals defined in the epic have been achieved:
 | Cancellation tokens | Cooperative cancellation | accept_worker + workers use cancellation_token | ✅ PASS |
 | Unified monitoring | Thread statistics tracking | All threads tracked via thread_adapter | ✅ PASS |
 | Platform stability | All platforms pass | Linux, macOS x64/ARM64, Windows | ✅ PASS |
-| Graceful shutdown | < 5 seconds | 110 ms with active connections | ✅ PASS |
+| Graceful shutdown | < 5 seconds | 107 ms with 5 active connections | ✅ PASS |
 | Performance | < 5% overhead | No regression (actually improved) | ✅ PASS |
 
 ## Architecture Changes
@@ -105,15 +105,16 @@ dicom_server_v2
 
 ## Performance Results
 
-The migration achieved significant performance improvements:
+The baseline column holds the pass thresholds, not measurements from before the migration, so the
+table reports pass or fail rather than a ratio.
 
-| Metric | Baseline Target | Achieved | Improvement |
-|--------|-----------------|----------|-------------|
-| Association latency | < 100 ms | < 1 ms | 100x faster |
-| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | 900x baseline |
-| C-STORE throughput | > 20 store/s | 31,759 store/s | 1,500x baseline |
-| Concurrent operations | > 50 ops/s | 124 ops/s | 2.5x baseline |
-| Graceful shutdown | < 5000 ms | 110 ms | 45x faster |
+| Metric | Baseline Target | Achieved | Status |
+|--------|-----------------|----------|--------|
+| Association latency | < 100 ms | < 1 ms | ✅ Pass |
+| C-ECHO throughput | > 100 msg/s | 89,964 msg/s | ✅ Pass |
+| C-STORE throughput | > 20 store/s | 31,759 store/s | ✅ Pass |
+| Concurrent operations | > 50 ops/s | 124 ops/s | ✅ Pass |
+| Graceful shutdown (5 active connections) | < 5000 ms | 107 ms | ✅ Pass |
 | Data rate (512x512) | N/A | 9,247 MB/s | - |
 
 For detailed benchmark results, see [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md).
@@ -204,7 +205,7 @@ The thread system migration has been successfully completed. All 11 sub-issues o
 - Cooperative cancellation for graceful shutdown
 - Unified thread monitoring and statistics
 - Optional network_system integration for enhanced connection management
-- Significant performance improvements (45x faster shutdown, 900x+ throughput)
+- Shutdown within target: 107 ms with 5 active connections (threshold < 5000 ms) and 110 ms under load (threshold < 10000 ms)
 
 The system is ready for production use with the new thread architecture.
 

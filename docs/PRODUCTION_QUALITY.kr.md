@@ -75,7 +75,6 @@ PACS System은 포괄적인 품질 보증으로 프로덕션 사용을 위해 �
 
 - **Clang-Tidy**: 현대화 및 정확성 검사
 - **Cppcheck**: 추가 정적 분석
-- **Clang-Format**: 코드 포매팅 검증
 
 ### 설계 원칙
 

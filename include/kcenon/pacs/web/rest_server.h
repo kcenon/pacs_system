@@ -204,14 +204,17 @@ public:
   /**
    * @brief Start the server (non-blocking)
    *
-   * Starts the server in a background thread and returns immediately.
+   * Starts the server in a background thread and returns once it accepts
+   * connections. If the server fails to start (for example, the port is in
+   * use), returns with is_running() false.
    */
   void start_async();
 
   /**
    * @brief Stop the server
    *
-   * Gracefully shuts down the server. Safe to call multiple times.
+   * Gracefully shuts down the server and joins the server thread. Safe to
+   * call multiple times, right after start_async(), and after a failed start.
    */
   void stop();
 
@@ -225,7 +228,8 @@ public:
    * @brief Wait for server to stop
    *
    * Blocks until the server has completely stopped.
-   * Only valid after start_async() was called.
+   * Only valid after start_async() was called. Another thread may call
+   * stop() meanwhile.
    */
   void wait();
 

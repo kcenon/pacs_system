@@ -61,7 +61,10 @@ saying anything about the counts.
 
 ### check-stats-drift.sh
 
-Compares documented statistics in README.md with actual values.
+Compares documented statistics in README.md with actual values, then compares every
+value in the `README.kr.md` statistics block with the `README.md` block. The Korean
+block uses Korean labels and units, so rows are matched by position and each value
+(for example `~78,700` or `2661+`) must be identical; the threshold does not apply.
 
 ```bash
 # Check with default 10% threshold
@@ -72,8 +75,8 @@ Compares documented statistics in README.md with actual values.
 ```
 
 **Exit Codes:**
-- `0`: All statistics within threshold
-- `1`: One or more statistics exceed threshold
+- `0`: All statistics within threshold and `README.kr.md` matches `README.md`
+- `1`: One or more statistics exceed threshold, or a `README.kr.md` value differs
 
 ### update-readme-stats.sh
 
@@ -94,6 +97,7 @@ Updates the Code Statistics section in README.md.
 The script writes a `<!-- source: ... -->` comment as the first line of the block, naming
 this script, `calculate-stats.sh`, and the drift check. `README.kr.md` keeps a hand-maintained
 Korean copy of the block (same source comment, same values); update it after regenerating.
+The drift check fails until every value in the Korean block matches `README.md`.
 
 ## CI/CD Integration
 
@@ -105,7 +109,7 @@ The `docs-stats.yml` workflow runs on:
 - Manual trigger via workflow dispatch
 
 **Triggers:**
-Changes to any of these directories:
+Changes to any of these paths:
 - `src/**`
 - `include/**`
 - `tests/**`
@@ -113,11 +117,13 @@ Changes to any of these directories:
 - `tools/**`
 - `docs/**`
 - `.github/workflows/**`
+- `README.md`, `README.kr.md`
+- `scripts/calculate-stats.sh`, `scripts/update-readme-stats.sh`, `scripts/check-stats-drift.sh`
 
 **Jobs:**
 
 1. **calculate-stats**: Generates statistics report as artifact
-2. **check-drift**: Fails if any metric exceeds 10% drift threshold
+2. **check-drift**: Fails if any metric exceeds 10% drift threshold or a `README.kr.md` value differs from `README.md`
 3. **auto-update**: (Optional) Auto-updates README.md on main branch
 
 ### PR Comments
@@ -166,11 +172,11 @@ After adding significant new code (files, tests, examples):
 # Verify statistics are current
 ./scripts/check-stats-drift.sh --threshold 10
 
-# Update if necessary
+# Update if necessary, then copy the new values into README.kr.md
 ./scripts/update-readme-stats.sh
 
 # Commit the changes
-git add README.md
+git add README.md README.kr.md
 git commit -m "docs: update code statistics"
 ```
 

@@ -8,10 +8,11 @@
 #
 # and the build must succeed without referencing any deprecated alias.
 #
-# Usage (after installing pacs_system):
+# Usage (after the source install in docs/PACKAGE_STATE.md, which puts the
+# dependencies and pacs_system into one prefix):
 #
 #     cmake -S tests/cmake_consumer -B /tmp/pacs_consumer_build \
-#           -Dpacs_system_DIR=<prefix>/lib/cmake/pacs_system
+#           "-DCMAKE_PREFIX_PATH=<prefix>;<vcpkg_installed>/<triplet>"
 #     cmake --build /tmp/pacs_consumer_build
 #     /tmp/pacs_consumer_build/pacs_consumer
 #

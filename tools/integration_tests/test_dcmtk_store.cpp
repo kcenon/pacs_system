@@ -23,8 +23,10 @@
 
 #include <atomic>
 #include <filesystem>
+#include <fstream>
 #include <future>
 #include <mutex>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -125,7 +127,25 @@ private:
 };
 
 /**
- * @brief Find all DICOM files in a directory
+ * @brief Whether @p path is a DICOM Part 10 file ("DICM" after the
+ *        128-byte preamble)
+ */
+bool is_part10_file(const fs::path& path) {
+    std::ifstream in(path, std::ios::binary);
+    char header[132] = {};
+    if (!in.read(header, sizeof(header))) {
+        return false;
+    }
+    return std::string_view(header + 128, 4) == "DICM";
+}
+
+/**
+ * @brief Find all DICOM Part 10 files in a directory
+ *
+ * Files are recognized by content, not by extension: storescp names a
+ * received file "<modality>.<SOP Instance UID>" (for example
+ * "CT.1.2.826.0.1.3680043.9.9999.1729.12"), so the extension a path reports
+ * is the last UID component.
  */
 std::vector<fs::path> find_dicom_files(const fs::path& dir) {
     std::vector<fs::path> result;
@@ -134,14 +154,25 @@ std::vector<fs::path> find_dicom_files(const fs::path& dir) {
     }
 
     for (const auto& entry : fs::recursive_directory_iterator(dir)) {
-        if (entry.is_regular_file()) {
-            auto ext = entry.path().extension().string();
-            if (ext == ".dcm" || ext.empty()) {
-                result.push_back(entry.path());
-            }
+        if (entry.is_regular_file() && is_part10_file(entry.path())) {
+            result.push_back(entry.path());
         }
     }
     return result;
+}
+
+/**
+ * @brief Names of the files in @p dir, for failure messages
+ */
+std::string list_directory(const fs::path& dir) {
+    std::string names;
+    if (!fs::exists(dir)) {
+        return "(directory missing)";
+    }
+    for (const auto& entry : fs::recursive_directory_iterator(dir)) {
+        names += entry.path().filename().string() + " ";
+    }
+    return names.empty() ? "(empty)" : names;
 }
 
 /**
@@ -186,9 +217,11 @@ TEST_CASE("C-STORE: pacs_system SCP receives from DCMTK storescu",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP; see
+    // v1_server_accepts_tcp() in test_fixtures.h
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -268,9 +301,9 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU reaches DCMTK over TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     auto port = find_available_port();
@@ -304,12 +337,15 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
         storage_scu scu;
         auto send_result = scu.store(assoc, file_result.value().dataset());
         REQUIRE(send_result.is_ok());
+        INFO("C-STORE status: 0x" << std::hex << send_result.value().status);
+        REQUIRE(send_result.value().is_success());
 
         (void)assoc.release(default_timeout());
 
         // Wait for DCMTK to write the file
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         auto received = find_dicom_files(storage_dir.path());
+        INFO("storescp output: " << list_directory(storage_dir.path()));
         REQUIRE(received.size() >= 1);
     }
 
@@ -340,12 +376,15 @@ TEST_CASE("C-STORE: DCMTK storescp receives from pacs_system SCU",
             auto send_result = scu.store(assoc, files[i].second.dataset());
             INFO("Sending file " << i);
             REQUIRE(send_result.is_ok());
+            INFO("C-STORE status: 0x" << std::hex << send_result.value().status);
+            REQUIRE(send_result.value().is_success());
         }
 
         (void)assoc.release(default_timeout());
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         auto received = find_dicom_files(storage_dir.path());
+        INFO("storescp output: " << list_directory(storage_dir.path()));
         REQUIRE(received.size() >= 3);
     }
 }
@@ -360,9 +399,10 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // The first step runs storescu against a pacs_system SCP over TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     test_directory original_dir;
@@ -449,9 +489,10 @@ TEST_CASE("C-STORE: Concurrent store operations", "[dcmtk][interop][store][stres
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();
@@ -509,9 +550,9 @@ TEST_CASE("C-STORE: Error handling", "[dcmtk][interop][store][error]") {
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU tries TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     SECTION("storescu to non-existent server fails gracefully") {
@@ -559,9 +600,10 @@ TEST_CASE("C-STORE: Data integrity verification", "[dcmtk][interop][store][integ
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // storescu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
+             "associations; this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();

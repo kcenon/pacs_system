@@ -194,6 +194,9 @@ add_library(pacs_network
     src/network/dicom_server.cpp
     src/network/dimse/dimse_message.cpp
     src/network/detail/accept_worker.cpp
+    # TCP client path of association::connect() (Issue #1240)
+    src/network/detail/dimse_framing.cpp
+    src/network/detail/tcp_stream.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
     # Pipeline infrastructure (Issue #517)
@@ -1151,30 +1154,49 @@ if(PACS_BUILD_MODULES)
             CXX_SCAN_FOR_MODULES ON
         )
 
+        set(PACS_MODULE_PARTITIONS
+            # Tier 1: Core partition
+            src/modules/pacs-core.cppm
+            # Tier 2: Infrastructure partitions
+            src/modules/pacs-encoding.cppm
+            src/modules/pacs-storage.cppm
+            src/modules/pacs-security.cppm
+            # Tier 3: Protocol partitions
+            src/modules/pacs-network.cppm
+            src/modules/pacs-network-dimse.cppm
+            # Tier 4: Services partitions
+            src/modules/pacs-services.cppm
+            src/modules/pacs-services-cache.cppm
+            src/modules/pacs-services-validation.cppm
+            # Tier 5: Application partitions
+            src/modules/pacs-workflow.cppm
+            src/modules/pacs-web.cppm
+            src/modules/pacs-integration.cppm
+            # Tier 6: Optional partitions
+            src/modules/pacs-ai.cppm
+            src/modules/pacs-monitoring.cppm
+            src/modules/pacs-di.cppm
+        )
+
+        # Every interface unit under src/modules/ must be part of the target
+        # (and imported by pacs.cppm), so a new partition cannot be left out.
+        file(GLOB _pacs_module_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*.cppm)
+        list(REMOVE_ITEM _pacs_module_files
+            src/modules/pacs.cppm ${PACS_MODULE_PARTITIONS})
+        if(_pacs_module_files)
+            message(FATAL_ERROR
+                "Module interface units missing from pacs_system_modules: "
+                "${_pacs_module_files}")
+        endif()
+
         # Add module source files
         target_sources(pacs_system_modules
             PUBLIC FILE_SET CXX_MODULES
             FILES
                 # Primary module
                 src/modules/pacs.cppm
-                # Tier 1: Core partition
-                src/modules/pacs-core.cppm
-                # Tier 2: Infrastructure partitions
-                src/modules/pacs-encoding.cppm
-                src/modules/pacs-storage.cppm
-                src/modules/pacs-security.cppm
-                # Tier 3: Protocol partition
-                src/modules/pacs-network.cppm
-                # Tier 4: Services partition
-                src/modules/pacs-services.cppm
-                # Tier 5: Application partitions
-                src/modules/pacs-workflow.cppm
-                src/modules/pacs-web.cppm
-                src/modules/pacs-integration.cppm
-                # Tier 6: Optional partitions
-                src/modules/pacs-ai.cppm
-                src/modules/pacs-monitoring.cppm
-                src/modules/pacs-di.cppm
+                ${PACS_MODULE_PARTITIONS}
         )
 
         # Include directories for module target
@@ -1192,33 +1214,31 @@ if(PACS_BUILD_MODULES)
             pacs_security
         )
 
-        # Conditionally link optional libraries
-        if(TARGET pacs_storage)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_storage)
-        endif()
-        if(TARGET pacs_workflow)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_workflow)
-        endif()
-        if(TARGET pacs_web)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_web)
-        endif()
-        if(TARGET pacs_integration)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_integration)
-        endif()
-        if(TARGET pacs_ai)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_ai)
-        endif()
-        if(TARGET pacs_monitoring)
-            target_link_libraries(pacs_system_modules PUBLIC pacs_monitoring)
-        endif()
+        # Conditionally link optional libraries. The partition for each one
+        # exports its names only when PACS_MODULES_WITH_<NAME> is defined, and
+        # compiles empty otherwise, so the module never offers names that have
+        # no library behind them.
+        set(_pacs_module_features "")
+        foreach(_pacs_feature storage workflow web integration ai monitoring)
+            if(TARGET pacs_${_pacs_feature})
+                string(TOUPPER "${_pacs_feature}" _pacs_feature_upper)
+                target_link_libraries(pacs_system_modules PUBLIC pacs_${_pacs_feature})
+                target_compile_definitions(pacs_system_modules PUBLIC
+                    PACS_MODULES_WITH_${_pacs_feature_upper}=1
+                )
+                list(APPEND _pacs_module_features ${_pacs_feature})
+            endif()
+        endforeach()
 
         # Compile definitions
         target_compile_definitions(pacs_system_modules PUBLIC
             KCENON_USE_MODULES=1
         )
 
+        list(LENGTH PACS_MODULE_PARTITIONS _pacs_partition_count)
         message(STATUS "  C++20 module target: pacs_system_modules")
-        message(STATUS "  Module partitions: 12")
+        message(STATUS "  Module partitions: ${_pacs_partition_count}")
+        message(STATUS "  Optional partitions with exports: ${_pacs_module_features}")
         message(STATUS "==============================")
     endif()
 endif()

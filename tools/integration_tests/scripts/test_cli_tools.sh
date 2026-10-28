@@ -226,6 +226,22 @@ test_dcm_conv() {
     run_test "dcm_conv: convert to implicit VR" \
         "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${OUTPUT2}\" --implicit"
     assert_file_exists "dcm_conv: implicit output file created" "${OUTPUT2}"
+
+    # Compress to RLE Lossless and back; --verify decodes the Pixel Data
+    local RLE="${WORK_DIR}/conv_rle.dcm"
+    local RLE_BACK="${WORK_DIR}/conv_rle_back.dcm"
+    run_test "dcm_conv: compress to RLE with verification" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${RLE}\" --rle --verify"
+    run_test "dcm_conv: decompress RLE with verification" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${RLE}\" \"${RLE_BACK}\" --explicit --verify"
+    if [[ -f "${RLE_BACK}" ]]; then
+        run_test "dcm_conv: RLE round trip reproduces the file" \
+            "cmp -s \"${DCM}\" \"${RLE_BACK}\""
+    fi
+
+    # A Transfer Syntax without a working codec is refused
+    run_test "dcm_conv: HEVC target is refused" \
+        "\"${BINARY_DIR}/dcm_conv\" \"${DCM}\" \"${WORK_DIR}/conv_hevc.dcm\" -t 1.2.840.10008.1.2.4.107" --expect-fail
 }
 
 test_dcm_modify() {
@@ -311,6 +327,18 @@ test_dcm_dir() {
             "\"${BINARY_DIR}/dcm_dir\" list \"${DICOMDIR_FILE}\""
         assert_contains "dcm_dir: list shows patient/study data" \
             "Patient\|PATIENT\|Study\|STUDY\|TEST" "${output}"
+
+        # Two files of different patients: a PATIENT, STUDY, SERIES, and
+        # IMAGE record for each
+        assert_contains "dcm_dir: list reports both patients" \
+            "Patients: *2$" "${output}"
+        assert_contains "dcm_dir: list reports both studies" \
+            "Studies: *2$" "${output}"
+        assert_contains "dcm_dir: list reports both images" \
+            "Images: *2$" "${output}"
+        output=$("${BINARY_DIR}/dcm_dump" "${DICOMDIR_FILE}" 2>&1)
+        assert_contains "dcm_dir: Directory Record Sequence holds 8 records" \
+            "(0004,1220) SQ .*(8 items)" "${output}"
     fi
 
     # Invalid command

@@ -720,8 +720,10 @@ auto study_lock_manager::cleanup_expired_locks() -> std::size_t {
 }
 
 auto study_lock_manager::get_stats() const -> lock_manager_stats {
-    std::lock_guard stats_lock{stats_mutex_};
+    // Lock order: mutex_ before stats_mutex_, as in lock() and the unlock
+    // paths; the opposite order can deadlock against them
     std::shared_lock lock{mutex_};
+    std::lock_guard stats_lock{stats_mutex_};
 
     lock_manager_stats current_stats = stats_;
     current_stats.active_locks = 0;

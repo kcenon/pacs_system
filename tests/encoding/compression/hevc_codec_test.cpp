@@ -228,8 +228,11 @@ TEST_CASE("hevc_codec move semantics", "[encoding][compression][hevc]") {
 }
 
 TEST_CASE("codec_factory HEVC support", "[encoding][compression][hevc]") {
-    SECTION("Factory recognizes HEVC Main Profile UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.4.107"));
+    // The factory creates the stub codec, but does not report it as
+    // supported or available.
+    SECTION("Factory creates the HEVC Main Profile stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.4.107"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.4.107"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.4.107");
         REQUIRE(codec != nullptr);
@@ -237,8 +240,9 @@ TEST_CASE("codec_factory HEVC support", "[encoding][compression][hevc]") {
         CHECK(codec->is_lossy());
     }
 
-    SECTION("Factory recognizes HEVC Main 10 Profile UID") {
-        CHECK(codec_factory::is_supported("1.2.840.10008.1.2.4.108"));
+    SECTION("Factory creates the HEVC Main 10 Profile stub") {
+        CHECK_FALSE(codec_factory::is_supported("1.2.840.10008.1.2.4.108"));
+        CHECK_FALSE(codec_factory::is_available("1.2.840.10008.1.2.4.108"));
 
         auto codec = codec_factory::create("1.2.840.10008.1.2.4.108");
         REQUIRE(codec != nullptr);
@@ -246,7 +250,7 @@ TEST_CASE("codec_factory HEVC support", "[encoding][compression][hevc]") {
         CHECK(codec->is_lossy());
     }
 
-    SECTION("HEVC UIDs appear in supported transfer syntaxes list") {
+    SECTION("HEVC UIDs are not in the supported transfer syntaxes list") {
         auto supported = codec_factory::supported_transfer_syntaxes();
 
         bool found_main = false;
@@ -257,8 +261,8 @@ TEST_CASE("codec_factory HEVC support", "[encoding][compression][hevc]") {
             if (uid == "1.2.840.10008.1.2.4.108") found_main10 = true;
         }
 
-        CHECK(found_main);
-        CHECK(found_main10);
+        CHECK_FALSE(found_main);
+        CHECK_FALSE(found_main10);
     }
 }
 
@@ -267,7 +271,7 @@ TEST_CASE("HEVC transfer syntax registry", "[encoding][compression][hevc]") {
         auto ts = find_transfer_syntax("1.2.840.10008.1.2.4.107");
         REQUIRE(ts.has_value());
         CHECK(ts->is_valid());
-        CHECK(ts->is_supported());
+        CHECK_FALSE(ts->is_supported());  // Stub codec
         CHECK(ts->is_encapsulated());
         CHECK_FALSE(ts->is_deflated());
         CHECK(ts->name() == "HEVC/H.265 Main Profile / Level 5.1");
@@ -277,7 +281,7 @@ TEST_CASE("HEVC transfer syntax registry", "[encoding][compression][hevc]") {
         auto ts = find_transfer_syntax("1.2.840.10008.1.2.4.108");
         REQUIRE(ts.has_value());
         CHECK(ts->is_valid());
-        CHECK(ts->is_supported());
+        CHECK_FALSE(ts->is_supported());  // Stub codec
         CHECK(ts->is_encapsulated());
         CHECK_FALSE(ts->is_deflated());
         CHECK(ts->name() == "HEVC/H.265 Main 10 Profile / Level 5.1");

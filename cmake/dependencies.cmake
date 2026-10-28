@@ -226,10 +226,19 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
     # Must use CACHE FORCE because option() clears normal variables.
     set(_pacs_saved_build_shared_libs "${BUILD_SHARED_LIBS}")
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    # 0.21.5 is the first release without the AVX-512 alignment fault (#1257).
+    # In 0.21.0-0.21.4, ojph_block_encoder_avx512.cpp writes the plain stack
+    # arrays cwd/cwd_len (proc_ms_encode(), 0.21.0 lines 686-700) and
+    # tuple/u_q (ojph_encode_codeblock_avx512(), lines 1171-1179) with the
+    # aligned _mm512_store_epi32, so HTJ2K encoding crashes when the CPU takes
+    # the AVX-512 path and the arrays are not 64-byte aligned. Upstream commits
+    # 57e5592 and bfc2436 switched these stores to _mm512_storeu_si512.
+    # A system OpenJPH found above bypasses this pin: on x86-64 it must be
+    # 0.21.5 or later, or be built with -DOJPH_DISABLE_AVX512=ON.
     FetchContent_Declare(
         openjph
         GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
-        GIT_TAG        0.21.0
+        GIT_TAG        0.21.5
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(openjph)
@@ -266,7 +275,40 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
             SYMBOLIC)
     endif()
 endif()
+
+# A missing codec library only disables that codec (warnings above). With
+# PACS_REQUIRE_CODECS=ON it stops the configure step instead, so a build that
+# is meant to have every codec (the CI jobs that install the libraries)
+# cannot silently fall back to the stub codecs.
+if(PACS_REQUIRE_CODECS)
+    set(_pacs_missing_codec_libraries "")
+    if(NOT PACS_JPEG_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "libjpeg-turbo (JPEG)")
+    endif()
+    if(NOT PACS_JPEG2000_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "OpenJPEG (JPEG 2000)")
+    endif()
+    if(NOT PACS_JPEGLS_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "CharLS (JPEG-LS)")
+    endif()
+    if(NOT PACS_HTJ2K_FOUND)
+        list(APPEND _pacs_missing_codec_libraries "OpenJPH (HTJ2K)")
+    endif()
+    if(_pacs_missing_codec_libraries)
+        list(JOIN _pacs_missing_codec_libraries ", " _pacs_missing_codec_libraries)
+        message(FATAL_ERROR
+            "PACS_REQUIRE_CODECS is ON, but these codec libraries were not found: "
+            "${_pacs_missing_codec_libraries}.\n"
+            "Install them, or configure with -DPACS_REQUIRE_CODECS=OFF to build "
+            "without those codecs.")
+    endif()
+    message(STATUS "")
+    message(STATUS "All codec libraries found (PACS_REQUIRE_CODECS=ON)")
+endif()
 else()
+    if(PACS_REQUIRE_CODECS)
+        message(FATAL_ERROR "PACS_REQUIRE_CODECS=ON requires PACS_BUILD_CODECS=ON")
+    endif()
     message(STATUS "")
     message(STATUS "=== Image codecs disabled (PACS_BUILD_CODECS=OFF) ===")
     set(PACS_JPEG_FOUND FALSE)
@@ -576,17 +618,17 @@ set(_PACS_LOGGER_PATHS
 )
 
 set(LOGGER_SYSTEM_FOUND FALSE)
-# Installed-package target used by the pacs_system export bridge
-set(PACS_LOGGER_SYSTEM_INSTALL_TARGET logger_system::logger_system)
+# Installed-package target used by the pacs_system export bridge. A standalone
+# logger_system install exports its library as logger_system::logger
+# (EXPORT_NAME logger), including when this build uses the sibling checkout.
+set(PACS_LOGGER_SYSTEM_INSTALL_TARGET logger_system::logger)
 if(TARGET logger_system::logger OR TARGET logger_system::logger_system)
+    if(NOT TARGET logger_system::logger)
+        set(PACS_LOGGER_SYSTEM_INSTALL_TARGET logger_system::logger_system)
+    endif()
     if(NOT TARGET logger_system)
         add_library(logger_system INTERFACE)
-        if(TARGET logger_system::logger)
-            target_link_libraries(logger_system INTERFACE logger_system::logger)
-            set(PACS_LOGGER_SYSTEM_INSTALL_TARGET logger_system::logger)
-        else()
-            target_link_libraries(logger_system INTERFACE logger_system::logger_system)
-        endif()
+        target_link_libraries(logger_system INTERFACE ${PACS_LOGGER_SYSTEM_INSTALL_TARGET})
     endif()
     set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
     set(LOGGER_SYSTEM_FOUND TRUE)
@@ -612,12 +654,13 @@ if(NOT LOGGER_SYSTEM_FOUND AND NOT TARGET logger_system)
         set(PACS_LOGGER_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
         # Create non-namespaced target for compatibility with downstream checks
         if(NOT TARGET logger_system)
-            if(TARGET logger_system::logger_system)
-                add_library(logger_system INTERFACE)
-                target_link_libraries(logger_system INTERFACE logger_system::logger_system)
-            elseif(TARGET logger_system::logger)
+            if(TARGET logger_system::logger)
                 add_library(logger_system INTERFACE)
                 target_link_libraries(logger_system INTERFACE logger_system::logger)
+            elseif(TARGET logger_system::logger_system)
+                add_library(logger_system INTERFACE)
+                target_link_libraries(logger_system INTERFACE logger_system::logger_system)
+                set(PACS_LOGGER_SYSTEM_INSTALL_TARGET logger_system::logger_system)
             endif()
         endif()
     endif()
@@ -662,19 +705,28 @@ if(PACS_BUILD_STORAGE)
         "${CMAKE_CURRENT_SOURCE_DIR}/database_system"
     )
 
+    # pacs_storage needs unified_database_system from integrated_database. A
+    # database_system package that does not export database_system::integrated_database
+    # (sources before kcenon/database_system#611, including the CI pin) would
+    # leave those symbols unresolved, so such a package is not used.
+    set(DATABASE_SYSTEM_PACKAGE_INCOMPLETE FALSE)
     set(DATABASE_SYSTEM_FOUND FALSE)
     if(TARGET database_system::database_system)
-        if(NOT TARGET database)
-            add_library(database INTERFACE)
-            target_link_libraries(database INTERFACE database_system::database_system)
+        if(TARGET database_system::integrated_database OR TARGET integrated_database)
+            if(NOT TARGET database)
+                add_library(database INTERFACE)
+                target_link_libraries(database INTERFACE database_system::database_system)
+            endif()
+            if(TARGET database_system::integrated_database AND NOT TARGET integrated_database)
+                add_library(integrated_database INTERFACE)
+                target_link_libraries(integrated_database INTERFACE database_system::integrated_database)
+            endif()
+            set(PACS_DATABASE_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
+            set(DATABASE_SYSTEM_FOUND TRUE)
+            message(STATUS "Using installed database_system target")
+        else()
+            set(DATABASE_SYSTEM_PACKAGE_INCOMPLETE TRUE)
         endif()
-        if(TARGET database_system::integrated_database AND NOT TARGET integrated_database)
-            add_library(integrated_database INTERFACE)
-            target_link_libraries(integrated_database INTERFACE database_system::integrated_database)
-        endif()
-        set(PACS_DATABASE_SYSTEM_INCLUDE_DIR "FOUND_VIA_PACKAGE")
-        set(DATABASE_SYSTEM_FOUND TRUE)
-        message(STATUS "Using installed database_system target")
     else()
         foreach(_path ${_PACS_DATABASE_PATHS})
             if(EXISTS "${_path}/CMakeLists.txt" AND EXISTS "${_path}/include/kcenon/database/database_manager.h")
@@ -688,19 +740,26 @@ if(PACS_BUILD_STORAGE)
     endif()
 
     # find_package() fallback for vcpkg/system installs
-    if(NOT DATABASE_SYSTEM_FOUND AND NOT TARGET database)
+    if(NOT DATABASE_SYSTEM_FOUND AND NOT DATABASE_SYSTEM_PACKAGE_INCOMPLETE AND NOT TARGET database)
         find_package(database_system CONFIG QUIET)
         if(database_system_FOUND)
             message(STATUS "Found database_system via find_package(database_system)")
-            set(DATABASE_SYSTEM_FOUND TRUE)
-            if(NOT TARGET database AND TARGET database_system::database_system)
+            if(TARGET database_system::database_system AND TARGET database_system::integrated_database)
+                set(DATABASE_SYSTEM_FOUND TRUE)
                 add_library(database INTERFACE)
                 target_link_libraries(database INTERFACE database_system::database_system)
+            else()
+                set(DATABASE_SYSTEM_PACKAGE_INCOMPLETE TRUE)
             endif()
         endif()
     endif()
 
-    if(DATABASE_SYSTEM_FOUND AND NOT TARGET database)
+    if(DATABASE_SYSTEM_PACKAGE_INCOMPLETE)
+        message(WARNING
+            "The database_system package does not export database_system::integrated_database, "
+            "which pacs_storage needs; database_system integration is disabled. "
+            "Install a database_system that includes kcenon/database_system#611.")
+    elseif(DATABASE_SYSTEM_FOUND AND NOT TARGET database)
         set(BUILD_DATABASE_SAMPLES OFF CACHE BOOL "" FORCE)
         set(USE_UNIT_TEST OFF CACHE BOOL "" FORCE)
         set(DATABASE_BUILD_INTEGRATION_TESTS OFF CACHE BOOL "" FORCE)

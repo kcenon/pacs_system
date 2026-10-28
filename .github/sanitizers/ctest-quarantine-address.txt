@@ -1,0 +1,5 @@
+# CTest quarantine for the AddressSanitizer job (.github/workflows/sanitizers.yml)
+#
+# One exact CTest test name per line; lines starting with # are comments.
+# Each group names the issue that tracks the failure. Remove the lines when
+# the issue is fixed. Quarantined tests still run in the non-sanitizer jobs.

@@ -36,11 +36,13 @@ constexpr int kDirectoryCreateError = -6;
 constexpr int kIntegrityError = -7;
 
 /// Generate a unique temporary filename
+///
+/// store() runs on concurrent association threads, so each thread owns its
+/// engine (seeded once from std::random_device) instead of sharing one.
 auto generate_temp_filename(const std::filesystem::path& base)
     -> std::filesystem::path {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    static std::uniform_int_distribution<uint64_t> dist;
+    static thread_local std::mt19937 gen(std::random_device{}());
+    static thread_local std::uniform_int_distribution<uint64_t> dist;
 
     auto temp_name = base.filename().string() + ".tmp." +
                      std::to_string(dist(gen));

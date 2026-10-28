@@ -13,6 +13,10 @@
  * - pacs_metrics: DICOM-specific metrics
  * - Metric collectors for associations, services, storage
  *
+ * The exports below exist only when pacs_monitoring is built
+ * (PACS_MODULES_WITH_MONITORING is defined by cmake/targets.cmake);
+ * otherwise this partition is empty.
+ *
  * Part of the kcenon.pacs module.
  */
 
@@ -33,6 +37,7 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#ifdef PACS_MODULES_WITH_MONITORING
 // PACS monitoring headers
 #include <kcenon/pacs/monitoring/pacs_monitor.h>
 #include <kcenon/pacs/monitoring/health_checker.h>
@@ -46,50 +51,71 @@ module;
 #include <kcenon/pacs/monitoring/collectors/dicom_association_collector.h>
 #include <kcenon/pacs/monitoring/collectors/dicom_service_collector.h>
 #include <kcenon/pacs/monitoring/collectors/dicom_storage_collector.h>
+#endif // PACS_MODULES_WITH_MONITORING
 
 export module kcenon.pacs:monitoring;
 
+#ifdef PACS_MODULES_WITH_MONITORING
+
 // ============================================================================
-// Re-export pacs::monitoring namespace
+// Re-export kcenon::pacs::monitoring namespace
 // ============================================================================
 
-export namespace pacs::monitoring {
+export namespace kcenon::pacs::monitoring {
 
 // Monitor
-using pacs::monitoring::pacs_monitor;
-using pacs::monitoring::metric_type;
+using kcenon::pacs::monitoring::pacs_monitor;
+using kcenon::pacs::monitoring::pacs_monitor_config;
+using kcenon::pacs::monitoring::metric_type;
+using kcenon::pacs::monitoring::metric_value;
+using kcenon::pacs::monitoring::metrics_snapshot;
+using kcenon::pacs::monitoring::monitor_health_status;
+using kcenon::pacs::monitoring::health_check_result;
 
 // Health
-using pacs::monitoring::health_checker;
-using pacs::monitoring::health_status;
+using kcenon::pacs::monitoring::health_checker;
+using kcenon::pacs::monitoring::health_checker_config;
+using kcenon::pacs::monitoring::health_level;
+using kcenon::pacs::monitoring::database_status;
+using kcenon::pacs::monitoring::storage_status;
+using kcenon::pacs::monitoring::association_metrics;
+using kcenon::pacs::monitoring::storage_metrics;
+using kcenon::pacs::monitoring::version_info;
+using kcenon::pacs::monitoring::health_status;
+using kcenon::pacs::monitoring::to_json;
+using kcenon::pacs::monitoring::to_json_pretty;
 
 // Metrics core
-using pacs::monitoring::pacs_metrics;
-using pacs::monitoring::association_counters;
-using pacs::monitoring::transfer_counters;
-using pacs::monitoring::pool_counters;
-using pacs::monitoring::operation_counter;
-using pacs::monitoring::dimse_operation;
-using pacs::monitoring::to_string;
+using kcenon::pacs::monitoring::pacs_metrics;
+using kcenon::pacs::monitoring::association_counters;
+using kcenon::pacs::monitoring::data_transfer_metrics;
+using kcenon::pacs::monitoring::pool_counters;
+using kcenon::pacs::monitoring::operation_counter;
+using kcenon::pacs::monitoring::dimse_operation;
+
+// to_string overloads (metric, health, and DIMSE operation enums)
+using kcenon::pacs::monitoring::to_string;
 
 // CRTP collector base
-using pacs::monitoring::dicom_collector_base;
-using pacs::monitoring::dicom_metric;
-using pacs::monitoring::config_map;
-using pacs::monitoring::stats_map;
+using kcenon::pacs::monitoring::dicom_collector_base;
+using kcenon::pacs::monitoring::dicom_metric;
+using kcenon::pacs::monitoring::config_map;
+using kcenon::pacs::monitoring::stats_map;
 
 // Unified DICOM metrics collector
-using pacs::monitoring::dicom_metrics_collector;
-using pacs::monitoring::dicom_metrics_snapshot;
+using kcenon::pacs::monitoring::dicom_metrics_collector;
+using kcenon::pacs::monitoring::dicom_metrics_snapshot;
 
 // Specialized collectors
-using pacs::monitoring::dicom_association_collector;
-using pacs::monitoring::association_metric;
+using kcenon::pacs::monitoring::dicom_association_collector;
+using kcenon::pacs::monitoring::association_metric;
 
-using pacs::monitoring::dicom_service_collector;
-using pacs::monitoring::service_metric;
+using kcenon::pacs::monitoring::dicom_service_collector;
+using kcenon::pacs::monitoring::service_metric;
 
-using pacs::monitoring::dicom_storage_collector;
-using pacs::monitoring::storage_metric;
+using kcenon::pacs::monitoring::dicom_storage_collector;
+using kcenon::pacs::monitoring::storage_metric;
 
-} // namespace pacs::monitoring
+} // namespace kcenon::pacs::monitoring
+
+#endif // PACS_MODULES_WITH_MONITORING

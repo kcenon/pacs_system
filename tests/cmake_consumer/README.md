@@ -19,16 +19,16 @@ install step.
 
 ## Manual verification
 
-Build and install pacs_system into a scratch prefix, then configure and run
-the consumer:
+Install the dependencies and pacs_system into a scratch prefix as described
+in [Source install][source-install], then configure and run the consumer with
+the same `CMAKE_PREFIX_PATH` (the prefix and the third-party packages):
 
 ```bash
 PREFIX=/tmp/pacs_install
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX="${PREFIX}"
-cmake --build build --target install
+THIRD_PARTY=/path/to/vcpkg_installed/<triplet>
 
 cmake -S tests/cmake_consumer -B /tmp/pacs_consumer_build \
-      -Dpacs_system_DIR="${PREFIX}/lib/cmake/pacs_system"
+      "-DCMAKE_PREFIX_PATH=${PREFIX};${THIRD_PARTY}"
 cmake --build /tmp/pacs_consumer_build
 
 /tmp/pacs_consumer_build/pacs_consumer
@@ -36,9 +36,15 @@ cmake --build /tmp/pacs_consumer_build
 # pacs_system v1.0 consumer OK (tag=10,10)
 ```
 
+`scripts/check-source-install.sh` runs every step, from the dependency
+installs to this consumer, and is what the `Source Install` workflow runs.
+An install produced by the sibling-directory build (dependencies checked out
+next to pacs_system) is not consumable this way.
+
 If `find_package` fails with a version mismatch, the project version in the
 top-level `CMakeLists.txt` is below `PACS_CONSUMER_MIN_VERSION`. If the linker complains
 about `pacs_system::pacs_system`, the umbrella INTERFACE target was removed
 from `cmake/install.cmake`.
 
 [1158]: https://github.com/kcenon/pacs_system/issues/1158
+[source-install]: ../../docs/PACKAGE_STATE.md#source-install

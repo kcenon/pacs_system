@@ -36,11 +36,11 @@ TEST_CASE("C-ECHO: pacs_system SCP with DCMTK echoscu", "[dcmtk][interop][echo]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    // See test_fixtures.h supports_real_tcp_dicom() for details
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet - "
-             "accept_worker closes connections immediately. See Issue #XXX.");
+    // echoscu needs a pacs_system SCP that accepts TCP; see
+    // v1_server_accepts_tcp() in test_fixtures.h
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     // Setup: Start pacs_system echo server
@@ -104,10 +104,9 @@ TEST_CASE("C-ECHO: DCMTK storescp with pacs_system SCU", "[dcmtk][interop][echo]
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU reaches DCMTK over TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet - "
-             "association uses in-memory transport only. See Issue #XXX.");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     // Setup: Start DCMTK store server (accepts echo)
@@ -189,10 +188,9 @@ TEST_CASE("C-ECHO: DCMTK echoscp with pacs_system SCU", "[dcmtk][interop][echo]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU reaches DCMTK over TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet - "
-             "association uses in-memory transport only. See Issue #XXX.");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     // Setup: Start DCMTK echo server
@@ -240,11 +238,6 @@ TEST_CASE("C-ECHO: Concurrent echo operations", "[dcmtk][interop][echo][stress]"
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
-    }
-
     auto port = find_available_port();
     const std::string ae_title = "STRESS_SCP";
 
@@ -258,6 +251,12 @@ TEST_CASE("C-ECHO: Concurrent echo operations", "[dcmtk][interop][echo][stress]"
     }, server_ready_timeout()));
 
     SECTION("5 concurrent DCMTK echoscu clients") {
+        // echoscu needs a pacs_system SCP that accepts TCP
+        if (!v1_server_accepts_tcp()) {
+            SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+                 "this section needs a dicom_server_v2 fixture");
+        }
+
         constexpr int num_clients = 5;
         std::vector<std::future<dcmtk_result>> futures;
         futures.reserve(num_clients);
@@ -338,9 +337,9 @@ TEST_CASE("C-ECHO: Connection error handling", "[dcmtk][interop][echo][error]") 
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
+    // The pacs_system SCU tries TCP
     if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+        SKIP("association::connect() has no TCP transport in this build");
     }
 
     SECTION("echoscu to non-existent server fails gracefully") {
@@ -387,9 +386,10 @@ TEST_CASE("C-ECHO: Protocol verification", "[dcmtk][interop][echo][protocol]") {
         SKIP("DCMTK not installed");
     }
 
-    // Skip if real TCP DICOM connections are not supported yet
-    if (!supports_real_tcp_dicom()) {
-        SKIP("pacs_system does not support real TCP DICOM connections yet");
+    // echoscu needs a pacs_system SCP that accepts TCP
+    if (!v1_server_accepts_tcp()) {
+        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
+             "this case needs a dicom_server_v2 fixture");
     }
 
     auto port = find_available_port();

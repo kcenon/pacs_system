@@ -962,13 +962,17 @@ EXPECT_EQ(mock_storage->store_count(), 1);
 ---
 ## C++20 Module Support
 
-> **Status:** Experimental
-> **Requirements:** CMake 3.28+, Clang 16+/GCC 14+/MSVC 2022 17.4+
+> **Status:** Experimental. CI builds the module target with Clang 18 on Ubuntu 24.04; see
+> [C++20 Module Architecture](ARCHITECTURE.md#c20-module-architecture) for what the CI job proves.
+> **Requirements:** CMake 3.28+, Ninja, and a compiler that CMake supports for modules
+> (Clang 16+/GCC 14+/MSVC 2022 17.4+); only Clang 18 is tested
 
 ### Overview
 
-pacs_system provides C++20 module support as an alternative to the traditional header-based approach. Modules offer:
-- Faster compilation times (estimated 25-40% reduction)
+pacs_system provides C++20 module support as an alternative to the traditional header-based approach.
+The primary module `kcenon.pacs` re-exports the names that the public headers declare, in the same
+`kcenon::pacs::` namespaces. Modules offer:
+- Faster compilation of consumers, since the partitions are compiled once
 - Better encapsulation of internal APIs
 - Cleaner dependency graph
 - Improved IDE responsiveness
@@ -977,41 +981,48 @@ pacs_system provides C++20 module support as an alternative to the traditional h
 
 ```
 kcenon.pacs
-├── :core           # DICOM core types (dicom_tag, dicom_dataset, etc.)
-├── :encoding       # Transfer syntax and compression codecs
-├── :storage        # Storage backends and database adapters
-├── :security       # RBAC, encryption, anonymization
-├── :network        # DICOM network protocol (PDU, Association, DIMSE)
-├── :services       # SCP service implementations
-├── :workflow       # Task scheduling and prefetching
-├── :web            # REST API and DICOMweb endpoints
-├── :integration    # External system adapters
-├── :ai             # AI/ML service integration (optional)
-├── :monitoring     # Health checks and metrics
-└── :di             # Dependency injection utilities
+├── :core                 # DICOM core types (dicom_tag, dicom_dataset, tags::, events, Result<T>)
+├── :encoding             # VR types, transfer syntaxes, compression codecs, SIMD feature checks
+├── :storage              # Storage backends, index database, records (needs pacs_storage)
+├── :security             # RBAC, certificates and signatures, anonymization
+├── :network              # Association, PDU types and codecs, dicom_server, v2 server
+├── :network_dimse        # DIMSE messages, command fields, status checks, factories
+├── :services             # SCP/SCU implementations, SOP class registry
+├── :services_cache       # Query cache; cursors and streaming with database_system
+├── :services_validation  # IOD validators
+├── :workflow             # Task scheduling and prefetching (needs pacs_workflow)
+├── :web                  # REST API and DICOMweb helpers (needs pacs_web)
+├── :integration          # Ecosystem adapters (needs pacs_integration)
+├── :ai                   # AI/ML service integration (needs pacs_ai)
+├── :monitoring           # Health checks and metrics (needs pacs_monitoring)
+└── :di                   # Dependency injection utilities
 ```
+
+A partition marked "needs `pacs_<name>`" is empty when that library is not built.
 
 ### Building with Modules
 
 ```bash
-cmake -DPACS_BUILD_MODULES=ON ..
-cmake --build .
+cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++-18 -DPACS_BUILD_MODULES=ON
+cmake --build build --target pacs_system_modules
 ```
 
 ### Usage
 
 ```cpp
-// Import entire pacs module
+#include <iostream>
+
+// Import the entire pacs module
 import kcenon.pacs;
 
 int main() {
     // Use core types
-    pacs::core::dicom_dataset ds;
-    ds.set_string(pacs::core::tags::patient_name,
-                  pacs::encoding::vr_type::PN, "DOE^JOHN");
+    kcenon::pacs::core::dicom_dataset ds;
+    ds.set_string(kcenon::pacs::core::tags::patient_name,
+                  kcenon::pacs::encoding::vr_type::PN, "DOE^JOHN");
 
-    // Use Result pattern
-    auto result = pacs::ok(42);
+    // Use the Result pattern
+    auto result = kcenon::pacs::ok(42);
     if (result.is_ok()) {
         std::cout << result.value() << std::endl;
     }
@@ -1020,150 +1031,33 @@ int main() {
 }
 ```
 
-### Import Specific Partitions
-
-```cpp
-// Import only what you need
-import kcenon.pacs:core;
-import kcenon.pacs:encoding;
-
-int main() {
-    pacs::core::dicom_tag tag{0x0010, 0x0010};  // Patient Name
-    pacs::encoding::vr_type vr = pacs::encoding::vr_type::PN;
-    return 0;
-}
-```
+Partitions are internal to the module: `import kcenon.pacs:core;` is not valid outside
+`kcenon.pacs`, so consumers always write `import kcenon.pacs;`. Namespace-scope `constexpr`
+constants without `inline` (for example `kcenon::pacs::error_codes` and the DIMSE `status_*`
+codes) cannot be exported; include their headers next to the import to use them.
 
 ### Partition Details
 
-#### :encoding Partition
+| Partition | Exported namespaces | Main types |
+|-----------|--------------------|------------|
+| `:core` | `kcenon::pacs`, `kcenon::pacs::core`, `kcenon::pacs::core::tags`, `kcenon::pacs::events` | `dicom_tag`, `dicom_element`, `dicom_dataset`, `dicom_file`, `dicom_dictionary`, `Result<T>` |
+| `:encoding` | `kcenon::pacs::encoding`, `::compression`, `::simd` | `vr_type`, `transfer_syntax`, `explicit_vr_codec`, `codec_factory`, `jpeg_baseline_codec` |
+| `:storage` | `kcenon::pacs::storage` | `file_storage`, `s3_storage`, `azure_blob_storage`, `hsm_storage`, `index_database` |
+| `:security` | `kcenon::pacs::security` | `access_control_manager`, `User`, `Role`, `certificate`, `digital_signature`, `anonymizer` |
+| `:network` | `kcenon::pacs::network`, `::v2` | `association`, `pdu_encoder`, `pdu_decoder`, `server_config`, `dicom_server`, `dicom_server_v2` |
+| `:network_dimse` | `kcenon::pacs::network::dimse` | `dimse_message`, `command_field`, `status_code`, `make_c_echo_rq` and the other factories |
+| `:services` | `kcenon::pacs::services` | `storage_scp`, `query_scp`, `retrieve_scp`, `storage_scu`, `query_scu`, `sop_class_registry` |
+| `:services_cache` | `kcenon::pacs::services::cache`, `kcenon::pacs::services` | `query_cache`, `simple_lru_cache`; `database_cursor`, `query_result_stream` with database_system |
+| `:services_validation` | `kcenon::pacs::services::validation` | `us_iod_validator`, `dx_iod_validator`, `ct_iod_validator`, `validation_result` |
+| `:workflow` | `kcenon::pacs::workflow` | `task_scheduler`, `auto_prefetch_service`, `study_lock_manager` |
+| `:web` | `kcenon::pacs::web`, `::dicomweb` | `rest_server`, `rest_server_config`, `multipart_builder` |
+| `:integration` | `kcenon::pacs::integration` | `logger_adapter`, `thread_pool_adapter`, `network_adapter`, `dicom_session` |
+| `:ai` | `kcenon::pacs::ai` | `ai_service_connector`, `ai_result_handler`, `assessment_manager` |
+| `:monitoring` | `kcenon::pacs::monitoring` | `pacs_monitor`, `health_checker`, `pacs_metrics`, `dicom_metrics_collector` |
+| `:di` | `kcenon::pacs::di`, `::test` | `ILogger`, `IDicomStorage`, `register_services`, `TestContainerBuilder` |
 
-The encoding partition provides DICOM encoding types, compression codecs, and SIMD utilities:
-
-```cpp
-import kcenon.pacs:encoding;
-
-// VR and Transfer Syntax
-pacs::encoding::vr_type vr = pacs::encoding::vr_type::PN;
-auto ts = pacs::encoding::transfer_syntax::jpeg_baseline;
-
-// Compression Codecs
-pacs::encoding::compression::jpeg_baseline_codec jpeg;
-auto result = jpeg.encode(pixel_data, params);
-
-// SIMD Detection
-if (pacs::encoding::simd::has_avx2()) {
-    // Use optimized path
-}
-```
-
-Exported namespaces:
-- `pacs::encoding` - Core encoding types
-- `pacs::encoding::compression` - Compression codecs (JPEG, JPEG-LS, JPEG 2000, RLE)
-- `pacs::encoding::simd` - CPU feature detection and vectorized operations
-
-#### :storage Partition
-
-The storage partition provides storage backends, cloud storage, and HSM:
-
-```cpp
-import kcenon.pacs:storage;
-
-// File storage
-pacs::storage::file_storage fs("/data/dicom");
-
-// Cloud storage (S3)
-pacs::storage::cloud_storage_config s3_cfg;
-s3_cfg.bucket_name = "dicom-archive";
-pacs::storage::s3_storage s3(s3_cfg);
-
-// HSM with automatic migration
-pacs::storage::hsm_storage_config hsm_cfg;
-hsm_cfg.policy.hot_to_warm = std::chrono::days{30};
-pacs::storage::hsm_storage hsm(hot_storage, warm_storage, cold_storage);
-```
-
-Exported types:
-- Storage interfaces: `storage_interface`, `file_storage`
-- Cloud storage: `s3_storage`, `azure_blob_storage`
-- HSM: `hsm_storage`, `hsm_migration_service`, `storage_tier`, `tier_policy`
-- Records: `patient_record`, `study_record`, `series_record`, `instance_record`
-
-#### :security Partition
-
-The security partition provides RBAC, encryption, and anonymization:
-
-```cpp
-import kcenon.pacs:security;
-
-// Access control
-pacs::security::access_control_manager acm;
-auto check = acm.check_access(user, DicomOperation::store);
-
-// Anonymization
-pacs::security::anonymizer anon;
-auto result = anon.anonymize(dataset, profile);
-```
-
-#### :network Partition
-
-The network partition provides DICOM network protocol implementation:
-
-```cpp
-import kcenon.pacs:network;
-
-// Association management
-pacs::network::association assoc;
-auto state = assoc.state();
-
-// Server configuration
-pacs::network::server_config config;
-config.ae_title = "PACS_SCP";
-config.port = 11112;
-
-// DICOM server (v2 with network_system integration)
-pacs::network::v2::dicom_server_v2 server(config);
-server.start();
-```
-
-Sub-partitions:
-- `:network_dimse` - Full DIMSE message types and factory functions
-
-#### :services Partition
-
-The services partition provides DICOM SCP service implementations:
-
-```cpp
-import kcenon.pacs:services;
-
-// Storage SCP
-pacs::services::storage_scp_config cfg;
-cfg.storage_path = "/data/dicom";
-pacs::services::storage_scp scp(cfg);
-
-// Query SCP
-pacs::services::query_scp query(database);
-```
-
-Sub-partitions:
-- `:services_validation` - IOD validators for all modalities (DX, MG, NM, PET, RT, SEG, SR, US, XA)
-- `:services_cache` - Query caching with LRU, parallel execution, streaming
-
-```cpp
-// Using validation sub-partition
-import kcenon.pacs:services_validation;
-
-pacs::services::validation::dx_validation_options opts;
-pacs::services::validation::dx_iod_validator validator;
-auto result = validator.validate(dataset, opts);
-
-// Using cache sub-partition
-import kcenon.pacs:services_cache;
-
-pacs::services::cache::query_cache_config cfg;
-cfg.max_entries = 1000;
-pacs::services::cache::query_cache cache(cfg);
-```
+The types are documented with their headers in the other parts of this API reference; the
+partitions add no API of their own apart from `kcenon::pacs::module_version`.
 
 ### Testing and Examples
 
@@ -1173,8 +1067,8 @@ Run module import tests to verify module functionality:
 
 ```bash
 # Build with tests and modules
-cmake -DPACS_BUILD_MODULES=ON -DPACS_BUILD_TESTS=ON ..
-cmake --build .
+cmake -G Ninja -DPACS_BUILD_MODULES=ON -DPACS_BUILD_TESTS=ON ..
+cmake --build . --target module_tests
 
 # Run module tests
 ctest -L modules
@@ -1186,8 +1080,8 @@ The `module_example` demonstrates C++20 module usage:
 
 ```bash
 # Build with examples and modules
-cmake -DPACS_BUILD_MODULES=ON -DPACS_BUILD_EXAMPLES=ON ..
-cmake --build .
+cmake -G Ninja -DPACS_BUILD_MODULES=ON -DPACS_BUILD_EXAMPLES=ON ..
+cmake --build . --target module_example
 
 # Run example
 ./bin/module_example [optional_dicom_file]
@@ -1195,14 +1089,19 @@ cmake --build .
 
 ### CMake Integration
 
+The module target is defined in the pacs_system build tree and is not installed, so
+`find_package(pacs_system)` does not provide it. Add pacs_system to your build (for example with
+`add_subdirectory` or `FetchContent`) and link the alias:
+
 ```cmake
-# Find pacs_system with module support
-find_package(pacs_system REQUIRED)
+set(PACS_BUILD_MODULES ON)
+add_subdirectory(pacs_system)
 
 # Link to module target
 target_link_libraries(my_app PRIVATE kcenon::pacs_modules)
+set_target_properties(my_app PROPERTIES CXX_SCAN_FOR_MODULES ON)
 
-# Or link specific components
+# Or link specific components (header-based)
 target_link_libraries(my_app PRIVATE
     pacs_core
     pacs_encoding

@@ -41,11 +41,12 @@ cd build && ctest --output-on-failure --timeout 120
 
 Key CMake options:
 - `PACS_BUILD_TESTS` (ON) — Catch2 v3.4.0 unit tests
-- `PACS_BUILD_EXAMPLES` (OFF) — 32 CLI utility binaries (sources under `tools/`)
+- `PACS_BUILD_EXAMPLES` (OFF) — CLI tools plus the `module_example` demo (sources under `tools/`; listed in `docs/CLI_REFERENCE.md`)
 - `PACS_BUILD_SAMPLES` (OFF) — 5 progressive tutorials (sources under `examples/`)
 - `PACS_BUILD_BENCHMARKS` (OFF)
 - `PACS_BUILD_STORAGE` (ON) — Requires SQLite3
 - `PACS_BUILD_CODECS` (ON) — JPEG, JPEG2000, JPEG-LS, HTJ2K, RLE
+- `PACS_REQUIRE_CODECS` (OFF) — Configure fails when libjpeg-turbo, OpenJPEG, CharLS, or OpenJPH is missing (CI codec jobs set it)
 - `PACS_WITH_OPENSSL` (ON), `PACS_WITH_REST_API` (ON)
 - `PACS_WITH_AWS_SDK` (OFF), `PACS_WITH_AZURE_SDK` (OFF)
 
@@ -94,6 +95,6 @@ pacs_system        (Tier 5)  <-- this project
 - libjpeg-turbo cannot be built via FetchContent (must be system package)
 - `PACS_USE_MOCK_S3` prohibited in Release builds (CMake FATAL_ERROR)
 - Linux static linking: circular dependency requires `--start-group/--end-group` linker flags
-- C++20 modules experimental (CMake 3.28+, Clang 16+/GCC 14+)
+- C++20 modules experimental (CMake 3.28+; CI builds them only with Clang 18 in `modules.yml`; AppleClang cannot)
 - UWP/Xbox unsupported
 - Test framework: Catch2 (differs from ecosystem's Google Test convention)

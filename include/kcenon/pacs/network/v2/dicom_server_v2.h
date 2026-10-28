@@ -35,6 +35,7 @@
 #include <mutex>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -193,12 +194,13 @@ public:
     [[nodiscard]] Result<std::monostate> start();
 
     /**
-     * @brief Stop the server gracefully
+     * @brief Stop the server
      *
-     * Stops accepting new connections and waits for active associations
-     * to complete or timeout.
+     * Closes the active associations and their connections, then stops
+     * accepting connections. network_system offers no way to stop accepting
+     * while sessions continue, so active associations are not waited for.
      *
-     * @param timeout Maximum time to wait for associations to close
+     * @param timeout Unused; kept for source compatibility
      */
     void stop(duration timeout = std::chrono::seconds{30});
 
@@ -320,6 +322,30 @@ private:
     /// Create and register a new handler for a session
     void create_handler(std::shared_ptr<kcenon::network::interfaces::i_session> session);
 
+    /// Deliver @p session's data and errors straight to @p handler
+    /// (registered as @p key). network_system reports the same id() for
+    /// every session of a server, so the server-level callbacks cannot tell
+    /// sessions apart. Returns false when the session type has no
+    /// per-session callbacks.
+    bool route_session_events(
+        const std::shared_ptr<kcenon::network::interfaces::i_session>& session,
+        const std::string& key,
+        const std::weak_ptr<dicom_association_handler>& handler);
+
+    /// Close @p session on the closer thread (see
+    /// dicom_association_handler::set_session_closer()) once the peer had
+    /// association_timeout (ARTIM) to close it first, as PS3.8 Sta13 has the
+    /// acceptor wait after A-RELEASE-RP, A-ABORT, or A-ASSOCIATE-RJ. Closing
+    /// at once would also cancel the write of that last PDU.
+    void close_session_later(
+        const std::shared_ptr<kcenon::network::interfaces::i_session>& session);
+
+    /// Body of the closer thread
+    void run_session_closer();
+
+    /// Stop the closer thread after it closed what is queued
+    void stop_session_closer();
+
     /// Remove handler by session ID
     void remove_handler(const std::string& session_id);
 
@@ -356,8 +382,28 @@ private:
     /// Map from SOP Class UID to service (non-owning pointers)
     std::map<std::string, services::scp_service*> sop_class_to_service_;
 
-    /// Active association handlers (keyed by session ID)
+    /// Active association handlers (keyed by a per-connection session ID)
     std::unordered_map<std::string, std::shared_ptr<dicom_association_handler>> handlers_;
+
+    /// Source of per-connection session IDs
+    std::atomic<uint64_t> next_session_number_{0};
+
+    /// Thread that closes sessions outside network_system's callbacks
+    std::thread closer_thread_;
+
+    /// Sessions waiting for the closer thread, with the time to close them
+    std::vector<std::pair<clock::time_point,
+                          std::shared_ptr<kcenon::network::interfaces::i_session>>>
+        sessions_to_close_;
+
+    /// Whether the closer thread accepts work (guarded by closer_mutex_)
+    bool closer_running_{false};
+
+    /// Guards sessions_to_close_ and closer_running_
+    std::mutex closer_mutex_;
+
+    /// Wakes the closer thread
+    std::condition_variable closer_cv_;
 
     /// Server statistics
     mutable server_statistics stats_;

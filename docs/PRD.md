@@ -709,7 +709,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 |--------|-----------------|---------|--------|
 | **common_system** | Foundation | Result<T>, Error codes, IExecutor | ✅ Integrated |
 | **container_system** | Data Layer | DICOM value serialization | ✅ Integrated |
-| **thread_system** | Concurrency | Worker pools, async processing, jthread support, cancellation_token | ✅ Fully Migrated (v1.1.0) |
+| **thread_system** | Concurrency | Worker pools, async processing, jthread support, cancellation_token | ✅ Fully Migrated (in `v0.1.0`) |
 | **logger_system** | Logging | Audit logs, diagnostics | ✅ Integrated |
 | **monitoring_system** | Observability | Metrics, health checks | ✅ Integrated |
 | **network_system** | Network | TCP/TLS, session management, messaging_server | ✅ V2 Implementation (Optional) |
@@ -723,7 +723,7 @@ The system has been fully migrated from direct `std::thread` usage to `thread_sy
 |-----------|----------|---------|---------|
 | Accept Loop | `std::thread accept_thread_` | `accept_worker` (inherits `thread_base`) | jthread, cancellation_token |
 | Worker Threads | Per-association `std::thread` | `thread_adapter` pool | Unified monitoring, load balancing |
-| Shutdown | Manual thread management | Cooperative cancellation | 45x faster graceful shutdown |
+| Shutdown | Manual thread management | Cooperative cancellation | Graceful shutdown within target (107 ms with 5 active connections, threshold < 5000 ms) |
 | Statistics | None | Unified thread statistics | Full observability |
 
 #### Network System V2 (Optional)
@@ -793,7 +793,7 @@ An optional V2 implementation using `network_system::messaging_server` is availa
 | C-STORE throughput | ≥100 MB/s | 9,247 MB/s | ✅ PASS | 512KB images |
 | C-ECHO throughput | ≥100 msg/s | 89,964 msg/s | ✅ PASS | Sustained traffic |
 | Association latency | <100 ms | ~1 ms | ✅ PASS | Including negotiation |
-| Graceful shutdown | <5,000 ms | 110 ms | ✅ PASS | With active connections |
+| Graceful shutdown | <5,000 ms | 107 ms | ✅ PASS | With 5 active connections |
 | Memory per connection | <10 MB | ~5 MB | ✅ PASS | Active association |
 
 *Performance measured after thread_system migration (2025-12-07). See [PERFORMANCE_RESULTS.md](PERFORMANCE_RESULTS.md) for details.*

@@ -2,7 +2,8 @@
 # scripts/check-stats-drift.sh
 #
 # Check if documented statistics in README.md drift from actual values.
-# Fails if any statistic is off by more than the allowed threshold.
+# Fails if any statistic is off by more than the allowed threshold, or if the
+# statistics block in README.kr.md does not carry the same values as README.md.
 #
 # Usage:
 #   ./scripts/check-stats-drift.sh              # Check with 10% threshold
@@ -71,6 +72,78 @@ calculate_drift() {
     echo "${percent}"
 }
 
+# Print "label|value" for each row of the statistics table between the
+# STATS_START and STATS_END markers. The value is the number as written in the
+# cell (e.g. "~78,700", "2661+", "0.1.0") without its unit.
+# Args: readme_file
+extract_block_values() {
+    awk -F'|' '
+        /<!-- STATS_START -->/ { in_block = 1; next }
+        /<!-- STATS_END -->/   { in_block = 0 }
+        in_block && $2 ~ /\*\*/ {
+            label = $2
+            gsub(/^ +| +$/, "", label)
+            value = ""
+            if (match($3, /[~]?[0-9][0-9,.]*[+]?/)) {
+                value = substr($3, RSTART, RLENGTH)
+            }
+            print label "|" value
+        }
+    ' "$1"
+}
+
+# Compare the README.kr.md statistics block with the README.md block.
+# The Korean block is a hand-maintained copy with Korean labels and units, so
+# rows are matched by position and every value must be identical.
+# Returns 1 on any mismatch.
+check_korean_block() {
+    local en_rows=()
+    local kr_rows=()
+    local row
+
+    while IFS= read -r row; do
+        en_rows+=("${row}")
+    done < <(extract_block_values "${PROJECT_ROOT}/README.md")
+    while IFS= read -r row; do
+        kr_rows+=("${row}")
+    done < <(extract_block_values "${PROJECT_ROOT}/README.kr.md")
+
+    echo "Comparing the README.kr.md statistics block with README.md..."
+    echo ""
+
+    local en_count=${#en_rows[@]}
+    local kr_count=${#kr_rows[@]}
+    if [[ ${en_count} -eq 0 || ${en_count} -ne ${kr_count} ]]; then
+        echo -e "${RED}README.md has ${en_count} statistics rows, README.kr.md has ${kr_count}.${NC}"
+        return 1
+    fi
+
+    printf "%-20s %-12s %-12s %s\n" "Metric" "README.md" "README.kr.md" "Status"
+    printf "%s\n" "-------------------------------------------------------------------------------"
+
+    local mismatch=0
+    local i name en_value kr_value status
+    for (( i = 0; i < en_count; i++ )); do
+        name="${en_rows[i]%%|*}"
+        name="${name//\*/}"
+        en_value="${en_rows[i]#*|}"
+        kr_value="${kr_rows[i]#*|}"
+
+        if [[ -n "${en_value}" && "${en_value}" == "${kr_value}" ]]; then
+            status="${GREEN}OK${NC}"
+        else
+            status="${RED}FAIL${NC}"
+            mismatch=1
+        fi
+
+        printf "%-20s %-12s %-12s " "${name}" "${en_value}" "${kr_value}"
+        echo -e "${status}"
+    done
+
+    echo ""
+    return ${mismatch}
+}
+
 # Main check function
 check_drift() {
     cd "${PROJECT_ROOT}"
@@ -83,7 +156,7 @@ check_drift() {
 
     # Get actual statistics (use temp file for compatibility)
     local stats_tmp
-    stats_tmp=$(mktemp)
+    stats_tmp=$(mktemp "${TMPDIR:-/tmp}/stats.XXXXXX")
     "${SCRIPT_DIR}/calculate-stats.sh" --raw > "${stats_tmp}"
     source "${stats_tmp}"
     rm -f "${stats_tmp}"
@@ -132,14 +205,23 @@ check_drift() {
 
     echo ""
 
+    local korean_error=0
+    check_korean_block || korean_error=1
+
     if [[ ${has_error} -eq 1 ]]; then
         echo -e "${RED}FAILED: Some statistics exceed ${THRESHOLD}% drift threshold.${NC}"
         echo "Please update README.md or run: ./scripts/update-readme-stats.sh"
-        exit 1
-    else
-        echo -e "${GREEN}PASSED: All statistics within ${THRESHOLD}% threshold.${NC}"
-        exit 0
     fi
+    if [[ ${korean_error} -eq 1 ]]; then
+        echo -e "${RED}FAILED: The README.kr.md statistics block does not match README.md.${NC}"
+        echo "Copy the README.md values into the README.kr.md block, keeping its Korean labels and units."
+    fi
+    if [[ ${has_error} -eq 1 || ${korean_error} -eq 1 ]]; then
+        exit 1
+    fi
+
+    echo -e "${GREEN}PASSED: All statistics within ${THRESHOLD}% threshold; README.kr.md matches README.md.${NC}"
+    exit 0
 }
 
 # Run check

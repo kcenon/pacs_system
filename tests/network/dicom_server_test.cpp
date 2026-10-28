@@ -5,8 +5,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/network/dimse/status_codes.h"
 #include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/services/verification_scp.h"
 
 #include <atomic>
@@ -587,5 +593,79 @@ TEST_CASE("dicom_server shutdown with short timeout", "[dicom_server][cancellati
         // Very short timeout (10ms) - should still work with no active connections
         server.stop(std::chrono::milliseconds{10});
         CHECK_FALSE(server.is_running());
+    }
+}
+
+// =============================================================================
+// JPEG-LS Negotiation Tests (Issue #1242)
+// =============================================================================
+
+TEST_CASE("dicom_server stores over negotiated JPEG-LS contexts",
+          "[dicom_server][negotiation][jpegls]") {
+    // The SCP offers JPEG-LS whether or not CharLS was found at build time:
+    // it stores encapsulated pixel data without decoding it.
+    constexpr uint16_t jpeg_ls_test_port = 11142;
+    constexpr const char* ct_image_storage = "1.2.840.10008.5.1.4.1.1.2";
+    constexpr const char* sop_instance_uid = "1.2.826.0.1.3680043.2.1545.1242.1";
+
+    for (const char* jpeg_ls_uid :
+         {"1.2.840.10008.1.2.4.80", "1.2.840.10008.1.2.4.81"}) {
+        DYNAMIC_SECTION("C-STORE on a context proposing only " << jpeg_ls_uid) {
+            server_config config;
+            config.ae_title = TEST_AE_TITLE;
+            config.port = jpeg_ls_test_port;
+
+            std::atomic<int> stored_count{0};
+            auto storage = std::make_shared<storage_scp>();
+            storage->set_handler([&stored_count](const auto&, const auto&,
+                                                 const auto&, const auto&) {
+                ++stored_count;
+                return storage_status::success;
+            });
+
+            dicom_server server{config};
+            server.register_service(storage);
+            REQUIRE(server.start().is_ok());
+
+            association_config scu_config;
+            scu_config.calling_ae_title = "JPEGLS_SCU";
+            scu_config.called_ae_title = TEST_AE_TITLE;
+            scu_config.proposed_contexts.push_back({1, ct_image_storage, {jpeg_ls_uid}});
+
+            auto connect_result =
+                association::connect("localhost", jpeg_ls_test_port, scu_config);
+            REQUIRE(connect_result.is_ok());
+            auto& assoc = connect_result.value();
+
+            auto ts_result = assoc.context_transfer_syntax(1);
+            REQUIRE(ts_result.is_ok());
+            CHECK(ts_result.value().uid() == jpeg_ls_uid);
+            CHECK(ts_result.value().is_encapsulated());
+
+            namespace tags = kcenon::pacs::core::tags;
+            using kcenon::pacs::encoding::vr_type;
+            kcenon::pacs::core::dicom_dataset dataset;
+            dataset.set_string(tags::sop_class_uid, vr_type::UI, ct_image_storage);
+            dataset.set_string(tags::sop_instance_uid, vr_type::UI, sop_instance_uid);
+            dataset.set_string(tags::patient_id, vr_type::LO, "JPEGLS-1242");
+
+            auto store_rq = dimse::make_c_store_rq(1, ct_image_storage, sop_instance_uid);
+            store_rq.set_dataset(std::move(dataset));
+            REQUIRE(assoc.send_dimse(1, store_rq).is_ok());
+
+            auto recv_result = assoc.receive_dimse(std::chrono::milliseconds{5000});
+            REQUIRE(recv_result.is_ok());
+            auto& [recv_context_id, store_rsp] = recv_result.value();
+            CHECK(recv_context_id == 1);
+            CHECK(store_rsp.command() == dimse::command_field::c_store_rsp);
+            CHECK(store_rsp.status() == dimse::status_success);
+            CHECK(stored_count == 1);
+
+            // Release while the server-side association is idle; the
+            // in-memory peer only calls back into the client when it answers
+            // a request.
+            CHECK(assoc.release().is_ok());
+            server.stop();
+        }
     }
 }

@@ -84,6 +84,7 @@ if(PACS_BUILD_TESTS)
     # Encoding tests
     add_executable(encoding_tests
         tests/encoding/transfer_syntax_test.cpp
+        tests/encoding/transfer_syntax_support_test.cpp
         tests/encoding/vr_type_test.cpp
         tests/encoding/vr_info_test.cpp
         tests/encoding/implicit_vr_codec_test.cpp
@@ -113,10 +114,14 @@ if(PACS_BUILD_TESTS)
         tests/network/pdu_encoder_test.cpp
         tests/network/pdu_decoder_test.cpp
         tests/network/association_test.cpp
+        tests/network/association_tcp_test.cpp
         tests/network/dicom_server_test.cpp
+        tests/network/in_memory_peer_test.cpp
+        tests/network/scp_transfer_syntaxes_test.cpp
         tests/network/dimse/dimse_message_test.cpp
         tests/network/dimse/n_service_test.cpp
         tests/network/detail/accept_worker_test.cpp
+        tests/network/detail/dimse_framing_test.cpp
         tests/network/v2/dicom_association_handler_test.cpp
         tests/network/v2/dicom_server_v2_test.cpp
         tests/network/v2/pdu_framing_test.cpp
@@ -134,6 +139,10 @@ if(PACS_BUILD_TESTS)
             pacs_network
             pacs_services
             Catch2::Catch2WithMain
+    )
+    # Read by tests/network/scp_transfer_syntaxes_test.cpp (Issue #1275)
+    target_compile_definitions(network_tests PRIVATE
+        PACS_CONFORMANCE_STATEMENT_PATH="${CMAKE_SOURCE_DIR}/docs/DICOM_CONFORMANCE_STATEMENT.md"
     )
     # Link pacs_integration for thread_pool_adapter (used by dicom_server)
     if(TARGET pacs_integration)
@@ -359,6 +368,7 @@ if(PACS_BUILD_TESTS)
             tests/web/measurement_endpoints_test.cpp
             tests/web/key_image_endpoints_test.cpp
             tests/web/viewer_state_endpoints_test.cpp
+            tests/web/endpoint_uuid_test.cpp
             tests/web/wado_uri_endpoints_test.cpp
             tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp

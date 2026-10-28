@@ -433,7 +433,8 @@ TEST_CASE("monitoring_adapter thread safety", "[monitoring_adapter][threading]")
 
         std::vector<std::thread> threads;
         for (int i = 0; i < num_threads; i++) {
-            threads.emplace_back([&]() {
+            // Capture i by value: the thread may read it after the loop ends
+            threads.emplace_back([&, i]() {
                 for (int j = 0; j < spans_per_thread; j++) {
                     auto span = monitoring_adapter::start_span("concurrent_op");
                     span.set_tag("thread", std::to_string(i));

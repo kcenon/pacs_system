@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 #include "kcenon/pacs/integration/thread_pool_adapter.h"
@@ -387,8 +388,8 @@ void dicom_server::message_loop(association_info& info) {
             break;
         }
 
-        // Update activity timestamp
-        info.last_activity = clock::now();
+        // Update activity timestamp under associations_mutex_, which
+        // check_idle_timeouts() holds while it reads it from another thread
         touch_association(info.id);
 
         // Dispatch message to service
@@ -597,20 +598,7 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
     negotiation_config.implementation_version_name = config_.implementation_version_name;
     negotiation_config.supported_abstract_syntaxes = supported_sop_classes();
     // Accept compressed and uncompressed transfer syntaxes
-    negotiation_config.supported_transfer_syntaxes = {
-        "1.2.840.10008.1.2.4.201", // HTJ2K Lossless Only
-        "1.2.840.10008.1.2.4.202", // HTJ2K RPCL Lossless Only
-        "1.2.840.10008.1.2.4.203", // HTJ2K (Lossless or Lossy)
-        "1.2.840.10008.1.2.4.90",  // JPEG 2000 Lossless
-        "1.2.840.10008.1.2.4.91",  // JPEG 2000 Lossy
-        "1.2.840.10008.1.2.4.80",  // JPEG-LS Lossless
-        "1.2.840.10008.1.2.4.81",  // JPEG-LS Near-Lossless
-        "1.2.840.10008.1.2.4.70",  // JPEG Lossless
-        "1.2.840.10008.1.2.4.50",  // JPEG Baseline
-        "1.2.840.10008.1.2.5",     // RLE Lossless
-        "1.2.840.10008.1.2.1",     // Explicit VR LE
-        "1.2.840.10008.1.2"        // Implicit VR LE
-    };
+    negotiation_config.supported_transfer_syntaxes = detail::scp_transfer_syntax_list();
 
     // Accept association
     auto assoc = association::accept(rq, negotiation_config);
@@ -631,9 +619,8 @@ Result<associate_ac> dicom_server::simulate_association_request(const associate_
         std::lock_guard<std::mutex> lock(associations_mutex_);
         auto it = associations_.find(id);
         if (it != associations_.end()) {
-            // Link peers
+            // Link peers (set_peer() pairs both ends)
             it->second->assoc.set_peer(client_peer);
-            client_peer->set_peer(&it->second->assoc);
 
             // Submit message loop to thread_pool_adapter instead of creating dedicated thread.
             // We need to capture the raw pointer to info because unique_ptr is in the map.

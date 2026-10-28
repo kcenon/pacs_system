@@ -104,9 +104,11 @@ ctest --output-on-failure
 
 ### Branch Naming
 
-Create a feature branch from `main`:
+Create a feature branch from `develop`, the integration branch. Maintainers promote changes to
+`main` through pull requests from `develop` or `release/*` branches:
 
 ```bash
+git checkout develop
 git checkout -b feature/your-feature-name
 # or
 git checkout -b fix/issue-description
@@ -127,15 +129,12 @@ git checkout -b fix/issue-description
 - Use Doxygen comments for public API (`/** @brief ... */`)
 - English for all code, comments, and documentation
 - C++20 features preferred where appropriate
-- Use `pacs::` namespace for all public API
+- Use the `kcenon::pacs::` namespace for all public API (headers under `include/kcenon/pacs/`)
 
 ### Formatting
 
-The project uses clang-format. Format your code before submitting:
-
-```bash
-clang-format -i src/**/*.cpp include/**/*.h
-```
+The repository has no `.clang-format` file, so running `clang-format` applies its default style,
+not the project's. Format changes by hand to match the surrounding code.
 
 ### Windows Compatibility
 
@@ -162,9 +161,10 @@ auto value = std::max(x, y);
 
 ### Writing Tests
 
-- Use Google Test framework
-- Place unit tests alongside source in `tests/` directories
-- Name test files with `test_` prefix
+- Use Catch2 v3 (`cmake/testing.cmake` fetches v3.4.0)
+- Place tests under `tests/<module>/`, mirroring `src/<module>/`, and add each new file to the
+  module's test executable in `cmake/testing.cmake`
+- Name test files `<component>_test.cpp`
 
 ### Running Tests
 
@@ -174,10 +174,17 @@ cmake -B build -DPACS_BUILD_TESTS=ON
 cmake --build build
 
 # Run all tests
-cd build && ctest --output-on-failure
+ctest --test-dir build --output-on-failure
 
-# Run specific test
-./build/bin/pacs_tests --gtest_filter=DicomElement*
+# Run one module's tests (one executable per module, for example core_tests)
+./build/bin/core_tests
+
+# Run test cases by tag or by name pattern (Catch2 test spec)
+./build/bin/core_tests "[dicom_element]"
+./build/bin/core_tests "dicom_element*"
+
+# Select tests through CTest by name
+ctest --test-dir build -R dicom_element --output-on-failure
 ```
 
 ---
@@ -187,8 +194,8 @@ cd build && ctest --output-on-failure
 1. Ensure all tests pass
 2. Run static analysis (clang-tidy) if available
 3. Push your branch to your fork
-4. Create a Pull Request against `main`
-5. Fill in the PR template with the 5W1H framework
+4. Create a Pull Request against `develop`
+5. Fill in the PR template
 6. Wait for CI to pass and code review
 
 ### Pull Request Guidelines

@@ -339,8 +339,10 @@ void imaging_document_source::set_config(
 
 std::string imaging_document_source::generate_uid() const {
     static constexpr const char* uid_root = "1.2.826.0.1.3680043.2.1545.1";
-    static std::mt19937_64 gen{std::random_device{}()};
-    static std::uniform_int_distribution<uint64_t> dist;
+    // Every instance shares these statics, so each thread owns its engine
+    // (seeded once from std::random_device) instead of sharing one.
+    static thread_local std::mt19937_64 gen{std::random_device{}()};
+    static thread_local std::uniform_int_distribution<uint64_t> dist;
 
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(

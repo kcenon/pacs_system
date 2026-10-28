@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "description": "Third-party CMake packages that the installed ecosystem dependencies require for the source install (docs/PACKAGE_STATE.md, Source install): asio (network_system), simdutf (thread_system) and unofficial-sqlite3 (database_system).",
+  "dependencies": [
+    "asio",
+    "simdutf",
+    "sqlite3"
+  ],
+  "builtin-baseline": "d90a9b159c08169f39adcd1b0f1ac0ca12c4b96c",
+  "overrides": [
+    { "name": "asio", "version": "1.30.2" },
+    { "name": "simdutf", "version": "5.2.5" },
+    { "name": "sqlite3", "version": "3.45.3" }
+  ]
+}

@@ -4,18 +4,31 @@
  */
 
 #include <kcenon/pacs/services/storage_scu.h>
+#include <kcenon/pacs/services/scp_service.h>
 #include <kcenon/pacs/services/storage_scp.h>
 #include <kcenon/pacs/services/storage_status.h>
+#include <kcenon/pacs/network/dicom_server.h>
 #include <kcenon/pacs/network/dimse/command_field.h>
 #include <kcenon/pacs/network/dimse/dimse_message.h>
 #include <kcenon/pacs/network/dimse/status_codes.h>
+#include <kcenon/pacs/network/server_config.h>
 #include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <kcenon/pacs/core/result.h>
+#include <kcenon/pacs/encoding/transfer_syntax.h>
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <future>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <random>
 
 // KCENON_HAS_COMMON_SYSTEM is defined by CMake when common_system is available
 #ifndef KCENON_HAS_COMMON_SYSTEM
@@ -564,4 +577,327 @@ TEST_CASE("store_files with null progress callback", "[services][storage_scu]") 
     auto results = scu.store_files(assoc, paths, nullptr);
 
     REQUIRE(results.size() == 1);
+}
+
+// =============================================================================
+// Presentation Context Negotiation Tests (Issue #1274)
+// =============================================================================
+
+namespace {
+
+using kcenon::pacs::encoding::transfer_syntax;
+
+constexpr const char* implicit_vr_le_uid = "1.2.840.10008.1.2";
+constexpr const char* explicit_vr_le_uid = "1.2.840.10008.1.2.1";
+constexpr const char* explicit_vr_be_uid = "1.2.840.10008.1.2.2";
+constexpr const char* rle_lossless_uid = "1.2.840.10008.1.2.5";
+
+/// Port of the in-process dicom_server; no other test uses it
+constexpr uint16_t negotiation_test_port = 11274;
+
+/// A temporary directory that no other test process shares
+struct unique_temp_directory {
+    std::filesystem::path path;
+
+    explicit unique_temp_directory(const std::string& prefix) {
+        const auto stamp =
+            std::chrono::steady_clock::now().time_since_epoch().count();
+        path = std::filesystem::temp_directory_path() /
+               (prefix + "_" + std::to_string(stamp) + "_" +
+                std::to_string(std::random_device{}()));
+        std::filesystem::create_directories(path);
+    }
+
+    ~unique_temp_directory() {
+        std::error_code ec;
+        std::filesystem::remove_all(path, ec);
+    }
+};
+
+/**
+ * @brief Write a CT Image file in a transfer syntax.
+ *
+ * The file carries no Pixel Data: storage_scu picks the presentation context
+ * from the transfer syntax in the File Meta Information, so the tests need
+ * no codec.
+ */
+std::filesystem::path write_ct_file(const std::filesystem::path& directory,
+                                    const std::string& sop_instance_uid,
+                                    const char* transfer_syntax_uid) {
+    transfer_syntax syntax{transfer_syntax_uid};
+    REQUIRE(syntax.is_valid());
+
+    auto file = dicom_file::create(
+        create_test_dataset(std::string(ct_image_storage_uid), sop_instance_uid),
+        syntax);
+    auto path = directory / (sop_instance_uid + ".dcm");
+    REQUIRE(file.save(path).is_ok());
+    return path;
+}
+
+/**
+ * @brief Storage SCP that records the transfer syntax of the presentation
+ *        context each C-STORE request arrives on, then stores it like
+ *        storage_scp.
+ */
+class context_recording_storage_scp final : public scp_service {
+public:
+    [[nodiscard]] std::vector<std::string> supported_sop_classes() const override {
+        return {std::string(ct_image_storage_uid)};
+    }
+
+    [[nodiscard]] kcenon::pacs::network::Result<std::monostate> handle_message(
+        association& assoc,
+        uint8_t context_id,
+        const dimse_message& request) override {
+        auto syntax = assoc.context_transfer_syntax(context_id);
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            received_[request.affected_sop_instance_uid()] =
+                syntax.is_ok() ? std::string(syntax.value().uid()) : std::string{};
+        }
+        return storage_.handle_message(assoc, context_id, request);
+    }
+
+    [[nodiscard]] std::string_view service_name() const noexcept override {
+        return "Context Recording Storage SCP";
+    }
+
+    /// Transfer syntax of the context each SOP Instance arrived on
+    [[nodiscard]] std::map<std::string, std::string> received() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return received_;
+    }
+
+private:
+    storage_scp storage_;
+    mutable std::mutex mutex_;
+    std::map<std::string, std::string> received_;
+};
+
+/// An SCU paired in memory with an SCP that accepts only some transfer
+/// syntaxes, the way dicom_server pairs them
+struct paired_storage_associations {
+    std::unique_ptr<association> scu;
+    std::unique_ptr<association> scp;
+};
+
+paired_storage_associations pair_with_scp(
+    std::vector<proposed_presentation_context> proposed,
+    std::vector<std::string> scp_transfer_syntaxes) {
+    association_config scu_config;
+    scu_config.calling_ae_title = "STORESCU";
+    scu_config.called_ae_title = "STRICT_SCP";
+    scu_config.proposed_contexts = std::move(proposed);
+    // An unpaired SCU awaiting A-ASSOCIATE-AC, paired by hand below
+    auto scu = std::make_unique<association>(association::propose(scu_config));
+
+    scp_config config;
+    config.ae_title = "STRICT_SCP";
+    config.supported_abstract_syntaxes = {std::string(ct_image_storage_uid)};
+    config.supported_transfer_syntaxes = std::move(scp_transfer_syntaxes);
+    auto scp = std::make_unique<association>(
+        association::accept(scu->build_associate_rq(), config));
+    REQUIRE(scp->is_established());
+    REQUIRE(scu->process_associate_ac(scp->build_associate_ac()));
+
+    scp->set_peer(scu.get());
+    return {std::move(scu), std::move(scp)};
+}
+
+/// Answer one C-STORE request on the SCP end with storage_scp; the future
+/// holds the transfer syntax of the context the request arrived on
+std::future<std::string> answer_one_store(association& scp, storage_scp& storage) {
+    return std::async(std::launch::async, [&scp, &storage]() -> std::string {
+        auto received = scp.receive_dimse(std::chrono::seconds{10});
+        if (received.is_err()) {
+            return {};
+        }
+        const auto& [context_id, request] = received.value();
+        auto syntax = scp.context_transfer_syntax(context_id);
+        (void)storage.handle_message(scp, context_id, request);
+        return syntax.is_ok() ? std::string(syntax.value().uid()) : std::string{};
+    });
+}
+
+}  // namespace
+
+TEST_CASE("storage_scu proposes only transfer syntaxes the DIMSE layer can send",
+          "[services][storage_scu][negotiation]") {
+    using syntax_list = std::vector<std::string>;
+
+    SECTION("an encapsulated transfer syntax is proposed on its own") {
+        for (const char* uid : {"1.2.840.10008.1.2.4.201", "1.2.840.10008.1.2.4.202",
+                                "1.2.840.10008.1.2.4.203", "1.2.840.10008.1.2.4.90",
+                                "1.2.840.10008.1.2.4.80", rle_lossless_uid}) {
+            INFO(uid);
+            CHECK(storage_scu::proposed_transfer_syntaxes(transfer_syntax{uid}) ==
+                  syntax_list{uid});
+        }
+    }
+
+    SECTION("a native transfer syntax is proposed as Little Endian, own syntax first") {
+        CHECK(storage_scu::proposed_transfer_syntaxes(transfer_syntax{implicit_vr_le_uid}) ==
+              syntax_list{implicit_vr_le_uid, explicit_vr_le_uid});
+        CHECK(storage_scu::proposed_transfer_syntaxes(transfer_syntax{explicit_vr_le_uid}) ==
+              syntax_list{explicit_vr_le_uid, implicit_vr_le_uid});
+        CHECK(storage_scu::proposed_transfer_syntaxes(transfer_syntax{explicit_vr_be_uid}) ==
+              syntax_list{explicit_vr_le_uid, implicit_vr_le_uid});
+    }
+
+    SECTION("an unknown transfer syntax is not proposed") {
+        CHECK(storage_scu::proposed_transfer_syntaxes(transfer_syntax{"1.2.3.4"}).empty());
+    }
+
+    SECTION("no registered transfer syntax leads to a Big Endian proposal") {
+        for (const auto& syntax : kcenon::pacs::encoding::all_transfer_syntaxes()) {
+            INFO(syntax.uid());
+            const auto proposed = storage_scu::proposed_transfer_syntaxes(syntax);
+            REQUIRE_FALSE(proposed.empty());
+            CHECK(std::find(proposed.begin(), proposed.end(), explicit_vr_be_uid) ==
+                  proposed.end());
+            if (!syntax.is_encapsulated()) {
+                for (const auto& uid : proposed) {
+                    CHECK((uid == implicit_vr_le_uid || uid == explicit_vr_le_uid));
+                }
+            }
+        }
+    }
+}
+
+TEST_CASE("storage_scu sends an HTJ2K file on an HTJ2K context of the pacs_system SCP",
+          "[services][storage_scu][negotiation][htj2k]") {
+    const std::string ct{ct_image_storage_uid};
+    const std::string htj2k_instance = "1.2.826.0.1.3680043.2.1545.1274.1";
+    const std::string native_instance = "1.2.826.0.1.3680043.2.1545.1274.2";
+
+    for (const char* htj2k_uid : {"1.2.840.10008.1.2.4.201", "1.2.840.10008.1.2.4.202",
+                                  "1.2.840.10008.1.2.4.203"}) {
+        DYNAMIC_SECTION("file in " << htj2k_uid) {
+            unique_temp_directory temp_dir{"pacs_test_storage_scu_htj2k"};
+            const auto htj2k_file = write_ct_file(temp_dir.path, htj2k_instance, htj2k_uid);
+            const auto native_file =
+                write_ct_file(temp_dir.path, native_instance, explicit_vr_le_uid);
+
+            server_config config;
+            config.ae_title = "NEGOTIATION_SCP";
+            config.port = negotiation_test_port;
+            auto service = std::make_shared<context_recording_storage_scp>();
+            dicom_server server{config};
+            server.register_service(service);
+            REQUIRE(server.start().is_ok());
+
+            // One context per (SOP Class, transfer syntax) pair of the files,
+            // as store_scu proposes them
+            association_config scu_config;
+            scu_config.calling_ae_title = "STORESCU";
+            scu_config.called_ae_title = "NEGOTIATION_SCP";
+            scu_config.proposed_contexts.push_back(
+                {1, ct, storage_scu::proposed_transfer_syntaxes(transfer_syntax{htj2k_uid})});
+            scu_config.proposed_contexts.push_back(
+                {3, ct,
+                 storage_scu::proposed_transfer_syntaxes(transfer_syntax{explicit_vr_le_uid})});
+
+            auto connect_result =
+                association::connect("localhost", negotiation_test_port, scu_config);
+            REQUIRE(connect_result.is_ok());
+            auto& assoc = connect_result.value();
+
+            auto htj2k_context = assoc.context_transfer_syntax(1);
+            REQUIRE(htj2k_context.is_ok());
+            CHECK(htj2k_context.value().uid() == htj2k_uid);
+
+            storage_scu scu;
+            auto results = scu.store_files(assoc, {htj2k_file, native_file});
+            REQUIRE(results.size() == 2);
+            CHECK(results[0].is_success());
+            CHECK(results[1].is_success());
+
+            // The SCP side saw each file on a context in the file's syntax
+            const auto received = service->received();
+            REQUIRE(received.size() == 2);
+            CHECK(received.at(htj2k_instance) == htj2k_uid);
+            CHECK(received.at(native_instance) == explicit_vr_le_uid);
+
+            CHECK(assoc.release().is_ok());
+            server.stop();
+        }
+    }
+}
+
+TEST_CASE("storage_scu never sends a compressed file on an Explicit VR LE context",
+          "[services][storage_scu][negotiation]") {
+    unique_temp_directory temp_dir{"pacs_test_storage_scu_strict"};
+    const auto rle_file =
+        write_ct_file(temp_dir.path, "1.2.826.0.1.3680043.2.1545.1274.11", rle_lossless_uid);
+    const auto native_file =
+        write_ct_file(temp_dir.path, "1.2.826.0.1.3680043.2.1545.1274.12", implicit_vr_le_uid);
+
+    // A context that also offers native fallbacks for the compressed file,
+    // as store_scu proposed before #1274; the SCP accepts only Explicit VR LE
+    auto pair = pair_with_scp(
+        {{1, std::string(ct_image_storage_uid),
+          {rle_lossless_uid, explicit_vr_le_uid, implicit_vr_le_uid}}},
+        {explicit_vr_le_uid});
+    auto accepted = pair.scu->context_transfer_syntax(1);
+    REQUIRE(accepted.is_ok());
+    REQUIRE(accepted.value().uid() == explicit_vr_le_uid);
+
+    storage_scu scu;
+    storage_scp storage;
+
+    SECTION("the compressed file fails cleanly and nothing is sent") {
+        auto result = scu.store_file(*pair.scu, rle_file);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::store_no_accepted_context);
+        CHECK(result.error().message.find(rle_lossless_uid) != std::string::npos);
+
+        auto received = pair.scp->receive_dimse(std::chrono::milliseconds{200});
+        REQUIRE(received.is_err());
+        CHECK(received.error().code == kcenon::pacs::error_codes::receive_timeout);
+    }
+
+    SECTION("a batch reports the compressed file and still sends the native file") {
+        auto answered = answer_one_store(*pair.scp, storage);
+        auto results = scu.store_files(*pair.scu, {rle_file, native_file});
+        REQUIRE(results.size() == 2);
+        CHECK(results[0].is_error());
+        CHECK(results[0].error_comment.find(rle_lossless_uid) != std::string::npos);
+        CHECK(results[1].is_success());
+
+        // The native file went out on the Explicit VR LE context, and it was
+        // the only request the SCP received
+        REQUIRE(answered.wait_for(std::chrono::seconds{10}) == std::future_status::ready);
+        CHECK(answered.get() == explicit_vr_le_uid);
+        CHECK(pair.scp->receive_dimse(std::chrono::milliseconds{200}).is_err());
+    }
+}
+
+TEST_CASE("storage_scu never sends a native dataset on a compressed context",
+          "[services][storage_scu][negotiation]") {
+    const std::string ct{ct_image_storage_uid};
+    auto pair = pair_with_scp({{1, ct, {rle_lossless_uid}}}, {rle_lossless_uid});
+    auto dataset = create_test_dataset(ct, "1.2.826.0.1.3680043.2.1545.1274.21");
+    storage_scu scu;
+
+    SECTION("store() treats the dataset as native and does not send it") {
+        auto result = scu.store(*pair.scu, dataset);
+        REQUIRE(result.is_err());
+        CHECK(result.error().code == kcenon::pacs::error_codes::store_no_accepted_context);
+
+        auto received = pair.scp->receive_dimse(std::chrono::milliseconds{200});
+        REQUIRE(received.is_err());
+        CHECK(received.error().code == kcenon::pacs::error_codes::receive_timeout);
+    }
+
+    SECTION("store() with the dataset's transfer syntax sends it on the matching context") {
+        storage_scp storage;
+        auto answered = answer_one_store(*pair.scp, storage);
+        auto result = scu.store(*pair.scu, dataset, transfer_syntax::rle_lossless);
+        REQUIRE(result.is_ok());
+        CHECK(result.value().is_success());
+
+        REQUIRE(answered.wait_for(std::chrono::seconds{10}) == std::future_status::ready);
+        CHECK(answered.get() == rle_lossless_uid);
+    }
 }
