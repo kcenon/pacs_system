@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    "uncompressed",
+    "jpeg-lossless",
+    "jpeg-ls-lossless",
+    "rle-lossless"
+  ],
+  "components": [
+    {
+      "id": "component.core_tests",
+      "binary": "core_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.utilities_tests",
+      "binary": "utilities_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.encoding_tests",
+      "binary": "encoding_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.network_tests",
+      "binary": "network_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.services_tests",
+      "binary": "services_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.storage_tests",
+      "binary": "storage_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.security_tests",
+      "binary": "security_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.client_tests",
+      "binary": "client_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.workflow_tests",
+      "binary": "workflow_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.ai_tests",
+      "binary": "ai_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.monitoring_tests",
+      "binary": "monitoring_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.di_tests",
+      "binary": "di_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.web_tests",
+      "binary": "web_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_integration_tests",
+      "binary": "pacs_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_ihe_xds_tests",
+      "binary": "pacs_ihe_xds_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.xds_gazelle_integration_tests",
+      "binary": "xds_gazelle_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_xds_atna_integration_tests",
+      "binary": "pacs_xds_atna_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_cli_roundtrip",
+      "binary": "pacs_cli_roundtrip",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.concurrency_tests",
+      "binary": "concurrency_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.e2e",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "~[.slow]~[stress]~[tls]"
+      ],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.v2_tls",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[tls][v2]"
+      ],
+      "timeout_seconds": 90
+    },
+    {
+      "id": "component.stress",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[stress]"
+      ],
+      "timeout_seconds": 180
+    },
+    {
+      "id": "component.cli",
+      "kind": "ctest",
+      "args": [
+        "--label-regex",
+        "cli"
+      ],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.build_contract",
+      "kind": "ctest",
+      "args": [
+        "--tests-regex",
+        "^(pacs_factory_result_compat|storage_boundary_guard)$"
+      ],
+      "timeout_seconds": 60
+    },
+    {
+      "id": "component.discovery",
+      "kind": "discovery",
+      "args": [],
+      "timeout_seconds": 60
+    },
+    {
+      "id": "component.legacy_tls",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[tls]~[v2]"
+      ],
+      "timeout_seconds": 180
+    }
+  ],
+  "interop_cases": [
+    "peer.preflight",
+    "peer.tls",
+    "fixtures",
+    "echo.primary",
+    "echo.secondary",
+    "store.primary",
+    "store.secondary",
+    "move.scu",
+    "mwl.scu",
+    "mwl.sequence",
+    "echo.scp",
+    "store.scp",
+    "query.scp",
+    "get.scp",
+    "move.scp",
+    "tls.scp",
+    "query.ct",
+    "query.mr",
+    "query.cr",
+    "integrity.ct",
+    "integrity.mr",
+    "integrity.cr",
+    "get.ct",
+    "get.mr",
+    "get.cr"
+  ],
+  "features": [
+    {
+      "id": "core",
+      "components": [
+        "component.core_tests",
+        "component.utilities_tests",
+        "component.pacs_cli_roundtrip",
+        "component.cli"
+      ],
+      "interop": [],
+      "gaps": [
+        "Independent malformed/undefined-length sequence and big-endian raw-value regression fixtures."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1302",
+        "https://github.com/kcenon/pacs_system/issues/1293"
+      ]
+    },
+    {
+      "id": "encoding",
+      "components": [
+        "component.encoding_tests"
+      ],
+      "interop": [
+        "fixtures",
+        "integrity.ct",
+        "integrity.mr",
+        "integrity.cr"
+      ],
+      "gaps": [
+        "JPEG 2000, HTJ2K, JPEG XL, HEVC and all supported syntax/SOP combinations need independent peer fixtures."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1292",
+        "https://github.com/kcenon/pacs_system/issues/1299"
+      ]
+    },
+    {
+      "id": "association",
+      "components": [
+        "component.network_tests"
+      ],
+      "interop": [
+        "echo.primary",
+        "echo.secondary",
+        "echo.scp"
+      ],
+      "gaps": [],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1240",
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "storage_service",
+      "components": [
+        "component.services_tests"
+      ],
+      "interop": [
+        "store.primary",
+        "store.secondary",
+        "store.scp"
+      ],
+      "gaps": [
+        "Extend CT/MR/CR transport fixtures to every advertised Storage SOP class."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1303",
+        "https://github.com/kcenon/pacs_system/issues/1292"
+      ]
+    },
+    {
+      "id": "query",
+      "components": [
+        "component.services_tests"
+      ],
+      "interop": [
+        "query.ct",
+        "query.mr",
+        "query.cr",
+        "query.scp"
+      ],
+      "gaps": [
+        "External patient/study/series levels, wildcard/date/unicode and cancel cases beyond IMAGE queries."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "move",
+      "components": [
+        "component.services_tests"
+      ],
+      "interop": [
+        "move.scu",
+        "move.scp"
+      ],
+      "gaps": [
+        "Failure/cancel/unknown-destination sub-operation counters and timeout/retry paths."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1304"
+      ]
+    },
+    {
+      "id": "get",
+      "components": [
+        "component.services_tests"
+      ],
+      "interop": [
+        "get.ct",
+        "get.mr",
+        "get.cr",
+        "get.scp"
+      ],
+      "gaps": [
+        "Refused role negotiation, cancellation and mixed failure counters."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1306"
+      ]
+    },
+    {
+      "id": "mwl_mpps",
+      "components": [
+        "component.services_tests",
+        "component.e2e"
+      ],
+      "interop": [
+        "mwl.scu",
+        "mwl.sequence"
+      ],
+      "gaps": [
+        "Independent MPPS N-CREATE/N-SET peer and MWL SCP roundtrip."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1258",
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "normalized_services",
+      "components": [
+        "component.services_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "Independent Storage Commitment/UPS/Print/N-GET/PIR workflows, including reverse event reports."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "security",
+      "components": [
+        "component.security_tests",
+        "component.v2_tls",
+        "component.legacy_tls"
+      ],
+      "interop": [
+        "tls.scp"
+      ],
+      "gaps": [
+        "TLS client certificate rejection and protocol-version matrix; external ATNA receiver and nested anonymization roundtrip."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1305",
+        "https://github.com/kcenon/pacs_system/issues/1300"
+      ]
+    },
+    {
+      "id": "storage_backend",
+      "components": [
+        "component.storage_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "PACS archive restart/crash recovery with on-disk/database reconciliation under transfer."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "cloud",
+      "components": [
+        "component.storage_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "S3/Azure SDK builds against emulators and real provider semantics; existing tests use mocks."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "web",
+      "components": [
+        "component.web_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "STOW->DIMSE retrieve and DIMSE store->QIDO/WADO over HTTP with authentication."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "workflow",
+      "components": [
+        "component.client_tests",
+        "component.workflow_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "Routing/prefetch/sync/jobs against both external PACS nodes, including retries and restart."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "ai",
+      "components": [
+        "component.ai_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "Independent inference-service request/result roundtrip and failure handling."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "ihe",
+      "components": [
+        "component.pacs_ihe_xds_tests",
+        "component.xds_gazelle_integration_tests",
+        "component.pacs_xds_atna_integration_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "External XDS registry/repository/ATNA receiver; current registry tests use an in-process mock."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "monitoring_di",
+      "components": [
+        "component.monitoring_tests",
+        "component.di_tests",
+        "component.pacs_integration_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "Metrics/readiness/audit under external transfer, induced failure and shutdown."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "frontend",
+      "components": [],
+      "interop": [],
+      "gaps": [
+        "Browser workflow tests against live authenticated PACS APIs; build/lint is not behavioral verification."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "reliability",
+      "components": [
+        "component.concurrency_tests",
+        "component.stress"
+      ],
+      "interop": [
+        "peer.preflight",
+        "peer.tls"
+      ],
+      "gaps": [
+        "Long-duration soak, sanitizer/fuzz campaigns and loss-of-power recovery are separate required evidence."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "packaging",
+      "components": [
+        "component.build_contract",
+        "component.discovery"
+      ],
+      "interop": [],
+      "gaps": [
+        "C++ module, installed consumer and supported OS/compiler matrix; see existing source-install/modules CI."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1266",
+        "https://github.com/kcenon/pacs_system/issues/1288"
+      ]
+    }
+  ]
+}

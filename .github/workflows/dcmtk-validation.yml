@@ -1,0 +1,75 @@
+name: PACS Full Validation with DCMTK Docker
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'validation/**'
+      - 'scripts/run_dcmtk_validation.py'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/dcmtk-validation.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'include/**'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - 'validation/**'
+      - 'scripts/run_dcmtk_validation.py'
+      - '.github/actions/checkout-kcenon-deps/**'
+      - '.github/workflows/dcmtk-validation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pacs-dcmtk-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate-tests:
+    name: Validation report contract
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s validation/dcmtk/tests -v
+
+  functional-validation:
+    name: PACS functions against DCMTK Docker
+    needs: gate-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run components and four peer profiles sequentially
+        # Known product failures and missing external coverage remain failures.
+        # This job must not be treated as proof of full coverage until its manifest is satisfied.
+        run: python3 scripts/run_dcmtk_validation.py --output "$RUNNER_TEMP/pacs-validation" --jobs 2
+      - name: Publish actual feature results
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/pacs-validation/summary.txt" ]; then
+            cat "$RUNNER_TEMP/pacs-validation/summary.txt" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Validation did not produce a summary; coverage is unknown.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Preserve all failures and provenance
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pacs-dcmtk-validation
+          path: ${{ runner.temp }}/pacs-validation
+          if-no-files-found: error
+          retention-days: 14

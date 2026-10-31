@@ -73,9 +73,9 @@ CI runs the unit tests ([ci.yml](.github/workflows/ci.yml)) and uploads coverage
 The [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) is the source for the
 supported SOP classes (section 3): Verification; CT, MR, US, XA, XRF, X-Ray, NM, PET, RT, SR, SEG,
 MG, CR, and SC Storage; Patient and Study Root Query/Retrieve; Modality Worklist; MPPS; Storage
-Commitment; and Basic Grayscale Print, Basic Color Print, and Printer. The
-[DCMTK interoperability workflow](.github/workflows/dcmtk-interop.yml) exercises C-ECHO, C-STORE,
-C-FIND, and C-MOVE against DCMTK tools on Ubuntu and macOS.
+Commitment; and Basic Grayscale Print, Basic Color Print, and Printer. Test routines:
+[host DCMTK interoperability](.github/workflows/dcmtk-interop.yml) and
+[Docker functional validation](validation/dcmtk/README.md), which reports failures and coverage gaps for 20 feature groups.
 
 ### Transfer Syntax Support
 

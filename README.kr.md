@@ -72,8 +72,9 @@ CI는 단위 테스트를 실행하고([ci.yml](.github/workflows/ci.yml)) 커�
 지원 SOP 클래스의 출처는 [DICOM 적합성 선언문](docs/DICOM_CONFORMANCE_STATEMENT.md) 3절입니다:
 Verification; CT, MR, US, XA, XRF, X-Ray, NM, PET, RT, SR, SEG, MG, CR, SC Storage; Patient 및 Study
 Root Query/Retrieve; Modality Worklist; MPPS; Storage Commitment; Basic Grayscale Print, Basic Color
-Print, Printer. [DCMTK 상호운용성 워크플로](.github/workflows/dcmtk-interop.yml)는 Ubuntu와 macOS에서
-DCMTK 도구를 상대로 C-ECHO, C-STORE, C-FIND, C-MOVE를 실행합니다.
+Print, Printer. 검증 루틴은 [호스트 DCMTK 상호운용성 검사](.github/workflows/dcmtk-interop.yml)와
+[Docker 기능 검증](validation/dcmtk/README.md)이며, 후자는 네 전송 프로필에서 PACS 기능을 검사하고
+20개 기능군별 실제 실패와 외부 검증 누락을 보고합니다.
 
 ### 전송 구문 지원
 
