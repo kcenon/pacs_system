@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/kcenon/dcmtk-docker.git",
+  "revision": "104bdd2851e349e7ca7c21011f764a699f5a4232",
+  "profiles": ["uncompressed", "jpeg-lossless", "jpeg-ls-lossless", "rle-lossless"]
+}
