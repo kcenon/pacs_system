@@ -134,8 +134,12 @@ class Driver:
                 try: self.command(command,log)
                 except Exception as exc: self.errors.append(f'{profile}: {exc}')
             if not self.args.keep:
-                try: self.command([*dc,'down','--volumes','--remove-orphans','--timeout','5'],f'{profile}/cleanup.log')
-                except Exception as exc: self.errors.append(f'{profile}: cleanup failed: {exc}')
+                # `compose down` can retain a `compose run` container whose service
+                # is behind an inactive profile. Remove this run's named container.
+                for command in (['docker','rm','-f',container],
+                                [*dc,'down','--volumes','--remove-orphans','--timeout','5']):
+                    try: self.command(command,f'{profile}/cleanup.log')
+                    except Exception as exc: self.errors.append(f'{profile}: cleanup failed: {exc}')
             report = directory/'evidence/results.json'
             if report.exists():
                 try: self.reports.append(json.loads(report.read_text()))
