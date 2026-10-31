@@ -232,8 +232,11 @@ class Validation:
     def move_scu(self):
         ds = self.data['ct'][0]
         before = json.loads(self.command([self.bin/'query_scu','pacs-server-2','11112','DCMTK_PAC2',
-                                          '--study-uid',ds.StudyInstanceUID,'--format','json']))
-        require(before['resultCount']==0, 'Destination contains the study before C-MOVE')
+                                          '--study-uid',ds.StudyInstanceUID,'--format','json'],allowed=(0,1)))
+        # query_scu documents exit 1 for an empty successful result. The required
+        # empty JSON result distinguishes this precondition from a command error.
+        require(before['resultCount']==0 and before['results']==[],
+                'Destination contains the study before C-MOVE')
         self.command([self.bin/'retrieve_scu','pacs-server','11112','DCMTK_PACS','--mode','move',
                       '--dest-ae','DCMTK_PAC2','--study-uid',ds.StudyInstanceUID,'--no-progress'])
         directory = self.output/'moved-ct'

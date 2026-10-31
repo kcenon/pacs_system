@@ -115,6 +115,22 @@ class OracleTests(unittest.TestCase):
         self.assertEqual(self.v.results[-1]['status'],'blocked')
         self.assertEqual(self.v.results[-1]['tests'],0)
 
+    def test_move_accepts_empty_destination_query_exit_one(self):
+        self.v.bin.mkdir()
+        query=self.v.bin/'query_scu'
+        query.write_text('#!/usr/bin/env python3\n'
+                         'print(\'{"resultCount":0,"results":[]}\')\nraise SystemExit(1)\n')
+        query.chmod(0o755)
+        retrieve=self.v.bin/'retrieve_scu'
+        retrieve.write_text('#!/usr/bin/env python3\nraise SystemExit(0)\n')
+        retrieve.chmod(0o755)
+        self.v.data['ct']=[self.ds]
+        def receive(host,ae,study,directory):
+            directory.mkdir()
+            self.ds.save_as(directory/'object.dcm')
+        self.v.get_oracle=receive
+        self.assertIn('1 exact',self.v.move_scu())
+
 
 if __name__=='__main__':
     unittest.main()
