@@ -363,6 +363,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_web)
         add_executable(web_tests
             tests/web/rest_server_test.cpp
+            tests/web/rest_http_smoke_test.cpp
             tests/web/system_endpoints_test.cpp
             tests/web/patient_study_endpoints_test.cpp
             tests/web/worklist_audit_endpoints_test.cpp

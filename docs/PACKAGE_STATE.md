@@ -200,7 +200,8 @@ intentional:
 |------------|-------------------|--------------|--------|
 | `vcpkg-cmake`, `vcpkg-cmake-config` | absent | host dependencies | Needed only by a portfile build |
 | `overrides` | exact third-party pins | absent | vcpkg ignores `overrides` in ports; the root pins feed version-drift checks |
-| `rest-api` feature Crow floor | `>= 1.3.1` | `>= 1.2.1` | The overlay mirrors the canonical port; the root build pins Crow 1.3.1 |
+| `rest-api` feature Crow floor | `>= 1.3.2` | `>= 1.2.1` | The overlay mirrors the canonical port; the root build pins Crow 1.3.2 |
+| `codecs` feature OpenJPH floor | `>= 0.30.1` | `>= 0.21.0` | The root and FetchContent pin 0.30.1, including allocator and generic decoder alignment fixes; the registry port revision is 0 |
 | `pugixml`, `curl[openssl]` | core dependencies | absent | IHE XDS.b actors (#1128-#1131) exist only in the current source tree, not in `v0.1.0` |
 | `testing` feature | `benchmark` only (Catch2 via FetchContent) | `gtest` + `benchmark` | The overlay mirrors the canonical port for the `v0.1.0` test setup |
 | `KCENON_WITH_*` options | n/a | legacy `PACS_WITH_*` only | `v0.1.0` predates the canonical option shim |
@@ -209,13 +210,13 @@ The default root build resolves published registry ports, which install legacy p
 (`ContainerSystem`, `NetworkSystem`, `LoggerSystem`). `cmake/dependencies.cmake` accepts those
 names after the current `container_system`/`network_system`/`logger_system` names, the export
 bridges link whichever package was found, and the installed `pacs_system-config.cmake` accepts
-the same legacy names. `cmake --preset vcpkg` therefore works with the reviewed registry
-baseline, and a source install passes `tests/cmake_consumer`.
+the same legacy names. Run the verification sequence below for the selected registry
+baseline; the installed-consumer and Windows matrix is tracked by #1266 and #1327.
 
 ## Dependency provenance
 
 `dependency-manifest.json` records the current FetchContent pins (SQLite
-`sqlite-amalgamation-3450300` / 3.45.3, OpenJPH 0.21.5, Crow v1.3.1, ASIO `asio-1-30-2`) and two
+`sqlite-amalgamation-3450300` / 3.45.3, OpenJPH 0.30.1, Crow v1.3.2, ASIO `asio-1-30-2`) and two
 sets of ecosystem SHAs:
 
 - `internal_ecosystem[].version`: the SHAs CI actually checks out through
@@ -240,8 +241,15 @@ owned by #1164 and happen only after every Tier 0-4 dependency ships v1.0.
 
 ## Verification
 
-1. Pin vcpkg to the root builtin baseline (`d90a9b159c08169f39adcd1b0f1ac0ca12c4b96c`); older
-   vcpkg checkouts lack the port versions that baseline selects.
+1. Pin vcpkg to the root builtin baseline (`33f8517b96502c15c69b22512bbd7797195f24fc`); older
+   vcpkg checkouts lack the port versions that baseline selects. This commit contains Crow
+   1.3.2 and OpenJPH 0.30.1. Run `python3 scripts/check_vcpkg_overrides.py --vcpkg-root <checkout>`
+   to check every override, including its port revision, against that exact commit's version
+   database. The check is offline; fetch the commit before running it. The required SOUP
+   Version Drift Detection job runs this check and its rejection tests. Availability does
+   not establish a successful feature build: install the root manifest with
+   `vcpkg install --x-feature=codecs --x-feature=rest-api`, then build with
+   `PACS_FETCH_OPENJPH=OFF`, `PACS_FETCH_CROW=OFF`, and `PACS_REQUIRE_CODECS=ON`.
 2. Install through the overlay with a fresh cache: `VCPKG_BINARY_SOURCES=clear`, empty
    `VCPKG_DOWNLOADS` and `X_VCPKG_REGISTRIES_CACHE`, and a consumer manifest that depends on
    `kcenon-pacs-system` with `overlay-ports` pointing at `vcpkg-ports/`. vcpkg verifies the

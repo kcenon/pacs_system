@@ -49,12 +49,12 @@ category: "PROJ"
 |----|------|-------------|---------|---------|---------------------|-------------|-----------------|
 | SOUP-008 | [SQLite3](https://www.sqlite.org/) | SQLite Consortium | 3.45.1 | Public Domain | Local metadata database storage | B | None |
 | SOUP-009 | [OpenSSL](https://www.openssl.org/) | OpenSSL Project | System-provided | Apache-2.0 | TLS encryption, certificate management | C | CVE tracking via OS vendor |
-| SOUP-010 | [Crow](https://github.com/CrowCpp/Crow) | CrowCpp | v1.3.1 | BSD-3-Clause | REST API / DICOMweb HTTP server | B | None |
+| SOUP-010 | [Crow](https://github.com/CrowCpp/Crow) | CrowCpp | v1.3.2 | BSD-3-Clause | REST API / DICOMweb HTTP server | B | None |
 | SOUP-011 | [ASIO](https://github.com/chriskohlhoff/asio) | Christopher Kohlhoff | asio-1-30-2 | BSL-1.0 | Async I/O for network operations | B | None |
 | SOUP-012 | [libjpeg-turbo](https://libjpeg-turbo.org/) | libjpeg-turbo Project | System-provided | IJG/BSD-3-Clause | JPEG image compression codec | B | None |
 | SOUP-013 | [OpenJPEG](https://www.openjpeg.org/) | UCLouvain | System-provided | BSD-2-Clause | JPEG 2000 image compression codec | B | None |
 | SOUP-014 | [CharLS](https://github.com/team-charls/charls) | Team CharLS | System-provided | BSD-3-Clause | JPEG-LS image compression codec | B | None |
-| SOUP-015 | [OpenJPH](https://github.com/aous72/OpenJPH) | Aous Naman | 0.21.5 | BSD-2-Clause | HTJ2K (High Throughput JPEG 2000) codec | B | (1) `mem_elastic_allocator` constructs `coded_lists` objects at unaligned offsets (undefined behavior). UBSan's alignment check is suppressed for these OpenJPH files in `.github/sanitizers/ubsan.supp`; no fault has been observed on x86-64 or arm64. Fixed upstream in 0.27.0 ([aous72/OpenJPH#262](https://github.com/aous72/OpenJPH/pull/262)). (2) On arm64, the generic reversible colour transform left-shifts negative samples (`ojph_colour.cpp:452`; undefined behavior, since OpenJPH builds as C++14). Seen under a local UBSan build; not suppressed, and the x86-64 CI uses the SSE2/AVX2 transform instead. (3) 0.21.0&ndash;0.21.4 crash in the AVX-512 block encoder (aligned stores to unaligned stack arrays, #1257), so a system-provided OpenJPH on x86-64 must be 0.21.5 or later or built with `OJPH_DISABLE_AVX512=ON`. |
+| SOUP-015 | [OpenJPH](https://github.com/aous72/OpenJPH) | Aous Naman | 0.30.1 | BSD-2-Clause | HTJ2K (High Throughput JPEG 2000) codec | B | (1) The prior `coded_lists` allocator alignment defect is fixed by [OpenJPH#262](https://github.com/aous72/OpenJPH/pull/262); generic decoder unaligned loads seen in 0.27.2 are fixed by [OpenJPH#291](https://github.com/aous72/OpenJPH/pull/291). All 15 focused HTJ2K cases pass with alignment instrumentation on arm64; the old alignment suppressions are removed. (2) The generic reversible colour transform still left-shifts negative samples (`ojph_colour.cpp:467`; undefined in the dependency's C++14 build). A full UBSan run reproduces this on arm64; it remains unsuppressed and tracked by #1299. (3) Historical 0.21.0&ndash;0.21.4 AVX-512 encoder faults (#1257) require a system-provided OpenJPH on x86-64 to be 0.21.5 or later, or built with `OJPH_DISABLE_AVX512=ON`. |
 | SOUP-016 | [fmt](https://github.com/fmtlib/fmt) | Victor Zverovich | 10.2.1 | MIT | String formatting library | A | None |
 | SOUP-017 | [Catch2](https://github.com/catchorg/Catch2) | Catch2 Authors | v3.4.0 | BSL-1.0 | Unit test framework (test only) | A | None |
 | SOUP-018 | [ICU](https://icu.unicode.org/) | Unicode Consortium | vcpkg baseline | Unicode-3.0 | Character set conversion (DICOM Specific Character Set) | B | None |
@@ -113,6 +113,15 @@ When updating any SOUP dependency:
 3. Verify no new known anomalies (check CVE databases)
 4. Run full CI/CD pipeline to confirm compatibility
 5. Document the change in the PR description
+
+For root vcpkg overrides, also run `scripts/check_vcpkg_overrides.py --vcpkg-root <checkout>`.
+It reads version files from the configured builtin baseline commit, not the checkout's HEAD,
+and checks exact port revisions. Crow 1.3.2 and OpenJPH 0.30.1 share baseline
+`33f8517b96502c15c69b22512bbd7797195f24fc`; FetchContent uses the matching upstream releases
+`v1.3.2` and `0.30.1` (both port revision 0). OpenJPH 0.27.2 was evaluated but its generic
+decoder failed UBSan alignment checks; 0.30.1 includes the subsequent memcpy load fix
+([OpenJPH#291](https://github.com/aous72/OpenJPH/pull/291)). Database availability and FetchContent version agreement
+are required checks in SOUP Version Drift Detection; feature builds remain separate checks.
 
 ---
 

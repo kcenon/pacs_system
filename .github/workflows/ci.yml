@@ -113,6 +113,7 @@ jobs:
     - name: Setup vcpkg
       uses: kcenon/common_system/.github/actions/setup-vcpkg@main
       with:
+        vcpkg-commit: '33f8517b96502c15c69b22512bbd7797195f24fc'
         extra-cache-key: 'pacs-system'
         manifest-dir: 'pacs_system'
 

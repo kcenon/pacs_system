@@ -194,7 +194,8 @@ targets 파일 없이 config만 설치하므로, 이 빌드로 만든 설치본�
 |------|-------------------|---------------|------|
 | `vcpkg-cmake`, `vcpkg-cmake-config` | 없음 | host 의존성 | portfile 빌드에서만 필요 |
 | `overrides` | 서드파티 정확 고정 | 없음 | vcpkg는 포트의 `overrides`를 무시하며, 루트 고정값은 version-drift 검사에 사용 |
-| `rest-api` 기능의 Crow 하한 | `>= 1.3.1` | `>= 1.2.1` | 오버레이는 캐노니컬 포트를 따르고, 루트 빌드는 Crow 1.3.1로 고정 |
+| `rest-api` 기능의 Crow 하한 | `>= 1.3.2` | `>= 1.2.1` | 오버레이는 캐노니컬 포트를 따르고, 루트 빌드는 Crow 1.3.2로 고정 |
+| `codecs` 기능의 OpenJPH 하한 | `>= 0.30.1` | `>= 0.21.0` | 루트와 FetchContent는 할당기 및 범용 디코더 정렬 문제가 수정된 0.30.1을 사용하며, 레지스트리 포트 리비전은 0 |
 | `pugixml`, `curl[openssl]` | core 의존성 | 없음 | IHE XDS.b 액터(#1128-#1131)는 현재 소스 트리에만 있고 `v0.1.0`에는 없음 |
 | `testing` 기능 | `benchmark`만 (Catch2는 FetchContent) | `gtest` + `benchmark` | 오버레이는 `v0.1.0` 테스트 구성을 위한 캐노니컬 포트를 따름 |
 | `KCENON_WITH_*` 옵션 | 해당 없음 | 레거시 `PACS_WITH_*`만 | `v0.1.0`은 캐노니컬 옵션 shim보다 이전 버전 |
@@ -202,13 +203,14 @@ targets 파일 없이 config만 설치하므로, 이 빌드로 만든 설치본�
 기본 루트 빌드는 게시된 레지스트리 포트를 해석하며, 이 포트들은 레거시 패키지 이름(`ContainerSystem`,
 `NetworkSystem`, `LoggerSystem`)을 설치합니다. `cmake/dependencies.cmake`는 현재 이름
 (`container_system`/`network_system`/`logger_system`) 다음으로 이 이름들을 허용하고, export 브리지는 실제로
-찾은 패키지에 링크하며, 설치된 `pacs_system-config.cmake`도 같은 레거시 이름을 허용합니다. 따라서 검토된
-레지스트리 baseline으로 `cmake --preset vcpkg`가 동작하고, 소스 설치본은 `tests/cmake_consumer`를 통과합니다.
+찾은 패키지에 링크하며, 설치된 `pacs_system-config.cmake`도 같은 레거시 이름을 허용합니다. 선택한
+레지스트리 baseline에 대해 아래 검증 절차를 실행하세요. 설치된 패키지의 consumer 및 Windows 검증은
+#1266과 #1327에서 추적합니다.
 
 ## 의존성 출처
 
 `dependency-manifest.json`은 현재 FetchContent 고정값(SQLite `sqlite-amalgamation-3450300` / 3.45.3,
-OpenJPH 0.21.5, Crow v1.3.1, ASIO `asio-1-30-2`)과 두 가지 생태계 SHA 집합을 기록합니다:
+OpenJPH 0.30.1, Crow v1.3.2, ASIO `asio-1-30-2`)과 두 가지 생태계 SHA 집합을 기록합니다:
 
 - `internal_ecosystem[].version`: CI가 `.github/actions/checkout-kcenon-deps`로 실제 체크아웃하는 SHA이며
   `docs/SOUP.md`에도 기록됩니다. `scripts/check_manifest_drift.py`가 세 곳의 일치를 유지합니다.
@@ -232,7 +234,14 @@ OpenJPH 0.21.5, Crow v1.3.1, ASIO `asio-1-30-2`)과 두 가지 생태계 SHA 집
 
 ## 검증
 
-1. vcpkg를 루트 builtin baseline(`d90a9b159c08169f39adcd1b0f1ac0ca12c4b96c`)으로 고정합니다. 더 오래된
+1. vcpkg를 루트 builtin baseline(`33f8517b96502c15c69b22512bbd7797195f24fc`)으로 고정합니다.
+   이 커밋에는 Crow 1.3.2와 OpenJPH 0.30.1이 있습니다.
+   `python3 scripts/check_vcpkg_overrides.py --vcpkg-root <checkout>`은 이 커밋의 버전 데이터베이스를
+   사용하여 모든 override와 포트 리비전을 오프라인으로 검사합니다. 먼저 해당 커밋을 가져와야 합니다.
+   필수 SOUP Version Drift Detection 작업에서 이 검사와 거부 사례 테스트를 실행합니다.
+   버전 존재 여부와 기능 빌드 성공은 별개입니다. 루트 매니페스트에서
+   `vcpkg install --x-feature=codecs --x-feature=rest-api`를 실행한 뒤
+   `PACS_FETCH_OPENJPH=OFF`, `PACS_FETCH_CROW=OFF`, `PACS_REQUIRE_CODECS=ON`으로 빌드하세요. 더 오래된
    vcpkg 체크아웃에는 해당 baseline이 선택하는 포트 버전이 없습니다.
 2. 새 캐시로 오버레이를 통해 설치합니다: `VCPKG_BINARY_SOURCES=clear`, 비어 있는 `VCPKG_DOWNLOADS`와
    `X_VCPKG_REGISTRIES_CACHE`, 그리고 `overlay-ports`가 `vcpkg-ports/`를 가리키면서

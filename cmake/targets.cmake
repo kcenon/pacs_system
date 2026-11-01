@@ -173,12 +173,12 @@ if(PACS_HTJ2K_FOUND)
             )
         endif()
     endif()
-    # FetchContent compatibility: add include bridge for openjph/ prefix
-    if(DEFINED _openjph_compat_include)
+    # The source header parent provides the installed-style openjph/ prefix.
+    if(DEFINED _pacs_openjph_source_include)
         pacs_add_build_interface_include_dirs(
             pacs_encoding
             PUBLIC
-            "${_openjph_compat_include}"
+            "${_pacs_openjph_source_include}"
         )
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)

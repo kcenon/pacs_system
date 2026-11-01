@@ -7,20 +7,9 @@
 # quarantined in ctest-quarantine-<sanitizer>.txt with its issue instead.
 # A pattern matches the source file of the report as a substring.
 
-# OpenJPH 0.21.5 (FetchContent pin in cmake/dependencies.cmake):
-# mem_elastic_allocator::get_buffer() advances its store by
-# needed_bytes + sizeof(coded_lists) without rounding, so each coded_lists
-# after the first is constructed at an arbitrary byte offset
-# (others/ojph_mem.cpp:91-118). The constructor and every later access through
-# such an object are misaligned; the files below are where those accesses
-# are reported. Only the alignment check is suppressed, and only in these
-# OpenJPH files. Fixed upstream by aous72/OpenJPH#262 (commit 0ec2184, first
-# released in 0.27.0); remove these entries when the OpenJPH pin is 0.27.0
-# or later.
-alignment:openjph-src/src/core/others/ojph_mem.cpp
-alignment:openjph-src/src/core/common/ojph_mem.h
-alignment:openjph-src/src/core/coding/ojph_block_encoder
-alignment:openjph-src/src/core/codestream/ojph_bitbuffer_read.h
-alignment:openjph-src/src/core/codestream/ojph_bitbuffer_write.h
-alignment:openjph-src/src/core/codestream/ojph_codeblock.cpp
-alignment:openjph-src/src/core/codestream/ojph_precinct.cpp
+# OpenJPH allocator alignment suppressions were removed with the 0.30.1 pin
+# (#1288), after all 15 HTJ2K cases passed with the codec and OpenJPH compiled
+# with -fsanitize=alignment and no suppression file on arm64. This includes
+# allocator fix OpenJPH#262 and generic decoder memcpy loads from OpenJPH#291.
+# The generic ARM reversible colour-transform shift remains unsuppressed and
+# tracked by #1299; a full C++14 UBSan run still reports that separate defect.

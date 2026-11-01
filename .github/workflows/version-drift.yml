@@ -20,6 +20,28 @@ jobs:
       - name: Run version-drift with recorded policy and raw results
         run: python3 scripts/run_coherence.py version-drift -- --no-color --verbose --no-matrix
 
+      - name: Test offline registry validation and rejection cases
+        run: python3 -m unittest discover -s scripts/tests -p test_vcpkg_overrides.py -v
+
+      - name: Read the manifest's builtin registry baseline
+        id: registry
+        run: |
+          baseline=$(python3 scripts/check_vcpkg_overrides.py --print-baseline)
+          echo "baseline=$baseline" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the exact builtin registry database
+        uses: actions/checkout@v7
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ steps.registry.outputs.baseline }}
+          path: .vcpkg-registry
+          persist-credentials: false
+
+      - name: Require every override to exist at the pinned baseline
+        run: >-
+          python3 scripts/check_vcpkg_overrides.py --vcpkg-root .vcpkg-registry
+          --json-output coherence-results/vcpkg-overrides.json
+
       - uses: actions/upload-artifact@v7
         if: always()
         with:
