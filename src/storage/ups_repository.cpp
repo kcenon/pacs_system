@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/storage/ups_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <algorithm>
 #include <chrono>
@@ -449,8 +450,8 @@ auto ups_repository::ups_workitem_count(std::string_view state)
     }
 
     auto query = kcenon::pacs::compat::format(
-        "SELECT COUNT(*) as count FROM {} WHERE state = '{}'",
-        table_name(), std::string(state));
+        "SELECT COUNT(*) as count FROM {} WHERE state = {}",
+        table_name(), sql_literal(state));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());

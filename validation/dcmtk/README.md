@@ -98,6 +98,45 @@ concurrency. In-memory/mock tests remain component evidence, not proof of extern
 provider interoperability. Long-duration `[.slow]` tests, module/toolchain/platform
 matrices and additional external services are explicit outstanding requirements.
 
+### Query/Retrieve matrix
+
+`component.qr` runs `tests/qr_matrix_probe.py` once. Its tables are in `qr_matrix.py`,
+and `tests/test_qr_matrix.py` holds them to the conformance statement. Every expected
+result is a literal set of fixture keys, and the fixture holds entities that must not
+match, so an SCP that ignores a key returns too much and fails.
+
+| Case group | What it proves | Independent side |
+|------------|----------------|------------------|
+| `qr.find.<server>.<model>.<level>.<name>` | Exact result set, every requested value, Query/Retrieve Level and Retrieve AE Title, on `qr_scp` and `pacs_server` | DCMTK `findscu` |
+| `qr.find.<server>.refuse.<name>` | An Identifier that does not fit the model gets one A900 and no matches | DCMTK `findscu` |
+| `qr.{get,move}.<server>.*` | Exact objects at the receiver, byte-exact pixel data, every pending and final counter | DCMTK `getscu`, `movescu`, `storescp` |
+| `qr.fault.*` | Missing or corrupt files, a destination that refuses a class or is down, an unknown destination, and a failing index are reported by name or by status, never as success | DCMTK peers |
+| `qr.reference.*` | The expectations themselves, run on `dcmqrscp` | `dcmqrscp` |
+| `qr.scu.{find_scu,query_scu,get_scu,move_scu,retrieve_scu}.*` | PACS as the SCU: exact results and objects | `dcmqrscp` |
+| `qr.scu.fail.*` | Refused requests, a wrong AE title, a peer that is down and Warning B000 give a non-zero exit, in bounded time | `dcmqrscp` |
+| `qr.cancel.*` | C-CANCEL from DCMTK stops matching and transfers: final FE00, counters that add up, and a receiver that stays steady | `findscu --cancel`, `movescu --cancel` |
+| `qr.protocol.*` | Fragmentation, PDU limits, malformed PDUs, rejected contexts and roles, abort, shutdown, association limit, idle timeout, duplicate requests and steady descriptors | Controlled peers in `tests/qr_protocol_probe.py` and the #1304, #1306 and #1315 probes |
+| `qr.verification.*` | C-ECHO in both roles and its refusals | DCMTK `echoscu`, `storescp` |
+
+`REFERENCE_DIFFERENCES` in `qr_matrix.py` lists every case where `dcmqrscp` differs from
+what PACS declares, with the reason. A difference missing from the list fails, and so
+does a listed case that no longer differs, so the list cannot go stale. `getscu` reports
+that a final response carries a Failed SOP Instance UID List but not its contents, so
+`qr.protocol.find-scp.get-names-unreadable-object` reads the exact list for C-GET.
+
+`qr-summary.json` maps each declared SOP class, role and condition to the cases behind
+it. A requirement with no case reads `unexecuted`, never passed.
+
+`qr.protocol.find-scp.slow-reader-keeps-pdu-framing` fails on network_system `093691d9`, whose
+socket writes overlap under backpressure (SOUP-006 in `docs/SOUP.md`). It is a real defect, not a
+flaky test, so the case stays in the gate and `component.qr` stays failed until the pin moves.
+
+```bash
+python3 validation/dcmtk/tests/qr_matrix_probe.py --output /tmp/qr --build-dir build \
+  --source-revision "$(git rev-parse HEAD)" --source-digest "$(git rev-parse HEAD)"
+python3 validation/dcmtk/tests/qr_protocol_probe.py --binary build/bin/qr_scp --output /tmp/qr-protocol
+```
+
 ## Results and outstanding work
 
 `summary.txt`, `summary.json` and `summary.xml` distinguish:

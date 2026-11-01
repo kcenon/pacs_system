@@ -350,6 +350,8 @@ add_library(pacs_services
     src/services/storage_scu.cpp
     src/services/query_scu.cpp
     src/services/retrieve_scu.cpp
+    src/services/qr_index.cpp
+    src/services/qr_matching.cpp
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
     src/services/worklist_scp.cpp

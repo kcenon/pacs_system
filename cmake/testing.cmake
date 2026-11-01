@@ -187,6 +187,8 @@ if(PACS_BUILD_TESTS)
         tests/services/storage_scp_test.cpp
         tests/services/storage_scu_test.cpp
         tests/services/retrieve_scu_test.cpp
+        tests/services/qr_index_test.cpp
+        tests/services/qr_matching_test.cpp
         tests/services/query_scp_test.cpp
         tests/services/retrieve_scp_test.cpp
         tests/services/worklist_scp_test.cpp

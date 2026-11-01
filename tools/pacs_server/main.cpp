@@ -19,6 +19,7 @@
  *   --db-path <path>        Database path (default: ./pacs.db)
  *   --log-level <level>     Log level (default: info)
  *   --max-associations <n>  Max concurrent associations (default: 50)
+ *   --peer <AE:host:port>   C-MOVE destination (repeatable)
  *   --help                  Show help message
  * @endcode
  */

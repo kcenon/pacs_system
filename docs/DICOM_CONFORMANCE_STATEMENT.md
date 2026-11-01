@@ -57,6 +57,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-11-01 | 1.9.0 | Declare the Query/Retrieve contract: keys, matching, responses, retrieve rules and association limits (Section 3.3). The retired Patient/Study Only model is SCP only. |
 | 2026-11-01 | 1.8.0 | Correct SOP Class UIDs and names against PS3.6: Legacy Converted Enhanced CT (`.2.2`), US Multi-frame (`.3.1`, retired `.3`), Label Map (`.66.7`) and Height Map (`.66.8`) Segmentation, Waveform Presentation State (`.9.100.1`), Waveform Annotation SR (`.88.77`), Wide Field Ophthalmic Photography (`.77.1.5.5`). Section 3.2 now lists every registered class, and `store_scp` and `pacs_server` accept exactly that list by default. |
 | 2026-10-24 | 1.7.0 | Section 4 states PACS_SCP negotiation and codec support per transfer syntax: Explicit VR Big Endian, Deflated Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate are not negotiated, and the last four have no working codec; Appendix B lists these and the JPEG Lossless decoder limitation |
 | 2026-10-23 | 1.6.0 | Add JPEG-LS Lossless and Near-Lossless transfer syntaxes; list all optional codec libraries in Appendix B |
@@ -374,9 +375,82 @@ Response command pattern: `response = request | 0x8000`
 | Study Root Q/R Information Model - FIND | 1.2.840.10008.5.1.4.1.2.2.1 | Yes | Yes |
 | Study Root Q/R Information Model - MOVE | 1.2.840.10008.5.1.4.1.2.2.2 | Yes | Yes |
 | Study Root Q/R Information Model - GET | 1.2.840.10008.5.1.4.1.2.2.3 | Yes | Yes |
-| Patient/Study Only Q/R Information Model - FIND (Retired) | 1.2.840.10008.5.1.4.1.2.3.1 | Yes | Yes |
+| Patient/Study Only Q/R Information Model - FIND (Retired) | 1.2.840.10008.5.1.4.1.2.3.1 | Yes | No |
 
-Query levels supported: PATIENT, STUDY, SERIES, IMAGE.
+Query levels: PATIENT, STUDY, SERIES and IMAGE under Patient Root; STUDY, SERIES and
+IMAGE under Study Root; PATIENT and STUDY under Patient/Study Only. `qr_scp` and
+`pacs_server` answer from one implementation, the Hierarchical Search Method of PS3.4
+C.4.1.3.1. Relational Queries are not negotiated.
+
+**Keys held for existence and matching**
+
+| Level | Unique Key | Required Keys | Optional Keys |
+|-------|------------|---------------|---------------|
+| PATIENT | Patient ID | Patient's Name | Patient's Birth Date, Patient's Sex |
+| STUDY | Study Instance UID | Study Date, Study Time, Accession Number, Study ID; under Study Root also Patient's Name, Patient ID | Referring Physician's Name, Study Description, Modalities in Study; under Study Root also Patient's Birth Date, Patient's Sex |
+| SERIES | Series Instance UID | Modality, Series Number | Series Description |
+| IMAGE | SOP Instance UID | Instance Number | SOP Class UID |
+
+**Matching**
+
+- UIDs use Single Value or List of UID Matching, with no wild cards.
+- AE, CS, LO, LT, PN, SH, ST, UC, UR and UT keys use Single Value or Wild Card Matching.
+  `?` is one character, whatever its encoded length. Only PN ignores case, and only
+  for ASCII letters (the implementation choice C.2.2.2.1.1 and C.2.2.2.4 leave open).
+- DA and TM keys use Single Value or Range Matching by meaning. A TM value with less
+  precision covers what it names, so `10` means 10:00:00 through 10:59:59.
+- A stored attribute with no value matches any key, as C.2.2.1.2 requires. This
+  applies to Optional Keys too, which C.2.2.1.3 says behave like Required Keys.
+- A key with several values, outside List of UID Matching, matches when any value does.
+  C.2.2.2.8 leaves this undefined without Extended Negotiation.
+- Text keys are decoded from the Identifier's Specific Character Set and compare with
+  the UTF-8 the index holds, so a key in one character set finds an object stored in
+  another. An index written before this behavior needs a rescan to hold UTF-8.
+
+**C-FIND responses**
+
+Each response holds the requested keys held by the index, Query/Retrieve Level and
+Retrieve AE Title, and declares ISO_IR 192 when its text is not ASCII. A key the index
+does not hold is ignored and not returned, and matches then carry Pending status FF01.
+
+| Request | Result |
+|---------|--------|
+| No Identifier, or no valid level for the model | A900 |
+| A Unique Key above the level is missing or holds several values | A900 |
+| The index cannot answer | C001, never an empty success |
+| No entity matches | 0000 with no matches |
+| C-CANCEL naming the operation | FE00, and no further matches |
+
+**C-MOVE and C-GET**
+
+The Identifier needs Query/Retrieve Level and the Unique Keys of that level and those
+above, or the answer is A900. The Unique Key of the level may be a list of UIDs, except
+Patient ID. A Unique Key below the level is refused, since it names less than the level
+would deliver. Required and Optional Keys do not belong in the Identifier and are ignored,
+so they neither narrow nor widen what the Unique Keys select. An object the index holds
+but whose file cannot be read counts as a failed sub-operation and is named in Failed SOP
+Instance UID List. A C-MOVE destination must be configured with `--peer`, or the answer
+is A801.
+
+**Associations**
+
+Past the association limit a peer receives A-ASSOCIATE-RJ (rejected-transient, local limit
+exceeded). An association silent for the idle timeout receives A-ABORT, unless a request is
+being served, as a requester waiting for a long retrieve is silent but not idle.
+
+**Cancellation**
+
+Once C-CANCEL takes effect, no new match is sent and no new C-STORE sub-operation starts. A
+store already in flight may still land at the receiver; it counts as failed unless its
+acknowledgement arrived first. The final FE00 reports the sub-operations left undone.
+
+**Known limitation**
+
+Streams of C-FIND responses are unreliable for a peer that reads more slowly than the SCP
+writes, once the responses outgrow the socket buffers. The network layer starts a write while
+an earlier one is still incomplete, which breaks PDU framing. The query then fails, and a
+damaged response may arrive before the failure (SOUP-006 in [SOUP.md](SOUP.md)). Retrieves are
+not affected in this way, because each object waits for its acknowledgement.
 
 ### 3.4 Modality Worklist
 

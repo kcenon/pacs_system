@@ -23,7 +23,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/encoding/vr_type.h"
-#include "../common/utf8_text.h"
+#include "kcenon/pacs/core/utf8_text.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -710,7 +710,7 @@ int convert_file(const std::filesystem::path& input_path,
     }
 
     // Write main dataset. PS3.18 JSON is UTF-8 whatever the object's character set is.
-    const auto text_dataset = kcenon::pacs::cli::utf8_text_copy(file.dataset());
+    const auto text_dataset = kcenon::pacs::core::utf8_text_copy(file.dataset());
     for (const auto& [tag, element] : text_dataset) {
         if (!should_include_tag(tag, opts)) {
             continue;

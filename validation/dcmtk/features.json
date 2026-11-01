@@ -170,6 +170,12 @@
       "timeout_seconds": 900
     },
     {
+      "id": "component.qr",
+      "kind": "qr-matrix",
+      "args": [],
+      "timeout_seconds": 1500
+    },
+    {
       "id": "component.discovery",
       "kind": "discovery",
       "args": [],
@@ -318,7 +324,8 @@
     {
       "id": "association",
       "components": [
-        "component.network_tests"
+        "component.network_tests",
+        "component.qr"
       ],
       "interop": [
         "echo.primary",
@@ -329,9 +336,7 @@
         "cli.mpps.tcp",
         "cli.pacs.tcp"
       ],
-      "gaps": [
-        "Independent negative negotiation/framing/timeout/limit cases from #1319 remain unverified."
-      ],
+      "gaps": [],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1240",
         "https://github.com/kcenon/pacs_system/issues/1303"
@@ -357,7 +362,8 @@
     {
       "id": "query",
       "components": [
-        "component.services_tests"
+        "component.services_tests",
+        "component.qr"
       ],
       "interop": [
         "query.ct",
@@ -376,7 +382,7 @@
         "diagnostic.scp.ready"
       ],
       "gaps": [
-        "External patient/study/series levels, wildcard/date/unicode and cancel cases beyond IMAGE queries."
+        "Large C-FIND results to a slow reader: network_system 093691d9 overlaps socket writes under backpressure, which breaks PDU framing (SOUP-006). qr.protocol.find-scp.slow-reader-keeps-pdu-framing fails until the pin moves."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1303"
@@ -385,7 +391,8 @@
     {
       "id": "move",
       "components": [
-        "component.services_tests"
+        "component.services_tests",
+        "component.qr"
       ],
       "interop": [
         "move.scu",
@@ -394,7 +401,7 @@
         "diagnostic.move.scp"
       ],
       "gaps": [
-        "Failure/cancel/unknown-destination sub-operation counters and timeout/retry paths."
+        "Retry paths; a destination that accepts and then stalls is covered only by the protocol probe."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1304"
@@ -403,7 +410,8 @@
     {
       "id": "get",
       "components": [
-        "component.services_tests"
+        "component.services_tests",
+        "component.qr"
       ],
       "interop": [
         "get.ct",
@@ -415,9 +423,7 @@
         "diagnostic.get.cr",
         "diagnostic.get.scp"
       ],
-      "gaps": [
-        "Refused role negotiation, cancellation and mixed failure counters."
-      ],
+      "gaps": [],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1306"
       ]
@@ -730,7 +736,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.association.negative",
@@ -750,7 +756,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.storage_service.positive",
@@ -810,7 +816,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.query.negative",
@@ -830,7 +836,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.move.positive",
@@ -1463,6 +1469,24 @@
         ],
         "core": [
           "Broader malformed/unknown-VR parsing and nesting behavior outside the undefined-length UN path (#1318)."
+        ]
+      }
+    },
+    {
+      "issue": 1319,
+      "change": "component.qr evaluates every declared Query/Retrieve model, level, key type and failure path with exact UID sets, statuses, counters and receiver objects, against independent DCMTK peers and a controlled protocol peer. The expected tables are themselves cross-checked on dcmqrscp, with each difference listed and justified.",
+      "previous_gaps": {
+        "association": [
+          "Independent negative negotiation/framing/timeout/limit cases from #1319 remain unverified."
+        ],
+        "query": [
+          "External patient/study/series levels, wildcard/date/unicode and cancel cases beyond IMAGE queries."
+        ],
+        "move": [
+          "Failure/cancel/unknown-destination sub-operation counters and timeout/retry paths."
+        ],
+        "get": [
+          "Refused role negotiation, cancellation and mixed failure counters."
         ]
       }
     }

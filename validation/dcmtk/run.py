@@ -687,7 +687,7 @@ class Validation:
                 errors.append(f'{binary}: discovery failed: {exc}')
                 all_tests[binary] = []
         for spec in self.manifest['components']:
-            if spec.get('kind') in ('discovery', 'corpus'):
+            if spec.get('kind') in ('discovery', 'corpus', 'qr-matrix'):
                 continue
             try:
                 if spec.get('kind') == 'ctest':
@@ -733,9 +733,23 @@ class Validation:
                     detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
                            'see corpus/corpus-summary.json')
 
+    def qr_matrix(self, spec):
+        """Report the Query/Retrieve matrix's own results; a nonzero exit only means some cases failed."""
+        directory = self.output/'qr-matrix'
+        self.command(['python3', HERE/'tests/qr_matrix_probe.py', '--output', directory,
+                      '--build-dir', self.args.build_dir, '--source-revision', self.args.source_revision,
+                      '--source-digest', self.args.source_digest],
+                     timeout=spec['timeout_seconds'], allowed=(0, 1))
+        counts = json.loads((directory/'qr-summary.json').read_text())['counts']
+        return dict(tests=sum(counts.values()), failed=counts['failed']+counts['blocked'], skipped=0,
+                    detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
+                           'see qr-matrix/qr-summary.json')
+
     def component(self, spec):
         if spec.get('kind') == 'corpus':
             return self.corpus_matrix(spec)
+        if spec.get('kind') == 'qr-matrix':
+            return self.qr_matrix(spec)
         xml = self.output/(spec['id']+'.xml')
         native_xml = self.output/(spec['id']+'.catch.xml')
         if spec.get('kind') == 'discovery':

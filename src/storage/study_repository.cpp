@@ -11,6 +11,7 @@
  */
 
 #include "kcenon/pacs/storage/study_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <chrono>
 #include <ctime>
@@ -302,14 +303,14 @@ auto study_repository::search_studies(const study_query& query)
 
         if (query.patient_id.has_value()) {
             where_clauses.push_back(
-                kcenon::pacs::compat::format("p.patient_id LIKE '{}'",
-                                   to_like_pattern(*query.patient_id)));
+                kcenon::pacs::compat::format("p.patient_id LIKE {} ESCAPE '\\'",
+                                   sql_literal(to_like_pattern(*query.patient_id))));
         }
 
         if (query.patient_name.has_value()) {
             where_clauses.push_back(
-                kcenon::pacs::compat::format("p.patient_name LIKE '{}'",
-                                   to_like_pattern(*query.patient_name)));
+                kcenon::pacs::compat::format("p.patient_name LIKE {} ESCAPE '\\'",
+                                   sql_literal(to_like_pattern(*query.patient_name))));
         }
     } else {
         sql = R"(
@@ -326,56 +327,57 @@ auto study_repository::search_studies(const study_query& query)
 
     if (query.study_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_uid = '{}'", prefix, *query.study_uid));
+            kcenon::pacs::compat::format("{}study_uid = {}", prefix, sql_literal(*query.study_uid)));
     }
 
     if (query.study_id.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_id LIKE '{}'", prefix,
-                               to_like_pattern(*query.study_id)));
+            kcenon::pacs::compat::format("{}study_id LIKE {} ESCAPE '\\'", prefix,
+                               sql_literal(to_like_pattern(*query.study_id))));
     }
 
     if (query.study_date.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_date = '{}'", prefix, *query.study_date));
+            kcenon::pacs::compat::format("{}study_date = {}", prefix, sql_literal(*query.study_date)));
     }
 
     if (query.study_date_from.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_date >= '{}'", prefix, *query.study_date_from));
+            kcenon::pacs::compat::format("{}study_date >= {}", prefix, sql_literal(*query.study_date_from)));
     }
 
     if (query.study_date_to.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_date <= '{}'", prefix, *query.study_date_to));
+            kcenon::pacs::compat::format("{}study_date <= {}", prefix, sql_literal(*query.study_date_to)));
     }
 
     if (query.accession_number.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}accession_number LIKE '{}'", prefix,
-                               to_like_pattern(*query.accession_number)));
+            kcenon::pacs::compat::format("{}accession_number LIKE {} ESCAPE '\\'", prefix,
+                               sql_literal(to_like_pattern(*query.accession_number))));
     }
 
     if (query.referring_physician.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}referring_physician LIKE '{}'", prefix,
-                               to_like_pattern(*query.referring_physician)));
+            kcenon::pacs::compat::format("{}referring_physician LIKE {} ESCAPE '\\'", prefix,
+                               sql_literal(to_like_pattern(*query.referring_physician))));
     }
 
     if (query.study_description.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("{}study_description LIKE '{}'", prefix,
-                               to_like_pattern(*query.study_description)));
+            kcenon::pacs::compat::format("{}study_description LIKE {} ESCAPE '\\'", prefix,
+                               sql_literal(to_like_pattern(*query.study_description))));
     }
 
     if (query.modality.has_value()) {
         const auto& mod = *query.modality;
         where_clauses.push_back(kcenon::pacs::compat::format(
-            "({}modalities_in_study = '{}' OR "
-            "{}modalities_in_study LIKE '{}\\%' OR "
-            "{}modalities_in_study LIKE '%\\{}' OR "
-            "{}modalities_in_study LIKE '%\\{}\\%')",
-            prefix, mod, prefix, mod, prefix, mod, prefix, mod));
+            "({}modalities_in_study = {} OR "
+            "{}modalities_in_study LIKE {} OR "
+            "{}modalities_in_study LIKE {} OR "
+            "{}modalities_in_study LIKE {})",
+            prefix, sql_literal(mod), prefix, sql_literal(mod+"\\%"), prefix, sql_literal("%\\"+mod), prefix,
+            sql_literal("%\\"+mod+"\\%")));
     }
 
     // Build WHERE clause
@@ -916,12 +918,12 @@ auto study_repository::search_studies(const study_query& query) const
     std::vector<std::string> params;
 
     if (query.patient_id.has_value()) {
-        sql += " AND p.patient_id LIKE ?";
+        sql += " AND p.patient_id LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.patient_id));
     }
 
     if (query.patient_name.has_value()) {
-        sql += " AND p.patient_name LIKE ?";
+        sql += " AND p.patient_name LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.patient_name));
     }
 
@@ -931,7 +933,7 @@ auto study_repository::search_studies(const study_query& query) const
     }
 
     if (query.study_id.has_value()) {
-        sql += " AND s.study_id LIKE ?";
+        sql += " AND s.study_id LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.study_id));
     }
 
@@ -951,7 +953,7 @@ auto study_repository::search_studies(const study_query& query) const
     }
 
     if (query.accession_number.has_value()) {
-        sql += " AND s.accession_number LIKE ?";
+        sql += " AND s.accession_number LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.accession_number));
     }
 
@@ -967,12 +969,12 @@ auto study_repository::search_studies(const study_query& query) const
     }
 
     if (query.referring_physician.has_value()) {
-        sql += " AND s.referring_physician LIKE ?";
+        sql += " AND s.referring_physician LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.referring_physician));
     }
 
     if (query.study_description.has_value()) {
-        sql += " AND s.study_description LIKE ?";
+        sql += " AND s.study_description LIKE ? ESCAPE '\\'";
         params.push_back(to_like_pattern(*query.study_description));
     }
 

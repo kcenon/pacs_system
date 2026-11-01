@@ -36,7 +36,7 @@ category: "PROJ"
 | SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `6dd5c9e8` | BSD-3-Clause | Thread pool, async task scheduling | B | Original integrated commit (`db8d36f1`) unrecoverable (orphaned by upstream history rewrite); re-pinned to v1.0.0 tag — see [PR-001](compliance/problem-resolution/PR-001-soup-dangling-sha.md). Re-V&V required before release. |
 | SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `f119ecd6` | BSD-3-Clause | Structured logging infrastructure | A | None |
 | SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `da708abb` | BSD-3-Clause | Performance metrics collection | A | None |
-| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | None |
+| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | Overlapping socket writes under backpressure; see [below](#network_system-overlapping-writes-1319) |
 | SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `593a18a7` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
 
 > **Note**: kcenon libraries are pinned by commit SHA (no release tags available).
@@ -122,6 +122,29 @@ and checks exact port revisions. Crow 1.3.2 and OpenJPH 0.30.1 share baseline
 decoder failed UBSan alignment checks; 0.30.1 includes the subsequent memcpy load fix
 ([OpenJPH#291](https://github.com/aous72/OpenJPH/pull/291)). Database availability and FetchContent version agreement
 are required checks in SOUP Version Drift Detection; feature builds remain separate checks.
+
+---
+
+## network_system overlapping writes (#1319)
+
+`tcp_socket::async_send` (`libs/network-tcp/src/tcp_socket.cpp`) and `secure_tcp_socket::async_send`
+start `asio::async_write` for every call. Asio requires that no other write starts until that
+operation completes. When a write completes only in part, because the peer reads slowly and the
+socket buffers are full, the next send runs inside it and the byte stream is interleaved.
+`i_session` reports neither completion nor pending bytes, so PACS cannot serialize its writes
+without changing that library. The TLS path has the same code and was not measured.
+
+**Effect on PACS.** C-FIND streams responses without acknowledgements, so a slow reader breaks
+PDU framing. Against a slowed DCMTK `findscu`, four of four runs ended in `Find Failed` after
+15,924 to 41,682 of 60,000 matches, and one of them stored one damaged response first. A retrieve
+sends each object as one write and waits for its acknowledgement, so objects do not overlap each
+other. `qr.protocol.find-scp.slow-reader-keeps-pdu-framing` reproduces the failure and fails on
+this pin. It stays failing until the pin moves.
+
+**Status.** Not reported upstream and not patched here. As checked on 2026-11-01, upstream `main`
+has the same code and no matching issue. In a local experiment, a write queue in `tcp_socket` made
+that case pass three of three runs and the slowed `findscu` receive all 60,000 matches exactly in
+two of two runs. That patch is not part of any delivered build.
 
 ---
 

@@ -27,6 +27,8 @@
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 
+#include "../common/qr_cli.h"
+
 #include <algorithm>
 #include <atomic>
 #include <set>
@@ -1030,6 +1032,7 @@ int perform_c_move(const options& opts) {
 
     // Process C-MOVE responses
     bool move_complete = false;
+    uint16_t move_status = 0;
     uint16_t total_completed = 0;
     uint16_t total_failed = 0;
     uint16_t total_warning = 0;
@@ -1075,12 +1078,9 @@ int perform_c_move(const options& opts) {
         }
 
         // Check if C-MOVE is complete
-        if (status == status_success ||
-            status == status_cancel ||
-            (status & 0xF000) == 0xA000 ||  // Failure
-            (status & 0xF000) == 0xC000) {  // Unable to process
-
+        if (kcenon::pacs::cli::is_final_retrieve_status(status)) {
             move_complete = true;
+            move_status = status;
 
             if (status != status_success && status != status_cancel) {
                 std::cerr << "\nC-MOVE failed with status: 0x"
@@ -1126,13 +1126,7 @@ int perform_c_move(const options& opts) {
     std::cout << "  Total time:      " << total_duration.count() << " ms\n";
     std::cout << "========================================\n";
 
-    // Return appropriate exit code
-    if (total_failed > 0 && total_completed == 0) {
-        return 2;  // Complete failure
-    } else if (total_failed > 0) {
-        return 1;  // Partial failure
-    }
-    return 0;  // Success
+    return kcenon::pacs::cli::retrieve_exit_code(move_status, total_failed);
 }
 
 }  // namespace

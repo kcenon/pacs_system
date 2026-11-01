@@ -201,16 +201,6 @@ private:
         const std::string& sop_instance_uid,
         const encoding::transfer_syntax& syntax);
 
-    /// Handle C-FIND query
-    std::vector<core::dicom_dataset> handle_query(
-        services::query_level level,
-        const core::dicom_dataset& query_keys,
-        const std::string& calling_ae);
-
-    /// Handle C-MOVE/C-GET retrieve
-    std::vector<core::dicom_file> handle_retrieve(
-        const core::dicom_dataset& query_keys);
-
     /// Handle worklist query
     std::vector<core::dicom_dataset> handle_worklist_query(
         const core::dicom_dataset& query_keys,

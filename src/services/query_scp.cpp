@@ -31,6 +31,14 @@ kcenon::pacs::events::query_level to_event_level(query_level level) {
         default: return kcenon::pacs::events::query_level::patient;
     }
 }
+
+[[nodiscard]] std::optional<qr_model> model_of(std::string_view sop_class_uid) noexcept {
+    if (sop_class_uid == patient_root_find_sop_class_uid) return qr_model::patient_root;
+    if (sop_class_uid == study_root_find_sop_class_uid) return qr_model::study_root;
+    if (sop_class_uid == patient_study_only_find_sop_class_uid) return qr_model::patient_study_only;
+    return std::nullopt;
+}
+
 }  // namespace
 
 // =============================================================================
@@ -46,6 +54,10 @@ query_scp::query_scp(std::shared_ptr<di::ILogger> logger)
 
 void query_scp::set_handler(query_handler handler) {
     handler_ = std::move(handler);
+}
+
+void query_scp::set_find_handler(find_handler handler) {
+    find_handler_ = std::move(handler);
 }
 
 void query_scp::set_max_results(size_t max) noexcept {
@@ -72,7 +84,8 @@ void query_scp::set_audit_handler(
 std::vector<std::string> query_scp::supported_sop_classes() const {
     return {
         std::string(patient_root_find_sop_class_uid),
-        std::string(study_root_find_sop_class_uid)
+        std::string(study_root_find_sop_class_uid),
+        std::string(patient_study_only_find_sop_class_uid)
     };
 }
 
@@ -94,7 +107,7 @@ network::Result<std::monostate> query_scp::handle_message(
     }
 
     // Verify we have a handler
-    if (!handler_) {
+    if (!handler_ && !find_handler_) {
         kcenon::common::get_event_bus().publish(
             kcenon::pacs::events::query_failed_event{
                 calling_ae,
@@ -114,32 +127,62 @@ network::Result<std::monostate> query_scp::handle_message(
     if (!request.has_dataset()) {
         return send_final_response(
             assoc, context_id, request.message_id(),
-            sop_class_uid, status_error_cannot_understand);
+            sop_class_uid, status_error_dataset_mismatch);
     }
 
-    // Extract query level
+    // The level must exist in the model the SOP Class selects (PS3.4 Annex C.6)
     const auto& query_keys = request.dataset().value().get();
     auto level = extract_query_level(query_keys);
-
-    if (!level.has_value()) {
-        // Invalid or missing query level
+    const auto model = model_of(sop_class_uid);
+    if (!level.has_value() || (model.has_value() && !level_in_model(*model, *level))) {
         return send_final_response(
             assoc, context_id, request.message_id(),
-            sop_class_uid, status_error_cannot_understand);
+            sop_class_uid, status_error_dataset_mismatch);
     }
 
-    // Call the handler to get matching results
-    auto results = handler_(level.value(), query_keys, calling_ae);
+    // Call the handler to get matching results. A failure must not read as no matches.
+    std::vector<core::dicom_dataset> results;
+    status_code pending_status = status_pending;
+    if (find_handler_ && model.has_value()) {
+        find_outcome outcome;
+        try {
+            outcome = find_handler_(find_request{*model, *level, query_keys, calling_ae, assoc.called_ae()});
+        } catch (const std::exception&) {
+            outcome.failure = qr_failure::unable_to_process;
+        }
+        if (outcome.failure != qr_failure::none) {
+            return send_final_response(
+                assoc, context_id, request.message_id(), sop_class_uid,
+                outcome.failure == qr_failure::identifier_mismatch ? status_error_dataset_mismatch
+                                                                   : status_error_unable_to_process);
+        }
+        results = std::move(outcome.matches);
+        if (outcome.optional_keys_ignored) {
+            pending_status = status_pending_warning;
+        }
+    } else if (handler_) {
+        results = handler_(level.value(), query_keys, calling_ae);
+    } else {
+        return send_final_response(assoc, context_id, request.message_id(), sop_class_uid,
+                                   status_error_unable_to_process);
+    }
 
     // Apply max results limit if configured
     if (max_results_ > 0 && results.size() > max_results_) {
         results.resize(max_results_);
     }
 
+    // The association registers each C-FIND before dispatch, so a C-CANCEL naming this
+    // message sets this flag from the receive thread while this loop is sending.
+    const auto cancelled = [&] {
+        return assoc.cancellation_requested(context_id, request.message_id()) ||
+               (cancel_check_ && cancel_check_());
+    };
+
     // Send pending responses for each result
     for (const auto& result : results) {
         // Check for cancel request
-        if (cancel_check_ && cancel_check_()) {
+        if (cancelled()) {
             // Increment statistics
             ++queries_processed_;
 
@@ -152,7 +195,7 @@ network::Result<std::monostate> query_scp::handle_message(
         // Send pending response with matching dataset
         auto send_result = send_pending_response(
             assoc, context_id, request.message_id(),
-            sop_class_uid, result);
+            sop_class_uid, result, pending_status);
 
         if (send_result.is_err()) {
             return send_result;
@@ -161,6 +204,13 @@ network::Result<std::monostate> query_scp::handle_message(
 
     // Increment statistics
     ++queries_processed_;
+
+    // A cancel that arrives after the last match still ends the operation as cancelled.
+    if (cancelled()) {
+        return send_final_response(
+            assoc, context_id, request.message_id(),
+            sop_class_uid, status_cancel);
+    }
 
     // Calculate execution time
     auto end_time = std::chrono::steady_clock::now();
@@ -230,7 +280,8 @@ network::Result<std::monostate> query_scp::send_pending_response(
     uint8_t context_id,
     uint16_t message_id,
     std::string_view sop_class_uid,
-    const core::dicom_dataset& result) {
+    const core::dicom_dataset& result,
+    network::dimse::status_code status) {
 
     using namespace network::dimse;
 
@@ -238,7 +289,7 @@ network::Result<std::monostate> query_scp::send_pending_response(
     auto response = make_c_find_rsp(
         message_id,
         sop_class_uid,
-        status_pending
+        status
     );
 
     // Attach the matching dataset

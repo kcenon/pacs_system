@@ -811,6 +811,13 @@ Lightweight Query/Retrieve SCP server for serving DICOM files from a storage dir
 ./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --max-assoc 20 --timeout 600
 ```
 
+`qr_scp` and `pacs_server` answer with the same Hierarchical Search Method. A query above
+IMAGE needs the Unique Key of every higher level: under Patient Root, a STUDY query needs
+Patient ID, or the answer is status A900. Section 3.3 of the
+[Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md) lists the keys and matching rules.
+An index written by an earlier version holds text in each object's own character set; run
+`--scan-only` again so that non-ASCII keys can match it.
+
 Features:
 - **C-FIND**: Query at Patient, Study, Series, and Image levels
 - **C-MOVE**: Send images to configured destination AE titles
@@ -950,6 +957,9 @@ Full PACS server example with configuration.
 ```bash
 # Run with configuration
 ./build/tools/pacs_server/pacs_server --config pacs_server.yaml
+
+# Allow C-MOVE to a destination. Without --peer, every C-MOVE is refused with A801.
+./build/bin/pacs_server --port 11112 --ae-title MY_PACS --peer VIEWER:192.168.1.10:11113
 ```
 
 **Sample Configuration** (`pacs_server.yaml`):

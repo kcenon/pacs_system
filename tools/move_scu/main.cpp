@@ -31,6 +31,8 @@
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/services/retrieve_scp.h"
+
+#include "../common/qr_cli.h"
 #include "kcenon/pacs/services/storage_scp.h"
 
 #include <algorithm>
@@ -603,7 +605,7 @@ kcenon::pacs::core::dicom_dataset build_query_dataset(const options& opts) {
     ds.set_string(tags::query_retrieve_level, vr_type::CS, level_str);
 
     for (const auto& key : opts.keys) {
-        ds.set_string(key.tag, vr_type::UN, key.value);
+        ds.set_string(key.tag, kcenon::pacs::cli::key_vr(key.tag), key.value);
     }
 
     return ds;
@@ -727,6 +729,7 @@ int perform_move(const options& opts) {
     uint16_t final_completed = 0;
     uint16_t final_failed = 0;
     uint16_t final_warning = 0;
+    uint16_t final_status = 0;
 
     auto dimse_timeout = opts.dimse_timeout.count() > 0
         ? std::chrono::duration_cast<std::chrono::milliseconds>(opts.dimse_timeout)
@@ -771,12 +774,10 @@ int perform_move(const options& opts) {
             display_progress(progress, opts.verbose);
         }
 
-        if (status == status_success ||
-            status == status_cancel ||
-            (status & 0xF000) == 0xA000 ||
-            (status & 0xF000) == 0xC000) {
+        if (kcenon::pacs::cli::is_final_retrieve_status(status)) {
 
             move_complete = true;
+            final_status = status;
 
             if (status != status_success && status != status_cancel &&
                 !opts.quiet) {
@@ -824,12 +825,7 @@ int perform_move(const options& opts) {
         std::cout << "========================================\n";
     }
 
-    if (final_failed > 0 && final_completed == 0) {
-        return 2;
-    } else if (final_failed > 0) {
-        return 1;
-    }
-    return 0;
+    return kcenon::pacs::cli::retrieve_exit_code(final_status, final_failed);
 }
 
 }  // namespace

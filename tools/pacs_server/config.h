@@ -85,6 +85,15 @@ struct access_control_config {
 };
 
 /**
+ * @brief A peer that C-MOVE may send to, since a Move Destination names only an AE title
+ */
+struct move_destination {
+    std::string ae_title;
+    std::string host;
+    uint16_t port{0};
+};
+
+/**
  * @brief Complete PACS server configuration
  */
 struct pacs_server_config {
@@ -102,6 +111,9 @@ struct pacs_server_config {
 
     /// Access control settings
     access_control_config access_control;
+
+    /// C-MOVE destinations. Without one, every C-MOVE is refused as A801.
+    std::vector<move_destination> move_destinations;
 
     /**
      * @brief Parse configuration from command line arguments

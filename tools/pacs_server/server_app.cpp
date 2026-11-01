@@ -5,6 +5,9 @@
 
 #include "server_app.h"
 
+#include "kcenon/pacs/core/utf8_text.h"
+#include "kcenon/pacs/services/qr_index.h"
+
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/services/storage_status.h"
 
@@ -266,17 +269,22 @@ bool pacs_server_app::setup_server() {
 
     // Register Query SCP
     auto query_scp = std::make_shared<services::query_scp>();
-    query_scp->set_handler(
-        [this](auto level, const auto& keys, const auto& ae) {
-            return handle_query(level, keys, ae);
-        });
+    query_scp->set_find_handler(
+        [this](const services::find_request& request) { return services::find_in_index(*database_, request); });
     server_->register_service(query_scp);
 
     // Register Retrieve SCP
     auto retrieve_scp = std::make_shared<services::retrieve_scp>();
-    retrieve_scp->set_retrieve_handler(
-        [this](const auto& keys) {
-            return handle_retrieve(keys);
+    retrieve_scp->set_retrieve_selector(
+        [this](const services::retrieve_request& request) { return services::select_from_index(*database_, request); });
+    retrieve_scp->set_destination_resolver(
+        [this](const std::string& ae_title) -> std::optional<std::pair<std::string, uint16_t>> {
+            for (const auto& destination : config_.move_destinations) {
+                if (destination.ae_title == ae_title) {
+                    return std::make_pair(destination.host, destination.port);
+                }
+            }
+            return std::nullopt;
         });
     server_->register_service(retrieve_scp);
 
@@ -342,11 +350,12 @@ services::storage_status pacs_server_app::handle_store(
         return services::storage_status::storage_error;
     }
 
-    // Index in database
-    auto patient_id = dataset.get_string(core::tags::patient_id);
-    auto patient_name = dataset.get_string(core::tags::patient_name);
-    auto study_uid = dataset.get_string(core::tags::study_instance_uid);
-    auto series_uid = dataset.get_string(core::tags::series_instance_uid);
+    // Index in database. The index holds UTF-8, whatever character set each object uses.
+    const auto index_text = core::utf8_text_copy(dataset);
+    auto patient_id = index_text.get_string(core::tags::patient_id);
+    auto patient_name = index_text.get_string(core::tags::patient_name);
+    auto study_uid = index_text.get_string(core::tags::study_instance_uid);
+    auto series_uid = index_text.get_string(core::tags::series_instance_uid);
 
     if (patient_id.empty()) {
         std::cerr << log_prefix() << "Warning: Missing PatientID\n";
@@ -354,8 +363,8 @@ services::storage_status pacs_server_app::handle_store(
     }
 
     // Upsert patient and get pk
-    auto birth_date = dataset.get_string(core::tags::patient_birth_date);
-    auto sex = dataset.get_string(core::tags::patient_sex);
+    auto birth_date = index_text.get_string(core::tags::patient_birth_date);
+    auto sex = index_text.get_string(core::tags::patient_sex);
     auto patient_result = database_->upsert_patient(
         patient_id,
         patient_name,
@@ -371,12 +380,12 @@ services::storage_status pacs_server_app::handle_store(
     // Upsert study if we have study_uid
     int64_t study_pk = 0;
     if (!study_uid.empty()) {
-        auto study_date = dataset.get_string(core::tags::study_date);
-        auto study_time = dataset.get_string(core::tags::study_time);
-        auto accession = dataset.get_string(core::tags::accession_number);
-        auto study_desc = dataset.get_string(core::tags::study_description);
-        auto referring = dataset.get_string(core::tags::referring_physician_name);
-        auto study_id = dataset.get_string(core::tags::study_id);
+        auto study_date = index_text.get_string(core::tags::study_date);
+        auto study_time = index_text.get_string(core::tags::study_time);
+        auto accession = index_text.get_string(core::tags::accession_number);
+        auto study_desc = index_text.get_string(core::tags::study_description);
+        auto referring = index_text.get_string(core::tags::referring_physician_name);
+        auto study_id = index_text.get_string(core::tags::study_id);
 
         auto study_result = database_->upsert_study(
             patient_pk,
@@ -398,9 +407,9 @@ services::storage_status pacs_server_app::handle_store(
     // Upsert series if we have series_uid and study_pk
     int64_t series_pk = 0;
     if (!series_uid.empty() && study_pk > 0) {
-        auto modality = dataset.get_string(core::tags::modality);
-        auto series_number_str = dataset.get_string(core::tags::series_number);
-        auto series_desc = dataset.get_string(core::tags::series_description);
+        auto modality = index_text.get_string(core::tags::modality);
+        auto series_number_str = index_text.get_string(core::tags::series_number);
+        auto series_desc = index_text.get_string(core::tags::series_description);
 
         std::optional<int> series_number;
         if (!series_number_str.empty()) {
@@ -427,7 +436,7 @@ services::storage_status pacs_server_app::handle_store(
 
     // Upsert instance if we have series_pk
     if (series_pk > 0) {
-        auto instance_number_str = dataset.get_string(core::tags::instance_number);
+        auto instance_number_str = index_text.get_string(core::tags::instance_number);
         auto file_path = file_storage_->get_file_path(sop_instance_uid);
 
         int64_t file_size = 0;
@@ -457,190 +466,6 @@ services::storage_status pacs_server_app::handle_store(
     }
 
     return services::storage_status::success;
-}
-
-std::vector<core::dicom_dataset> pacs_server_app::handle_query(
-    services::query_level level,
-    const core::dicom_dataset& query_keys,
-    const std::string& calling_ae) {
-
-    std::cout << log_prefix() << "C-FIND from " << calling_ae
-              << " at level " << services::to_string(level) << "\n";
-
-    std::vector<core::dicom_dataset> results;
-
-    switch (level) {
-        case services::query_level::patient: {
-            storage::patient_query query;
-            auto id = query_keys.get_string(core::tags::patient_id);
-            if (!id.empty()) {
-                query.patient_id = id;
-            }
-            auto name = query_keys.get_string(core::tags::patient_name);
-            if (!name.empty()) {
-                query.patient_name = name;
-            }
-
-            auto patients_result = database_->search_patients(query);
-            if (patients_result.is_ok()) {
-                for (const auto& patient : patients_result.value()) {
-                    core::dicom_dataset ds;
-                    ds.set_string(core::tags::patient_id, encoding::vr_type::LO, patient.patient_id);
-                    ds.set_string(core::tags::patient_name, encoding::vr_type::PN, patient.patient_name);
-                    ds.set_string(core::tags::patient_birth_date, encoding::vr_type::DA, patient.birth_date);
-                    ds.set_string(core::tags::patient_sex, encoding::vr_type::CS, patient.sex);
-                    results.push_back(std::move(ds));
-                }
-            }
-            break;
-        }
-
-        case services::query_level::study: {
-            storage::study_query query;
-            auto id = query_keys.get_string(core::tags::patient_id);
-            if (!id.empty()) {
-                query.patient_id = id;
-            }
-            auto name = query_keys.get_string(core::tags::patient_name);
-            if (!name.empty()) {
-                query.patient_name = name;
-            }
-            auto uid = query_keys.get_string(core::tags::study_instance_uid);
-            if (!uid.empty()) {
-                query.study_uid = uid;
-            }
-            auto date = query_keys.get_string(core::tags::study_date);
-            if (!date.empty()) {
-                const auto separator = date.find('-');
-                if (separator == std::string::npos) {
-                    query.study_date = date;
-                } else {
-                    if (separator > 0) {
-                        query.study_date_from = date.substr(0, separator);
-                    }
-                    if (separator + 1 < date.size()) {
-                        query.study_date_to = date.substr(separator + 1);
-                    }
-                }
-            }
-
-            auto studies_result = database_->search_studies(query);
-            if (studies_result.is_ok()) {
-                for (const auto& study : studies_result.value()) {
-                    core::dicom_dataset ds;
-                    ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, study.study_uid);
-                    ds.set_string(core::tags::study_date, encoding::vr_type::DA, study.study_date);
-                    ds.set_string(core::tags::study_time, encoding::vr_type::TM, study.study_time);
-                    ds.set_string(core::tags::accession_number, encoding::vr_type::SH, study.accession_number);
-                    ds.set_string(core::tags::study_description, encoding::vr_type::LO, study.study_description);
-                    results.push_back(std::move(ds));
-                }
-            }
-            break;
-        }
-
-        case services::query_level::series: {
-            storage::series_query query;
-            auto uid = query_keys.get_string(core::tags::study_instance_uid);
-            if (!uid.empty()) {
-                query.study_uid = uid;
-            }
-            auto mod = query_keys.get_string(core::tags::modality);
-            if (!mod.empty()) {
-                query.modality = mod;
-            }
-
-            auto series_result = database_->search_series(query);
-            if (series_result.is_ok()) {
-                for (const auto& series : series_result.value()) {
-                    core::dicom_dataset ds;
-                    ds.set_string(core::tags::series_instance_uid, encoding::vr_type::UI, series.series_uid);
-                    ds.set_string(core::tags::modality, encoding::vr_type::CS, series.modality);
-                    if (series.series_number.has_value()) {
-                        ds.set_string(core::tags::series_number, encoding::vr_type::IS,
-                                      std::to_string(series.series_number.value()));
-                    }
-                    ds.set_string(core::tags::series_description, encoding::vr_type::LO, series.series_description);
-                    results.push_back(std::move(ds));
-                }
-            }
-            break;
-        }
-
-        case services::query_level::image: {
-            storage::instance_query query;
-            auto uid = query_keys.get_string(core::tags::series_instance_uid);
-            if (!uid.empty()) {
-                query.series_uid = uid;
-            }
-
-            auto instances_result = database_->search_instances(query);
-            if (instances_result.is_ok()) {
-                for (const auto& instance : instances_result.value()) {
-                    core::dicom_dataset ds;
-                    ds.set_string(core::tags::sop_instance_uid, encoding::vr_type::UI, instance.sop_uid);
-                    ds.set_string(core::tags::sop_class_uid, encoding::vr_type::UI, instance.sop_class_uid);
-                    if (instance.instance_number.has_value()) {
-                        ds.set_string(core::tags::instance_number, encoding::vr_type::IS,
-                                      std::to_string(instance.instance_number.value()));
-                    }
-                    results.push_back(std::move(ds));
-                }
-            }
-            break;
-        }
-    }
-
-    std::cout << log_prefix() << "  Found " << results.size() << " matches\n";
-    return results;
-}
-
-std::vector<core::dicom_file> pacs_server_app::handle_retrieve(
-    const core::dicom_dataset& query_keys) {
-
-    std::cout << log_prefix() << "C-MOVE/C-GET retrieve request\n";
-
-    std::vector<core::dicom_file> files;
-    std::vector<std::string> file_paths;
-
-    // Determine query level and get file paths
-    auto sop_uid = query_keys.get_string(core::tags::sop_instance_uid);
-    if (!sop_uid.empty()) {
-        // Instance level
-        auto path_result = database_->get_file_path(sop_uid);
-        if (path_result.is_ok() && path_result.value().has_value()) {
-            file_paths.push_back(path_result.value().value());
-        }
-    } else {
-        auto series_uid = query_keys.get_string(core::tags::series_instance_uid);
-        if (!series_uid.empty()) {
-            // Series level
-            auto series_files_result = database_->get_series_files(series_uid);
-            if (series_files_result.is_ok()) {
-                file_paths = std::move(series_files_result.value());
-            }
-        } else {
-            auto study_uid = query_keys.get_string(core::tags::study_instance_uid);
-            if (!study_uid.empty()) {
-                // Study level
-                auto study_files_result = database_->get_study_files(study_uid);
-                if (study_files_result.is_ok()) {
-                    file_paths = std::move(study_files_result.value());
-                }
-            }
-        }
-    }
-
-    // Load files
-    for (const auto& path : file_paths) {
-        auto file_result = core::dicom_file::open(path);
-        if (file_result.is_ok()) {
-            files.push_back(std::move(file_result.value()));
-        }
-    }
-
-    std::cout << log_prefix() << "  Found " << files.size() << " files to transfer\n";
-    return files;
 }
 
 std::vector<core::dicom_dataset> pacs_server_app::handle_worklist_query(

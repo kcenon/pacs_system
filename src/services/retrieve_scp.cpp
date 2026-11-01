@@ -39,6 +39,10 @@ void retrieve_scp::set_retrieve_handler(retrieve_handler handler) {
     retrieve_handler_ = std::move(handler);
 }
 
+void retrieve_scp::set_retrieve_selector(retrieve_selector selector) {
+    retrieve_selector_ = std::move(selector);
+}
+
 void retrieve_scp::set_destination_resolver(destination_resolver resolver) {
     destination_resolver_ = std::move(resolver);
 }
@@ -184,18 +188,23 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
     if (!dest_addr) {
         return refuse(status_refused_move_destination_unknown);
     }
-    if (!retrieve_handler_) {
+    if (!retrieve_handler_ && !retrieve_selector_) {
         return refuse(status_error_unable_to_process);
     }
     const auto& query_keys = request.dataset().value().get();
-    std::vector<core::dicom_file> files;
+    retrieve_selection selection;
     try {
-        files = retrieve_handler_(query_keys);
+        selection = select_objects(sop_class_uid, query_keys);
     } catch (const std::exception&) {
         return refuse(status_error_unable_to_process);
     }
+    if (selection.failure != qr_failure::none) {
+        return refuse(selection.failure == qr_failure::identifier_mismatch ? status_error_dataset_mismatch
+                                                                           : status_error_unable_to_process);
+    }
+    auto& files = selection.files;
     // DIMSE counters are US. Never wrap a larger match set into a success.
-    if (files.size() > (std::numeric_limits<uint16_t>::max)()) {
+    if (files.size()+selection.unavailable_uids.size() > (std::numeric_limits<uint16_t>::max)()) {
         return refuse(status_refused_out_of_resources_matches);
     }
     const std::string calling_ae{assoc.calling_ae()};
@@ -208,7 +217,9 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
 
     sub_operation_stats stats;
     stats.remaining = static_cast<uint16_t>(files.size());
-    std::vector<std::string> failed_uids;
+    // An object that cannot be read is a failed sub-operation, not an object that never was.
+    stats.failed = static_cast<uint16_t>(selection.unavailable_uids.size());
+    std::vector<std::string> failed_uids = std::move(selection.unavailable_uids);
     bool was_cancelled = false;
     using syntax_key = std::pair<std::string, std::string>;
     std::vector<syntax_key> syntaxes;
@@ -401,17 +412,22 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
     if (!request.has_dataset()) {
         return refuse(status_error_dataset_mismatch);
     }
-    if (!retrieve_handler_) {
+    if (!retrieve_handler_ && !retrieve_selector_) {
         return refuse(status_error_unable_to_process);
     }
     const auto& query_keys = request.dataset().value().get();
-    std::vector<core::dicom_file> files;
+    retrieve_selection selection;
     try {
-        files = retrieve_handler_(query_keys);
+        selection = select_objects(sop_class_uid, query_keys);
     } catch (const std::exception&) {
         return refuse(status_error_unable_to_process);
     }
-    if (files.size() > (std::numeric_limits<uint16_t>::max)()) {
+    if (selection.failure != qr_failure::none) {
+        return refuse(selection.failure == qr_failure::identifier_mismatch ? status_error_dataset_mismatch
+                                                                           : status_error_unable_to_process);
+    }
+    auto& files = selection.files;
+    if (files.size()+selection.unavailable_uids.size() > (std::numeric_limits<uint16_t>::max)()) {
         return refuse(status_refused_out_of_resources_matches);
     }
     const std::string calling_ae{assoc.calling_ae()};
@@ -424,7 +440,9 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
 
     sub_operation_stats stats;
     stats.remaining = static_cast<uint16_t>(files.size());
-    std::vector<std::string> failed_uids;
+    // An object that cannot be read is a failed sub-operation, not an object that never was.
+    stats.failed = static_cast<uint16_t>(selection.unavailable_uids.size());
+    std::vector<std::string> failed_uids = std::move(selection.unavailable_uids);
     bool was_cancelled = false;
     bool exchange_failed = false;
     for (const auto& file : files) {
@@ -608,6 +626,18 @@ network::Result<std::monostate> retrieve_scp::send_final_response(
     }
 
     return assoc.send_dimse(context_id, response);
+}
+
+retrieve_selection retrieve_scp::select_objects(std::string_view sop_class_uid,
+                                                const core::dicom_dataset& query_keys) const {
+    if (retrieve_selector_) {
+        const bool patient_root =
+            sop_class_uid == patient_root_move_sop_class_uid || sop_class_uid == patient_root_get_sop_class_uid;
+        return retrieve_selector_(retrieve_request{patient_root ? qr_model::patient_root : qr_model::study_root, query_keys});
+    }
+    retrieve_selection selection;
+    selection.files = retrieve_handler_(query_keys);
+    return selection;
 }
 
 std::string retrieve_scp::get_move_destination(

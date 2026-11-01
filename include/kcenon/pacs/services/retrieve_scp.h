@@ -22,6 +22,7 @@
 #ifndef PACS_SERVICES_RETRIEVE_SCP_HPP
 #define PACS_SERVICES_RETRIEVE_SCP_HPP
 
+#include "query_scp.h"
 #include "scp_service.h"
 #include "kcenon/pacs/core/dicom_dataset.h"
 #include "kcenon/pacs/core/dicom_file.h"
@@ -102,6 +103,28 @@ struct sub_operation_stats {
  */
 using retrieve_handler = std::function<std::vector<core::dicom_file>(
     const core::dicom_dataset& query_keys)>;
+
+/// A C-MOVE or C-GET request as the service understood it.
+struct retrieve_request {
+    qr_model model;
+    const core::dicom_dataset& keys;
+};
+
+/// The objects one retrieve names.
+struct retrieve_selection {
+    std::vector<core::dicom_file> files;
+    /// Selected objects whose files could not be read: failed sub-operations, not absences.
+    std::vector<std::string> unavailable_uids;
+    qr_failure failure{qr_failure::none};
+};
+
+/**
+ * @brief Retrieve selector function type
+ *
+ * Unlike retrieve_handler, it sees the Information Model and can report a refusal or an
+ * object it could not read, so neither turns into a final Success with fewer objects.
+ */
+using retrieve_selector = std::function<retrieve_selection(const retrieve_request& request)>;
 
 /**
  * @brief Destination resolver function type
@@ -256,6 +279,13 @@ public:
      * @param handler The retrieve handler function
      */
     void set_retrieve_handler(retrieve_handler handler);
+
+    /**
+     * @brief Set the retrieve selector, which takes precedence over retrieve_handler
+     *
+     * @param selector The retrieve selector function
+     */
+    void set_retrieve_selector(retrieve_selector selector);
 
     /**
      * @brief Set the destination resolver function
@@ -445,11 +475,16 @@ private:
     [[nodiscard]] std::string get_move_destination(
         const network::dimse::dimse_message& request) const;
 
+    /// Ask the selector or the handler for the objects an Identifier names.
+    [[nodiscard]] retrieve_selection select_objects(std::string_view sop_class_uid,
+                                                    const core::dicom_dataset& query_keys) const;
+
     // =========================================================================
     // Member Variables
     // =========================================================================
 
     retrieve_handler retrieve_handler_;
+    retrieve_selector retrieve_selector_;
     destination_resolver destination_resolver_;
     store_sub_operation store_handler_;
     retrieve_cancel_check cancel_check_;

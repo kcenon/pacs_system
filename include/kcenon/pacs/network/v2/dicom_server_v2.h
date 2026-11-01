@@ -323,7 +323,8 @@ private:
     // =========================================================================
 
     /// Create and register a new handler for a session
-    void create_handler(std::shared_ptr<kcenon::network::interfaces::i_session> session);
+    void create_handler(std::shared_ptr<kcenon::network::interfaces::i_session> session,
+                        bool reject_for_limit = false);
 
     /// Deliver @p session's data and errors straight to @p handler
     /// (registered as @p key). network_system reports the same id() for
@@ -358,6 +359,12 @@ private:
 
     /// Check for idle timeouts on handlers
     void check_idle_timeouts();
+
+    /// Run check_idle_timeouts() until stop_idle_monitor()
+    void start_idle_monitor();
+
+    /// End the idle monitor thread
+    void stop_idle_monitor();
 
     // =========================================================================
     // Internal Helpers
@@ -411,6 +418,12 @@ private:
 
     /// Wakes the closer thread
     std::condition_variable closer_cv_;
+
+    /// Ends associations that stay silent past the idle timeout
+    std::thread idle_thread_;
+    std::mutex idle_mutex_;
+    std::condition_variable idle_cv_;
+    bool idle_running_{false};
 
     /// Server statistics
     mutable server_statistics stats_;

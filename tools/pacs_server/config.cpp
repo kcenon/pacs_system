@@ -25,6 +25,7 @@ Options:
   --log-level <level>     Log level: trace, debug, info, warning, error, critical
                           (default: info)
   --max-associations <n>  Maximum concurrent associations (default: 50)
+  --peer <AE:host:port>   C-MOVE destination (repeatable)
   --help, -h              Show this help message
 
 Supported DICOM Services:
@@ -134,6 +135,35 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
                 std::cerr << "Error: Invalid max-associations value\n";
                 return std::nullopt;
             }
+            continue;
+        }
+
+        if (arg == "--peer") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: --peer requires a value\n";
+                return std::nullopt;
+            }
+            const std::string spec = argv[++i];
+            const auto first = spec.find(':');
+            const auto last = spec.rfind(':');
+            move_destination destination;
+            if (first == std::string::npos || first == 0 || last == first || last + 1 == spec.size()) {
+                std::cerr << "Error: Invalid peer format. Use AE:host:port\n";
+                return std::nullopt;
+            }
+            destination.ae_title = spec.substr(0, first);
+            destination.host = spec.substr(first + 1, last - first - 1);
+            try {
+                const int port = std::stoi(spec.substr(last + 1));
+                if (port < 1 || port > 65535) {
+                    throw std::out_of_range("port");
+                }
+                destination.port = static_cast<uint16_t>(port);
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid peer port\n";
+                return std::nullopt;
+            }
+            config.move_destinations.push_back(std::move(destination));
             continue;
         }
 

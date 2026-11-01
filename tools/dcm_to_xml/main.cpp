@@ -23,7 +23,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/encoding/vr_type.h"
-#include "../common/utf8_text.h"
+#include "kcenon/pacs/core/utf8_text.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -766,7 +766,7 @@ int convert_file(const std::filesystem::path& input_path,
 
     // Write main dataset
     // The document declares UTF-8 whatever the object's character set is.
-    write_dataset_xml(output, kcenon::pacs::cli::utf8_text_copy(file.dataset()), opts, base_path, 1,
+    write_dataset_xml(output, kcenon::pacs::core::utf8_text_copy(file.dataset()), opts, base_path, 1,
                       bulk_data_counter);
 
     output << "</NativeDicomModel>" << newline;

@@ -176,6 +176,19 @@ dicom_association_handler::time_point dicom_association_handler::last_activity()
     return last_activity_;
 }
 
+void dicom_association_handler::abort_idle() {
+    if (is_closed()) {
+        return;
+    }
+    send_abort(abort_source::service_provider, abort_reason::not_specified);
+    close_handler(false);
+}
+
+bool dicom_association_handler::service_active() const {
+    std::lock_guard<std::mutex> lock(service_mutex_);
+    return service_running_ || !service_requests_.empty();
+}
+
 // =============================================================================
 // Callbacks
 // =============================================================================
@@ -422,6 +435,15 @@ void dicom_association_handler::process_pdu(const integration::pdu_data& pdu) {
 }
 
 void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& payload) {
+    if (reject_for_limit_) {
+        // PS3.8 Table 9-21. A closed connection would tell the peer nothing about why.
+        send_associate_rj(reject_result::rejected_transient,
+                          static_cast<uint8_t>(reject_source::service_provider_presentation),
+                          static_cast<uint8_t>(reject_reason_provider_presentation::local_limit_exceeded));
+        close_handler(false);
+        return;
+    }
+
     // Build full PDU for decoder (add header back)
     std::vector<uint8_t> full_pdu;
     full_pdu.reserve(pdu_header_size + payload.size());
@@ -760,12 +782,14 @@ void dicom_association_handler::enqueue_request(uint8_t context_id, dimse::dimse
 void dicom_association_handler::run_services() {
     for (;;) {
         std::unique_lock<std::mutex> lock(service_mutex_);
+        service_running_ = false;
         service_ready_.wait(lock, [this] { return service_stopping_ || !service_requests_.empty(); });
         if (service_stopping_) {
             return;
         }
         auto [context_id, message] = std::move(service_requests_.front());
         service_requests_.pop_front();
+        service_running_ = true;
         lock.unlock();
         try {
             auto result = dispatch_to_service(context_id, message);
@@ -781,6 +805,9 @@ void dicom_association_handler::run_services() {
             message.command() != dimse::command_field::c_get_rq) {
             association_.finish_cancellable_operation(context_id, message.message_id());
         }
+        // Idleness counts from the end of the work, not from the request that started it.
+        std::lock_guard<std::mutex> activity(mutex_);
+        touch();
     }
 }
 

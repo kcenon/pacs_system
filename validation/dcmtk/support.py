@@ -47,7 +47,7 @@ def declared_support(root):
     # Preserve source identities for review of documentation/registry divergence.
     # This is a declaration inventory; runtime support/valid IOD combinations are
     # evaluated by their explicit external cases, never inferred from UID presence.
-    # "assigned" names an executing job (component.corpus); only its results pass anything.
+    # "assigned" names an executing job (component.corpus, component.qr); only its results pass anything.
     provenance = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
                   for path in sources}
     cases = []
@@ -65,7 +65,7 @@ def declared_support(root):
                     oracle='independent peer responses and object/state comparison',
                     prerequisites=['qualified independent peer','valid SOP/syntax/pixel-format combination'],
                     execution_lane='full-dicom', owner_issue=owner,
-                    assignment_status='assigned' if owner == 1318 else 'unverified',
+                    assignment_status='assigned' if owner in (1318, 1319) else 'unverified',
                     evidence_schema='case result plus independent peer/object evidence'))
     for syntax in syntaxes:
         for boundary in ('network','file_or_codec'):
