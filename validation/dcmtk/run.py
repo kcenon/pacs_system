@@ -439,6 +439,14 @@ class Validation:
         return dict(tests=15, failed=0, skipped=0,
                     detail='Public MPPS CLIs, controlled malformed wire peer, read-only SQLite state and process restart')
 
+    def dicomdir_files(self):
+        directory = self.output/'dicomdir'
+        self.command(['python3', HERE.parent.parent/'tools/integration_tests/scripts/test_dicomdir_offsets.py',
+                      self.args.build_dir, directory], timeout=180)
+        result = json.loads((directory/'results.json').read_text())
+        require(result == dict(tests=9, failed=0, skipped=0), 'Incomplete independent DICOMDIR evidence')
+        return dict(result, detail='Absolute Item offsets, FileSet/DCMTK readers, shuffled graph, empty/update and corrupt links')
+
     def big_endian_files(self):
         directory = self.output/'big-endian'
         self.command(['python3', HERE.parent.parent/'tools/integration_tests/scripts/test_big_endian_values.py',
@@ -769,6 +777,7 @@ class Validation:
         self.case('mwl.scp', self.mwl_scp, requires=['peer.preflight'])
         self.case('mpps.protocol', self.mpps_protocol)
         self.case('file.big-endian', self.big_endian_files)
+        self.case('file.dicomdir', self.dicomdir_files)
         self.security_cases()
         self.case('echo.scp',self.echo_scp,requires=['peer.preflight'])
         self.case('store.scp',self.store_scp,requires=['fixtures','peer.preflight'])

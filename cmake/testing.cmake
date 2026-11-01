@@ -73,6 +73,8 @@ if(PACS_BUILD_TESTS)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/utilities)
     add_executable(utilities_tests
         tests/utilities/dcm_modify_test.cpp
+        tests/utilities/directory_index_test.cpp
+        tools/dcm_dir/directory_index.cpp
     )
     target_link_libraries(utilities_tests
         PRIVATE

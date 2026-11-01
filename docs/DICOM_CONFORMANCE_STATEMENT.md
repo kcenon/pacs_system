@@ -563,11 +563,32 @@ DICOMDIR support is provided via the `dcm_dir` utility:
 | Create DICOMDIR | Yes |
 | List DICOMDIR contents | Yes |
 | Verify DICOMDIR integrity | Yes |
-| Update DICOMDIR | Yes |
+| Update DICOMDIR | Add/rebuild; deletion is not implemented |
 
 Directory Record types: PATIENT, STUDY, SERIES, IMAGE.
 
-Group 0004 directory record tags are fully supported.
+The writer emits records in deterministic patient/study/series/instance order and
+sets first-root, last-root, next-sibling and lower-level UL offsets to the absolute
+Item-tag positions, including the 128-byte preamble and `DICM` prefix. File Meta
+Information carries the Directory Storage SOP identifiers and group length; the
+Basic Directory dataset does not carry SOP Class/Instance UID attributes.
+
+`list`, `verify` and the update reader follow stored links, including when physical
+record order differs. They reject missing or malformed links, offsets that do not
+point to record Item tags, cycles, shared children, unreachable records and invalid
+hierarchy types. Empty directories and multiple roots/siblings are supported.
+Explicit VR Little Endian directories with defined or undefined sequence/item
+lengths are supported, with a 32-bit file-offset limit and a nesting limit of 32.
+Inactive records, MRDR/private record types and other directory hierarchies are
+not supported. Add/rebuild updates preserve the File-set UID and ID.
+
+Independent pydicom `FileSet` loading, DCMTK-created directories, literal offset
+checks and corrupt-link rejection are exercised by
+`tools/integration_tests/scripts/test_dicomdir_offsets.py`. This establishes the
+listed directory behavior, not full media application-profile or source-IOD
+validation. Referenced paths retain their actual spelling and resolve from the
+DICOMDIR parent; callers prepare compliant File ID names and media layout. The
+tool does not rename/copy files or validate every media filename/character-set rule.
 
 ---
 

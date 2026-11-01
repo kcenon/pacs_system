@@ -447,3 +447,11 @@ Python requires pydicom and NumPy; missing tools are failures. Run with
 Command arguments/exits/stdout/stderr and synthetic files are retained. The BE
 codec and Part 10 implementation share one swap policy; SCP negotiation continues
 to reject the retired syntax. General parser failure behavior remains #1301/#1302.
+
+DICOMDIR file acceptance (`file.dicomdir`) runs nine independent CLI cases through
+`test_dicomdir_offsets.py`: 30 records/16 images across multiple roots/studies/series,
+pydicom FileSet loading, DCMTK-defined/undefined lengths, shuffled physical records,
+empty directories, add/rebuild updates, path resolution, 13 invalid link mutations
+and malformed structure/metadata. Every command exit and synthetic artifact is
+retained. Requires pydicom plus DCMTK `dcmdump` and `dcmmkdir`; absent tools fail.
+The lane verifies the supported four-level hierarchy, not every media profile.

@@ -1010,3 +1010,14 @@ checks raw intermediate values, independent DCMTK files and pydicom/NumPy pixels
 including OW with eight-bit allocation. Its six cases are required in binary CI
 and the full DCMTK driver. These are file-format checks; retired Big Endian is
 still excluded from PACS_SCP presentation-context negotiation.
+
+Independent DICOMDIR acceptance:
+
+```sh
+python3 tools/integration_tests/scripts/test_dicomdir_offsets.py build build/test-results/dicomdir
+```
+
+Use a new evidence directory. Nine cases exercise actual `dcm_dir` creation,
+listing, verification and add/rebuild updates against pydicom FileSet and DCMTK,
+including shuffled physical order, empty directories and corrupt offsets. The
+script requires pydicom, `dcmdump` and `dcmmkdir`; missing tools fail the run.

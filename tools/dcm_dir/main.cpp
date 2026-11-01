@@ -22,15 +22,20 @@
  * @endcode
  */
 
+#include "directory_index.h"
 #include "kcenon/pacs/core/dicom_dictionary.h"
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
+#include "kcenon/pacs/encoding/explicit_vr_codec.h"
 #include "kcenon/pacs/encoding/vr_type.h"
 
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
+#include <limits>
+#include <tuple>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -300,7 +305,7 @@ std::string generate_uid() {
 }
 
 /**
- * @brief Convert path to Referenced File ID format (backslash separated, uppercase)
+ * @brief Convert path to Referenced File ID components, preserving the actual filename
  */
 std::string path_to_file_id(const std::filesystem::path& path,
                             const std::filesystem::path& base) {
@@ -311,8 +316,6 @@ std::string path_to_file_id(const std::filesystem::path& path,
             result += "\\";
         }
         std::string name = part.string();
-        // Convert to uppercase for ISO 9660 compatibility
-        std::transform(name.begin(), name.end(), name.begin(), ::toupper);
         result += name;
     }
     return result;
@@ -334,6 +337,7 @@ struct patient_info {
 struct study_info {
     std::string study_instance_uid;
     std::string study_date;
+    std::string study_id;
     std::string study_time;
     std::string study_description;
     std::string accession_number;
@@ -386,8 +390,10 @@ bool scan_directory(const std::filesystem::path& dir_path,
             return;
         }
 
-        ++stats.valid_files;
         auto& file = result.value();
+        if (file.meta_information().get_string(tags::media_storage_sop_class_uid) ==
+            kMediaStorageDirectorySopClassUid) return;
+        ++stats.valid_files;
         auto& ds = file.dataset();
 
         // Extract patient info
@@ -420,6 +426,7 @@ bool scan_directory(const std::filesystem::path& dir_path,
         study.study_instance_uid = study_uid;
         if (study.study_date.empty()) {
             study.study_date = ds.get_string(tags::study_date);
+            study.study_id = ds.get_string(tags::study_id);
             study.study_time = ds.get_string(tags::study_time);
             study.study_description = ds.get_string(tags::study_description);
             study.accession_number = ds.get_string(tags::accession_number);
@@ -449,20 +456,16 @@ bool scan_directory(const std::filesystem::path& dir_path,
 
     // Iterate directory
     try {
+        std::vector<std::filesystem::path> paths;
         if (opts.recursive) {
-            for (const auto& entry :
-                 std::filesystem::recursive_directory_iterator(dir_path)) {
-                if (entry.is_regular_file()) {
-                    process_file(entry.path());
-                }
-            }
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(dir_path))
+                if (entry.is_regular_file()) paths.push_back(entry.path());
         } else {
-            for (const auto& entry : std::filesystem::directory_iterator(dir_path)) {
-                if (entry.is_regular_file()) {
-                    process_file(entry.path());
-                }
-            }
+            for (const auto& entry : std::filesystem::directory_iterator(dir_path))
+                if (entry.is_regular_file()) paths.push_back(entry.path());
         }
+        std::sort(paths.begin(), paths.end());
+        for (const auto& path : paths) process_file(path);
     } catch (const std::filesystem::filesystem_error& e) {
         std::cerr << "Error: " << e.what() << "\n";
         return false;
@@ -490,10 +493,10 @@ bool scan_directory(const std::filesystem::path& dir_path,
 /**
  * @brief Create DICOMDIR dataset from hierarchical structure
  */
-kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
+kcenon::pacs::Result<kcenon::pacs::core::dicom_file> create_dicomdir(
     const std::map<std::string, patient_info>& patients,
     const std::filesystem::path& base_path,
-    const options& opts) {
+    const options& opts, const std::string& file_set_uid = {}) {
     using namespace kcenon::pacs::core;
     using namespace kcenon::pacs::encoding;
 
@@ -501,11 +504,26 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
 
     // Set basic DICOMDIR attributes
     ds.set_string(dir_tags::file_set_id, vr_type::CS,
-                  opts.file_set_id.empty() ? "PACS_SYSTEM" : opts.file_set_id);
+                  opts.file_set_id.empty() && file_set_uid.empty() ? "PACS_SYSTEM" : opts.file_set_id);
     ds.set_numeric<uint16_t>(dir_tags::file_set_consistency_flag, vr_type::US, 0);
 
-    // Create directory record sequence
+    ds.set_numeric<uint32_t>(dir_tags::offset_of_first_directory_record, vr_type::UL, 0);
+    ds.set_numeric<uint32_t>(dir_tags::offset_of_last_directory_record, vr_type::UL, 0);
+    // Fixed-size placeholders keep both serialization passes identical in size.
     std::vector<dicom_dataset> records;
+    constexpr size_t none = std::numeric_limits<size_t>::max();
+    std::vector<size_t> next, lower, roots;
+    auto append = [&](dicom_dataset record, std::vector<size_t>& siblings) {
+        const auto i = records.size();
+        record.set_numeric<uint32_t>(dir_tags::offset_of_next_directory_record, vr_type::UL, 0);
+        record.set_numeric<uint32_t>(dir_tags::offset_of_lower_level_directory_entity, vr_type::UL, 0);
+        records.push_back(std::move(record));
+        next.push_back(none);
+        lower.push_back(none);
+        if (!siblings.empty()) next[siblings.back()] = i;
+        siblings.push_back(i);
+        return i;
+    };
 
     for (const auto& [pid, patient] : patients) {
         // Create PATIENT record
@@ -515,6 +533,8 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
         patient_rec.set_string(tags::patient_id, vr_type::LO, patient.patient_id);
         patient_rec.set_string(tags::patient_name, vr_type::PN, patient.patient_name);
 
+        const auto patient_index = append(std::move(patient_rec), roots);
+        std::vector<size_t> studies;
         for (const auto& [suid, study] : patient.studies) {
             // Create STUDY record
             dicom_dataset study_rec;
@@ -525,8 +545,10 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
             study_rec.set_string(tags::study_time, vr_type::TM, study.study_time);
             study_rec.set_string(tags::study_description, vr_type::LO, study.study_description);
             study_rec.set_string(tags::accession_number, vr_type::SH, study.accession_number);
-            study_rec.set_string(tags::study_id, vr_type::SH, "");
+            study_rec.set_string(tags::study_id, vr_type::SH, study.study_id);
 
+            const auto study_index = append(std::move(study_rec), studies);
+            std::vector<size_t> series_indices;
             for (const auto& [seuid, series] : study.series) {
                 // Create SERIES record
                 dicom_dataset series_rec;
@@ -536,7 +558,13 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
                 series_rec.set_string(tags::modality, vr_type::CS, series.modality);
                 series_rec.set_string(tags::series_number, vr_type::IS, series.series_number);
 
-                for (const auto& instance : series.instances) {
+                const auto series_index = append(std::move(series_rec), series_indices);
+                std::vector<size_t> images;
+                auto instances = series.instances;
+                std::sort(instances.begin(), instances.end(), [](const auto& a, const auto& b) {
+                    return std::tie(a.sop_instance_uid, a.file_path) < std::tie(b.sop_instance_uid, b.file_path);
+                });
+                for (const auto& instance : instances) {
                     // Create IMAGE record
                     dicom_dataset image_rec;
                     image_rec.set_string(dir_tags::directory_record_type, vr_type::CS, "IMAGE");
@@ -557,17 +585,14 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
                     // Instance Number
                     image_rec.set_string(tags::instance_number, vr_type::IS, instance.instance_number);
 
-                    records.push_back(std::move(image_rec));
+                    append(std::move(image_rec), images);
                 }
-                records.push_back(std::move(series_rec));
+                if (!images.empty()) lower[series_index] = images.front();
             }
-            records.push_back(std::move(study_rec));
+            if (!series_indices.empty()) lower[study_index] = series_indices.front();
         }
-        records.push_back(std::move(patient_rec));
+        if (!studies.empty()) lower[patient_index] = studies.front();
     }
-
-    // Reverse records (DICOMDIR uses bottom-up order for linking)
-    std::reverse(records.begin(), records.end());
 
     // Create sequence element and set items
     dicom_element seq_elem(dir_tags::directory_record_sequence, vr_type::SQ);
@@ -575,11 +600,41 @@ kcenon::pacs::core::dicom_dataset create_dicomdir_dataset(
     items = std::move(records);
     ds.insert(std::move(seq_elem));
 
-    // Set SOP Class and Instance UIDs
-    ds.set_string(tags::sop_class_uid, vr_type::UI, kMediaStorageDirectorySopClassUid);
-    ds.set_string(tags::sop_instance_uid, vr_type::UI, generate_uid());
-
-    return ds;
+    auto file = dicom_file::create(std::move(ds), transfer_syntax::explicit_vr_little_endian);
+    // Basic Directory IOD carries these identifiers only in File Meta Information.
+    auto& meta = file.meta_information();
+    meta.set_string(tags::media_storage_sop_class_uid, vr_type::UI, kMediaStorageDirectorySopClassUid);
+    meta.set_string(tags::media_storage_sop_instance_uid, vr_type::UI,
+        file_set_uid.empty() ? generate_uid() : file_set_uid);
+    meta.set_numeric<uint32_t>(tags::file_meta_information_group_length, vr_type::UL,
+        static_cast<uint32_t>(explicit_vr_codec::encode(meta).size()));
+    auto first_pass = file.to_bytes();
+    auto offsets = pacs::tools::directory::item_offsets(first_pass);
+    if (offsets.is_err()) return offsets.error();
+    if (offsets.value().size() != next.size()) {
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::encode_error, "DICOMDIR item count changed during serialization");
+    }
+    auto& output = file.dataset();
+    if (!roots.empty()) {
+        output.set_numeric<uint32_t>(dir_tags::offset_of_first_directory_record, vr_type::UL, offsets.value()[roots.front()]);
+        output.set_numeric<uint32_t>(dir_tags::offset_of_last_directory_record, vr_type::UL, offsets.value()[roots.back()]);
+    }
+    auto& encoded_records = output.get(dir_tags::directory_record_sequence)->sequence_items();
+    for (size_t i = 0; i < encoded_records.size(); ++i) {
+        encoded_records[i].set_numeric<uint32_t>(dir_tags::offset_of_next_directory_record,
+            vr_type::UL, next[i] == none ? 0 : offsets.value()[next[i]]);
+        encoded_records[i].set_numeric<uint32_t>(dir_tags::offset_of_lower_level_directory_entity,
+            vr_type::UL, lower[i] == none ? 0 : offsets.value()[lower[i]]);
+    }
+    auto second_pass = file.to_bytes();
+    auto checked = pacs::tools::directory::inspect(second_pass, file);
+    if (checked.is_err()) return checked.error();
+    if (first_pass.size() != second_pass.size() || offsets.value() != checked.value().offsets) {
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::encode_error, "DICOMDIR offset layout changed during serialization");
+    }
+    return file;
 }
 
 /**
@@ -610,24 +665,20 @@ int execute_create(const options& opts) {
         return 2;
     }
 
-    if (stats.valid_files == 0) {
-        std::cerr << "Error: No valid DICOM files found\n";
+    if (stats.valid_files == 0 && stats.invalid_files != 0) {
+        std::cerr << "Error: No valid DICOM files found; input contained unreadable files\n";
         return 2;
     }
 
-    // Create DICOMDIR dataset
-    std::cout << "Building DICOMDIR structure...\n";
-    auto ds = create_dicomdir_dataset(patients, opts.input_path, opts);
-
-    // Create DICOM file
-    auto file = dicom_file::create(std::move(ds),
-                                   transfer_syntax::explicit_vr_little_endian);
-
-    // Determine output path
     std::filesystem::path output_path = opts.output_path;
-    if (output_path.is_relative()) {
-        output_path = opts.input_path / output_path;
+    if (output_path.is_relative()) output_path = opts.input_path / output_path;
+    std::cout << "Building DICOMDIR structure...\n";
+    auto created = create_dicomdir(patients, output_path.parent_path(), opts);
+    if (created.is_err()) {
+        std::cerr << "Error: " << created.error().message << "\n";
+        return 2;
     }
+    auto& file = created.value();
 
     // Save
     std::cout << "Saving to: " << output_path.string() << "\n";
@@ -667,34 +718,37 @@ bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
                     statistics& stats) {
     using namespace kcenon::pacs::core;
 
-    auto result = dicom_file::open(dicomdir_path);
+    std::ifstream input(dicomdir_path, std::ios::binary | std::ios::ate);
+    const auto size = input.tellg();
+    if (!input || size < 0 || static_cast<uint64_t>(size) > std::numeric_limits<uint32_t>::max()) {
+        std::cerr << "Error: Cannot read DICOMDIR within the 32-bit offset range\n";
+        return false;
+    }
+    std::vector<uint8_t> bytes(static_cast<size_t>(size));
+    input.seekg(0);
+    if (!input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()))) {
+        std::cerr << "Error: Failed to read DICOMDIR\n";
+        return false;
+    }
+    auto offsets = pacs::tools::directory::item_offsets(bytes);
+    if (offsets.is_err()) {
+        std::cerr << "Error: " << offsets.error().message << "\n";
+        return false;
+    }
+    auto result = dicom_file::from_bytes(bytes);
     if (result.is_err()) {
         std::cerr << "Error: Failed to open DICOMDIR: " << result.error().message << "\n";
         return false;
     }
-
-    auto& file = result.value();
-    auto& ds = file.dataset();
-
-    // Verify SOP Class
-    auto sop_class = ds.get_string(tags::sop_class_uid);
-    if (sop_class != kMediaStorageDirectorySopClassUid) {
-        std::cerr << "Warning: Not a standard DICOMDIR (SOP Class: " << sop_class << ")\n";
-    }
-
-    // Get Directory Record Sequence
-    auto* seq_elem = ds.get(dir_tags::directory_record_sequence);
-    if (seq_elem == nullptr || !seq_elem->is_sequence()) {
-        std::cerr << "Error: No Directory Record Sequence found\n";
+    auto checked = pacs::tools::directory::inspect(bytes, result.value());
+    if (checked.is_err()) {
+        std::cerr << "Error: " << checked.error().message << "\n";
         return false;
     }
-
-    const auto& items = seq_elem->sequence_items();
-
-    // Build hierarchy using a stack-based approach
-    std::vector<directory_record*> stack;
-
-    for (const auto& item : items) {
+    const auto& items = result.value().dataset().get(dir_tags::directory_record_sequence)->sequence_items();
+    std::function<directory_record(size_t)> build;
+    build = [&](size_t index) {
+        const auto& item = items[index];
         directory_record rec;
         rec.type = item.get_string(dir_tags::directory_record_type);
 
@@ -706,6 +760,8 @@ bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
         } else if (rec.type == "STUDY") {
             rec.attrs["StudyInstanceUID"] = item.get_string(tags::study_instance_uid);
             rec.attrs["StudyDate"] = item.get_string(tags::study_date);
+            rec.attrs["StudyTime"] = item.get_string(tags::study_time);
+            rec.attrs["StudyID"] = item.get_string(tags::study_id);
             rec.attrs["StudyDescription"] = item.get_string(tags::study_description);
             rec.attrs["AccessionNumber"] = item.get_string(tags::accession_number);
             ++stats.studies;
@@ -713,6 +769,7 @@ bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
             rec.attrs["SeriesInstanceUID"] = item.get_string(tags::series_instance_uid);
             rec.attrs["Modality"] = item.get_string(tags::modality);
             rec.attrs["SeriesNumber"] = item.get_string(tags::series_number);
+            rec.attrs["SeriesDescription"] = item.get_string(tags::series_description);
             ++stats.series;
         } else if (rec.type == "IMAGE") {
             rec.attrs["InstanceNumber"] = item.get_string(tags::instance_number);
@@ -723,28 +780,10 @@ bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
             ++stats.images;
         }
 
-        // Determine hierarchy level
-        int level = 0;
-        if (rec.type == "PATIENT") level = 0;
-        else if (rec.type == "STUDY") level = 1;
-        else if (rec.type == "SERIES") level = 2;
-        else if (rec.type == "IMAGE") level = 3;
-        else level = 4;  // Unknown type
-
-        // Adjust stack
-        while (stack.size() > static_cast<size_t>(level)) {
-            stack.pop_back();
-        }
-
-        // Add to appropriate parent
-        if (stack.empty()) {
-            root_records.push_back(std::move(rec));
-            stack.push_back(&root_records.back());
-        } else {
-            stack.back()->children.push_back(std::move(rec));
-            stack.push_back(&stack.back()->children.back());
-        }
-    }
+        for (auto child : checked.value().children[index]) rec.children.push_back(build(child));
+        return rec;
+    };
+    for (auto root : checked.value().roots) root_records.push_back(build(root));
 
     return true;
 }
@@ -1031,6 +1070,8 @@ int execute_update(const options& opts) {
                 auto& s = patient->studies[rec.attrs.at("StudyInstanceUID")];
                 s.study_instance_uid = rec.attrs.at("StudyInstanceUID");
                 s.study_date = rec.attrs.at("StudyDate");
+                s.study_time = rec.attrs.at("StudyTime");
+                s.study_id = rec.attrs.at("StudyID");
                 s.study_description = rec.attrs.at("StudyDescription");
                 s.accession_number = rec.attrs.at("AccessionNumber");
                 for (const auto& child : rec.children) {
@@ -1041,6 +1082,7 @@ int execute_update(const options& opts) {
                 se.series_instance_uid = rec.attrs.at("SeriesInstanceUID");
                 se.modality = rec.attrs.at("Modality");
                 se.series_number = rec.attrs.at("SeriesNumber");
+                se.series_description = rec.attrs.at("SeriesDescription");
                 for (const auto& child : rec.children) {
                     rebuild(child, patient, study, &se);
                 }
@@ -1106,12 +1148,22 @@ int execute_update(const options& opts) {
 
         // Recreate DICOMDIR
         std::cout << "\nRebuilding DICOMDIR...\n";
-        auto ds = create_dicomdir_dataset(patients, base_path, opts);
-
-        auto file = kcenon::pacs::core::dicom_file::create(
-            std::move(ds), kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
-
-        auto result = file.save(opts.input_path);
+        auto previous = kcenon::pacs::core::dicom_file::open(opts.input_path);
+        if (previous.is_err()) {
+            std::cerr << "Error: " << previous.error().message << "\n";
+            return 2;
+        }
+        auto update_opts = opts;
+        if (update_opts.file_set_id.empty())
+            update_opts.file_set_id = previous.value().dataset().get_string(dir_tags::file_set_id);
+        auto created = create_dicomdir(patients, base_path, update_opts,
+            previous.value().meta_information().get_string(
+                kcenon::pacs::core::tags::media_storage_sop_instance_uid));
+        if (created.is_err()) {
+            std::cerr << "Error: " << created.error().message << "\n";
+            return 2;
+        }
+        auto result = created.value().save(opts.input_path);
         if (result.is_err()) {
             std::cerr << "Error: Failed to save updated DICOMDIR: "
                       << result.error().message << "\n";
