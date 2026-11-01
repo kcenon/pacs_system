@@ -23,6 +23,7 @@
 #include "scp_service.h"
 #include "storage_status.h"
 #include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/encoding/transfer_syntax.h"
 
 #include <atomic>
 #include <functional>
@@ -68,6 +69,17 @@ using storage_handler = std::function<storage_status(
     const std::string& calling_ae,
     const std::string& sop_class_uid,
     const std::string& sop_instance_uid)>;
+
+/// Received representation and its negotiated presentation-context syntax.
+/// References are valid only for the duration of the callback.
+struct storage_context {
+    const core::dicom_dataset& dataset;
+    const std::string& calling_ae;
+    const std::string& sop_class_uid;
+    const std::string& sop_instance_uid;
+    const encoding::transfer_syntax& transfer_syntax;
+};
+using context_storage_handler = std::function<storage_status(const storage_context&)>;
 
 /**
  * @brief Callback type for pre-store validation
@@ -196,6 +208,10 @@ public:
      */
     void set_handler(storage_handler handler);
 
+    /// Register a handler that can preserve the negotiated transfer syntax.
+    /// Replaces any legacy handler; set_handler likewise replaces this handler.
+    void set_context_handler(context_storage_handler handler);
+
     /**
      * @brief Set the pre-store validation handler
      *
@@ -317,6 +333,7 @@ private:
 
     /// Main storage handler
     storage_handler handler_;
+    context_storage_handler context_handler_;
 
     /// Pre-store validation handler
     pre_store_handler pre_store_handler_;

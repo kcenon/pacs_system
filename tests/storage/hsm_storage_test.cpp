@@ -16,6 +16,7 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include "transfer_syntax_fixture.h"
 
 #include <chrono>
 #include <filesystem>
@@ -553,4 +554,36 @@ TEST_CASE("hsm_storage: concurrent access", "[storage][hsm][threading]") {
 
     CHECK(successful_reads > 0);
     CHECK(successful_writes > 0);
+}
+
+TEST_CASE("hsm_storage: transfer syntax and encapsulation survive persistence",
+          "[storage][hsm_storage][encapsulated]") {
+    temp_directory temp_dir;
+    hsm_storage storage{create_file_storage(temp_dir.path() / "hot"), nullptr, nullptr};
+    storage_syntax_test::check_representation(storage,
+        create_test_dataset("1.2.3.1292", "1.2.3.1292.1", "1.2.3.1292.1.1"));
+}
+
+TEST_CASE("hsm_storage: compressed migration retains syntax and fragments",
+          "[storage][hsm][migration][encapsulated]") {
+    temp_directory temp_dir;
+    hsm_storage storage{create_file_storage(temp_dir.path() / "hot"),
+                        create_file_storage(temp_dir.path() / "warm"),
+                        create_file_storage(temp_dir.path() / "cold")};
+    auto ds = create_test_dataset("1.2.3.1292", "1.2.3.1292.1", "1.2.3.1292.1.1");
+    const auto expected = storage_syntax_test::fragments();
+    auto pixel = dicom_element::from_encapsulated_pixel_data(expected);
+    REQUIRE(pixel.is_ok());
+    ds.insert(std::move(pixel.value()));
+    REQUIRE(storage.store(ds, transfer_syntax::rle_lossless).is_ok());
+    for (auto tier : {storage_tier::warm, storage_tier::cold, storage_tier::hot}) {
+        REQUIRE(storage.migrate("1.2.3.1292.1.1", tier).is_ok());
+        CHECK(storage.get_tier("1.2.3.1292.1.1") == tier);
+        auto result = storage.retrieve_file("1.2.3.1292.1.1");
+        REQUIRE(result.is_ok());
+        CHECK(result.value().transfer_syntax() == transfer_syntax::rle_lossless);
+        const auto* stored = result.value().dataset().get(tags::pixel_data);
+        REQUIRE(stored);
+        CHECK(std::ranges::equal(stored->raw_data(), expected));
+    }
 }

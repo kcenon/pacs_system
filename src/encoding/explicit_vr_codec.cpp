@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/encoding/explicit_vr_codec.h"
+#include "kcenon/pacs/core/encapsulated_pixel_data.h"
 
 #include <kcenon/pacs/encoding/vr_info.h>
 #include <kcenon/pacs/encoding/vr_type.h>
@@ -343,7 +344,21 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
         return seq_element;
     }
 
-    // For other undefined-length elements (like encapsulated pixel data),
+    if (tag == core::dicom_tag{0x7FE0, 0x0010}) {
+        const auto layout = core::inspect_encapsulated_pixel_data(data, true, true);
+        if (!layout || vr != vr_type::OB) {
+            return make_codec_error<core::dicom_element>(
+                kcenon::pacs::error_codes::invalid_sequence,
+                "Malformed encapsulated Pixel Data (PS3.5 A.4)");
+        }
+        // Keep the BOT, every item header, fragment payload and delimiter. The
+        // Part 10 writer and frame splitter use this same representation.
+        auto element = core::dicom_element::from_encapsulated_pixel_data(data.first(layout->encoded_size));
+        data = data.subspan(layout->encoded_size);
+        return element;
+    }
+
+    // For other undefined-length elements,
     // read until we find a sequence delimitation item
     std::vector<uint8_t> accumulated_data;
 

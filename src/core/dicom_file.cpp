@@ -10,6 +10,7 @@
 #include "kcenon/pacs/core/dicom_file.h"
 
 #include "kcenon/pacs/core/dicom_dictionary.h"
+#include "kcenon/pacs/core/encapsulated_pixel_data.h"
 #include "kcenon/pacs/core/memory_mapped_file.h"
 #include "kcenon/pacs/core/private_tag_registry.h"
 #include "kcenon/pacs/encoding/compression/codec_factory.h"
@@ -144,36 +145,8 @@ void write_uint32_be(std::vector<uint8_t>& buffer, uint32_t value) {
  */
 [[nodiscard]] auto encapsulated_items_length(std::span<const uint8_t> value)
     -> std::optional<size_t> {
-    size_t offset = 0;
-    while (offset + 8 <= value.size()) {
-        const uint16_t group = read_uint16_le(value.subspan(offset, 2));
-        const uint16_t element = read_uint16_le(value.subspan(offset + 2, 2));
-        if (group != kItemTagGroup) {
-            return std::nullopt;
-        }
-
-        if (element == kSequenceDelimitationElement) {
-            if (offset == 0 || offset + 8 != value.size()) {
-                return std::nullopt;
-            }
-            return offset;
-        }
-
-        if (element != kItemTagElement) {
-            return std::nullopt;
-        }
-
-        const uint32_t length = read_uint32_le(value.subspan(offset + 4, 4));
-        if (length == kUndefinedLength || length > value.size() - offset - 8) {
-            return std::nullopt;
-        }
-        offset += 8 + length;
-    }
-
-    if (offset == 0 || offset != value.size()) {
-        return std::nullopt;
-    }
-    return offset;
+    const auto layout = inspect_encapsulated_pixel_data(value);
+    return layout ? std::optional<size_t>{layout->items_size} : std::nullopt;
 }
 
 /**
@@ -230,7 +203,39 @@ void write_sequence(std::vector<uint8_t>& buffer,
 // ============================================================================
 
 dicom_file::dicom_file(dicom_dataset meta_info, dicom_dataset main_dataset)
-    : meta_info_(std::move(meta_info)), dataset_(std::move(main_dataset)) {}
+    : meta_info_(std::move(meta_info)), dataset_(std::move(main_dataset)) {
+    if (transfer_syntax().is_encapsulated()) {
+        if (const auto* pixel = dataset_.get(tags::pixel_data);
+            pixel && pixel->vr() == encoding::vr_type::OB) {
+            auto marked = dicom_element::from_encapsulated_pixel_data(pixel->raw_data());
+            if (marked.is_ok()) dataset_.insert(std::move(marked.value()));
+        }
+    }
+}
+
+auto dicom_file::validate_pixel_data_representation(
+    const dicom_dataset& dataset, const encoding::transfer_syntax& syntax)
+    -> kcenon::pacs::VoidResult {
+    if (!syntax.is_valid() || !syntax.is_supported()) {
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::unsupported_transfer_syntax,
+            "Unsupported storage transfer syntax: " + std::string(syntax.uid()));
+    }
+    const auto* pixel = dataset.get(tags::pixel_data);
+    if (!pixel) return kcenon::pacs::ok();
+    if (syntax.is_encapsulated()) {
+        if (pixel->vr() != encoding::vr_type::OB || !inspect_encapsulated_pixel_data(pixel->raw_data())) {
+            return kcenon::pacs::pacs_void_error(
+                kcenon::pacs::error_codes::invalid_sequence,
+                "Encapsulated transfer syntax requires OB Pixel Data with a BOT and fragments");
+        }
+    } else if (pixel->is_encapsulated_pixel_data()) {
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Encapsulated Pixel Data cannot be written using a native transfer syntax");
+    }
+    return kcenon::pacs::ok();
+}
 
 // ============================================================================
 // Static Factory Methods (Reading)
@@ -311,6 +316,15 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
         return kcenon::pacs::Result<dicom_file>::err(dataset_result.error());
     }
 
+    auto representation = validate_pixel_data_representation(dataset_result.value(),ts);
+    if (representation.is_err()) return representation.error();
+    const auto* pixel = dataset_result.value().get(tags::pixel_data);
+    if (ts.is_encapsulated() && pixel && !pixel->is_encapsulated_pixel_data()) {
+        return kcenon::pacs::pacs_error<dicom_file>(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Encapsulated transfer syntax requires undefined-length Pixel Data");
+    }
+
     return kcenon::pacs::Result<dicom_file>::ok(
         dicom_file{std::move(meta_result.value()), std::move(dataset_result.value())});
 }
@@ -334,6 +348,12 @@ auto dicom_file::save(const std::filesystem::path& path) const
     -> kcenon::pacs::VoidResult {
     auto bytes = to_bytes();
 
+    if (bytes.empty()) {
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::encode_error,
+            "Cannot serialize DICOM file with inconsistent Pixel Data or unsupported transfer syntax");
+    }
+
     std::ofstream file(path, std::ios::binary);
     if (!file) {
         return kcenon::pacs::pacs_void_error(
@@ -352,6 +372,9 @@ auto dicom_file::save(const std::filesystem::path& path) const
 }
 
 auto dicom_file::to_bytes() const -> std::vector<uint8_t> {
+    if (validate_pixel_data_representation(dataset_,transfer_syntax()).is_err()) {
+        return {};
+    }
     std::vector<uint8_t> result;
 
     // Reserve estimated size
@@ -692,38 +715,18 @@ auto dicom_file::decode_explicit_vr_le(std::span<const uint8_t> data,
                 continue;
             }
             else if (tag == tags::pixel_data) {
-                // Encapsulated pixel data - find sequence delimitation and store raw
-                size_t pixel_start = offset + header_size;
-                size_t scan_offset = pixel_start;
-
-                // Scan for Sequence Delimitation Item
-                while (scan_offset + 8 <= data.size()) {
-                    uint16_t g = read_uint16_le(data.subspan(scan_offset, 2));
-                    uint16_t e = read_uint16_le(data.subspan(scan_offset + 2, 2));
-
-                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
-                        scan_offset += 8;  // Include delimitation item
-                        break;
-                    }
-
-                    // Skip item tag and length
-                    if (g == kItemTagGroup && e == kItemTagElement) {
-                        scan_offset += 4;
-                        if (scan_offset + 4 > data.size()) break;
-                        uint32_t frag_len = read_uint32_le(data.subspan(scan_offset, 4));
-                        scan_offset += 4 + frag_len;
-                    } else {
-                        break;  // Unexpected tag
-                    }
+                const auto pixel_start = offset + header_size;
+                const auto value = data.subspan(pixel_start);
+                const auto layout = inspect_encapsulated_pixel_data(value, true, true);
+                if (!layout || vr != encoding::vr_type::OB) {
+                    return kcenon::pacs::pacs_error<dicom_dataset>(
+                        kcenon::pacs::error_codes::invalid_sequence,
+                        "Malformed encapsulated Pixel Data item stream");
                 }
-
-                // Store encapsulated data (OB VR for compressed pixel data)
-                size_t encap_length = scan_offset - pixel_start;
-                auto pixel_span = data.subspan(pixel_start, encap_length);
-                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
-                dataset.insert(std::move(pixel_elem));
-
-                offset = scan_offset;
+                auto pixel = dicom_element::from_encapsulated_pixel_data(value.first(layout->encoded_size));
+                if (pixel.is_err()) return pixel.error();
+                dataset.insert(std::move(pixel.value()));
+                offset = pixel_start + layout->encoded_size;
                 continue;
             }
             else {
@@ -839,36 +842,18 @@ auto dicom_file::decode_implicit_vr_le(std::span<const uint8_t> data,
                 continue;
             }
             else if (tag == tags::pixel_data) {
-                // Encapsulated pixel data - find sequence delimitation and store raw
-                size_t pixel_start = offset + kImplicitHeaderSize;
-                size_t scan_offset = pixel_start;
-
-                // Scan for Sequence Delimitation Item
-                while (scan_offset + 8 <= data.size()) {
-                    uint16_t g = read_uint16_le(data.subspan(scan_offset, 2));
-                    uint16_t e = read_uint16_le(data.subspan(scan_offset + 2, 2));
-
-                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
-                        scan_offset += 8;
-                        break;
-                    }
-
-                    if (g == kItemTagGroup && e == kItemTagElement) {
-                        scan_offset += 4;
-                        if (scan_offset + 4 > data.size()) break;
-                        uint32_t frag_len = read_uint32_le(data.subspan(scan_offset, 4));
-                        scan_offset += 4 + frag_len;
-                    } else {
-                        break;
-                    }
+                const auto pixel_start = offset + kImplicitHeaderSize;
+                const auto value = data.subspan(pixel_start);
+                const auto layout = inspect_encapsulated_pixel_data(value, true, true);
+                if (!layout) {
+                    return kcenon::pacs::pacs_error<dicom_dataset>(
+                        kcenon::pacs::error_codes::invalid_sequence,
+                        "Malformed encapsulated Pixel Data item stream");
                 }
-
-                size_t encap_length = scan_offset - pixel_start;
-                auto pixel_span = data.subspan(pixel_start, encap_length);
-                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
-                dataset.insert(std::move(pixel_elem));
-
-                offset = scan_offset;
+                auto pixel = dicom_element::from_encapsulated_pixel_data(value.first(layout->encoded_size));
+                if (pixel.is_err()) return pixel.error();
+                dataset.insert(std::move(pixel.value()));
+                offset = pixel_start + layout->encoded_size;
                 continue;
             }
             else {
@@ -969,35 +954,18 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
                 continue;
             }
             else if (tag == tags::pixel_data) {
-                // Encapsulated pixel data (rare for big endian but handle it)
-                size_t pixel_start = offset + header_size;
-                size_t scan_offset = pixel_start;
-
-                while (scan_offset + 8 <= data.size()) {
-                    uint16_t g = read_uint16_be(data.subspan(scan_offset, 2));
-                    uint16_t e = read_uint16_be(data.subspan(scan_offset + 2, 2));
-
-                    if (g == kItemTagGroup && e == kSequenceDelimitationElement) {
-                        scan_offset += 8;
-                        break;
-                    }
-
-                    if (g == kItemTagGroup && e == kItemTagElement) {
-                        scan_offset += 4;
-                        if (scan_offset + 4 > data.size()) break;
-                        uint32_t frag_len = read_uint32_be(data.subspan(scan_offset, 4));
-                        scan_offset += 4 + frag_len;
-                    } else {
-                        break;
-                    }
+                const auto pixel_start = offset + header_size;
+                const auto value = data.subspan(pixel_start);
+                const auto layout = inspect_encapsulated_pixel_data(value, true, true);
+                if (!layout || vr != encoding::vr_type::OB) {
+                    return kcenon::pacs::pacs_error<dicom_dataset>(
+                        kcenon::pacs::error_codes::invalid_sequence,
+                        "Malformed encapsulated Pixel Data item stream");
                 }
-
-                size_t encap_length = scan_offset - pixel_start;
-                auto pixel_span = data.subspan(pixel_start, encap_length);
-                dicom_element pixel_elem{tag, encoding::vr_type::OB, pixel_span};
-                dataset.insert(std::move(pixel_elem));
-
-                offset = scan_offset;
+                auto pixel = dicom_element::from_encapsulated_pixel_data(value.first(layout->encoded_size));
+                if (pixel.is_err()) return pixel.error();
+                dataset.insert(std::move(pixel.value()));
+                offset = pixel_start + layout->encoded_size;
                 continue;
             }
             else {

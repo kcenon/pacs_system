@@ -200,3 +200,20 @@ preparation failures, environment failures, prerequisites and blocked case IDs.
 The reference readiness check rejects missing, duplicate, corrupt or stale output.
 If public PACS import/readiness fails, SCP diagnostics remain explicitly unexecuted
 until the owning product defects (#1315/#1303) are repaired.
+
+## Focused incoming storage regression (#1292)
+
+Within the built validation runner, execute the following with a new output path:
+
+```sh
+python3 /workspace/pacs_system/validation/dcmtk/tests/storage_probe.py \
+  --profile rle-lossless --output /results/incoming-rle \
+  --source-revision <base-commit> --source-digest <tested-source-digest>
+```
+
+Repeat with `--profile uncompressed` and a different output path. The probe uses
+independent DCMTK `storescu` for all 13 CT/MR/CR instances, compares saved Pixel Data
+bytes and length form, and decodes compressed files with DCMTK before comparing
+all metadata and full pixel hashes. It checks clean receiver shutdown and preserves
+command/status/server logs. A passing focused probe does not certify the complete
+feature matrix, outbound storage, or real cloud providers.

@@ -265,11 +265,12 @@ int main(int argc, char* argv[]) {
     std::atomic<int> reject_count{0};
 
     // Main storage handler - called for each received image
-    storage_scp->set_handler(
-        [&](const core::dicom_dataset& dataset,
-            const std::string& calling_ae,
-            const std::string& sop_class_uid,
-            const std::string& sop_instance_uid) -> svc::storage_status {
+    storage_scp->set_context_handler(
+        [&](const svc::storage_context& context) -> svc::storage_status {
+            const auto& dataset = context.dataset;
+            const auto& calling_ae = context.calling_ae;
+            const auto& sop_class_uid = context.sop_class_uid;
+            const auto& sop_instance_uid = context.sop_instance_uid;
 
             std::cout << "\n[" << current_timestamp() << "] "
                       << kcenon::pacs::samples::colors::cyan << "[C-STORE]"
@@ -282,7 +283,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  SOP Class: " << sop_class_uid << "\n";
 
             // Store to filesystem
-            auto store_result = file_storage->store(dataset);
+            auto store_result = file_storage->store(dataset, context.transfer_syntax);
             if (store_result.is_err()) {
                 std::cout << "  " << kcenon::pacs::samples::colors::red << "Storage failed: "
                           << kcenon::pacs::samples::colors::reset

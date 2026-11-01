@@ -181,6 +181,12 @@ public:
     // Accessors
     // ========================================================================
 
+    /// Check the transfer syntax and Pixel Data representation without decoding
+    /// or transcoding pixels. No Pixel Data is required for non-image objects.
+    [[nodiscard]] static auto validate_pixel_data_representation(
+        const dicom_dataset& dataset, const encoding::transfer_syntax& syntax)
+        -> kcenon::pacs::VoidResult;
+
     /**
      * @brief Get read-only access to the File Meta Information
      * @return Const reference to the meta information dataset

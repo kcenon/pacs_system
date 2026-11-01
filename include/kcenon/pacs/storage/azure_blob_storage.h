@@ -222,6 +222,11 @@ public:
   [[nodiscard]] auto store(const core::dicom_dataset &dataset)
       -> VoidResult override;
 
+    [[nodiscard]] auto store(const core::dicom_dataset& dataset,
+                             const encoding::transfer_syntax& syntax) -> VoidResult override;
+    [[nodiscard]] auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file> override;
+
   /**
    * @brief Retrieve a DICOM dataset by SOP Instance UID
    *
@@ -352,6 +357,11 @@ public:
    */
   [[nodiscard]] auto set_access_tier(std::string_view sop_instance_uid,
                                      std::string_view tier) -> VoidResult;
+
+    [[nodiscard]] auto store_with_progress(const core::dicom_dataset& dataset,
+        const encoding::transfer_syntax& syntax, azure_progress_callback callback) -> VoidResult;
+    [[nodiscard]] auto retrieve_file_with_progress(std::string_view uid,
+        azure_progress_callback callback) -> Result<core::dicom_file>;
 
 private:
   // =========================================================================

@@ -75,6 +75,15 @@ file_storage::file_storage(const file_storage_config& config)
 // ============================================================================
 
 auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
+    auto syntax = native_store_syntax(dataset);
+    if (syntax.is_err()) return syntax.error();
+    return store(dataset,syntax.value());
+}
+
+auto file_storage::store(const core::dicom_dataset& dataset,
+                         const encoding::transfer_syntax& syntax) -> VoidResult {
+    auto validation = core::dicom_file::validate_pixel_data_representation(dataset,syntax);
+    if (validation.is_err()) return validation;
     // Extract required UIDs
     auto study_uid = dataset.get_string(core::tags::study_instance_uid);
     auto series_uid = dataset.get_string(core::tags::series_instance_uid);
@@ -151,7 +160,7 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
 
     // Create DICOM file and write atomically
     auto dicom_file = core::dicom_file::create(
-        dataset, encoding::transfer_syntax::explicit_vr_little_endian);
+        dataset, syntax);
 
     // Write to temporary file first
     auto temp_path = generate_temp_filename(file_path);
@@ -185,15 +194,21 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
     return ok();
 }
 
-auto file_storage::retrieve(std::string_view sop_instance_uid)
-    -> Result<core::dicom_dataset> {
+auto file_storage::retrieve(std::string_view uid) -> Result<core::dicom_dataset> {
+    auto file = retrieve_file(uid);
+    if (file.is_err()) return file.error();
+    return file.value().dataset();
+}
+
+auto file_storage::retrieve_file(std::string_view sop_instance_uid)
+    -> Result<core::dicom_file> {
     std::filesystem::path file_path;
 
     {
         std::shared_lock lock(mutex_);
         auto it = index_.find(std::string{sop_instance_uid});
         if (it == index_.end()) {
-            return make_error<core::dicom_dataset>(
+            return make_error<core::dicom_file>(
                 kFileNotFound,
                 "Instance not found: " + std::string{sop_instance_uid},
                 "file_storage");
@@ -204,13 +219,13 @@ auto file_storage::retrieve(std::string_view sop_instance_uid)
     // Read DICOM file
     auto open_result = core::dicom_file::open(file_path);
     if (open_result.is_err()) {
-        return make_error<core::dicom_dataset>(
+        return make_error<core::dicom_file>(
             kFileReadError,
             "Failed to read DICOM file: " + open_result.error().message,
             "file_storage");
     }
 
-    return open_result.value().dataset();
+    return std::move(open_result.value());
 }
 
 auto file_storage::remove(std::string_view sop_instance_uid) -> VoidResult {

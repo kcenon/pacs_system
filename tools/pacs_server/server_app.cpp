@@ -257,9 +257,10 @@ bool pacs_server_app::setup_server() {
 
     // Register Storage SCP
     auto storage_scp = std::make_shared<services::storage_scp>();
-    storage_scp->set_handler(
-        [this](const auto& ds, const auto& ae, const auto& sop_class, const auto& sop_uid) {
-            return handle_store(ds, ae, sop_class, sop_uid);
+    storage_scp->set_context_handler(
+        [this](const services::storage_context& context) {
+            return handle_store(context.dataset, context.calling_ae, context.sop_class_uid,
+                                context.sop_instance_uid, context.transfer_syntax);
         });
     server_->register_service(storage_scp);
 
@@ -328,13 +329,14 @@ services::storage_status pacs_server_app::handle_store(
     const core::dicom_dataset& dataset,
     const std::string& calling_ae,
     const std::string& sop_class_uid,
-    const std::string& sop_instance_uid) {
+    const std::string& sop_instance_uid,
+    const encoding::transfer_syntax& syntax) {
 
     std::cout << log_prefix() << "C-STORE from " << calling_ae
               << ": " << sop_instance_uid << "\n";
 
     // Store to filesystem
-    auto store_result = file_storage_->store(dataset);
+    auto store_result = file_storage_->store(dataset, syntax);
     if (store_result.is_err()) {
         std::cerr << log_prefix() << "Storage error\n";
         return services::storage_status::storage_error;

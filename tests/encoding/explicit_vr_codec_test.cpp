@@ -7,6 +7,7 @@
 
 #include <kcenon/pacs/core/dicom_dataset.h>
 #include <kcenon/pacs/core/dicom_element.h>
+#include <kcenon/pacs/core/dicom_file.h>
 #include <kcenon/pacs/core/dicom_tag.h>
 #include <kcenon/pacs/core/dicom_tag_constants.h>
 #include <kcenon/pacs/encoding/explicit_vr_codec.h>
@@ -16,6 +17,78 @@
 
 using namespace kcenon::pacs::core;
 using namespace kcenon::pacs::encoding;
+
+TEST_CASE("explicit_vr_codec preserves encapsulated Pixel Data items",
+          "[encoding][explicit][encapsulated]") {
+    // Two frames: the first occupies two fragments. BOT offsets refer to Item
+    // Tags, so the second frame begins 24 bytes after the first fragment tag.
+    const std::vector<uint8_t> value = {
+        0xFE,0xFF,0x00,0xE0, 8,0,0,0, 0,0,0,0, 24,0,0,0,
+        0xFE,0xFF,0x00,0xE0, 4,0,0,0, 0x11,0x12,0x13,0x14,
+        0xFE,0xFF,0x00,0xE0, 4,0,0,0, 0x15,0x16,0x17,0x18,
+        0xFE,0xFF,0x00,0xE0, 2,0,0,0, 0x21,0x22,
+        0xFE,0xFF,0xDD,0xE0, 0,0,0,0
+    };
+    const auto wire = [](const std::vector<uint8_t>& items) {
+        std::vector<uint8_t> bytes = {
+            0xE0,0x7F,0x10,0x00,'O','B',0,0,0xFF,0xFF,0xFF,0xFF
+        };
+        bytes.insert(bytes.end(),items.begin(),items.end());
+        return bytes;
+    };
+    SECTION("BOT and fragmented frames survive decoding without consuming the next element") {
+        auto bytes = wire(value);
+        const auto next = explicit_vr_codec::encode_element(
+            dicom_element::from_string(tags::patient_id,vr_type::LO,"NEXT"));
+        bytes.insert(bytes.end(),next.begin(),next.end());
+        std::span<const uint8_t> remaining(bytes);
+        auto decoded = explicit_vr_codec::decode_element(remaining);
+        REQUIRE(decoded.is_ok());
+        CHECK(std::vector<uint8_t>(decoded.value().raw_data().begin(),decoded.value().raw_data().end()) == value);
+        CHECK(remaining.size() == next.size());
+        auto frames = dicom_file::encapsulated_frames(decoded.value().raw_data(),2);
+        REQUIRE(frames.is_ok());
+        REQUIRE(frames.value().size() == 2);
+        CHECK(frames.value()[0] == std::vector<uint8_t>{0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18});
+        CHECK(frames.value()[1] == std::vector<uint8_t>{0x21,0x22});
+        auto following = explicit_vr_codec::decode_element(remaining);
+        REQUIRE(following.is_ok());
+        CHECK(following.value().as_string().value() == "NEXT");
+        CHECK(remaining.empty());
+    }
+    SECTION("empty BOT is preserved") {
+        auto items = value;
+        items.erase(items.begin()+8,items.begin()+16);
+        items[4] = 0;
+        auto bytes = wire(items);
+        std::span<const uint8_t> remaining(bytes);
+        auto decoded = explicit_vr_codec::decode_element(remaining);
+        REQUIRE(decoded.is_ok());
+        CHECK(std::vector<uint8_t>(decoded.value().raw_data().begin(),decoded.value().raw_data().end()) == items);
+    }
+    SECTION("missing or malformed delimiter and invalid fragment lengths fail") {
+        std::vector<std::vector<uint8_t>> malformed;
+        auto truncated = value;
+        truncated.resize(truncated.size()-8);
+        malformed.push_back(truncated);
+        auto nonzero_delimiter = value;
+        nonzero_delimiter[nonzero_delimiter.size()-4] = 1;
+        malformed.push_back(nonzero_delimiter);
+        for (const uint8_t length : {0,3,255}) {
+            auto invalid = value;
+            invalid[20] = length;
+            malformed.push_back(invalid);
+        }
+        auto undefined_fragment = value;
+        for (std::size_t i=20;i<24;++i) undefined_fragment.at(i) = 0xFF;
+        malformed.push_back(undefined_fragment);
+        for (const auto& items : malformed) {
+            auto bytes = wire(items);
+            std::span<const uint8_t> remaining(bytes);
+            CHECK(explicit_vr_codec::decode_element(remaining).is_err());
+        }
+    }
+}
 
 namespace {
 

@@ -375,11 +375,10 @@ bool run_server(const store_scp_args& args) {
     auto storage_service = std::make_shared<storage_scp>(scp_config);
 
     // Set storage handler
-    storage_service->set_handler(
-        [&storage](const dicom_dataset& dataset,
-                   const std::string& calling_ae,
-                   [[maybe_unused]] const std::string& sop_class_uid,
-                   [[maybe_unused]] const std::string& sop_instance_uid) -> storage_status {
+    storage_service->set_context_handler(
+        [&storage](const kcenon::pacs::services::storage_context& context) -> storage_status {
+            const auto& dataset = context.dataset;
+            const auto& calling_ae = context.calling_ae;
 
             // Log incoming image
             auto patient_name = dataset.get_string(tags::patient_name, "Unknown");
@@ -395,7 +394,7 @@ bool run_server(const store_scp_args& args) {
             std::cout << "\n";
 
             // Store the dataset
-            auto result = storage.store(dataset);
+            auto result = storage.store(dataset, context.transfer_syntax);
             if (result.is_err()) {
                 std::cerr << "[" << current_timestamp() << "] "
                           << "Storage failed: " << result.error().message << "\n";

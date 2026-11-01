@@ -1452,7 +1452,7 @@ TEST_CASE("dicom_file writes encapsulated pixel data", "[core][dicom_file][encap
         CHECK(parsed.value()[1] == frames[1]);
     }
 
-    SECTION("native pixel data under an encapsulated transfer syntax keeps its defined length") {
+    SECTION("native pixel data under an encapsulated transfer syntax is rejected") {
         dicom_dataset ds;
         ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
         ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.1276.2");
@@ -1462,9 +1462,10 @@ TEST_CASE("dicom_file writes encapsulated pixel data", "[core][dicom_file][encap
         auto file = dicom_file::create(std::move(ds), transfer_syntax::rle_lossless);
         const auto bytes = file.to_bytes();
 
-        CHECK_FALSE(contains_bytes(bytes, kEncapsulatedPixelDataHeader));
-        CHECK(contains_bytes(bytes, {0xE0, 0x7F, 0x10, 0x00, 'O', 'B', 0x00, 0x00,
-                                     0x08, 0x00, 0x00, 0x00}));
+        CHECK(bytes.empty());
+        const auto path = create_temp_file_path("invalid_native_as_rle_1292.dcm");
+        CHECK(file.save(path).is_err());
+        CHECK_FALSE(std::filesystem::exists(path));
     }
 
     SECTION("a native transfer syntax never writes undefined-length pixel data") {
@@ -2309,4 +2310,44 @@ TEST_CASE("dicom_file writes encapsulated Pixel Data in a sequence item",
     REQUIRE(frames.is_ok());
     CHECK(frames.value() == std::vector<std::vector<uint8_t>>{{0x01, 0x02, 0x03, 0x04}});
     CHECK(reopened.value().to_bytes() == bytes);
+}
+
+TEST_CASE("dicom_file rejects inconsistent pixel representations",
+          "[core][dicom_file][encapsulated]") {
+    auto wire = create_dicom_with_encapsulated_pixel_data();
+    const std::vector<uint8_t> header{0xE0,0x7F,0x10,0x00,'O','B',0,0,0xFF,0xFF,0xFF,0xFF};
+    const auto location = std::search(wire.begin(), wire.end(), header.begin(), header.end());
+    REQUIRE(location != wire.end());
+    const auto offset = static_cast<size_t>(location-wire.begin());
+    SECTION("defined-length compressed Pixel Data is rejected") {
+        const auto size = static_cast<uint32_t>(wire.size()-offset-12);
+        for (unsigned i=0;i<4;++i) wire.at(offset+8+i) = static_cast<uint8_t>(size>>(8*i));
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("encapsulated Pixel Data must use OB") {
+        wire.at(offset+5) = 'W';
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("delimiter length must be zero") {
+        wire.at(wire.size()-4) = 2;
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("truncated item stream is rejected") {
+        wire.resize(wire.size()-8);
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("parsed compressed representation cannot be mislabeled native") {
+        auto file = dicom_file::from_bytes(wire);
+        REQUIRE(file.is_ok());
+        auto copied = file.value().dataset();
+        auto* pixel = copied.get(tags::pixel_data);
+        REQUIRE(pixel);
+        CHECK(pixel->is_encapsulated_pixel_data());
+        CHECK(dicom_file::create(copied, transfer_syntax::explicit_vr_little_endian).to_bytes().empty());
+        const auto native = std::vector<uint8_t>{1,2,3,4};
+        pixel->set_value(native);
+        CHECK_FALSE(pixel->is_encapsulated_pixel_data());
+        CHECK_FALSE(dicom_file::create(copied, transfer_syntax::explicit_vr_little_endian).to_bytes().empty());
+        CHECK(dicom_file::create(copied, transfer_syntax::rle_lossless).to_bytes().empty());
+    }
 }

@@ -10,6 +10,7 @@
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/core/events.h"
+#include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/result.h"
 #include "kcenon/pacs/network/dimse/command_field.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
@@ -36,6 +37,12 @@ storage_scp::storage_scp(const storage_scp_config& config,
 
 void storage_scp::set_handler(storage_handler handler) {
     handler_ = std::move(handler);
+    context_handler_ = {};
+}
+
+void storage_scp::set_context_handler(context_storage_handler handler) {
+    context_handler_ = std::move(handler);
+    handler_ = {};
 }
 
 void storage_scp::set_pre_store_handler(pre_store_handler handler) {
@@ -95,6 +102,16 @@ network::Result<std::monostate> storage_scp::handle_message(
     // Get dataset reference (already validated above)
     const auto& dataset = request.dataset().value().get();
 
+    const auto syntax = assoc.context_transfer_syntax(context_id);
+    if (syntax.is_err()
+        || core::dicom_file::validate_pixel_data_representation(dataset, syntax.value()).is_err()
+        || (syntax.value().is_encapsulated() && dataset.get(core::tags::pixel_data)
+            && !dataset.get(core::tags::pixel_data)->is_encapsulated_pixel_data())) {
+        return assoc.send_dimse(context_id, make_c_store_rsp(
+            request.message_id(), sop_class_uid, sop_instance_uid,
+            static_cast<status_code>(storage_status::cannot_understand)));
+    }
+
     // Pre-store validation
     if (pre_store_handler_ && !pre_store_handler_(dataset)) {
         auto response = make_c_store_rsp(
@@ -109,7 +126,11 @@ network::Result<std::monostate> storage_scp::handle_message(
     // Determine storage status
     storage_status status = storage_status::success;
 
-    if (handler_) {
+    if (context_handler_) {
+        const std::string calling_ae{assoc.calling_ae()};
+        status = context_handler_({dataset, calling_ae, sop_class_uid,
+                                   sop_instance_uid, syntax.value()});
+    } else if (handler_) {
         // Call the registered storage handler
         status = handler_(
             dataset,

@@ -143,10 +143,10 @@ void mini_pacs::initialize_services() {
     // Storage SCP (C-STORE)
     services::storage_scp_config scp_config;
     storage_scp_ = std::make_shared<services::storage_scp>(scp_config);
-    storage_scp_->set_handler(
-        [this](const auto& ds, const auto& ae, const auto& sop_class,
-               const auto& sop_instance) {
-            return handle_store(ds, ae, sop_class, sop_instance);
+    storage_scp_->set_context_handler(
+        [this](const services::storage_context& context) {
+            return handle_store(context.dataset, context.calling_ae, context.sop_class_uid,
+                                context.sop_instance_uid, context.transfer_syntax);
         });
 
     // Query SCP (C-FIND)
@@ -245,7 +245,8 @@ services::storage_status mini_pacs::handle_store(
     const core::dicom_dataset& dataset,
     const std::string& calling_ae,
     const std::string& /*sop_class_uid*/,
-    const std::string& sop_instance_uid) {
+    const std::string& sop_instance_uid,
+    const encoding::transfer_syntax& syntax) {
 
     stats_.c_store_count++;
 
@@ -256,7 +257,7 @@ services::storage_status mini_pacs::handle_store(
     }
 
     // Store to filesystem
-    auto store_result = file_storage_->store(dataset);
+    auto store_result = file_storage_->store(dataset, syntax);
     if (store_result.is_err()) {
         std::cerr << "  Storage failed: " << store_result.error().message << "\n";
         return services::storage_status::storage_error;
