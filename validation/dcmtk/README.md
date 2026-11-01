@@ -153,3 +153,15 @@ Process-launch failures remain explicit failed cases. POSIX test utilities use
 executables immediately, and reap terminated children. The integration executable
 lets Catch2 own stdout so listing/reporting never includes a decorative banner.
 Malformed XML is rejected in place; the validator never repairs it into a pass.
+
+`test-inventory.json` includes a per-case deferral audit: allowed-failure tags,
+hidden cases, potential `SKIP` branches, and exact CTest sanitizer quarantine names.
+Each entry records its cause, issue owner and exit condition. Conditional branches
+are distinguished from actual skipped execution results. Existing cross-system
+allowances still need native/sanitizer matrix verification; passing one Linux run
+does not establish their historical root cause. The four direct worker tests now
+register workers explicitly and assert work delivery and shutdown without `!mayfail`.
+The hour-long store/query endurance test remains assigned to #1326; a shorter
+component run cannot stand in for its execution. Unresolved quarantine names remain
+visible as absent from the current build. None of these audit entries waives a
+failed, missing or skipped result.

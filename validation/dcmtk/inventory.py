@@ -113,7 +113,7 @@ def build_inventory(manifest, ctest, catch_all, selections, configuration):
         for test in tests:
             key = identity('catch2', binary, result_key(test, 'catch2'))
             records[key] = dict(case_id=key, name=test['name'], kind='catch2', binary=binary,
-                                tags=test['tags'], source=test['source'], feature_ids=features,
+                                tags=test['tags'], source=test['source'], source_line=test.get('line'), feature_ids=features,
                                 jobs=[], ctest_names=[], configuration=configuration,
                                 support_status='component', sop_class_uids=[], roles=[], syntaxes=[],
                                 fixture=test['source'], oracle='Catch2 assertions including allowed failures',

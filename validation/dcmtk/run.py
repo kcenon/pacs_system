@@ -18,6 +18,7 @@ import uuid
 
 import pydicom
 from report import digest, junit_counts, passed, validate_manifest, write_junit
+from deferrals import audit_deferrals
 from inventory import (attach_results, build_inventory, catch_listing, catch_results,
                        ctest_results, evaluate_inventory)
 from support import declared_support
@@ -409,6 +410,7 @@ class Validation:
         self.test_inventory['discovery_errors'] += errors
         self.test_inventory['support_requirements'] = self.manifest['support_requirements']
         self.test_inventory['declared_support'] = declared_support(HERE.parent.parent)
+        self.test_inventory['deferral_audit'] = audit_deferrals(HERE.parent.parent, self.test_inventory['cases'])
         (self.output/'test-inventory.json').write_text(json.dumps(self.test_inventory,indent=2)+'\n')
         self.save()
 
