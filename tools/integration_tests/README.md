@@ -469,16 +469,15 @@ stop_storescp "$storescp_pid"
 
 The DCMTK interoperability test suite validates bidirectional compatibility between the pacs_system and DCMTK reference implementation. These tests ensure compliance with DICOM standards and interoperability with real-world PACS systems.
 
-> **Note: Current Limitations**
->
-> The cases where a pacs_system SCU talks to a DCMTK SCP (`storescp`; DCMTK
-> has no `echoscp`, so `dcmtk_tool::echoscp()` starts `storescp`, which
-> answers C-ECHO) run over the association TCP client. The cases that run a DCMTK
-> SCU (`echoscu`, `storescu`, `findscu`, `movescu`) against a pacs_system SCP
-> are **skipped**: their fixtures use the v1 `dicom_server`, whose
-> `accept_worker` closes every TCP connection, so they skip on
-> `v1_server_accepts_tcp()` until the fixtures move to `dicom_server_v2`.
-> See [Association Transports](#association-transports-c).
+> The C++ DCMTK fixtures use `dicom_server_v2` for independent SCUs and the
+> TCP association client for PACS SCUs. C-FIND selects Patient Root (`-P`) for
+> patient queries, Study Root (`-S`) for other Q/R levels, and Worklist (`-W`)
+> only for MWL. Query tests extract the peer's response files and require exact
+> returned identifiers and metadata, including empty matches and UTF-8 names.
+> C-MOVE tests verify actual destination objects. Missing DCMTK can skip local
+> cases; CI requires the tools and rejects empty/all-skipped protocol selections.
+> TLS integration and shell-script acceptance remain separate follow-ups
+> (#1305/#1317 and #1258). See [Association Transports](#association-transports-c).
 
 ### Test Scenarios
 

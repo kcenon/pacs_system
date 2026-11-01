@@ -231,6 +231,8 @@ public:
         database_ = std::move(db_result.value());
     }
 
+    ~multimodal_pacs_server() { stop(); }
+
     bool initialize() {
         // Verification SCP
         server_->register_service(std::make_shared<verification_scp>());
@@ -345,6 +347,9 @@ private:
             return storage_status::storage_error;
         }
 
+        // index_database requires external synchronization for shared use.
+        std::lock_guard database_lock(database_mutex_);
+
         // Index in database (following test_store_query.cpp pattern)
         // 1. Patient
         auto pat_id = dataset.get_string(tags::patient_id);
@@ -405,6 +410,7 @@ private:
         query_level level,
         const dicom_dataset& query_keys) {
 
+        std::lock_guard database_lock(database_mutex_);
         std::vector<dicom_dataset> results;
 
         if (level == query_level::study) {
@@ -484,6 +490,7 @@ private:
     std::unique_ptr<file_storage> file_storage_;
     std::unique_ptr<index_database> database_;
 
+    std::mutex database_mutex_;
     mutable std::mutex mutex_;
     std::vector<dicom_dataset> worklist_items_;
     std::vector<mpps_instance> mpps_instances_;
@@ -524,7 +531,7 @@ bool store_to_pacs(
     auto store_result = scu.store(assoc, dataset);
 
     (void)assoc.release();
-    return store_result.is_ok();
+    return store_result.is_ok() && store_result.value().is_success();
 }
 
 /**

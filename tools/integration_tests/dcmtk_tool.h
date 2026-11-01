@@ -166,6 +166,7 @@ public:
      * @param keys Query keys as tag-value pairs (e.g., {"PatientID", "TEST001"})
      * @param calling_ae Calling AE title (default: FINDSCU)
      * @param timeout Operation timeout
+     * @param output_dir Optional directory for extracted response datasets
      * @return DCMTK execution result
      */
     static dcmtk_result findscu(
@@ -175,13 +176,19 @@ public:
         const std::string& query_level,
         const std::vector<std::pair<std::string, std::string>>& keys,
         const std::string& calling_ae = "FINDSCU",
-        std::chrono::seconds timeout = std::chrono::seconds{30}) {
+        std::chrono::seconds timeout = std::chrono::seconds{30},
+        const std::filesystem::path& output_dir = {}) {
 
         std::vector<std::string> args = {
             "-aec", called_ae,
             "-aet", calling_ae,
-            "-W"  // Use worklist model for MWL or study root for others
+            query_level == "MWL" ? "-W" : query_level == "PATIENT" ? "-P" : "-S"
         };
+
+        if (!output_dir.empty()) {
+            std::filesystem::create_directories(output_dir);
+            args.insert(args.end(), {"-X", "-od", output_dir.string()});
+        }
 
         // Set query level
         if (query_level == "PATIENT" || query_level == "STUDY" ||

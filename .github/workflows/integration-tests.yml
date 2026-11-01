@@ -412,11 +412,13 @@ jobs:
           echo "=== Running dicom_server_v2 tests ($V2_SPEC) ==="
           if [ -n "$TIMEOUT_CMD" ]; then
             $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --warn UnmatchedTestSpec \
               --reporter console \
               --reporter junit::out=integration-test-v2.xml \
               2>&1 || status=$?
           else
             ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --warn UnmatchedTestSpec \
               --reporter console \
               --reporter junit::out=integration-test-v2.xml \
               2>&1 || status=$?
@@ -442,13 +444,8 @@ jobs:
           ls -la integration-test-*.xml 2>/dev/null || echo "No test result files"
 
         else
-          echo "Integration test binary not found, running CTest integration tests"
-          ctest \
-            --output-on-failure \
-            --timeout 120 \
-            --output-junit integration-test-results.xml \
-            --tests-regex "integration::" \
-            || status=$?
+          echo "Required integration test binary not found"
+          status=1
         fi
 
         exit $status
@@ -487,7 +484,7 @@ jobs:
           # dicom_server_v2 over the association TCP client (#1240), without
           # [v2][stress] and [tls][v2] (see the Unix step)
           Write-Host "=== Running dicom_server_v2 tests ==="
-          & .\bin\pacs_integration_e2e.exe "[v2]~[tls]~[stress]" --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
+          & .\bin\pacs_integration_e2e.exe "[v2]~[tls]~[stress]" --warn UnmatchedTestSpec --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
           if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
           Write-Host "dicom_server_v2 tests completed (exit code $LASTEXITCODE)"
 
@@ -513,9 +510,8 @@ jobs:
           Get-ChildItem -Filter "integration-test-*.xml" | ForEach-Object { Write-Host $_.Name }
         }
         else {
-          Write-Host "Integration test binary not found, running CTest integration tests"
-          ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
-          $status = $LASTEXITCODE
+          Write-Host "Required integration test binary not found"
+          $status = 1
         }
 
         exit $status
@@ -893,21 +889,20 @@ jobs:
         fi
       timeout-minutes: 10
       # Known failing, so this step reports failure without failing the job:
-      # every suite runs a pacs_system SCU against a server in another process,
-      # which needs the real TCP client path in association::connect() (#1240),
-      # and the scripts pass arguments the CLI tools no longer accept (#1258).
-      # Remove continue-on-error when both are fixed.
+      # TCP and v2 fixtures are available. The remaining CLI arguments,
+      # timeout and result-counting fixes are tracked in #1258.
+      # Remove continue-on-error when #1258 is verified.
       continue-on-error: true
 
     - name: Record binary integration test outcome
       if: always()
       run: |
         # continue-on-error above keeps the job green; record the real outcome
-        # so the known failure (#1240, #1258) stays visible in the job summary
+        # so the known failure (#1258) stays visible in the job summary
         outcome='${{ steps.binary_tests.outcome }}'
-        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1240 and #1258)" >> "$GITHUB_STEP_SUMMARY"
+        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1258)" >> "$GITHUB_STEP_SUMMARY"
         if [ "$outcome" = failure ]; then
-          echo "::warning title=Known failure (#1240 and #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
+          echo "::warning title=Known failure (#1258)::Binary integration tests failed; continue-on-error keeps this job green until #1258 is fixed"
         fi
 
   # ============================================================================
