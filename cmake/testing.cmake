@@ -233,6 +233,7 @@ if(PACS_BUILD_TESTS)
         tests/security/sqlite_security_storage_test.cpp
         tests/security/uid_mapping_test.cpp
         tests/security/anonymizer_test.cpp
+        tests/security/anonymizer_sequence_test.cpp
         tests/security/atna_audit_logger_test.cpp
         tests/security/atna_syslog_transport_test.cpp
         tests/security/atna_service_auditor_test.cpp

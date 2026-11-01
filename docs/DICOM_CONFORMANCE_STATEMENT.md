@@ -663,15 +663,57 @@ per DICOM PS3.15.
 
 ### 7.3 De-identification Profiles (PS3.15 Annex E)
 
-| Profile | Description | Support |
-|---------|-------------|---------|
-| Basic | Remove direct identifiers | Yes |
-| Clean Pixel Data | Remove burned-in annotations | Yes |
-| Clean Descriptions | Sanitize text fields | Yes |
-| Retain Longitudinal | Preserve temporal relationships via date shifting | Yes |
-| Retain Patient Characteristics | Preserve demographics for research | Yes |
-| HIPAA Safe Harbor | Remove 18 identifier categories (45 CFR 164.514) | Yes |
-| GDPR Compliant | European data protection pseudonymization | Yes |
+The named presets implement a subset of Annex E actions. They do not establish
+complete PS3.15, HIPAA, or GDPR compliance. Applications must evaluate the IOD,
+remaining identifying content, and intended disclosure before releasing data.
+
+| Preset | Implemented behavior | Limits |
+|--------|----------------------|--------|
+| Basic | Configured identifier actions, recursive sequences and consistent instance UID mappings | Partial attribute table; no complete IOD validation |
+| Clean Pixel Data | Same metadata actions as Basic | Pixel cleaning and OCR are **not implemented** |
+| Clean Descriptions | Empty configured description fields; recursively clean selected sequence items | No semantic cleaning of arbitrary text or codes |
+| Retain Longitudinal | Shift configured dates with a shared offset | Caller chooses offset; not all date/time attributes are covered |
+| Retain Patient Characteristics | Keep configured demographic fields | Retained values may identify a patient |
+| HIPAA Safe Harbor | Additional configured identifier removals | Preset name is not a compliance guarantee |
+| GDPR Compliant | Hash configured patient identifiers | Pseudonymization is not anonymization or a compliance guarantee |
+
+Sequence actions follow the current [PS3.15 Table E.1-1](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html)
+subset in `src/security/anonymization_sequence_rules.h`:
+
+- X removes the entire sequence. Z retains an empty sequence. D replaces the
+  contents with one empty dummy item; required IOD-specific item attributes are
+  not synthesized, so the result may require further IOD validation.
+- K, C and U retain items and recursively apply configured attribute actions at
+  every depth. U remaps instance UID values with the same mapping as the root.
+  SOP Class and Transfer Syntax UIDs remain unchanged. C does not perform semantic
+  text, code, or pixel recognition.
+- Without IOD type information, X/Z and X/Z/D choose Z; X/D chooses X. Image
+  reference X/Z/U* uses U. Referenced Study Sequence defaults to Z; an explicit
+  custom K action retains and cleans its items. Content Sequence uses D, rather
+  than claiming support for the Clean Structured Content option.
+- Anatomic Region and selected clinical/reference containers have explicit K
+  policies. Unknown sequences are emptied at all depths. Unparsed retained
+  sequence payloads, unsupported sequence transforms, and nesting beyond 64 items
+  produce report errors and clear the affected sequence. Unknown opaque UN
+  values are also emptied, since they can hide implicit-VR sequences missing
+  from the dictionary; retaining or transforming non-empty UN values fails. Callers must check both
+  the Result and `report.is_successful()` before saving.
+- Private-tag policy applies in every retained item. The library keeps private
+  elements by default for API compatibility; callers should select `remove_all`
+  when appropriate. `dcm_anonymize` removes all private elements, including their
+  creators, at every depth. A custom keep action does not override this policy.
+
+`dcm_anonymize` shares one UID mapping across all files in an invocation, rebuilds
+file metadata and the preamble, and refuses to save failed reports. Mapping files
+can preserve linkage between invocations and contain original identifiers. The
+`dcm_modify` compatibility anonymizer delegates to the same engine; its options
+apply recursively. The `dcm_modify` executable itself exposes tag editing, not an
+anonymization command.
+
+Custom retention may preserve identifying data. `--verify` only checks common
+identifiers recursively and reports tag names/depths without values; it is not a
+compliance check. The library's opt-in detailed action records can contain
+original values and must be treated as sensitive data.
 
 ### 7.4 Access Control
 

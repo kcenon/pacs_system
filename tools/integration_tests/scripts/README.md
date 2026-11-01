@@ -87,3 +87,17 @@ UI padding NUL during N-SET, causing status `0xc001` after a successful N-CREATE
 Both sequential and parallel execution use the returned UID and preserve this
 failure. Remove that allowance only after the product fix and #1258 acceptance
 rerun; a passing run with even-length generated UIDs does not settle it.
+
+### Recursive anonymization round trip
+
+Run `python3 tools/integration_tests/scripts/test_recursive_anonymization.py build`.
+This required CI check uses DCMTK `dump2dcm`, `dcm2xml`, and `dcmdump` to create and
+independently inspect Part 10 files. Missing tools fail the check. Seven cases
+cover nested K/C/U actions, X/Z/D and unknown sequence handling, batch UID linkage,
+UID retention, value-free diagnostics, and refusal to save failed recursive
+processing. The nested case covers explicit/implicit VR and defined/undefined
+sequence lengths. Synthetic source identifiers are checked in output bytes as
+well as parsed structures. Commands, exits, output, and fixtures are retained
+under `build/test-results/anonymization/`; an optional second argument changes the
+evidence directory. These cases do not establish complete profile compliance or
+pixel cleaning.

@@ -893,6 +893,10 @@ jobs:
       working-directory: pacs_system
       run: python3 tools/integration_tests/scripts/test_shell_helpers.py
 
+    - name: Verify recursive anonymization with DCMTK
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_recursive_anonymization.py build
+
     - name: Run Binary Integration Tests
       id: binary_tests
       working-directory: pacs_system
@@ -922,6 +926,7 @@ jobs:
         path: |
           pacs_system/build/binary-shell.log
           pacs_system/build/test-results/shell/
+          pacs_system/build/test-results/anonymization/
         retention-days: 30
 
   # ============================================================================
