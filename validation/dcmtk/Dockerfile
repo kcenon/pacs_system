@@ -21,6 +21,6 @@ RUN cmake -S /workspace/pacs_system -B /workspace/build -G Ninja \
 # Keep report/probe edits independent of the expensive C++ build layer.
 COPY harness /workspace/pacs_system/validation/dcmtk
 COPY driver.py /workspace/pacs_system/scripts/run_dcmtk_validation.py
-RUN python3 -m unittest discover -s /workspace/pacs_system/validation/dcmtk/tests -p '*_test.py' -v
+RUN python3 -m unittest discover -s /workspace/pacs_system/validation/dcmtk/tests -p '*test*.py' -v
 WORKDIR /workspace/build
 ENTRYPOINT ["python3", "/workspace/pacs_system/validation/dcmtk/run.py"]

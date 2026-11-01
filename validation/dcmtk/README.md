@@ -35,6 +35,13 @@ and startup log identify the project for later `docker compose -p ... -f ... dow
    Check exact UID sets, counts, metadata and whole decoded PixelData hashes.
    Compressed cases also require the received file's transfer syntax; silently
    falling back to native encoding fails. Check MWL nested scheduled-step fields.
+   Separate diagnostic chains use distinct run/profile/role UID namespaces.
+   DCMTK `storescu` seeds reference data, then independent `getscu` plus decoded
+   pixel and metadata comparisons verify every instance before PACS query/retrieve
+   clients run. PACS SCP diagnostics use the documented `qr_scp --scan-only`
+   import/index contract and external C-ECHO readiness. A zero-file import fails
+   preparation. No test writes database rows directly. The original store-dependent
+   chain keeps its case IDs, prerequisites and failures.
 5. In the uncompressed profile, discover individual CTest and Catch2 cases before
    running every component suite listed in `features.json`,
    the existing integration suite, v2 TLS cases and bounded stress cases. JUnit
@@ -165,3 +172,25 @@ The hour-long store/query endurance test remains assigned to #1326; a shorter
 component run cannot stand in for its execution. Unresolved quarantine names remain
 visible as absent from the current build. None of these audit entries waives a
 failed, missing or skipped result.
+
+### Independent diagnostic fault probe
+
+Inside a running isolated topology, execute the following twice with new output
+directories; add `--fail-reference-seed` to the second invocation:
+
+```sh
+python3 /workspace/pacs_system/validation/dcmtk/tests/diagnostic_probe.py \
+  --profile rle-lossless --output /results/diagnostic-store-refusal \
+  --source-revision ACTUAL_SOURCE_REVISION --source-digest ACTUAL_SOURCE_DIGEST
+```
+
+This invokes real compressed PACS C-STORE with an intentionally refused called AE.
+The independent chain must still invoke PACS C-FIND/C-GET/C-MOVE. In the second
+probe, DCMTK reference seeding also uses a refused AE: every dependent diagnostic
+must remain blocked with `executed: false` and `tests: 0`, even if older synthetic
+objects exist in the peer. `probe-assertions.json` measures this scheduling contract;
+it does not certify product behavior. `results.json` retains actual product failures,
+preparation failures, environment failures, prerequisites and blocked case IDs.
+The reference readiness check rejects missing, duplicate, corrupt or stale output.
+If public PACS import/readiness fails, SCP diagnostics remain explicitly unexecuted
+until the owning product defects (#1315/#1303) are repaired.

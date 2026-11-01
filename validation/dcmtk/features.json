@@ -203,7 +203,23 @@
     "integrity.cr",
     "get.ct",
     "get.mr",
-    "get.cr"
+    "get.cr",
+    "diagnostic.reference.fixtures",
+    "diagnostic.reference.seed",
+    "diagnostic.reference.ready",
+    "diagnostic.scp.fixtures",
+    "diagnostic.scp.import",
+    "diagnostic.scp.ready",
+    "diagnostic.query.ct",
+    "diagnostic.query.mr",
+    "diagnostic.query.cr",
+    "diagnostic.get.ct",
+    "diagnostic.get.mr",
+    "diagnostic.get.cr",
+    "diagnostic.move.scu",
+    "diagnostic.query.scp",
+    "diagnostic.get.scp",
+    "diagnostic.move.scp"
   ],
   "features": [
     {
@@ -287,7 +303,17 @@
         "query.ct",
         "query.mr",
         "query.cr",
-        "query.scp"
+        "query.scp",
+        "diagnostic.query.ct",
+        "diagnostic.query.mr",
+        "diagnostic.query.cr",
+        "diagnostic.query.scp",
+        "diagnostic.reference.fixtures",
+        "diagnostic.reference.seed",
+        "diagnostic.reference.ready",
+        "diagnostic.scp.fixtures",
+        "diagnostic.scp.import",
+        "diagnostic.scp.ready"
       ],
       "gaps": [
         "External patient/study/series levels, wildcard/date/unicode and cancel cases beyond IMAGE queries."
@@ -303,7 +329,9 @@
       ],
       "interop": [
         "move.scu",
-        "move.scp"
+        "move.scp",
+        "diagnostic.move.scu",
+        "diagnostic.move.scp"
       ],
       "gaps": [
         "Failure/cancel/unknown-destination sub-operation counters and timeout/retry paths."
@@ -321,7 +349,11 @@
         "get.ct",
         "get.mr",
         "get.cr",
-        "get.scp"
+        "get.scp",
+        "diagnostic.get.ct",
+        "diagnostic.get.mr",
+        "diagnostic.get.cr",
+        "diagnostic.get.scp"
       ],
       "gaps": [
         "Refused role negotiation, cancellation and mixed failure counters."

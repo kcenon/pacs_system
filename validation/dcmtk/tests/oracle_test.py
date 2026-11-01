@@ -93,6 +93,7 @@ class OracleTests(unittest.TestCase):
         self.assertEqual([r['status'] for r in self.v.results],['failed','failed'])
         self.assertEqual([r['outcome'] for r in self.v.command_results],['spawn_error','signal'])
         self.assertIsNone(self.v.command_results[0]['returncode'])
+        self.assertEqual(self.v.results[0]['failure_category'],'environment_unavailable')
         self.assertEqual(self.v.command_results[1]['returncode'],-15)
         ET.parse(self.v.output/'results.xml')
         payload=json.loads((self.v.output/'results.json').read_text())
@@ -146,6 +147,112 @@ class OracleTests(unittest.TestCase):
             self.ds.save_as(directory/'object.dcm')
         self.v.get_oracle=receive
         self.assertIn('1 exact',self.v.move_scu())
+
+    def prepare_fixture_sources(self):
+        root = Path(self.temp.name)/'source-fixtures'
+        for mod,count in [('ct',5),('mr',6),('cr',2)]:
+            (root/mod).mkdir(parents=True)
+            for i in range(count):
+                self.ds.save_as(root/mod/f'{i}.dcm')
+        self.v.args.fixtures = str(root)
+
+    def test_diagnostic_and_end_to_end_namespaces_cannot_overlap(self):
+        self.prepare_fixture_sources()
+        seen = set()
+        for chain in ('end-to-end','diagnostic-reference','diagnostic-scp'):
+            data,paths = self.v.make_fixtures(chain)
+            uids = {str(ds.SOPInstanceUID) for values in data.values() for ds in values}
+            self.assertEqual(len(uids),13)
+            self.assertTrue(all(len(uid)<=64 for uid in uids))
+            self.assertFalse(seen & uids)
+            seen |= uids
+            self.assertEqual(sum(len(group) for group in paths.values()),13)
+
+    def prepare_reference_diagnostic_probe(self):
+        self.prepare_fixture_sources()
+        self.v.case('peer.preflight',lambda:'peer ready',phase='peer_preparation')
+        self.v.case('store.primary',lambda:self.v.command([sys.executable,'-c','raise SystemExit(9)']))
+        self.v.case('get.ct',lambda:self.fail('original chain must remain blocked'),requires=['store.primary'])
+        calls = []
+        self.v.query = lambda mod,data:calls.append('query.'+mod)
+        self.v.get_scu = lambda mod,data,prefix:calls.append('get.'+mod)
+        self.v.move_scu = lambda data,prefix:calls.append('move.scu')
+        return calls
+
+    def test_diagnostics_run_after_store_failure_without_repairing_original_chain(self):
+        calls = self.prepare_reference_diagnostic_probe()
+        self.v.seed_reference = lambda:'reference seeded'
+        def receive(host,ae,study,directory):
+            directory.mkdir()
+            for group in self.v.fixture_sets['diagnostic-reference']['data'].values():
+                for ds in group:
+                    if ds.StudyInstanceUID == study:
+                        ds.save_as(directory/f'{ds.SOPInstanceUID}.dcm')
+        self.v.get_oracle = receive
+        self.v.reference_diagnostics()
+        self.assertEqual(set(calls), {'query.ct','query.mr','query.cr','get.ct','get.mr','get.cr','move.scu'})
+        rows = {r['id']:r for r in self.v.results}
+        self.assertEqual(rows['store.primary']['status'],'failed')
+        self.assertEqual(rows['get.ct']['status'],'blocked')
+        self.assertFalse(rows['get.ct']['executed'])
+        self.assertTrue(rows['diagnostic.move.scu']['executed'])
+        self.assertEqual(rows['diagnostic.reference.ready']['status'],'passed')
+
+    def test_failed_seed_blocks_all_diagnostics(self):
+        calls = self.prepare_reference_diagnostic_probe()
+        self.v.seed_reference = lambda:self.v.command([sys.executable,'-c','raise SystemExit(8)'])
+        self.v.reference_ready = lambda:self.fail('failed seeding must block readiness')
+        self.v.reference_diagnostics()
+        self.assertEqual(calls,[])
+        rows = {r['id']:r for r in self.v.results}
+        self.assertEqual(rows['diagnostic.reference.seed']['failure_category'],'peer_preparation_failure')
+        for name in ['diagnostic.reference.ready','diagnostic.query.ct','diagnostic.get.ct','diagnostic.move.scu']:
+            self.assertEqual(rows[name]['status'],'blocked')
+            self.assertFalse(rows[name]['executed'])
+            self.assertEqual(rows[name]['tests'],0)
+
+    def test_corrupt_reference_pixels_fail_preparation_and_block_product_calls(self):
+        calls = self.prepare_reference_diagnostic_probe()
+        self.v.seed_reference = lambda:'reference seeded'
+        def corrupt(host,ae,study,directory):
+            directory.mkdir()
+            for group in self.v.fixture_sets['diagnostic-reference']['data'].values():
+                for ds in group:
+                    if ds.StudyInstanceUID == study:
+                        import copy
+                        bad = copy.deepcopy(ds)
+                        bad.PixelData=b'\x01\x00\x03\x00'
+                        bad.save_as(directory/f'{ds.SOPInstanceUID}.dcm')
+        self.v.get_oracle = corrupt
+        self.v.reference_diagnostics()
+        self.assertEqual(calls,[])
+        row=next(r for r in self.v.results if r['id']=='diagnostic.reference.ready')
+        self.assertEqual(row['status'],'failed')
+        self.assertIn('PixelData mismatch',row['detail'])
+
+    def test_public_import_must_index_the_exact_fixture_count(self):
+        self.prepare_fixture_sources()
+        self.v.make_fixtures('diagnostic-scp')
+        self.v.command=lambda *a,**k:'Scan complete: 0 files indexed'
+        with self.assertRaisesRegex(ValueError,'expected 13'):
+            self.v.import_scp()
+        self.v.command=lambda *a,**k:'Scan complete: 13 files indexed'
+        self.assertIn('13 instances',self.v.import_scp())
+        self.v.command=lambda *a,**k:'Scan complete: 13 files indexed (1 errors)'
+        with self.assertRaisesRegex(ValueError,'indexing errors'):
+            self.v.import_scp()
+
+    def test_existing_reference_output_is_not_reused_as_readiness_evidence(self):
+        calls = self.prepare_reference_diagnostic_probe()
+        self.v.seed_reference = lambda:'reference seeded'
+        stale = self.v.output/'diagnostic-reference-oracle-ct'
+        stale.mkdir()
+        self.ds.save_as(stale/'stale.dcm')
+        self.v.reference_diagnostics()
+        self.assertEqual(calls,[])
+        ready=next(r for r in self.v.results if r['id']=='diagnostic.reference.ready')
+        self.assertEqual(ready['status'],'failed')
+        self.assertIn('File exists',ready['detail'])
 
 
 if __name__=='__main__':

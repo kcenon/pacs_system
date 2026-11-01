@@ -51,6 +51,8 @@ class Validation:
         self.codec = CODECS[args.profile]
         self.test_inventory = None
         self.command_results = []
+        self.run_uid = '2.25.'+str(uuid.uuid4().int)
+        self.fixture_sets = {}
 
     def command(self, args, timeout=30, allowed=(0,), env=None):
         args = [str(x) for x in args]
@@ -88,20 +90,23 @@ class Validation:
         require(rc in allowed, f'exit {rc}: {args[0]}; see {self.current}.log')
         return stdout.decode(errors='replace')
 
-    def case(self, name, action, requires=()):
+    def case(self, name, action, requires=(), phase='product', chain='end-to-end'):
         self.current = name
         started = time.monotonic()
-        result = dict(id=name, status='failed', tests=1, failed=1, skipped=0)
+        result = dict(id=name, status='failed', tests=1, failed=1, skipped=0,
+                      phase=phase, chain=chain, prerequisites=list(requires), executed=False)
         completed = {r['id']:r for r in self.results}
         missing = [key for key in requires if not passed(completed.get(key))]
         if missing:
             result.update(status='blocked',tests=0,failed=0,
-                          detail='Prerequisite failed or absent: '+', '.join(missing),seconds=0)
+                          detail='Prerequisite failed or absent: '+', '.join(missing),seconds=0,
+                          blocked_by=missing, failure_category='prerequisite')
             self.results.append(result)
             self.save()
             print(f'{name}: blocked: {result["detail"]}',flush=True)
             return
         try:
+            result['executed'] = True
             detail = action()
             result.update(status='passed', failed=0, detail='completed')
             if isinstance(detail, dict):
@@ -114,7 +119,8 @@ class Validation:
         except Exception as exc:
             # Preserve actual assertion/skip counts when a component supplied them.
             # A skipped suite fails the gate without inventing an assertion failure.
-            result.update(status='failed', detail=str(exc))
+            result.update(status='failed', detail=str(exc), failure_category=(
+                'environment_unavailable' if isinstance(exc, FileNotFoundError) else phase+'_failure'))
         result['seconds'] = round(time.monotonic()-started, 3)
         self.results.append(result)
         self.save()
@@ -125,7 +131,7 @@ class Validation:
                        source_revision=self.args.source_revision, source_digest=self.args.source_digest,
                        peer_revision=json.loads((HERE/'lock.json').read_text())['revision'],
                        manifest_digest=digest(HERE/'features.json'), cases=self.results,
-                       commands=self.command_results)
+                       commands=self.command_results, run_uid=self.run_uid)
         if self.test_inventory is not None:
             payload['test_inventory'] = self.test_inventory
         (self.output/'results.json').write_text(json.dumps(payload,indent=2)+'\n')
@@ -155,13 +161,20 @@ class Validation:
         return dict(tests=3, failed=0, skipped=0)
 
     def fixtures(self):
-        root = '2.25.'+str(uuid.uuid4().int)
-        originals = self.output/'originals'
-        inputs = self.output/'inputs'
-        originals.mkdir()
-        inputs.mkdir()
+        self.data, self.paths = self.make_fixtures('end-to-end')
+        return '13 new-UID CT/MR/CR instances with nonempty PixelData'
+
+    def make_fixtures(self, chain):
+        group_id = ('end-to-end','diagnostic-reference','diagnostic-scp').index(chain)+1
+        profile_id = list(CODECS).index(self.args.profile)+1
+        root = f'{self.run_uid}.{profile_id}.{group_id}'
+        directory = self.output if chain == 'end-to-end' else self.output/chain
+        originals, inputs = directory/'originals', directory/'inputs'
+        originals.mkdir(parents=True)
+        inputs.mkdir(parents=True)
+        data, paths = {}, {}
         for group,mod in enumerate(('ct','mr','cr'),1):
-            self.data[mod],self.paths[mod] = [],[]
+            data[mod], paths[mod] = [],[]
             sources = sorted((Path(self.args.fixtures)/mod).glob('*.dcm'))
             require(len(sources)=={'ct':5,'mr':6,'cr':2}[mod], f'{mod}: fixture count differs from locked peer')
             for i,path in enumerate(sources,1):
@@ -179,11 +192,19 @@ class Validation:
                             'Compressor did not produce the required transfer syntax')
                 else:
                     wire.write_bytes(native.read_bytes())
-                self.data[mod].append(ds)
-                self.paths[mod].append(wire)
-        (self.output/'fixture-manifest.json').write_text(json.dumps(
-            {m:[self.signature(ds) for ds in values] for m,values in self.data.items()},indent=2)+'\n')
-        return '13 new-UID CT/MR/CR instances with nonempty PixelData'
+                data[mod].append(ds)
+                paths[mod].append(wire)
+        (directory/'fixture-manifest.json').write_text(json.dumps(
+            {m:[self.signature(ds) for ds in values] for m,values in data.items()},indent=2)+'\n')
+        self.fixture_sets[chain] = dict(data=data, paths=paths, directory=directory, uid_root=root)
+        (self.output/'fixture-namespaces.json').write_text(json.dumps(dict(
+            run_uid=self.run_uid, profile=self.args.profile,
+            chains={name:value['uid_root'] for name,value in self.fixture_sets.items()}),indent=2)+'\n')
+        return data, paths
+
+    def diagnostic_fixtures(self, chain):
+        self.make_fixtures(chain)
+        return '13 independent instances in '+self.fixture_sets[chain]['uid_root']
 
     @staticmethod
     def signature(ds):
@@ -225,14 +246,15 @@ class Validation:
                       '-aet','TEST_SCU','-aec',ae,'-od',directory,host,'11112',
                       '-k','QueryRetrieveLevel=STUDY','-k',f'StudyInstanceUID={study}'])
 
-    def query(self, mod):
-        ds = self.data[mod][0]
+    def query(self, mod, data=None):
+        data = self.data if data is None else data
+        ds = data[mod][0]
         output = self.command([self.bin/'query_scu','pacs-server','11112','DCMTK_PACS',
                                '--level','IMAGE','--study-uid',ds.StudyInstanceUID,
                                '--series-uid',ds.SeriesInstanceUID,'--format','json'])
         payload = json.loads(output)
         actual = [item['sopInstanceUid'] for item in payload['results']]
-        expected = [str(ds.SOPInstanceUID) for ds in self.data[mod]]
+        expected = [str(ds.SOPInstanceUID) for ds in data[mod]]
         require(sorted(actual)==sorted(expected) and payload['resultCount']==len(expected),
                 f'{mod}: exact query UID set/count mismatch')
 
@@ -256,26 +278,62 @@ class Validation:
         self.get_oracle('pacs-server-2','DCMTK_PAC2',ds.StudyInstanceUID,directory)
         return self.verify(directory,[ds])
 
-    def move_scu(self):
-        ds = self.data['ct'][0]
-        before = json.loads(self.command([self.bin/'query_scu','pacs-server-2','11112','DCMTK_PAC2',
+    def move_scu(self, data=None, prefix=''):
+        data = self.data if data is None else data
+        ds = data['ct'][0]
+        if prefix:
+            # Independently establish absence so a PACS query defect cannot prevent
+            # the diagnostic C-MOVE request from reaching the reference archive.
+            before = self.output/(prefix+'move-before')
+            before.mkdir()
+            self.command(['findscu','-S','-X','-od',before,'-aet','TEST_SCU','-aec','DCMTK_PAC2',
+                          'pacs-server-2','11112','-k','QueryRetrieveLevel=STUDY',
+                          '-k',f'StudyInstanceUID={ds.StudyInstanceUID}'])
+            require(not list(before.iterdir()), 'Destination already contains the diagnostic study')
+        else:
+            before = json.loads(self.command([self.bin/'query_scu','pacs-server-2','11112','DCMTK_PAC2',
                                           '--study-uid',ds.StudyInstanceUID,'--format','json'],allowed=(0,1)))
-        # query_scu documents exit 1 for an empty successful result. The required
-        # empty JSON result distinguishes this precondition from a command error.
-        require(before['resultCount']==0 and before['results']==[],
-                'Destination contains the study before C-MOVE')
+            # query_scu documents exit 1 for an empty successful result.
+            require(before['resultCount']==0 and before['results']==[],
+                    'Destination contains the study before C-MOVE')
         self.command([self.bin/'retrieve_scu','pacs-server','11112','DCMTK_PACS','--mode','move',
                       '--dest-ae','DCMTK_PAC2','--study-uid',ds.StudyInstanceUID,'--no-progress'])
-        directory = self.output/'moved-ct'
+        directory = self.output/(prefix+'moved-ct')
         self.get_oracle('pacs-server-2','DCMTK_PAC2',ds.StudyInstanceUID,directory)
-        return self.verify(directory,self.data['ct'])
+        return self.verify(directory,data['ct'])
 
-    def get_scu(self, mod):
-        dest = self.output/('pacs-get-'+mod)
+    def get_scu(self, mod, data=None, prefix=''):
+        data = self.data if data is None else data
+        dest = self.output/(prefix+'pacs-get-'+mod)
         dest.mkdir()
         self.command([self.bin/'retrieve_scu','pacs-server','11112','DCMTK_PACS','--mode','get',
-                      '--study-uid',self.data[mod][0].StudyInstanceUID,'--output',dest,'--no-progress'])
-        return self.verify(dest,self.data[mod])
+                      '--study-uid',data[mod][0].StudyInstanceUID,'--output',dest,'--no-progress'])
+        return self.verify(dest,data[mod])
+
+    def seed_reference(self):
+        paths = self.fixture_sets['diagnostic-reference']['paths']
+        flags = [self.codec[4]] if self.codec[4] else []
+        self.command(['storescu',*flags,'-aet','TEST_SCU','-aec','DCMTK_PACS','pacs-server','11112',
+                      *[path for group in paths.values() for path in group]])
+
+    def reference_ready(self):
+        data = self.fixture_sets['diagnostic-reference']['data']
+        for mod, instances in data.items():
+            dest = self.output/('diagnostic-reference-oracle-'+mod)
+            self.get_oracle('pacs-server','DCMTK_PACS',instances[0].StudyInstanceUID,dest)
+            self.verify(dest,instances)
+        return 'DCMTK independently retrieved and verified all 13 diagnostic objects'
+
+    def import_scp(self):
+        fixtures = self.fixture_sets['diagnostic-scp']
+        text = self.command([self.bin/'qr_scp','22503','PACS_QR','--scan-only',
+                             '--storage-dir',fixtures['directory']/'inputs',
+                             '--index-db',fixtures['directory']/'index.db'])
+        counts = re.findall(r'Scan complete: (\d+) files indexed', text)
+        expected = sum(len(values) for values in fixtures['data'].values())
+        require(counts == [str(expected)], f'Public qr_scp import indexed {counts}; expected {expected}')
+        require(not re.search(r'\([1-9]\d* errors\)',text), 'Public qr_scp import reported indexing errors')
+        return f'Public qr_scp --scan-only imported {expected} instances'
 
     def mwl(self, sequences=False):
         result = json.loads(self.command([self.bin/'worklist_scu','-aec','DCMTK_WLM','-o','json',
@@ -325,24 +383,32 @@ class Validation:
             self.command(['storescu',*flags,'-aec','PACS_STORE','127.0.0.1','22502',*self.paths['ct']])
             return self.verify(dest,self.data['ct'])
 
-    def qr_scp(self, mode):
+    def qr_scp(self, mode, diagnostic=False):
         # Independent DCMTK SCUs exercise the actual CLI, including its file index.
-        with self.server([self.bin/'qr_scp','22503','PACS_QR','--storage-dir',self.output/'inputs',
-                          '--index-db',self.output/f'{mode}.db','--peer','STORE_SCP:storescp-receiver:11112'],22503):
-            ds = self.data['ct'][0]
+        fixtures = self.fixture_sets['diagnostic-scp'] if diagnostic else None
+        data = fixtures['data'] if diagnostic else self.data
+        inputs = fixtures['directory']/'inputs' if diagnostic else self.output/'inputs'
+        index = fixtures['directory']/'index.db' if diagnostic else self.output/f'{mode}.db'
+        prefix = 'diagnostic-' if diagnostic else ''
+        with self.server([self.bin/'qr_scp','22503','PACS_QR','--storage-dir',inputs,
+                          '--index-db',index,'--peer','STORE_SCP:storescp-receiver:11112'],22503):
+            if mode == 'ready':
+                self.command(['echoscu','-to','5','-ta','5','-td','5','-aec','PACS_QR','127.0.0.1','22503'])
+                return 'Imported PACS endpoint completed an external C-ECHO'
+            ds = data['ct'][0]
             keys = ['-k','QueryRetrieveLevel=STUDY','-k',f'StudyInstanceUID={ds.StudyInstanceUID}']
             if mode=='query':
-                dest = self.output/'query-responses'
+                dest = self.output/(prefix+'query-responses')
                 dest.mkdir()
                 self.command(['findscu','-S','-X','-od',dest,'-aec','PACS_QR','127.0.0.1','22503',*keys])
                 responses = [pydicom.dcmread(p) for p in dest.iterdir()]
                 require(len(responses)==1 and str(responses[0].StudyInstanceUID)==str(ds.StudyInstanceUID),
                         'C-FIND SCP returned wrong study set')
             elif mode=='get':
-                dest = self.output/'scp-get-received'
+                dest = self.output/(prefix+'scp-get-received')
                 dest.mkdir()
                 self.command(['getscu','-S',self.codec[3],'-od',dest,'-aec','PACS_QR','127.0.0.1','22503',*keys])
-                return self.verify(dest,self.data['ct'])
+                return self.verify(dest,data['ct'])
             else:
                 dest = Path('/dicom/received')
                 # This is a fresh, project-scoped synthetic receiver volume. Keep directories
@@ -350,7 +416,39 @@ class Validation:
                 for path in dest.rglob('*'):
                     if path.is_file(): path.unlink()
                 self.command(['movescu','-S','-aec','PACS_QR','-aem','STORE_SCP','127.0.0.1','22503',*keys])
-                return self.verify(dest,self.data['ct'])
+                return self.verify(dest,data['ct'])
+
+    def reference_diagnostics(self):
+        chain = 'diagnostic-reference'
+        self.case('diagnostic.reference.fixtures',lambda:self.diagnostic_fixtures(chain),
+                  phase='fixture_preparation',chain=chain)
+        self.case('diagnostic.reference.seed',self.seed_reference,
+                  requires=['diagnostic.reference.fixtures','peer.preflight'],phase='peer_preparation',chain=chain)
+        self.case('diagnostic.reference.ready',self.reference_ready,
+                  requires=['diagnostic.reference.seed'],phase='peer_preparation',chain=chain)
+        # Resolve data inside actions: blocked nodes must not access failed preparation.
+        for mod in ('ct','mr','cr'):
+            self.case('diagnostic.query.'+mod,
+                      lambda mod=mod:self.query(mod,self.fixture_sets[chain]['data']),
+                      requires=['diagnostic.reference.ready'],chain=chain)
+            self.case('diagnostic.get.'+mod,
+                      lambda mod=mod:self.get_scu(mod,self.fixture_sets[chain]['data'],'diagnostic-'),
+                      requires=['diagnostic.reference.ready'],chain=chain)
+        self.case('diagnostic.move.scu',
+                  lambda:self.move_scu(self.fixture_sets[chain]['data'],'diagnostic-'),
+                  requires=['diagnostic.reference.ready'],chain=chain)
+
+    def scp_diagnostics(self):
+        chain = 'diagnostic-scp'
+        self.case('diagnostic.scp.fixtures',lambda:self.diagnostic_fixtures(chain),
+                  phase='fixture_preparation',chain=chain)
+        self.case('diagnostic.scp.import',self.import_scp,requires=['diagnostic.scp.fixtures'],
+                  phase='product_preparation',chain=chain)
+        self.case('diagnostic.scp.ready',lambda:self.qr_scp('ready',True),
+                  requires=['diagnostic.scp.import'],phase='product_preparation',chain=chain)
+        for mode in ('query','get','move'):
+            self.case('diagnostic.'+mode+'.scp',lambda mode=mode:self.qr_scp(mode,True),
+                      requires=['diagnostic.scp.ready'],chain=chain)
 
     def tls_scp(self):
         cert = self.output/'tls-certs'
@@ -457,9 +555,9 @@ class Validation:
         if pins.exists():
             shutil.copy2(pins,self.output/'dependency-pins.json')
         self.save()
-        self.case('peer.preflight',self.preflight)
-        self.case('peer.tls',self.peer_tls)
-        self.case('fixtures',self.fixtures)
+        self.case('peer.preflight',self.preflight,phase='peer_preparation',chain='reference')
+        self.case('peer.tls',self.peer_tls,phase='peer_preparation',chain='reference')
+        self.case('fixtures',self.fixtures,phase='fixture_preparation')
         self.case('echo.primary',lambda:self.command([self.bin/'echo_scu','-aec','DCMTK_PACS','pacs-server','11112']),
                   requires=['peer.preflight'])
         self.case('echo.secondary',lambda:self.command([self.bin/'echo_scu','-aec','DCMTK_PAC2','pacs-server-2','11112']),
@@ -480,6 +578,8 @@ class Validation:
         for mode in ('query','get','move'):
             self.case(mode+'.scp',lambda mode=mode:self.qr_scp(mode),requires=['fixtures','peer.preflight'])
         self.case('tls.scp',self.tls_scp,requires=['peer.tls'])
+        self.reference_diagnostics()
+        self.scp_diagnostics()
         if self.args.profile=='uncompressed' and not self.args.interop_only:
             try:
                 self.prepare_inventory()
