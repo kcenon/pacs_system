@@ -533,6 +533,29 @@ public:
     [[nodiscard]] Result<std::pair<uint8_t, dimse::dimse_message>> receive_dimse(
         duration timeout = default_timeout);
 
+    /// Allocate a non-reused MessageID for an SCP-initiated exchange. Exhaustion
+    /// requires a new association; delayed responses must never match a reuse.
+    [[nodiscard]] Result<uint16_t> next_request_message_id();
+
+    /// Register and send a C-STORE/C-ECHO request on a writer or in-memory
+    /// association whose receive path calls deliver_response(). Only one such
+    /// request may be outstanding (the default DIMSE operations window).
+    /// TCP SCUs continue to use send_dimse()/receive_dimse().
+    [[nodiscard]] Result<std::monostate> send_request(
+        uint8_t context_id, const dimse::dimse_message& request);
+
+    /// Consume the registered response exactly once. A receive_timeout leaves
+    /// the wait registered for polling; cancel_response_wait() retires it.
+    [[nodiscard]] Result<dimse::dimse_message> receive_response(
+        duration timeout = default_timeout);
+    void cancel_response_wait();
+
+    /// Receive-path entry point. Correlates context/command/MessageID and SOP
+    /// identity, ignores known late/duplicate responses, and never queues an
+    /// unsolicited response. Errors with no active waiter are protocol errors.
+    [[nodiscard]] Result<std::monostate> deliver_response(
+        uint8_t context_id, const dimse::dimse_message& response);
+
     // =========================================================================
     // PDU Access (for network layer integration)
     // =========================================================================
@@ -704,6 +727,9 @@ private:
     /// associations)
     struct transport;
 
+    struct response_router;
+    void close_response_waiters();
+
     /// Open the TCP connection and negotiate (connect() after propose())
     [[nodiscard]] Result<std::monostate> establish_over_tcp(
         const std::string& host, uint16_t port, duration timeout);
@@ -793,6 +819,8 @@ private:
     /// TCP connection or PDU writer; shared so that a thread blocked in
     /// I/O keeps it alive while another thread aborts
     std::shared_ptr<transport> transport_;
+
+    std::shared_ptr<response_router> responses_;
 
     std::map<std::pair<uint8_t, uint16_t>, bool> cancellable_operations_;
 

@@ -304,6 +304,10 @@ public:
      * @return Vector containing Patient Root and Study Root Move/Get SOP Classes
      */
     [[nodiscard]] std::vector<std::string> supported_sop_classes() const override;
+    [[nodiscard]] std::vector<std::string> outbound_sop_classes() const override;
+
+    /// Maximum wait for each default C-GET C-STORE acknowledgement.
+    void set_get_response_timeout(std::chrono::milliseconds timeout);
 
     /**
      * @brief Handle an incoming DIMSE message (C-MOVE-RQ or C-GET-RQ)
@@ -452,6 +456,7 @@ private:
     std::chrono::milliseconds move_connect_timeout_{3000};
     std::chrono::milliseconds move_response_timeout_{30000};
     std::chrono::milliseconds move_release_timeout_{1000};
+    std::chrono::milliseconds get_response_timeout_{30000};
 
     std::atomic<size_t> move_operations_{0};
     std::atomic<size_t> get_operations_{0};

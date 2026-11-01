@@ -32,6 +32,24 @@ using kcenon::common::error_info;
 
 namespace kcenon::pacs::network::v2 {
 
+#ifdef PACS_WITH_NETWORK_SYSTEM
+namespace {
+void discard_unrouted_session(
+    const std::shared_ptr<kcenon::network::interfaces::i_session>& session) {
+    // The adapter initially installs receive/error callbacks capturing the
+    // session itself. Normally route_session_events() replaces those cycles;
+    // rejected or shutdown-time connections need the same cleanup. This runs
+    // in the connection callback, outside the session's own callback lock.
+    if (auto messaging =
+            std::dynamic_pointer_cast<kcenon::network::session::messaging_session>(session)) {
+        messaging->set_receive_callback(nullptr);
+        messaging->set_error_callback(nullptr);
+    }
+    session->close(); // Preserve the adapter's disconnection callback.
+}
+} // namespace
+#endif
+
 // =============================================================================
 // Construction / Destruction
 // =============================================================================
@@ -343,7 +361,7 @@ void dicom_server_v2::on_connection(
     if (!running_) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
         // A connection that arrives while stop() runs gets no handler
-        session->close();
+        discard_unrouted_session(session);
 #endif
         return;
     }
@@ -367,7 +385,7 @@ void dicom_server_v2::on_connection(
 #ifdef PACS_WITH_NETWORK_SYSTEM
         // Not under handlers_mutex_: closing reports the disconnection to
         // on_disconnection(), which takes it
-        session->close();
+        discard_unrouted_session(session);
 #endif
         return;
     }
@@ -532,9 +550,23 @@ void dicom_server_v2::create_handler(
         });
 
     // Register handler
+    bool stopping = false;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
-        handlers_[session_id] = handler;
+        // stop() flips running_ before taking this same lock to collect handlers.
+        // A connection callback already in flight must not publish a new handler
+        // after that collection and outlive the session closer/io_context.
+        stopping = !running_;
+        if (!stopping) {
+            handlers_[session_id] = handler;
+        }
+    }
+    if (stopping) {
+#ifdef PACS_WITH_NETWORK_SYSTEM
+        discard_unrouted_session(session_for_routing);
+#endif
+        handler->stop(false);
+        return;
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
@@ -623,12 +655,10 @@ void dicom_server_v2::close_session_later(
             return;
         }
     }
-#ifdef PACS_WITH_NETWORK_SYSTEM
-    // The closer has stopped, which stop() does only after it closed every
-    // handler; a closed handler does not close again, so this does not run
-    // inside a network_system callback
-    session->close();
-#endif
+    // A callback can win close_handler's state exchange, then reach here only
+    // after stop() has joined the closer. Never close inline: network_system
+    // invokes callbacks under its session lock, so close() would re-enter it.
+    // The underlying server still owns this session and closes it during stop().
 }
 
 void dicom_server_v2::run_session_closer() {

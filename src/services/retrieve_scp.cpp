@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_scp.h"
 
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/core/events.h"
@@ -72,6 +73,17 @@ std::vector<std::string> retrieve_scp::supported_sop_classes() const {
         std::string(patient_root_get_sop_class_uid),
         std::string(study_root_get_sop_class_uid)
     };
+}
+
+std::vector<std::string> retrieve_scp::outbound_sop_classes() const {
+    return get_standard_storage_sop_classes();
+}
+
+void retrieve_scp::set_get_response_timeout(std::chrono::milliseconds timeout) {
+    if (timeout.count() <= 0) {
+        throw std::invalid_argument("C-GET response timeout must be positive");
+    }
+    get_response_timeout_ = timeout;
 }
 
 network::Result<std::monostate> retrieve_scp::handle_message(
@@ -310,10 +322,10 @@ network::Result<std::monostate> retrieve_scp::handle_c_move(
                 }
             }
             --stats.remaining;
-            if (is_success(store_status)) {
+            if (network::dimse::is_success(store_status)) {
                 ++stats.completed;
                 ++images_transferred_;
-            } else if (is_warning(store_status)) {
+            } else if (network::dimse::is_warning(store_status)) {
                 ++stats.warning;
                 ++images_transferred_;
             } else {
@@ -355,171 +367,158 @@ network::Result<std::monostate> retrieve_scp::handle_c_get(
     const network::dimse::dimse_message& request) {
 
     using namespace network::dimse;
-
-    // Verify we have a retrieve handler
-    if (!retrieve_handler_) {
-        return kcenon::pacs::pacs_void_error(
-            kcenon::pacs::error_codes::retrieve_handler_not_set,
-            "No retrieve handler configured");
-    }
-
-    auto sop_class_uid = request.affected_sop_class_uid();
-    auto message_id = request.message_id();
-
-    // Verify we have a dataset (query keys)
+    using namespace std::chrono;
+    const auto sop_class_uid = request.affected_sop_class_uid();
+    const auto message_id = request.message_id();
+    ++get_operations_;
+    assoc.register_cancellable_operation(context_id, message_id);
+    struct operation_guard {
+        network::association& assoc;
+        uint8_t context;
+        uint16_t message;
+        bool active{true};
+        void finish() {
+            if (active) {
+                assoc.cancel_response_wait();
+                assoc.finish_cancellable_operation(context, message);
+                active = false;
+            }
+        }
+        ~operation_guard() { finish(); }
+    } operation{assoc, context_id, message_id};
+    auto cancelled = [&] {
+        return assoc.cancellation_requested(context_id, message_id) ||
+               (cancel_check_ && cancel_check_());
+    };
+    auto refuse = [&](status_code status) {
+        dimse_message response{command_field::c_get_rsp, 0};
+        response.set_affected_sop_class_uid(sop_class_uid);
+        response.set_message_id_responded_to(message_id);
+        response.set_status(status);
+        operation.finish();
+        return assoc.send_dimse(context_id, response);
+    };
     if (!request.has_dataset()) {
-        sub_operation_stats stats;
-        return send_final_response(
-            assoc, context_id, message_id,
-            sop_class_uid, false, stats, false);
+        return refuse(status_error_dataset_mismatch);
     }
-
-    // Get calling AE for logging
-    std::string calling_ae{assoc.calling_ae()};
-
-    // Retrieve matching files
+    if (!retrieve_handler_) {
+        return refuse(status_error_unable_to_process);
+    }
     const auto& query_keys = request.dataset().value().get();
-    auto files = retrieve_handler_(query_keys);
-    auto start_time = std::chrono::steady_clock::now();
-
-    // Get study UID for event
-    std::string study_uid = query_keys.get_string(core::tags::study_instance_uid);
-
-    // Publish retrieve started event (C-GET has no destination AE)
+    std::vector<core::dicom_file> files;
+    try {
+        files = retrieve_handler_(query_keys);
+    } catch (const std::exception&) {
+        return refuse(status_error_unable_to_process);
+    }
+    if (files.size() > (std::numeric_limits<uint16_t>::max)()) {
+        return refuse(status_refused_out_of_resources_matches);
+    }
+    const std::string calling_ae{assoc.calling_ae()};
+    const auto start_time = steady_clock::now();
     kcenon::common::get_event_bus().publish(
         kcenon::pacs::events::retrieve_started_event{
-            kcenon::pacs::events::retrieve_operation::c_get,
-            calling_ae,
-            "",  // No destination for C-GET
-            study_uid,
-            static_cast<uint16_t>(files.size())
-        }
-    );
+            kcenon::pacs::events::retrieve_operation::c_get, calling_ae, "",
+            query_keys.get_string(core::tags::study_instance_uid),
+            static_cast<uint16_t>(files.size())});
 
-    // Initialize sub-operation statistics
     sub_operation_stats stats;
     stats.remaining = static_cast<uint16_t>(files.size());
+    std::vector<std::string> failed_uids;
     bool was_cancelled = false;
-
-    // Process each file (C-STORE sub-operations on same association)
+    bool exchange_failed = false;
     for (const auto& file : files) {
-        // Check for cancel request
-        if (cancel_check_ && cancel_check_()) {
-            was_cancelled = true;
+        if (cancelled() || !assoc.is_established()) {
+            was_cancelled = cancelled();
             break;
         }
-
-        // Send pending response with current progress
-        auto pending_result = send_pending_response(
-            assoc, context_id, message_id,
-            sop_class_uid, false, stats);
-
-        if (pending_result.is_err()) {
-            return pending_result;
+        const auto uid = file.dataset().get_string(core::tags::sop_instance_uid);
+        // Once the exchange failed, don't multiply a silent peer's timeout by
+        // the number of matches or count an unacknowledged object as completed.
+        if (exchange_failed) {
+            --stats.remaining;
+            ++stats.failed;
+            failed_uids.push_back(uid);
+            continue;
         }
-
-        // Perform C-STORE sub-operation on the same association
-        // For C-GET, images are sent back on the same association
-        status_code store_status = status_success;
-
-        if (store_handler_) {
-            // Use custom store handler
-            store_status = store_handler_(
-                assoc, context_id, file,
-                calling_ae, message_id);
-        } else {
-            // Default implementation: build and send C-STORE-RQ
-            // Get the SOP Class and Instance UIDs from the file
-            auto file_sop_class = file.sop_class_uid();
-            auto file_sop_instance = file.sop_instance_uid();
-
-            // Create C-STORE request
-            dimse_message store_rq{command_field::c_store_rq, message_id};
-            store_rq.set_affected_sop_class_uid(file_sop_class);
-            store_rq.set_affected_sop_instance_uid(file_sop_instance);
-            store_rq.set_priority(priority_medium);
-
-            // For C-GET, include Move Originator information
-            // (0000,1030) Move Originator Application Entity Title
-            // (0000,1031) Move Originator Message ID
-            store_rq.command_set().set_string(
-                tag_move_originator_aet,
-                encoding::vr_type::AE,
-                calling_ae);
-            store_rq.command_set().set_numeric<uint16_t>(
-                tag_move_originator_message_id,
-                encoding::vr_type::US,
-                message_id);
-
-            // Attach the dataset
-            store_rq.set_dataset(file.dataset());
-
-            // Find the presentation context for the SOP Class
-            auto store_context_id = assoc.accepted_context_id(file_sop_class);
-            if (!store_context_id.has_value()) {
-                // No accepted context for this SOP Class
-                stats.remaining--;
-                stats.failed++;
-                continue;
-            }
-
-            // Send the C-STORE request
-            auto send_result = assoc.send_dimse(store_context_id.value(), store_rq);
-            if (send_result.is_err()) {
-                stats.remaining--;
-                stats.failed++;
-                continue;
-            }
-
-            // Wait for C-STORE response
-            auto recv_result = assoc.receive_dimse();
-            if (recv_result.is_err()) {
-                stats.remaining--;
-                stats.failed++;
-                continue;
-            }
-
-            auto& [recv_ctx, store_rsp] = recv_result.value();
-            store_status = store_rsp.status();
+        auto pending = send_pending_response(assoc, context_id, message_id,
+                                              sop_class_uid, false, stats);
+        if (pending.is_err()) {
+            return pending;
         }
-
-        // Update statistics based on store result
-        stats.remaining--;
-        if (is_success(store_status)) {
-            stats.completed++;
+        const auto file_class = file.dataset().get_string(core::tags::sop_class_uid);
+        const std::string file_syntax{file.transfer_syntax().uid()};
+        std::optional<uint8_t> store_context;
+        if (assoc.requestor_role(file_class).scp_role) {
+            for (const auto& context : assoc.accepted_contexts()) {
+                const auto& syntax = context.transfer_syntax;
+                const bool native_pair =
+                    (file_syntax == "1.2.840.10008.1.2" || file_syntax == "1.2.840.10008.1.2.1") &&
+                    (syntax == "1.2.840.10008.1.2" || syntax == "1.2.840.10008.1.2.1");
+                if (context.is_accepted() && context.abstract_syntax == file_class &&
+                    (syntax == file_syntax || native_pair) &&
+                    core::dicom_file::validate_pixel_data_representation(
+                        file.dataset(), encoding::transfer_syntax{syntax}).is_ok()) {
+                    store_context = context.id;
+                    if (syntax == file_syntax) break;
+                }
+            }
+        }
+        status_code store_status = status_error_unable_to_process;
+        if (store_context) {
+            if (store_handler_) {
+                // Custom transports retain responsibility for their own waits.
+                store_status = store_handler_(assoc, *store_context, file, "", 0);
+            } else {
+                auto store_id = assoc.next_request_message_id();
+                if (store_id.is_ok()) {
+                    auto store = make_c_store_rq(store_id.value(), file_class, uid, request.priority());
+                    store.set_dataset(file.dataset());
+                    auto sent = assoc.send_request(*store_context, store);
+                    bool acknowledged = false;
+                    if (sent.is_ok()) {
+                        const auto deadline = steady_clock::now() + get_response_timeout_;
+                        while (steady_clock::now() < deadline && !cancelled() && assoc.is_established()) {
+                            const auto left = duration_cast<milliseconds>(deadline-steady_clock::now());
+                            auto received = assoc.receive_response((std::min)(left, milliseconds{50}));
+                            if (received.is_err()) {
+                                if (received.error().code == error_codes::receive_timeout) continue;
+                                break;
+                            }
+                            store_status = received.value().status();
+                            acknowledged = true;
+                            break;
+                        }
+                    }
+                    assoc.cancel_response_wait();
+                    exchange_failed = !acknowledged;
+                } else {
+                    exchange_failed = true;
+                }
+            }
+        }
+        --stats.remaining;
+        if (network::dimse::is_success(store_status)) {
+            ++stats.completed;
             ++images_transferred_;
-        } else if (is_warning(store_status)) {
-            stats.warning++;
+        } else if (network::dimse::is_warning(store_status)) {
+            ++stats.warning;
             ++images_transferred_;
         } else {
-            stats.failed++;
+            ++stats.failed;
+            failed_uids.push_back(uid);
         }
     }
-
-    // Update operation count
-    ++get_operations_;
-
-    // Calculate duration and publish completed event
-    auto end_time = std::chrono::steady_clock::now();
-    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_time - start_time).count();
-
+    // Cancellation after the last in-flight store still wins over normal final.
+    was_cancelled = was_cancelled || cancelled();
     kcenon::common::get_event_bus().publish(
         kcenon::pacs::events::retrieve_completed_event{
-            kcenon::pacs::events::retrieve_operation::c_get,
-            calling_ae,
-            "",  // No destination for C-GET
-            stats.completed,
-            stats.failed,
-            stats.warning,
-            static_cast<uint64_t>(duration_ms)
-        }
-    );
-
-    // Send final response
-    return send_final_response(
-        assoc, context_id, message_id,
-        sop_class_uid, false, stats, was_cancelled);
+            kcenon::pacs::events::retrieve_operation::c_get, calling_ae, "",
+            stats.completed, stats.failed, stats.warning,
+            static_cast<uint64_t>(duration_cast<milliseconds>(steady_clock::now()-start_time).count())});
+    operation.finish();
+    return send_final_response(assoc, context_id, message_id, sop_class_uid,
+                               false, stats, was_cancelled, failed_uids);
 }
 
 // =============================================================================

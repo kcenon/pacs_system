@@ -489,3 +489,63 @@ TEST_CASE("C-MOVE validates prerequisites and counter capacity before delivery",
     CHECK(service.images_transferred() == 0);
     CHECK(service.move_operations() == 1);
 }
+
+TEST_CASE("C-GET validates prerequisites and counter capacity before delivery", "[services][retrieve][get]") {
+    association_config proposed;
+    proposed.calling_ae_title = "ORIGINATOR";
+    proposed.called_ae_title = "MOVE_SCP";
+    proposed.proposed_contexts.emplace_back(1, std::string(study_root_get_sop_class_uid),
+                                            std::vector<std::string>{"1.2.840.10008.1.2.1"});
+    auto requester = association::propose(proposed);
+    scp_config accepted;
+    accepted.ae_title = "MOVE_SCP";
+    accepted.supported_abstract_syntaxes = {std::string(study_root_get_sop_class_uid)};
+    accepted.supported_transfer_syntaxes = {"1.2.840.10008.1.2.1"};
+    auto receiver = association::accept(requester.build_associate_rq(), accepted);
+    REQUIRE(requester.process_associate_ac(receiver.build_associate_ac()));
+    receiver.set_peer(&requester);
+    retrieve_scp service;
+    service.set_destination_resolver([](const std::string&) {
+        return std::make_optional(std::make_pair(std::string("127.0.0.1"), uint16_t{1}));
+    });
+    service.set_retrieve_handler([](const dicom_dataset&) { return std::vector<dicom_file>{}; });
+    dimse_message request{command_field::c_get_rq, 77};
+    request.set_affected_sop_class_uid(study_root_get_sop_class_uid);
+    request.command_set().set_string(tag_move_destination, vr_type::AE, "DEST");
+    request.set_dataset(dicom_dataset{});
+    status_code expected = status_success;
+    SECTION("no matches succeeds without a destination connection") {}
+    SECTION("missing identifier is a DIMSE failure") {
+        request = dimse_message{command_field::c_get_rq, 77};
+        request.set_affected_sop_class_uid(study_root_get_sop_class_uid);
+        expected = status_error_dataset_mismatch;
+    }
+    SECTION("missing retrieve handler is a DIMSE failure") {
+        service.set_retrieve_handler({});
+        expected = status_error_unable_to_process;
+    }
+    SECTION("archive exception is a DIMSE failure") {
+        service.set_retrieve_handler([](const dicom_dataset&) -> std::vector<dicom_file> {
+            throw std::runtime_error("Archive unavailable");
+        });
+        expected = status_error_unable_to_process;
+    }
+    SECTION("more than US capacity cannot wrap counters") {
+        service.set_retrieve_handler([](const dicom_dataset&) {
+            return std::vector<dicom_file>(65536);
+        });
+        expected = status_refused_out_of_resources_matches;
+    }
+    REQUIRE(service.handle_message(receiver, 1, request).is_ok());
+    auto received = requester.receive_dimse(std::chrono::milliseconds{100});
+    REQUIRE(received.is_ok());
+    CHECK(received.value().first == 1);
+    const auto& response = received.value().second;
+    CHECK(response.command() == command_field::c_get_rsp);
+    CHECK(response.message_id_responded_to() == 77);
+    CHECK(response.status() == expected);
+    CHECK_FALSE(response.command_set().contains(tag_number_of_remaining_subops));
+    CHECK_FALSE(response.has_dataset());
+    CHECK(service.images_transferred() == 0);
+    CHECK(service.get_operations() == 1);
+}

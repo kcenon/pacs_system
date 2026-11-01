@@ -14,6 +14,7 @@
 #include "kcenon/pacs/network/pdu_decoder.h"
 
 #include <span>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 
@@ -487,9 +488,24 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     scp_cfg.implementation_class_uid = config_.implementation_class_uid;
     scp_cfg.implementation_version_name = config_.implementation_version_name;
 
-    // Collect supported abstract syntaxes from services
-    for (const auto& [uid, _] : services_) {
+    // Only grant roles actually implemented by registered services. Retrieve
+    // supplies outbound Storage without pretending to be an incoming Store SCP.
+    std::set<std::string> outbound;
+    std::set<const services::scp_service*> visited;
+    for (const auto& [uid, service] : services_) {
         scp_cfg.supported_abstract_syntaxes.push_back(uid);
+        if (visited.insert(service).second) {
+            const auto classes = service->outbound_sop_classes();
+            outbound.insert(classes.begin(), classes.end());
+        }
+    }
+    for (const auto& offered : rq.user_info.role_selections) {
+        const bool incoming = services_.contains(offered.sop_class_uid);
+        const bool outgoing = outbound.contains(offered.sop_class_uid);
+        scp_cfg.supported_requestor_roles.emplace_back(offered.sop_class_uid, incoming, outgoing);
+        if (!incoming && outgoing && offered.scp_role) {
+            scp_cfg.supported_abstract_syntaxes.push_back(offered.sop_class_uid);
+        }
     }
 
     // Accept compressed and uncompressed transfer syntaxes
@@ -604,10 +620,28 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
         const auto& [context_id, message] = *added.value();
         messages_processed_.fetch_add(1, std::memory_order_relaxed);
 
-        if (message.command() == dimse::command_field::c_cancel_rq ||
-            (static_cast<uint16_t>(message.command()) & 0x8000) != 0) {
+        if (message.command() == dimse::command_field::c_cancel_rq) {
             association_.enqueue_message(context_id, message);
+        } else if (dimse::is_response(message.command())) {
+            auto delivered = association_.deliver_response(context_id, message);
+            if (delivered.is_err()) {
+                // No active exchange owns this reply. Report and discard it;
+                // never grow the service request queue or block future work.
+                // This also preserves fire-and-forget N-EVENT-REPORT services
+                // whose acknowledgements had no consumer in the legacy queue.
+                report_error(delivered.error().message);
+            }
         } else {
+            // An outbound-only Storage context does not authorize an incoming
+            // C-STORE request on that same context.
+            for (const auto& context : association_.accepted_contexts()) {
+                if (context.id == context_id &&
+                    !association_.requestor_role(context.abstract_syntax).scu_role) {
+                    send_abort(abort_source::service_provider, abort_reason::unexpected_pdu_parameter);
+                    close_handler(false);
+                    return;
+                }
+            }
             enqueue_request(context_id, message);
         }
     }
@@ -742,7 +776,8 @@ void dicom_association_handler::run_services() {
         } catch (...) {
             report_error("Unknown service exception");
         }
-        if (message.command() != dimse::command_field::c_move_rq) {
+        if (message.command() != dimse::command_field::c_move_rq &&
+            message.command() != dimse::command_field::c_get_rq) {
             association_.finish_cancellable_operation(context_id, message.message_id());
         }
     }

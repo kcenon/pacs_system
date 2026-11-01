@@ -4,6 +4,9 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <barrier>
+#include <future>
+#include <thread>
 
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/pdu_types.h"
@@ -709,4 +712,124 @@ TEST_CASE("C-CANCEL is scoped to its registered association/context/message", "[
     moved.enqueue_message(1, cancel); // late cancellation cannot cancel future reuse
     moved.register_cancellable_operation(1, 77);
     CHECK_FALSE(moved.cancellation_requested(1, 77));
+}
+
+namespace {
+association response_test_association() {
+    association_config proposed;
+    proposed.calling_ae_title = "PEER";
+    proposed.called_ae_title = "SCP";
+    proposed.proposed_contexts = {{1, VERIFICATION_SOP_CLASS, {EXPLICIT_VR_LE}}};
+    scp_config accepted;
+    accepted.ae_title = "SCP";
+    return association::accept(association::propose(proposed).build_associate_rq(), accepted);
+}
+}
+
+TEST_CASE("SCP response mailbox correlates and retires exchanges", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    auto request = make_c_echo_rq(1);
+    auto response = make_c_echo_rsp(1, status_success);
+    REQUIRE(assoc.send_request(1, request).is_ok());
+    CHECK(assoc.send_request(1, make_c_echo_rq(2)).is_err());
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    REQUIRE(assoc.deliver_response(1, response).is_ok());
+    REQUIRE(assoc.deliver_response(1, response).is_ok()); // duplicate before consumption
+    REQUIRE(assoc.receive_response(1ms).is_ok());
+    CHECK(assoc.receive_response(1ms).is_err()); // only one consumption
+    CHECK(assoc.send_request(1, request).is_err()); // no ID reuse
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(2)).is_ok());
+    REQUIRE(assoc.deliver_response(1, response).is_ok()); // duplicate during next wait
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    assoc.cancel_response_wait();
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(3)).is_ok());
+    REQUIRE(assoc.deliver_response(1, make_c_echo_rsp(2, status_success)).is_ok()); // late after cancel
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    auto moved = std::move(assoc);
+    REQUIRE(moved.deliver_response(1, make_c_echo_rsp(3, status_success)).is_ok());
+    REQUIRE(moved.receive_response(1ms).is_ok());
+    CHECK(moved.deliver_response(1, make_c_echo_rsp(99, status_success)).is_err());
+}
+
+TEST_CASE("SCP response mailbox rejects mismatched and malformed acknowledgements", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+    auto response = make_c_echo_rsp(1, status_success);
+    uint8_t context = 1;
+    SECTION("wrong context") { context = 3; }
+    SECTION("wrong MessageID") { response.set_message_id_responded_to(2); }
+    SECTION("wrong command") { response = make_c_store_rsp(1, VERIFICATION_SOP_CLASS, ""); }
+    SECTION("missing MessageID") { response.command_set().remove(tag_message_id_responded_to); }
+    SECTION("missing status") { response.command_set().remove(tag_status); }
+    SECTION("pending status") { response.set_status(status_pending); }
+    SECTION("wrong SOP class") { response.set_affected_sop_class_uid(CT_IMAGE_STORAGE); }
+    SECTION("unexpected dataset") { response.set_dataset(kcenon::pacs::core::dicom_dataset{}); }
+    REQUIRE(assoc.deliver_response(context, response).is_ok());
+    auto received = assoc.receive_response(1ms);
+    REQUIRE(received.is_err());
+    CHECK(received.error().code != kcenon::pacs::error_codes::receive_timeout);
+    CHECK(assoc.receive_response(1ms).is_err());
+}
+
+TEST_CASE("SCP response wait wakes on association lifecycle and explicit cancellation", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    auto peer = response_test_association();
+    assoc.set_peer(&peer);
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+    std::promise<void> started;
+    auto receiver = std::async(std::launch::async, [&] {
+        started.set_value();
+        return assoc.receive_response(5s);
+    });
+    started.get_future().wait();
+    SECTION("local abort") { assoc.abort(); }
+    SECTION("peer abort") { peer.abort(); }
+    SECTION("peer release") { REQUIRE(peer.release().is_ok()); }
+    SECTION("local release") { REQUIRE(assoc.release().is_ok()); }
+    SECTION("network abort") { assoc.process_abort(abort_source::service_user, abort_reason::not_specified); }
+    SECTION("network release") { assoc.process_release_rq(); }
+    SECTION("explicit cancellation") { assoc.cancel_response_wait(); }
+    CHECK(receiver.wait_for(1s) == std::future_status::ready);
+    CHECK(receiver.get().is_err());
+    CHECK(assoc.receive_response(1ms).is_err());
+}
+
+TEST_CASE("Response arrival racing close is consumed at most once", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    for (int i = 0; i < 100; ++i) {
+        auto assoc = response_test_association();
+        REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+        std::barrier ready{3};
+        std::thread delivered([&] {
+            ready.arrive_and_wait();
+            (void)assoc.deliver_response(1, make_c_echo_rsp(1, status_success));
+        });
+        std::thread closed([&] {
+            ready.arrive_and_wait();
+            assoc.process_abort(abort_source::service_user, abort_reason::not_specified);
+        });
+        ready.arrive_and_wait();
+        auto result = assoc.receive_response(1s);
+        delivered.join();
+        closed.join();
+        CHECK((result.is_ok() || result.error().code == kcenon::pacs::error_codes::association_aborted));
+        CHECK(assoc.receive_response(1ms).is_err());
+    }
+}
+
+TEST_CASE("SCP request IDs have a bounded non-reusing lifetime", "[association][response-routing]") {
+    association assoc;
+    for (uint32_t id = 1; id <= 65535; ++id) {
+        auto result = assoc.next_request_message_id();
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value() == id);
+    }
+    CHECK(assoc.next_request_message_id().is_err());
 }

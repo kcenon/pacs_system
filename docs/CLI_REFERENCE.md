@@ -811,7 +811,9 @@ Lightweight Query/Retrieve SCP server for serving DICOM files from a storage dir
 Features:
 - **C-FIND**: Query at Patient, Study, Series, and Image levels
 - **C-MOVE**: Send images to configured destination AE titles
-- **C-GET**: Direct image retrieval over the same association
+- **C-GET**: Direct image retrieval over the same association; the requester must
+  offer Storage SCP roles and compatible transfer syntaxes. Completed counts
+  require matching C-STORE acknowledgements.
 - **Automatic Indexing**: SQLite-based fast query responses
 - **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 

@@ -105,6 +105,12 @@ public:
      */
     [[nodiscard]] virtual std::vector<std::string> supported_sop_classes() const = 0;
 
+    /// SOP classes this service can initiate on an accepted association.
+    /// Used for explicit requestor SCP role negotiation, e.g. C-GET Storage.
+    [[nodiscard]] virtual std::vector<std::string> outbound_sop_classes() const {
+        return {};
+    }
+
     /**
      * @brief Handle an incoming DIMSE message
      *

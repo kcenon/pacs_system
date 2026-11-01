@@ -309,3 +309,65 @@ unknown/refused destinations, partial context rejection, mixed storage outcomes,
 malformed responses, cancellation during a blocked store, transfer/release timeout,
 and shutdown. Controlled wire peers are not independent interoperability evidence.
 These focused probes do not replace the complete validation gate.
+
+### C-GET SCP response routing (#1306)
+
+The v2 server negotiates requestor Storage SCP roles from the retrieve service's
+outbound capabilities. A Storage context without this role cannot be used for
+C-GET. The service selects a context for the stored SOP class and exact compressed
+transfer syntax; native Little Endian may use either VR encoding. It sends each
+C-STORE on the requesting association, preserves the requested priority, and does
+not add C-MOVE originator fields.
+
+`association::send_request()` registers a single C-STORE/C-ECHO response wait
+before sending. The receive thread calls `deliver_response()` while the service
+worker waits in `receive_response()`. Context, command, MessageID, status and any
+returned SOP identities must match. Known late/duplicate responses are discarded;
+a mismatched response fails the active exchange. Replies with no owner are logged
+and discarded, including acknowledgements from legacy fire-and-forget notification
+services. They cannot accumulate in the request queue. New requests remain on the
+bounded service queue and C-CANCEL retains its association/context/MessageID scope.
+
+The default C-GET acknowledgement deadline is 30 seconds, configurable with
+`set_get_response_timeout()` before serving. Cancellation is checked at most every
+50 ms during a wait. Release, abort and server stop wake the response mailbox.
+An unacknowledged in-flight store fails; cancellation leaves unstarted matches in
+Remaining. On timeout or invalid acknowledgement, the remaining matches fail
+without another timeout per object. Final counters and the Failed SOP Instance UID
+List reflect these outcomes. Normal terminal responses omit Remaining.
+
+MessageIDs allocated by `next_request_message_id()` are not reused on an
+association, preventing old acknowledgements from matching later operations.
+After 65535 allocated IDs the requester must open a new association. The mailbox
+holds one response and bounded identifier history. The API is for writer/in-memory
+associations with an external receive dispatcher; TCP SCUs retain their existing
+`send_dimse()`/`receive_dimse()` interface. Custom store callbacks receive the actual
+Storage context and empty/zero Move Originator values for C-GET, and remain
+responsible for their own acknowledgement and deadline handling.
+
+```sh
+python3 validation/dcmtk/tests/get_scp_peer_probe.py \
+  --output /results/get-native --profile uncompressed \
+  --source-revision "$PACS_SOURCE_REVISION" --source-digest "$PACS_SOURCE_DIGEST"
+python3 validation/dcmtk/tests/get_scp_protocol_probe.py \
+  --binary /workspace/build/bin/qr_scp --fixture /dicom/testdata/ct/ct-1.dcm \
+  --output /results/get-protocol
+./build/bin/network_tests '[response-routing]'
+```
+
+Repeat the independent peer probe for `jpeg-lossless`, `jpeg-ls-lossless`, and
+`rle-lossless`. It imports 13 objects through the public CLI and verifies independent
+DCMTK getscu delivery of exact 5/6/2 CT/MR/CR objects, metadata, decoded full pixel
+hashes, raw pixel/item bytes, and final counters. The controlled probe exercises
+three stores per normal retrieval, delayed/interleaved messages, duplicate/late
+replies, four simultaneous associations, invalid replies, missing roles/contexts,
+cancellation, timeout, release/abort and server shutdown. Use sanitizer-built
+`qr_scp` with `--binary` for the same lifetime probes. These scoped runs do not
+replace the complete validation gate.
+
+Shutdown also fences late handler registration. A callback reaching the closer
+after it stops leaves session closure to the underlying server, avoiding re-entry
+into the session callback lock. Rejected/shutdown-time connections clear the
+adapter's self-capturing receive/error callbacks while preserving disconnection
+cleanup. The `shutdown-race` protocol case overlaps a blocked C-GET with connection
+churn and SIGTERM; run it with leak detection enabled.
