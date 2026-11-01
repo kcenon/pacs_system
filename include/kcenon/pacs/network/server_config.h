@@ -18,6 +18,7 @@
 #define PACS_NETWORK_SERVER_CONFIG_HPP
 
 #include "kcenon/pacs/network/pdu_types.h"
+#include "kcenon/pacs/network/tls_config.h"
 
 #include <chrono>
 #include <cstdint>
@@ -72,6 +73,9 @@ struct server_config {
 
     /// Accept unknown calling AE titles (when whitelist is non-empty)
     bool accept_unknown_calling_ae{false};
+
+    /// Optional TLS transport; enabled TLS never falls back to plaintext/in-memory.
+    tls_config tls;
 
     /**
      * @brief Default constructor with sensible defaults

@@ -20,6 +20,7 @@
 #define PACS_NETWORK_ASSOCIATION_HPP
 
 #include "kcenon/pacs/network/pdu_types.h"
+#include "kcenon/pacs/network/tls_config.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 
@@ -204,6 +205,9 @@ struct association_config {
     std::string implementation_class_uid;
     std::string implementation_version_name;
 
+    /// Optional TLS transport; enabled TLS never falls back to plaintext/in-memory.
+    tls_config tls;
+
     association_config() = default;
 };
 
@@ -316,6 +320,9 @@ public:
 
     /// Default timeout for operations
     static constexpr duration default_timeout{30000};  // 30 seconds
+
+    /// TLS protocol negotiated by the TCP client; empty for plaintext/in-memory.
+    [[nodiscard]] std::string negotiated_tls_version() const;
 
     /// Whether connect() reaches peers that are not an in-process
     /// dicom_server over TCP (Issue #1240). Test suites gate their TCP cases
@@ -732,7 +739,7 @@ private:
 
     /// Open the TCP connection and negotiate (connect() after propose())
     [[nodiscard]] Result<std::monostate> establish_over_tcp(
-        const std::string& host, uint16_t port, duration timeout);
+        const std::string& host, uint16_t port, duration timeout, const tls_config& tls);
 
     /// receive_dimse() over the TCP connection
     [[nodiscard]] Result<std::pair<uint8_t, dimse::dimse_message>> receive_over_tcp(

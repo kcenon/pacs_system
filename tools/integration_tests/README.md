@@ -267,12 +267,12 @@ The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testi
 The SCUs in these cases reach `dicom_server_v2` over TCP (see
 [Association Transports](#association-transports-c)). CI runs them in the
 `Integration Tests` jobs of `.github/workflows/integration-tests.yml`, and a
-failed case fails the job: Ubuntu runs `"[v2]~[tls]"`, macOS and Windows run
-`"[v2]~[tls]~[stress]"`, and the `Stress Tests` job runs the `[v2][stress]`
-cases on Ubuntu as part of `"[stress]"`. The `[tls][v2]` cases are not run
-in CI: they configure TLS on neither the server nor the client, the client
-fails `configure_tls()` without a client certificate, and the concurrent
-case's AE title is longer than 16 characters.
+failed case fails the job: Ubuntu runs `"[v2]"`, macOS and Windows run
+`"[v2]~[stress]"`, and the `Stress Tests` job runs the `[v2][stress]` cases
+on Ubuntu as part of `"[stress]"`. TLS cases require certificates and OpenSSL;
+missing prerequisites fail instead of skipping. A separate required `[tls][v2]`
+selection also rejects an empty TLS suite. CI generates isolated temporary
+certificates on every platform and removes them in an always-run cleanup step.
 
 ### V2 E2E Test Fixtures
 
@@ -295,94 +295,56 @@ V2 E2E tests require `PACS_WITH_NETWORK_SYSTEM=ON` during build.
 
 ## TLS Integration Tests (C++)
 
-The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured DICOM communication. These tests verify TLS functionality using the `network_adapter` TLS configuration.
+The `[tls][v2]` cases use the real TLS listener and association client. They
+verify negotiated protocol versions, C-ECHO, concurrent clients, mTLS C-STORE
+with complete pixel comparison, plaintext/wrong-CA rejection, missing client
+identity, invalid server credentials, receive timeout and shutdown/restart.
+Legacy `[tls]~[v2]` fixtures and the broader external TLS/security/audit matrix
+remain tracked in #1317; those fixtures do not establish v2 TLS coverage.
 
 ### Running TLS Tests
 
 ```bash
-# Generate test certificates (run once, required before TLS tests)
-./tools/integration_tests/test_data/certs/generate_test_certs.sh
-
-# Run TLS integration tests
-PACS_TEST_CERT_DIR=./tools/integration_tests/test_data/certs \
-    ./build/bin/pacs_integration_e2e "[tls]"
-
-# Run specific TLS test scenarios
-./build/bin/pacs_integration_e2e "[tls][connectivity]"  # Basic TLS connection
-./build/bin/pacs_integration_e2e "[tls][security]"      # Certificate validation
-./build/bin/pacs_integration_e2e "[tls][mtls]"          # Mutual TLS
-./build/bin/pacs_integration_e2e "[tls][version]"       # TLS version tests
-./build/bin/pacs_integration_e2e "[tls][concurrent]"    # Concurrent TLS connections
-./build/bin/pacs_integration_e2e "[tls][config]"        # Configuration validation
+cert_dir="$(mktemp -d)"
+trap 'rm -rf "$cert_dir"' EXIT
+bash tools/integration_tests/test_data/certs/generate_test_certs.sh "$cert_dir"
+PACS_TEST_CERT_DIR="$cert_dir" ./build/bin/pacs_integration_e2e \
+    "[tls][v2]" --warn UnmatchedTestSpec
 ```
 
-### TLS Test Scenarios
+`PACS_TEST_CERT_DIR` selects the certificate directory exclusively when set.
+The helper generates a CA, localhost/loopback server identity, client identity,
+and separate untrusted CA. Certificates/private keys are test-only material and
+must not be committed. OpenSSL and network_system must be available at build time.
 
-| Scenario | Tag | Description |
-|----------|-----|-------------|
-| Basic TLS Connection | `[tls][connectivity]` | TLS server accepts connection and responds to C-ECHO |
-| Certificate Validation | `[tls][security]` | Valid/invalid certificate handling |
-| Mutual TLS | `[tls][mtls]` | Client certificate authentication |
-| TLS Version | `[tls][version]` | TLS 1.2 and 1.3 negotiation |
-| Concurrent Connections | `[tls][concurrent]` | Multiple parallel TLS connections |
-| Config Validation | `[tls][config]` | TLS configuration structure validation |
-
-### Test Certificate Generation
-
-The `generate_test_certs.sh` script creates a complete PKI for testing:
-
-```bash
-# Generate certificates in custom directory
-./generate_test_certs.sh /path/to/output
-
-# Files generated:
-# - ca.crt / ca.key       - Root CA certificate
-# - server.crt / server.key - Server certificate (localhost)
-# - client.crt / client.key - Client certificate (for mTLS)
-# - other_ca.crt / other_ca.key - Different CA for validation tests
-```
-
-### TLS Test Fixtures
-
-The test file provides reusable TLS fixtures:
+### Shared TLS Test Fixtures
 
 ```cpp
-#include "test_tls_integration.cpp"
+#include "tls_test_fixtures.h"
 
-// Get test certificate paths
-auto certs = get_test_certificates();
-if (!certs.all_exist()) {
-    SKIP("Test certificates not available");
-}
-
-// Create TLS-enabled server
-tls_config server_tls;
-server_tls.enabled = true;
-server_tls.cert_path = certs.server_cert;
-server_tls.key_path = certs.server_key;
-server_tls.ca_path = certs.ca_cert;
-server_tls.verify_peer = true;  // Require client cert (mTLS)
-
-tls_test_server server(port, "TLS_SCP", server_tls);
+const auto certs = get_test_certificates();
+REQUIRE(certs.all_exist());
+tls_test_server_v2 server(server_tls_config(certs, true)); // require mTLS
 server.register_service(std::make_shared<verification_scp>());
-server.start();
-
-// Connect with TLS client
-tls_config client_tls;
-client_tls.enabled = true;
-client_tls.cert_path = certs.client_cert;
-client_tls.key_path = certs.client_key;
-client_tls.ca_path = certs.ca_cert;
-
-auto result = tls_test_client::connect(
-    "localhost", port, server.ae_title(), "TLS_SCU", client_tls);
+REQUIRE(server.start().is_ok());
+auto result = connect_tls(server.port(), server.ae_title(), client_tls_config(certs, true));
+REQUIRE(result.is_ok());
+CHECK_FALSE(result.value().negotiated_tls_version().empty());
 ```
 
-### Environment Variables
+Production callers set `server_config::tls` on `dicom_server_v2` and
+`association_config::tls` on `association::connect()`. TLS is disabled by default.
+Server certificate/key are required; client certificate/key are optional unless
+the server requires mTLS. Client verification checks both the CA chain and host/IP
+identity. `verify_peer=true` on the server requires a trusted client certificate.
+The minimum protocol is TLS 1.2 (TLS 1.3 can be required). TLS connection failures
+never retry as plaintext or use the legacy in-memory test transport. The legacy
+`dicom_server` rejects TLS configurations; it does not provide a TLS listener.
 
-| Variable | Description |
-|----------|-------------|
-| `PACS_TEST_CERT_DIR` | Directory containing test certificates |
+The pinned network_system TCP facade rejects TLS creation. PACS supplies a TLS
+adapter implementing its public session/server interfaces, with bounded handshake
+waits and outbound queues, while the existing v2 DICOM handler processes decrypted
+PDUs. The synchronous association client preserves per-call timeouts over TLS.
 
 ## C++ Test Utilities
 
@@ -476,8 +438,8 @@ The DCMTK interoperability test suite validates bidirectional compatibility betw
 > returned identifiers and metadata, including empty matches and UTF-8 names.
 > C-MOVE tests verify actual destination objects. Missing DCMTK can skip local
 > cases; CI requires the tools and rejects empty/all-skipped protocol selections.
-> TLS integration and shell-script acceptance remain separate follow-ups
-> (#1305/#1317 and #1258). See [Association Transports](#association-transports-c).
+> Broader external TLS/security and shell-script acceptance remain separate
+> follow-ups (#1317 and #1258). See [Association Transports](#association-transports-c).
 
 ### Test Scenarios
 

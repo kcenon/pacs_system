@@ -197,6 +197,7 @@ add_library(pacs_network
     # TCP client path of association::connect() (Issue #1240)
     src/network/detail/dimse_framing.cpp
     src/network/detail/tcp_stream.cpp
+    src/network/detail/tls_server.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
     # Pipeline infrastructure (Issue #517)
@@ -224,6 +225,11 @@ target_compile_options(pacs_network PRIVATE
 target_link_libraries(pacs_network
     PUBLIC pacs_core pacs_encoding pacs_security
 )
+
+if(PACS_OPENSSL_FOUND)
+    target_compile_definitions(pacs_network PUBLIC PACS_WITH_TLS)
+    target_link_libraries(pacs_network PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+endif()
 
 # Link network_system (Tier 4) - DICOM PDU/Association
 if(TARGET network_system)

@@ -435,7 +435,7 @@ Result<association> association::connect(
 
     // In-process dicom_server (test hook): pair in memory, no socket. Only
     // for loopback hosts, so a remote peer on the same port is not hijacked.
-    if (is_loopback_host(host)) {
+    if (!config.tls.enabled && is_loopback_host(host)) {
         if (auto* server = dicom_server::get_server_on_port(port)) {
             auto rq = assoc.build_associate_rq();
             auto result = server->simulate_association_request(rq, &assoc);
@@ -451,7 +451,7 @@ Result<association> association::connect(
         }
     }
 
-    auto established = assoc.establish_over_tcp(host, port, timeout);
+    auto established = assoc.establish_over_tcp(host, port, timeout, config.tls);
     if (established.is_err()) {
         return established.error();
     }
@@ -1395,12 +1395,17 @@ void association::finish_after_peer_left(association_state peer_exit) {
 // TCP Transport
 // =============================================================================
 
+std::string association::negotiated_tls_version() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return transport_ && transport_->stream ? transport_->stream->tls_version() : "";
+}
+
 Result<std::monostate> association::establish_over_tcp(
-    const std::string& host, uint16_t port, duration timeout) {
+    const std::string& host, uint16_t port, duration timeout, const tls_config& tls) {
 
     const auto deadline = clock::now() + timeout;
 
-    auto stream = detail::tcp_stream::connect(host, port, timeout);
+    auto stream = detail::tcp_stream::connect(host, port, timeout, tls);
     if (stream.is_err()) {
         std::lock_guard<std::mutex> lock(mutex_);
         state_ = association_state::idle;

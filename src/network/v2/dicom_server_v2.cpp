@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/network/v2/dicom_server_v2.h"
+#include "kcenon/pacs/network/detail/tls_server.h"
 
 #include <algorithm>
 #include <sstream>
@@ -164,7 +165,9 @@ Result<std::monostate> dicom_server_v2::start() {
         kcenon::network::facade::tcp_facade::server_config srv_cfg;
         srv_cfg.server_id = config_.ae_title;
         srv_cfg.port = config_.port;
-        auto server_result = compat::factory_result(facade.create_server(srv_cfg));
+        auto server_result = config_.tls.enabled
+            ? detail::make_tls_server(config_)
+            : compat::factory_result(facade.create_server(srv_cfg));
         if (server_result.is_err()) {
             running_ = false;
             stop_session_closer();
@@ -201,7 +204,7 @@ Result<std::monostate> dicom_server_v2::start() {
             running_ = false;
             server_.reset();
             stop_session_closer();
-            return error_info("Failed to start server");
+            return error_info("Failed to start server: " + result.error().message);
         }
 
         return std::monostate{};

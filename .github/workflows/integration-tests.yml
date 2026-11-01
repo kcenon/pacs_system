@@ -324,22 +324,32 @@ jobs:
       working-directory: pacs_system
       run: cmake --build build --parallel
 
-    - name: Generate TLS Test Certificates (Unix)
-      if: runner.os != 'Windows'
+    - name: Generate isolated TLS test certificates
       working-directory: pacs_system
+      shell: bash
       run: |
-        if [ -f "./tools/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
-          chmod +x ./tools/integration_tests/test_data/certs/generate_test_certs.sh
-          ./tools/integration_tests/test_data/certs/generate_test_certs.sh
+        command -v openssl
+        cert_dir="$(mktemp -d "${RUNNER_TEMP}/pacs-tls.XXXXXX")"
+        # Git Bash must not convert X.509 /CN= subjects into Windows paths.
+        export MSYS2_ARG_CONV_EXCL='/CN='
+        cert_env_dir="$cert_dir"
+        if command -v cygpath >/dev/null 2>&1; then
+          cert_env_dir="$(cygpath -w "$cert_dir")"
         fi
+        echo "PACS_TEST_CERT_DIR=$cert_env_dir" >> "$GITHUB_ENV"
+        bash tools/integration_tests/test_data/certs/generate_test_certs.sh "$cert_dir"
 
-    - name: Generate TLS Test Certificates (Windows)
-      if: runner.os == 'Windows'
-      working-directory: pacs_system
-      shell: pwsh
+    - name: Run required TLS v2 cases
+      working-directory: pacs_system/build
+      shell: bash
+      timeout-minutes: 3
       run: |
-        # Skip TLS cert generation on Windows for now - requires OpenSSL CLI
-        Write-Host "TLS certificate generation skipped on Windows"
+        test_binary="./bin/pacs_integration_e2e"
+        if [ -f "${test_binary}.exe" ]; then
+          test_binary="${test_binary}.exe"
+        fi
+        "$test_binary" "[tls][v2]" --warn UnmatchedTestSpec \
+          --reporter console --reporter junit::out=integration-test-tls-v2.xml
 
     - name: Run Integration Tests (Unix)
       if: runner.os != 'Windows'
@@ -401,13 +411,13 @@ jobs:
           fi
 
           # dicom_server_v2 over the association TCP client (#1240). Ubuntu runs
-          # every [v2] case; macOS runs all but [v2][stress], which the Stress
-          # Tests job also runs on Ubuntu. The [tls][v2] cases are left out:
-          # they configure TLS on neither end and fail in their own setup.
+          # every [v2] case, including actual TLS; macOS runs all but [v2][stress],
+          # which the Stress Tests job also runs on Ubuntu. Missing certificates
+          # or TLS support fail the TLS cases instead of skipping them.
           if [ "$RUNNER_OS" = "Linux" ]; then
-            V2_SPEC="[v2]~[tls]"
+            V2_SPEC="[v2]"
           else
-            V2_SPEC="[v2]~[tls]~[stress]"
+            V2_SPEC="[v2]~[stress]"
           fi
           echo "=== Running dicom_server_v2 tests ($V2_SPEC) ==="
           if [ -n "$TIMEOUT_CMD" ]; then
@@ -449,8 +459,6 @@ jobs:
         fi
 
         exit $status
-      env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
     - name: Run Integration Tests (Windows)
       if: runner.os == 'Windows'
@@ -482,9 +490,9 @@ jobs:
           Write-Host "Config tests completed (exit code $LASTEXITCODE)"
 
           # dicom_server_v2 over the association TCP client (#1240), without
-          # [v2][stress] and [tls][v2] (see the Unix step)
+          # [v2][stress] (see the Unix step); TLS cases are required.
           Write-Host "=== Running dicom_server_v2 tests ==="
-          & .\bin\pacs_integration_e2e.exe "[v2]~[tls]~[stress]" --warn UnmatchedTestSpec --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
+          & .\bin\pacs_integration_e2e.exe "[v2]~[stress]" --warn UnmatchedTestSpec --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
           if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
           Write-Host "dicom_server_v2 tests completed (exit code $LASTEXITCODE)"
 
@@ -515,8 +523,10 @@ jobs:
         }
 
         exit $status
-      env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
+
+    - name: Remove TLS test certificates
+      if: always()
+      run: python -c "import os,shutil; p=os.environ.get('PACS_TEST_CERT_DIR'); shutil.rmtree(p) if p and os.path.isdir(p) else None"
 
     - name: Upload Integration Test Results
       uses: actions/upload-artifact@v7

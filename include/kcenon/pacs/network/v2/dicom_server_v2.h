@@ -60,7 +60,7 @@ namespace kcenon::pacs::network::v2 {
  *
  * - **No manual thread management**: Accept loop and I/O handled by ASIO internally
  * - **Built-in session tracking**: Automatic cleanup on disconnect
- * - **TLS support**: Ready for secure DICOM (future enhancement)
+ * - **TLS support**: Optional certificate-authenticated TLS via server_config::tls
  * - **Proven scalability**: ASIO's async model for efficient connection handling
  *
  * ### Architecture

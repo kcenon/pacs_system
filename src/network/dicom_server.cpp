@@ -102,6 +102,9 @@ std::vector<std::string> dicom_server::supported_sop_classes() const {
 // =============================================================================
 
 Result<std::monostate> dicom_server::start() {
+    if (config_.tls.enabled) {
+        return error_info{"TLS requires dicom_server_v2"};
+    }
     if (running_.exchange(true)) {
         return error_info("Server already running");
     }

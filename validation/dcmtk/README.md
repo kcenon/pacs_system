@@ -77,11 +77,12 @@ result. Remove a gap only when its test and feature mapping are implemented, not
 because related component tests happen to pass. `known_issues` are references,
 not an allowlist or permission to ignore failures.
 
-The current PACS baseline has known failures: the v1 CLI server TCP path (#1303),
-retrieval SCP behavior (#1304/#1306), compressed storage (#1292) and v2 TLS (#1305).
-The prior audit also found C-GET SCU role negotiation and a utility test using a
-nonexistent `echoscp` executable. This validation workflow is expected to report
-those defects; adding the workflow is not a claim that they were fixed.
+The initial audit recorded defects in the v1 CLI TCP path (#1303), retrieval
+SCP behavior (#1304/#1306), compressed storage (#1292), v2 TLS (#1305), C-GET
+role negotiation and a utility invoking nonexistent `echoscp`. Subsequent fixes
+have dedicated regression evidence; run this validator against the current source
+and rebuilt images to establish the integrated result. Cross-platform TLS and the
+broader external security/audit matrix (#1317) still require their own evidence.
 
 The primary outputs are the actual results, not the workflow's existence. The
 [CI workflow](../../.github/workflows/dcmtk-validation.yml) runs the same command

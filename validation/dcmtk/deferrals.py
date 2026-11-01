@@ -17,10 +17,10 @@ def skip_disposition(text):
         return disposition('environment', 1240, 'DCMTK executable unavailable',
                            'Run with the pinned DCMTK tools and execute the assertions.')
     if 'certificates not available' in text:
-        return disposition('environment', 1305, 'TLS fixture certificates unavailable',
+        return disposition('environment', 1317, 'Legacy TLS fixture certificates unavailable',
                            'Generate the required certificate chain before executing the TLS cases.')
     if 'TLS not properly configured' in text:
-        return disposition('fixture defect', 1305, 'TLS fixture startup is not enforced',
+        return disposition('fixture defect', 1317, 'Legacy TLS fixture startup is not enforced',
                            'Configure the TLS endpoint and assert handshake behavior without SKIP.')
     if 'in-process' in text:
         return disposition('fixture defect', 1240, 'The fixture uses the in-process v1 server',
@@ -83,15 +83,10 @@ def audit_deferrals(root, cases):
                     'environment', 1313, str(exc), 'Make the matching test source available for audit.')))
         # These assertions failed in the original E2E probe; never exempt them.
         if case['name'] in ('Complete MPPS workflow', 'MPPS discontinue workflow',
-                            'MPPS cannot modify completed procedure', 'Multi-modal workflow tests'):
+                            'MPPS cannot modify completed procedure'):
             exceptions.append(dict(kind='observed-product-failure', **disposition(
-                'product defect', 1316, 'MPPS/multimodal workflow failed in the Linux baseline',
+                'product defect', 1316, 'MPPS workflow failed in the Linux baseline',
                 'Repair the workflow and pass the existing status/state/error-count assertions.')))
-        if case['name'] in ('C-FIND: pacs_system SCP with DCMTK findscu',
-                            'C-FIND: Query level variations', 'C-FIND: Special character handling'):
-            exceptions.append(dict(kind='observed-fixture-failure', **disposition(
-                'fixture defect', 1240, 'dcmtk_tool::findscu always proposes the worklist model (-W)',
-                'Select the patient/study query model explicitly and verify exact returned keys and UID sets.')))
         case['deferrals'] = exceptions
         if exceptions:
             rows.append(dict(case_id=case['case_id'], name=case['name'], exceptions=exceptions))
