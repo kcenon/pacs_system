@@ -38,7 +38,9 @@ dimse_message::dimse_message(command_field cmd, uint16_t message_id)
     // Initialize the command set with required fields
     command_set_.set_numeric(tag_command_field, encoding::vr_type::US,
                              static_cast<uint16_t>(cmd));
-    command_set_.set_numeric(tag_message_id, encoding::vr_type::US, message_id);
+    command_set_.set_numeric(cmd == command_field::c_cancel_rq
+                                 ? tag_message_id_responded_to : tag_message_id,
+                             encoding::vr_type::US, message_id);
     update_data_set_type();
 }
 
@@ -328,10 +330,21 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Extract message ID
     auto msg_id = command_set.get_numeric<uint16_t>(tag_message_id);
-    if (!msg_id && dimse::is_request(cmd)) {
+    if (!msg_id && dimse::is_request(cmd) && cmd != command_field::c_cancel_rq) {
         return make_dimse_error(dimse_error::missing_required_field, "MessageID tag not found for request");
     }
-    // For responses, use message_id_responded_to if message_id is not present
+    if (cmd == command_field::c_cancel_rq) {
+        if (!command_set.get_numeric<uint16_t>(tag_message_id_responded_to)) {
+            return make_dimse_error(dimse_error::missing_required_field,
+                                    "C-CANCEL requires MessageIDBeingRespondedTo");
+        }
+        if (!dataset_data.empty() ||
+            command_set.get_numeric<uint16_t>(tag_command_data_set_type) != 0x0101) {
+            return make_dimse_error(dimse_error::invalid_data_format,
+                                    "C-CANCEL must not contain a dataset");
+        }
+    }
+    // Responses and C-CANCEL identify the original operation separately.
     uint16_t message_id = msg_id.value_or(0);
 
     dimse_message msg(cmd, message_id);
@@ -373,7 +386,9 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
 auto dimse_message::is_valid() const noexcept -> bool {
     return command_set_.contains(tag_command_field) &&
-           command_set_.contains(tag_message_id);
+           command_set_.contains(command_ == command_field::c_cancel_rq
+                                     ? tag_message_id_responded_to : tag_message_id) &&
+           (command_ != command_field::c_cancel_rq || !has_dataset());
 }
 
 auto dimse_message::is_request() const noexcept -> bool {

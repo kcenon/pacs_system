@@ -63,6 +63,18 @@ dicom_association_handler::~dicom_association_handler() {
     } catch (...) {
         // Suppress exceptions in destructor to prevent std::terminate
     }
+    wait_for_service();
+}
+
+void dicom_association_handler::wait_for_service() {
+    std::thread worker;
+    {
+        std::lock_guard<std::mutex> lock(service_mutex_);
+        worker = std::move(service_thread_);
+    }
+    if (worker.joinable()) {
+        worker.join();
+    }
 }
 
 // =============================================================================
@@ -507,7 +519,8 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     association_.set_pdu_writer(
         [this, session = session_](std::vector<uint8_t> pdus) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
-            if (!session || !session->is_connected() ||
+            std::lock_guard<std::mutex> write_lock(write_mutex_);
+            if (is_closed() || !session || !session->is_connected() ||
                 session->send(std::move(pdus)).is_err()) {
                 return false;
             }
@@ -591,10 +604,11 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
         const auto& [context_id, message] = *added.value();
         messages_processed_.fetch_add(1, std::memory_order_relaxed);
 
-        // Dispatch to service
-        auto dispatch_result = dispatch_to_service(context_id, message);
-        if (dispatch_result.is_err()) {
-            report_error("Service dispatch failed: " + dispatch_result.error().message);
+        if (message.command() == dimse::command_field::c_cancel_rq ||
+            (static_cast<uint16_t>(message.command()) & 0x8000) != 0) {
+            association_.enqueue_message(context_id, message);
+        } else {
+            enqueue_request(context_id, message);
         }
     }
 }
@@ -663,6 +677,7 @@ void dicom_association_handler::send_abort(abort_source source, abort_reason rea
 
 void dicom_association_handler::send_pdu(pdu_type /*type*/, const std::vector<uint8_t>& encoded_pdu) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
+    std::lock_guard<std::mutex> write_lock(write_mutex_);
     if (session_ && session_->is_connected()) {
         // encoded_pdu already includes header for most PDU types
         // For encode_associate_ac, encode_associate_rj, etc., the encoder returns full PDU
@@ -681,10 +696,66 @@ void dicom_association_handler::send_pdu(pdu_type /*type*/, const std::vector<ui
 // Service Dispatching
 // =============================================================================
 
+void dicom_association_handler::enqueue_request(uint8_t context_id, dimse::dimse_message msg) {
+    std::unique_lock<std::mutex> lock(service_mutex_);
+    if (service_stopping_) {
+        return;
+    }
+    // Bound queued request memory even if a peer ignores the synchronous
+    // operations window. Responses and C-CANCEL bypass this queue.
+    if (service_requests_.size() >= 16) {
+        lock.unlock();
+        report_error("Too many queued DIMSE requests");
+        send_abort(abort_source::service_provider, abort_reason::unexpected_pdu);
+        close_handler(false);
+        return;
+    }
+    if (msg.command() == dimse::command_field::c_move_rq ||
+        msg.command() == dimse::command_field::c_get_rq ||
+        msg.command() == dimse::command_field::c_find_rq) {
+        association_.register_cancellable_operation(context_id, msg.message_id());
+    }
+    service_requests_.emplace_back(context_id, std::move(msg));
+    if (!service_thread_.joinable()) {
+        service_thread_ = std::thread([this] { run_services(); });
+    }
+    service_ready_.notify_one();
+}
+
+void dicom_association_handler::run_services() {
+    for (;;) {
+        std::unique_lock<std::mutex> lock(service_mutex_);
+        service_ready_.wait(lock, [this] { return service_stopping_ || !service_requests_.empty(); });
+        if (service_stopping_) {
+            return;
+        }
+        auto [context_id, message] = std::move(service_requests_.front());
+        service_requests_.pop_front();
+        lock.unlock();
+        try {
+            auto result = dispatch_to_service(context_id, message);
+            if (result.is_err()) {
+                report_error("Service dispatch failed: " + result.error().message);
+            }
+        } catch (const std::exception& e) {
+            report_error("Service exception: " + std::string(e.what()));
+        } catch (...) {
+            report_error("Unknown service exception");
+        }
+        if (message.command() != dimse::command_field::c_move_rq) {
+            association_.finish_cancellable_operation(context_id, message.message_id());
+        }
+    }
+}
+
 Result<std::monostate> dicom_association_handler::dispatch_to_service(
     uint8_t context_id,
     const dimse::dimse_message& msg) {
 
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (!is_established()) {
+        return error_info("Association closed before service dispatch");
+    }
     // Find the abstract syntax for this context
     std::string abstract_syntax;
     for (const auto& ctx : association_.accepted_contexts()) {
@@ -757,7 +828,8 @@ Result<std::monostate> dicom_association_handler::dispatch_to_service(
         }
     }
 
-    // Dispatch to service
+    // No handler lock may be held across service/network waits.
+    lock.unlock();
     return service->handle_message(association_, context_id, msg);
 }
 
@@ -798,6 +870,19 @@ void dicom_association_handler::close_handler(bool graceful) {
     if (state_.exchange(handler_state::closed, std::memory_order_acq_rel) ==
         handler_state::closed) {
         return;  // Already closed
+    }
+
+    association_.process_abort(abort_source::service_user, abort_reason::not_specified);
+    {
+        std::lock_guard<std::mutex> lock(service_mutex_);
+        service_stopping_ = true;
+        service_requests_.clear();
+    }
+    service_ready_.notify_all();
+    // No new service write can pass is_closed(); drain an in-flight writer
+    // before asking the network layer to close the underlying session.
+    {
+        std::lock_guard<std::mutex> write_lock(write_mutex_);
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM

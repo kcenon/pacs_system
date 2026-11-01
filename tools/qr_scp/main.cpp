@@ -326,6 +326,8 @@ size_t scan_storage(
         try {
             auto file = dicom_file::open(entry.path());
             if (file.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << file.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -341,6 +343,8 @@ size_t scan_storage(
             // Insert/update patient
             auto patient_pk = db.upsert_patient(patient_id, patient_name, birth_date, sex);
             if (patient_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << patient_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -359,6 +363,8 @@ size_t scan_storage(
                 patient_pk.value(), study_uid, study_id, study_date, study_time,
                 accession, ref_phys, study_desc);
             if (study_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << study_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -383,6 +389,8 @@ size_t scan_storage(
                 study_pk.value(), series_uid, modality, series_num,
                 series_desc, body_part, station);
             if (series_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << series_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -391,7 +399,7 @@ size_t scan_storage(
             auto sop_uid = dataset.get_string(tags::sop_instance_uid, "");
             auto sop_class = dataset.get_string(tags::sop_class_uid, "");
             auto inst_num_str = dataset.get_string(tags::instance_number, "");
-            auto transfer_syntax_uid = file.value().transfer_syntax().uid();
+            const std::string transfer_syntax_uid{file.value().transfer_syntax().uid()};
 
             std::optional<int> inst_num;
             if (!inst_num_str.empty()) {
@@ -413,9 +421,12 @@ size_t scan_storage(
                     std::cout << "  Indexed " << count << " files...\n";
                 }
             } else {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << instance_pk.error().message << "\n";
                 ++errors;
             }
         } catch (const std::exception& e) {
+            std::cerr << "Cannot index " << entry.path() << ": " << e.what() << "\n";
             ++errors;
         }
     }

@@ -27,6 +27,7 @@
 #include "kcenon/pacs/core/dicom_file.h"
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <string>
@@ -286,6 +287,13 @@ public:
      */
     void set_cancel_check(retrieve_cancel_check check);
 
+    /// Configure positive destination connect/write, C-STORE response and release
+    /// deadlines before starting the server (defaults: 3s, 30s, 1s).
+    void set_move_timeouts(std::chrono::milliseconds connect,
+                           std::chrono::milliseconds response,
+                           std::chrono::milliseconds release);
+
+
     // =========================================================================
     // scp_service Interface Implementation
     // =========================================================================
@@ -421,7 +429,8 @@ private:
         std::string_view sop_class_uid,
         bool is_move,
         const sub_operation_stats& stats,
-        bool was_cancelled);
+        bool was_cancelled,
+        const std::vector<std::string>& failed_uids = {});
 
     /**
      * @brief Get the Move Destination AE title from the request
@@ -440,6 +449,9 @@ private:
     destination_resolver destination_resolver_;
     store_sub_operation store_handler_;
     retrieve_cancel_check cancel_check_;
+    std::chrono::milliseconds move_connect_timeout_{3000};
+    std::chrono::milliseconds move_response_timeout_{30000};
+    std::chrono::milliseconds move_release_timeout_{1000};
 
     std::atomic<size_t> move_operations_{0};
     std::atomic<size_t> get_operations_{0};

@@ -259,3 +259,53 @@ wrong counters, warning/cancellation responses, bounded timeout, wrong message I
 unnegotiated or missing-dataset stores, optional omitted final counters, stale
 existing files and escaped paths. This is protocol fault-injection evidence;
 independent archive interoperability comes from the peer probe above.
+
+### C-MOVE destination delivery (#1304)
+
+`retrieve_scp` resolves `--peer AE:host:port` (or the application's configured AE
+resolver), opens a separate association, and reuses it for matching instances.
+It proposes each stored SOP class/transfer syntax pair, with separate batches
+when more than 128 contexts are needed. Encapsulated syntax must match exactly;
+native Little Endian can use either native VR encoding. No transcoding is implied.
+The default destination connect/write, C-STORE response and release deadlines are
+3 seconds, 30 seconds and 1 second. Applications can configure positive durations
+with `set_move_timeouts()` before starting their server.
+
+Each completed/warning count requires a correlated C-STORE response. Refused
+contexts, connection failures, invalid responses and unanswered stores count as
+failed, with their SOP Instance UIDs in the final identifier. Unknown destinations
+return A801. Final Success/Warning/Failure omits Remaining; cancellation returns
+FE00 with the unattempted count. An in-flight store without an acknowledgement is
+failed and the destination association is aborted. The optional custom store
+callback receives the **destination** association/context for C-MOVE; its own
+I/O/deadline behavior remains the application's responsibility.
+
+The v2 association handler executes services on one joined worker per association.
+The network receive thread continues processing C-CANCEL, responses and disconnects.
+Cancellation is matched by association, presentation context and original MessageID;
+shutdown aborts active waits and joins the worker. Closed handlers are retired
+on the session closer thread; their workers finish before network resources are
+released. Service writes and protocol-control writes are serialized. This dispatch foundation does
+not establish C-GET SCP acceptance, which is tracked separately in #1306.
+
+Run these scoped probes from a prepared validation runner, using a new output
+folder and recording the source revision/digest:
+
+```sh
+python3 validation/dcmtk/tests/move_scp_peer_probe.py \
+  --output /results/move-native --profile uncompressed \
+  --source-revision "$PACS_SOURCE_REVISION" --source-digest "$PACS_SOURCE_DIGEST"
+python3 validation/dcmtk/tests/move_scp_protocol_probe.py \
+  --binary /workspace/build/bin/qr_scp --fixture /dicom/testdata/ct/ct-1.dcm \
+  --output /results/move-protocol
+```
+
+Repeat the peer probe for `jpeg-lossless`, `jpeg-ls-lossless`, and `rle-lossless`.
+It imports all 13 fixtures through the public `qr_scp --scan-only` command, then
+runs independent DCMTK movescu/storescp exchanges for CT/MR/CR (5/6/2 objects).
+It checks exact UID sets, metadata, decoded full Pixel Data hashes, preserved item
+bytes and final sub-operation counts. The controlled protocol probe covers
+unknown/refused destinations, partial context rejection, mixed storage outcomes,
+malformed responses, cancellation during a blocked store, transfer/release timeout,
+and shutdown. Controlled wire peers are not independent interoperability evidence.
+These focused probes do not replace the complete validation gate.

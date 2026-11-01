@@ -685,3 +685,28 @@ TEST_CASE("association negotiates requestor storage roles without assuming accep
     }
     CHECK_FALSE(client.requestor_role("9.9.9").scp_role);
 }
+
+TEST_CASE("C-CANCEL is scoped to its registered association/context/message", "[association][cancel]") {
+    association first, second;
+    first.register_cancellable_operation(1, 77);
+    second.register_cancellable_operation(1, 77);
+    auto cancel = dimse::dimse_message{dimse::command_field::c_cancel_rq, 0};
+    cancel.set_message_id_responded_to(77);
+    first.enqueue_message(3, cancel);
+    CHECK_FALSE(first.cancellation_requested(1, 77));
+    cancel.set_message_id_responded_to(78);
+    first.enqueue_message(1, cancel);
+    CHECK_FALSE(first.cancellation_requested(1, 77));
+    cancel.set_message_id_responded_to(77);
+    first.enqueue_message(1, cancel);
+    CHECK(first.cancellation_requested(1, 77));
+    CHECK_FALSE(second.cancellation_requested(1, 77));
+    first.register_cancellable_operation(1, 77);
+    CHECK(first.cancellation_requested(1, 77)); // early cancellation survives dispatch
+    association moved{std::move(first)};
+    CHECK(moved.cancellation_requested(1, 77));
+    moved.finish_cancellable_operation(1, 77);
+    moved.enqueue_message(1, cancel); // late cancellation cannot cancel future reuse
+    moved.register_cancellable_operation(1, 77);
+    CHECK_FALSE(moved.cancellation_requested(1, 77));
+}

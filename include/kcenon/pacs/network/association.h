@@ -650,6 +650,13 @@ public:
      */
     void enqueue_message(uint8_t context_id, dimse::dimse_message msg);
 
+    /// Register before dispatch so an early C-CANCEL cannot be lost. Repeated
+    /// registration preserves cancellation; finish removes the operation.
+    void register_cancellable_operation(uint8_t context_id, uint16_t message_id);
+    void finish_cancellable_operation(uint8_t context_id, uint16_t message_id);
+    [[nodiscard]] bool cancellation_requested(uint8_t context_id, uint16_t message_id) const;
+
+
     /**
      * @brief Re-pair with @p new_peer if paired with @p old_peer (for
      *        in-memory testing).
@@ -787,7 +794,9 @@ private:
     /// I/O keeps it alive while another thread aborts
     std::shared_ptr<transport> transport_;
 
-    /// Incoming message queue for in-memory testing (thread-safe)
+    std::map<std::pair<uint8_t, uint16_t>, bool> cancellable_operations_;
+
+    /// Incoming message queue for in-memory and asynchronous server dispatch (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;
     using message_queue_type = kcenon::thread::detail::concurrent_queue<message_type>;
     mutable std::unique_ptr<message_queue_type> incoming_queue_{

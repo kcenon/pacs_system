@@ -399,6 +399,10 @@ private:
                           std::shared_ptr<kcenon::network::interfaces::i_session>>>
         sessions_to_close_;
 
+    // Keep closed handlers alive until their service worker has been joined
+    // off the receive thread, before session/I/O context destruction.
+    std::vector<std::shared_ptr<dicom_association_handler>> retired_handlers_;
+
     /// Whether the closer thread accepts work (guarded by closer_mutex_)
     bool closer_running_{false};
 

@@ -237,6 +237,7 @@ void dicom_server_v2::stop(duration timeout) {
     for (auto& handler : handlers_to_stop) {
         try {
             handler->stop(false);  // Force abort
+            handler->wait_for_service();
         } catch (...) {
             // Suppress exceptions during handler stop
         }
@@ -634,35 +635,35 @@ void dicom_server_v2::run_session_closer() {
     std::unique_lock<std::mutex> lock(closer_mutex_);
     for (;;) {
         std::vector<std::shared_ptr<kcenon::network::interfaces::i_session>> due;
-        if (!closer_running_) {
-            // Stopping: close everything that is left now
-            for (auto& [deadline, session] : sessions_to_close_) {
-                due.push_back(std::move(session));
-            }
-            sessions_to_close_.clear();
-        } else if (sessions_to_close_.empty()) {
-            closer_cv_.wait(lock);
-            continue;
-        } else {
-            const auto now = clock::now();
-            auto earliest = sessions_to_close_.front().first;
-            for (auto it = sessions_to_close_.begin(); it != sessions_to_close_.end();) {
-                if (it->first <= now) {
-                    due.push_back(std::move(it->second));
-                    it = sessions_to_close_.erase(it);
-                } else {
-                    earliest = (std::min)(earliest, it->first);
-                    ++it;
-                }
-            }
-            if (due.empty()) {
-                closer_cv_.wait_until(lock, earliest);
-                continue;
+        std::vector<std::shared_ptr<dicom_association_handler>> retired;
+        retired.swap(retired_handlers_);
+        const bool stopping = !closer_running_;
+        const auto now = clock::now();
+        auto earliest = time_point::max();
+        for (auto it = sessions_to_close_.begin(); it != sessions_to_close_.end();) {
+            if (stopping || it->first <= now) {
+                due.push_back(std::move(it->second));
+                it = sessions_to_close_.erase(it);
+            } else {
+                earliest = (std::min)(earliest, it->first);
+                ++it;
             }
         }
-
-        const bool stopping = !closer_running_;
+        if (!stopping && retired.empty() && due.empty()) {
+            if (sessions_to_close_.empty()) {
+                closer_cv_.wait(lock);
+            } else {
+                closer_cv_.wait_until(lock, earliest);
+            }
+            continue;
+        }
         lock.unlock();
+        // A network callback may still hold a handler reference. Explicitly
+        // join here; merely dropping our reference does not join that worker.
+        for (auto& handler : retired) {
+            handler->wait_for_service();
+        }
+        retired.clear();
 #ifdef PACS_WITH_NETWORK_SYSTEM
         for (auto& session : due) {
             try {
@@ -707,8 +708,12 @@ void dicom_server_v2::remove_handler(const std::string& session_id) {
     std::lock_guard<std::mutex> lock(handlers_mutex_);
     auto it = handlers_.find(session_id);
     if (it != handlers_.end()) {
-        // Handler cleans itself up via stop() in destructor
+        {
+            std::lock_guard<std::mutex> closer_lock(closer_mutex_);
+            retired_handlers_.push_back(std::move(it->second));
+        }
         handlers_.erase(it);
+        closer_cv_.notify_one();
     }
 }
 

@@ -323,6 +323,7 @@ association::association(association&& other) noexcept {
     is_scu_ = other.is_scu_;
     take_peer_link_from(other);
     transport_ = std::move(other.transport_);
+    cancellable_operations_ = std::move(other.cancellable_operations_);
 
     other.state_ = association_state::idle;
 }
@@ -362,6 +363,7 @@ association& association::operator=(association&& other) noexcept {
         is_scu_ = other.is_scu_;
         take_peer_link_from(other);
         transport_ = std::move(other.transport_);
+        cancellable_operations_ = std::move(other.cancellable_operations_);
 
         other.state_ = association_state::idle;
     }
@@ -692,9 +694,7 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
         return receive_over_tcp(*link, timeout);
     }
 
-    // In-memory peer: use the lock-free queue with blocking wait (a PDU
-    // writer's SCP gets its messages from dicom_server_v2 instead, so its
-    // queue stays empty)
+    // In-memory peers and asynchronous server dispatch enqueue responses here.
     if (auto item = incoming_queue_->wait_dequeue(timeout)) {
         return std::move(*item);
     }
@@ -1004,8 +1004,31 @@ void association::set_peer(association* peer) {
 }
 
 void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) {
-    // Lock-free enqueue with automatic notification
+    if (msg.command() == dimse::command_field::c_cancel_rq) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = cancellable_operations_.find({context_id, msg.message_id_responded_to()});
+        if (it != cancellable_operations_.end()) {
+            it->second = true;
+        }
+        return;
+    }
     incoming_queue_->enqueue({context_id, std::move(msg)});
+}
+
+void association::register_cancellable_operation(uint8_t context_id, uint16_t message_id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    cancellable_operations_.try_emplace({context_id, message_id}, false);
+}
+
+void association::finish_cancellable_operation(uint8_t context_id, uint16_t message_id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    cancellable_operations_.erase({context_id, message_id});
+}
+
+bool association::cancellation_requested(uint8_t context_id, uint16_t message_id) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = cancellable_operations_.find({context_id, message_id});
+    return it != cancellable_operations_.end() && it->second;
 }
 
 void association::update_peer(association* old_peer, association* new_peer) {

@@ -405,3 +405,20 @@ TEST_CASE("DIMSE compressed datasets preserve item streams and reject mismatches
         CHECK(dimse_message::decode(encoded.value().first, encoded.value().second, syntax).is_ok());
     }
 }
+
+TEST_CASE("C-CANCEL wire command uses MessageIDBeingRespondedTo", "[network][dimse][cancel]") {
+    using namespace kcenon::pacs::network::dimse;
+    dimse_message cancel{command_field::c_cancel_rq, 77};
+    CHECK_FALSE(cancel.command_set().contains(tag_message_id));
+    CHECK(cancel.is_valid());
+    auto encoded = dimse_message::encode(cancel, transfer_syntax::implicit_vr_little_endian);
+    REQUIRE(encoded.is_ok());
+    auto decoded = dimse_message::decode(encoded.value().first, {}, transfer_syntax::implicit_vr_little_endian);
+    REQUIRE(decoded.is_ok());
+    CHECK(decoded.value().command() == command_field::c_cancel_rq);
+    CHECK(decoded.value().message_id_responded_to() == 77);
+    cancel.command_set().remove(tag_message_id_responded_to);
+    encoded = dimse_message::encode(cancel, transfer_syntax::implicit_vr_little_endian);
+    REQUIRE(encoded.is_ok());
+    CHECK(dimse_message::decode(encoded.value().first, {}, transfer_syntax::implicit_vr_little_endian).is_err());
+}
