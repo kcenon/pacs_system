@@ -348,8 +348,8 @@ class Validation:
                         and step['stepId'] and step['startDate'], 'Missing/malformed ScheduledProcedureStepSequence')
 
     @contextmanager
-    def server(self, args, port):
-        with (self.output/f'{self.current}-server.log').open('w') as log:
+    def server(self, args, port, log_name=None):
+        with (self.output/f'{log_name or self.current}-server.log').open('w') as log:
             p = subprocess.Popen([str(a) for a in args],stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
             try:
                 ready = False

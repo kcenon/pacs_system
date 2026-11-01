@@ -45,6 +45,7 @@ TEST_CASE("explicit_vr_codec preserves encapsulated Pixel Data items",
         auto decoded = explicit_vr_codec::decode_element(remaining);
         REQUIRE(decoded.is_ok());
         CHECK(std::vector<uint8_t>(decoded.value().raw_data().begin(),decoded.value().raw_data().end()) == value);
+        CHECK(explicit_vr_codec::encode_element(decoded.value()) == wire(value));
         CHECK(remaining.size() == next.size());
         auto frames = dicom_file::encapsulated_frames(decoded.value().raw_data(),2);
         REQUIRE(frames.is_ok());
@@ -65,6 +66,14 @@ TEST_CASE("explicit_vr_codec preserves encapsulated Pixel Data items",
         auto decoded = explicit_vr_codec::decode_element(remaining);
         REQUIRE(decoded.is_ok());
         CHECK(std::vector<uint8_t>(decoded.value().raw_data().begin(),decoded.value().raw_data().end()) == items);
+        CHECK(explicit_vr_codec::encode_element(decoded.value()) == bytes);
+    }
+    SECTION("in-memory value without delimiter gains exactly one wire delimiter") {
+        auto items = value;
+        items.resize(items.size() - 8);
+        auto pixel = dicom_element::from_encapsulated_pixel_data(items);
+        REQUIRE(pixel.is_ok());
+        CHECK(explicit_vr_codec::encode_element(pixel.value()) == wire(value));
     }
     SECTION("missing or malformed delimiter and invalid fragment lengths fail") {
         std::vector<std::vector<uint8_t>> malformed;

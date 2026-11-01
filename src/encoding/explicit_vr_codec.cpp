@@ -125,6 +125,20 @@ std::vector<uint8_t> explicit_vr_codec::encode_element(
         return buffer;
     }
 
+    if (element.is_encapsulated_pixel_data()) {
+        const auto data = element.raw_data();
+        const auto layout = core::inspect_encapsulated_pixel_data(data);
+        // The validated element factory guarantees this invariant.
+        if (!layout) return {};
+        write_le16(buffer, 0);
+        write_le32(buffer, UNDEFINED_LENGTH);
+        buffer.insert(buffer.end(), data.begin(), data.begin() + layout->items_size);
+        write_le16(buffer, ITEM_GROUP);
+        write_le16(buffer, SEQ_DELIM_ELEMENT);
+        write_le32(buffer, 0);
+        return buffer;
+    }
+
     // Get padded data
     auto data = element.raw_data();
     auto padded_data = pad_to_even(element.vr(), data);

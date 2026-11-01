@@ -217,3 +217,28 @@ bytes and length form, and decodes compressed files with DCMTK before comparing
 all metadata and full pixel hashes. It checks clean receiver shutdown and preserves
 command/status/server logs. A passing focused probe does not certify the complete
 feature matrix, outbound storage, or real cloud providers.
+
+## Compressed wire and restart checks (#1314)
+
+`tests/compressed_roundtrip_probe.py` accepts the same profile, output, source
+revision/digest and fixture arguments as the incoming storage probe. Run each of
+`uncompressed`, `jpeg-lossless`, `jpeg-ls-lossless`, and `rle-lossless` separately.
+It sends all 13 objects from PACS to an independent DCMTK receiver, receives 13
+objects from DCMTK into PACS, stops and restarts the PACS receiver, stores a new
+readiness object, then uses `store_scu` to read and forward the original archived
+files. A second receiver checks a separate study. Negotiated contexts, exact item
+bytes, metadata and full decoded pixel hashes must match. Restart forwarding here
+uses the stored files; it does not substitute for C-GET/C-MOVE SCP acceptance.
+
+`tests/peer_storage_probe.py` runs within the isolated Compose topology. It runs
+the pinned peer's native/compressed prerequisite suite, the original PACS primary
+store of 13 instances, independent DCMTK C-GET integrity for 5/6/2 CT/MR/CR objects,
+and the separate archive destination. Run all four profiles in fresh projects.
+Reusing a runner image with copied binaries is a local diagnostic; record the
+binary/source hashes and do not claim the image's original digest proves the edits.
+
+The explicit VR encoder emits marked encapsulated pixels with undefined length,
+unchanged BOT/fragments and exactly one delimiter. DIMSE validates the dataset
+against the negotiated syntax before encoding and after decoding. It rejects a
+native/encapsulated mismatch, defined-length compressed wire pixels and unsupported
+network byte order/encoding. It does not compress or decompress pixels implicitly.

@@ -8,6 +8,8 @@
 #include <kcenon/pacs/network/dimse/status_codes.h>
 
 #include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_file.h>
+#include <algorithm>
 #include <kcenon/pacs/core/dicom_tag.h>
 #include <kcenon/pacs/core/dicom_tag_constants.h>
 #include <kcenon/pacs/encoding/transfer_syntax.h>
@@ -358,5 +360,48 @@ TEST_CASE("dimse_message sub-operation counts", "[dimse][message]") {
     SECTION("Set and get warning") {
         msg.set_warning_subops(1);
         CHECK(msg.warning_subops().value() == 1);
+    }
+}
+
+TEST_CASE("DIMSE compressed datasets preserve item streams and reject mismatches",
+          "[dimse][message][codec][encapsulated]") {
+    const auto items = dicom_file::encapsulate_frames({{1,2,3,4}, {5,6,7,8}});
+    auto request = make_c_store_rq(1, "1.2.840.10008.5.1.4.1.1.2", "1.2.3.1314");
+    dicom_dataset dataset;
+    // Explicit syntax supplies context for an otherwise unmarked valid item stream.
+    dataset.insert(dicom_element{tags::pixel_data, vr_type::OB, items});
+    request.set_dataset(dataset);
+    const std::vector<uint8_t> header{0xE0,0x7F,0x10,0,'O','B',0,0,0xFF,0xFF,0xFF,0xFF};
+    for (const auto& syntax : {transfer_syntax::rle_lossless,
+                              transfer_syntax::jpeg_lossless,
+                              transfer_syntax::jpeg_ls_lossless}) {
+        auto encoded = dimse_message::encode(request, syntax);
+        REQUIRE(encoded.is_ok());
+        auto& [command, data] = encoded.value();
+        REQUIRE(data.size() == header.size() + items.size());
+        CHECK(std::equal(header.begin(), header.end(), data.begin()));
+        CHECK(std::equal(items.begin(), items.end(), data.begin()+header.size()));
+        auto decoded = dimse_message::decode(command, data, syntax);
+        REQUIRE(decoded.is_ok());
+        auto roundtrip = dimse_message::encode(decoded.value(), syntax);
+        REQUIRE(roundtrip.is_ok());
+        CHECK(roundtrip.value() == encoded.value());
+        CHECK(dimse_message::encode(decoded.value(), transfer_syntax::explicit_vr_little_endian).is_err());
+        CHECK(dimse_message::decode(command, data, transfer_syntax::explicit_vr_little_endian).is_err());
+        for (unsigned i=0;i<4;++i) data.at(8+i) = static_cast<uint8_t>(items.size()>>(8*i));
+        CHECK(dimse_message::decode(command, data, syntax).is_err());
+    }
+    // Encoding works on its own copy and does not mark native caller-owned data.
+    CHECK_FALSE(request.dataset().value().get().get(tags::pixel_data)->is_encapsulated_pixel_data());
+    dataset.insert(dicom_element{tags::pixel_data, vr_type::OB, std::vector<uint8_t>{1,2,3,4}});
+    request.set_dataset(dataset);
+    CHECK(dimse_message::encode(request, transfer_syntax::rle_lossless).is_err());
+    CHECK(dimse_message::encode(request, transfer_syntax::deflated_explicit_vr_le).is_err());
+    CHECK(dimse_message::encode(request, transfer_syntax::explicit_vr_big_endian).is_err());
+    for (const auto& syntax : {transfer_syntax::explicit_vr_little_endian,
+                              transfer_syntax::implicit_vr_little_endian}) {
+        auto encoded = dimse_message::encode(request, syntax);
+        REQUIRE(encoded.is_ok());
+        CHECK(dimse_message::decode(encoded.value().first, encoded.value().second, syntax).is_ok());
     }
 }

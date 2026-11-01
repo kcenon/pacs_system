@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_element.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/network/detail/dimse_framing.h"
@@ -287,4 +288,32 @@ TEST_CASE("dimse_assembler rejects PDVs that break PS3.8 Annex E", "[network][fr
         auto assembler = make_assembler();
         CHECK(assembler.add({CONTEXT_ID, true, true, {0x01, 0x02, 0x03}}).is_err());
     }
+}
+
+TEST_CASE("compressed Pixel Data survives PDU fragment boundaries",
+          "[network][framing][encapsulated]") {
+    const std::vector<std::vector<uint8_t>> frames{std::vector<uint8_t>(1000,0x12),
+                                                  std::vector<uint8_t>(750,0x34)};
+    const auto items = core::dicom_file::encapsulate_frames(frames);
+    auto request = make_store_rq(0);
+    auto pixel = core::dicom_element::from_encapsulated_pixel_data(items);
+    REQUIRE(pixel.is_ok());
+    request.dataset().value().get().insert(std::move(pixel.value()));
+    const auto syntax = encoding::transfer_syntax::rle_lossless;
+    auto encoded = encode_dimse_pdus(CONTEXT_ID, request, syntax, 37);
+    REQUIRE(encoded.is_ok());
+    auto pdus = split_pdus(encoded.value());
+    REQUIRE(pdus.size() > 50);
+    dimse_assembler assembler{[&](uint8_t context) -> std::optional<encoding::transfer_syntax> {
+        return context == CONTEXT_ID ? std::optional{syntax} : std::nullopt;
+    }};
+    auto messages = reassemble(assembler, pdus);
+    REQUIRE(messages.size() == 1);
+    const auto* restored = messages[0].second.dataset().value().get().get(core::tags::pixel_data);
+    REQUIRE(restored);
+    CHECK(restored->is_encapsulated_pixel_data());
+    CHECK(std::ranges::equal(restored->raw_data(), items));
+    auto decoded_frames = core::dicom_file::encapsulated_frames(restored->raw_data(), 2);
+    REQUIRE(decoded_frames.is_ok());
+    CHECK(decoded_frames.value() == frames);
 }

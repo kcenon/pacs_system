@@ -8,6 +8,7 @@
  */
 
 #include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/core/dicom_file.h>
 
 #include <kcenon/pacs/encoding/implicit_vr_codec.h>
 #include <kcenon/pacs/encoding/explicit_vr_codec.h>
@@ -280,6 +281,22 @@ auto dimse_message::encode(const dimse_message& msg,
         if (ds_result.is_err()) {
             return ds_result.error();
         }
+        auto& dataset = ds_result.value().get();
+        const auto validation = core::dicom_file::validate_pixel_data_representation(dataset, dataset_ts);
+        if (validation.is_err()) {
+            return make_dimse_error(dimse_error::encoding_error, validation.error().message);
+        }
+        if (dataset_ts.endianness() != encoding::byte_order::little_endian) {
+            return make_dimse_error(dimse_error::encoding_error,
+                                    "DIMSE encoding supports only Little Endian datasets");
+        }
+        if (dataset_ts.is_encapsulated()) {
+            if (const auto* pixel = dataset.get(core::tags::pixel_data)) {
+                auto marked = core::dicom_element::from_encapsulated_pixel_data(pixel->raw_data());
+                if (marked.is_err()) return marked.error();
+                dataset.insert(std::move(marked.value()));
+            }
+        }
         if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
             dataset_bytes = encoding::implicit_vr_codec::encode(ds_result.value().get());
         } else {
@@ -322,6 +339,11 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Decode dataset if present
     if (!dataset_data.empty()) {
+        if (!dataset_ts.is_valid() || !dataset_ts.is_supported()
+            || dataset_ts.endianness() != encoding::byte_order::little_endian) {
+            return make_dimse_error(dimse_error::decoding_error,
+                                    "Unsupported DIMSE dataset transfer syntax");
+        }
         kcenon::pacs::Result<core::dicom_dataset> ds_result =
             (dataset_ts.vr_type() == encoding::vr_encoding::implicit)
                 ? encoding::implicit_vr_codec::decode(dataset_data)
@@ -329,6 +351,15 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
         if (ds_result.is_err()) {
             return make_dimse_error(dimse_error::decoding_error, "Failed to decode dataset");
+        }
+        const auto validation = core::dicom_file::validate_pixel_data_representation(ds_result.value(), dataset_ts);
+        if (validation.is_err()) {
+            return make_dimse_error(dimse_error::decoding_error, validation.error().message);
+        }
+        if (const auto* pixel = ds_result.value().get(core::tags::pixel_data);
+            dataset_ts.is_encapsulated() && pixel && !pixel->is_encapsulated_pixel_data()) {
+            return make_dimse_error(dimse_error::decoding_error,
+                                    "Encapsulated Pixel Data requires undefined length");
         }
         msg.dataset_ = std::move(ds_result.value());
     }
