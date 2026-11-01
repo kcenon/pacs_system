@@ -11,5 +11,16 @@
 # (#1288), after all 15 HTJ2K cases passed with the codec and OpenJPH compiled
 # with -fsanitize=alignment and no suppression file on arm64. This includes
 # allocator fix OpenJPH#262 and generic decoder memcpy loads from OpenJPH#291.
-# The generic ARM reversible colour-transform shift remains unsuppressed and
-# tracked by #1299; a full C++14 UBSan run still reports that separate defect.
+
+# OpenJPH 0.30.1 generic RCT (32- and 64-bit transformed lines) left-shifts
+# negative green samples, which is undefined before C++20:
+# https://github.com/aous72/OpenJPH/issues/406
+# Fixed upstream by PR405, commit c7a4d43942d2f92fdc385a8c4148a9b523063192,
+# but no published release includes that fix as checked on 2026-11-01.
+# Only a C++14 OpenJPH needs this entry (its default and the vcpkg port's mode).
+# A FetchContent build inherits C++20, where the shift is defined and reports
+# nothing, so the htj2k-arm64-ubsan job runs that mode with no suppression file.
+# Its C++14 mode keeps unsuppressed reproducers and an unrelated shift control.
+# Remove this entry and the expected-failure probes when a fixed release is
+# adopted. This is tracked suppressed coverage, not a fix (#1299).
+shift-base:openjph-src/src/core/transform/ojph_colour.cpp

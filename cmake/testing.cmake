@@ -114,6 +114,32 @@ if(PACS_BUILD_TESTS)
             Catch2::Catch2WithMain
     )
 
+    option(PACS_TEST_OPENJPH_INTERNALS "Test generic OpenJPH RCT branches for sanitizer validation" OFF)
+    if(PACS_TEST_OPENJPH_INTERNALS)
+        if(NOT PACS_HTJ2K_FOUND OR NOT DEFINED openjph_SOURCE_DIR)
+            message(FATAL_ERROR "PACS_TEST_OPENJPH_INTERNALS requires FetchContent OpenJPH")
+        endif()
+        target_sources(encoding_tests PRIVATE
+            tests/encoding/compression/openjph_rct_test.cpp)
+        target_include_directories(encoding_tests PRIVATE
+            "${openjph_SOURCE_DIR}/src/core/transform")
+        # OpenJPH's negative left shift is undefined only before C++20. A
+        # FetchContent build inherits C++20, while OpenJPH's own default and the
+        # vcpkg port use C++14. This lets the ARM job validate both modes (#1299).
+        set(PACS_TEST_OPENJPH_CXX_STANDARD "" CACHE STRING
+            "C++ standard for the fetched OpenJPH in sanitizer validation; empty inherits CMAKE_CXX_STANDARD")
+        if(PACS_TEST_OPENJPH_CXX_STANDARD)
+            set_target_properties(openjph PROPERTIES CXX_STANDARD "${PACS_TEST_OPENJPH_CXX_STANDARD}")
+        endif()
+        # Deliberate UB is an executable negative control, never a CTest case.
+        # The focused sanitizer runner requires the C++14 failure even with the
+        # OpenJPH-only suppression loaded, and compares the same source in C++20.
+        add_executable(pacs_ubsan_shift_control tests/sanitizers/shift_base_control.cpp)
+        set_target_properties(pacs_ubsan_shift_control PROPERTIES CXX_STANDARD 14)
+        add_executable(pacs_ubsan_shift_control_cxx20 tests/sanitizers/shift_base_control.cpp)
+        set_target_properties(pacs_ubsan_shift_control_cxx20 PROPERTIES CXX_STANDARD 20)
+    endif()
+
     # Network tests
     add_executable(network_tests
         tests/network/pdu_encoder_test.cpp
