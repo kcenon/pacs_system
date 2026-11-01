@@ -362,7 +362,7 @@ class Validation:
                     except OSError:
                         time.sleep(.1)
                 require(ready, 'Server did not open its port')
-                yield
+                yield p
             finally:
                 if p.poll() is None:
                     os.killpg(p.pid,signal.SIGTERM)
@@ -372,16 +372,44 @@ class Validation:
                         p.wait()
 
     def echo_scp(self):
-        with self.server([self.bin/'echo_scp','22501','PACS_ECHO'],22501):
+        with self.server([self.bin/'echo_scp','22501','PACS_ECHO'],22501) as process:
             self.command(['echoscu','-aec','PACS_ECHO','127.0.0.1','22501'])
+        require(process.returncode == 0, f'echo_scp shutdown exit {process.returncode}')
 
     def store_scp(self):
         dest = self.output/'inbound-store'
         dest.mkdir()
-        with self.server([self.bin/'store_scp','22502','PACS_STORE','--storage-dir',dest],22502):
+        with self.server([self.bin/'store_scp','22502','PACS_STORE','--storage-dir',dest],22502) as process:
             flags = [self.codec[4]] if self.codec[4] else []
-            self.command(['storescu',*flags,'-aec','PACS_STORE','127.0.0.1','22502',*self.paths['ct']])
-            return self.verify(dest,self.data['ct'])
+            self.command(['storescu','-d',*flags,'-aec','PACS_STORE','127.0.0.1','22502',*self.paths['ct']])
+            detail = self.verify(dest,self.data['ct'])
+        require(process.returncode == 0, f'store_scp shutdown exit {process.returncode}')
+        return detail
+
+    def cli_tcp(self, binary):
+        directory = self.output/(binary+'-tcp')
+        directory.mkdir()
+        port = 22505+('qr_scp','worklist_scp','mpps_scp','pacs_server').index(binary)
+        ae = 'CLI_TCP'
+        if binary == 'pacs_server':
+            args = [self.bin/binary,'--port',port,'--ae-title',ae,
+                    '--storage-dir',directory/'archive','--db-path',directory/'index.db']
+        else:
+            args = [self.bin/binary,port,ae]
+            if binary == 'qr_scp':
+                (directory/'archive').mkdir()
+                args += ['--storage-dir',directory/'archive','--index-db',directory/'index.db']
+            elif binary == 'worklist_scp':
+                (directory/'worklist.json').write_text('[]\n')
+                args += ['--worklist-file',directory/'worklist.json']
+            else:
+                args += ['--output-dir',directory/'mpps']
+        with self.server(args,port) as process:
+            for _ in range(2):
+                self.command(['echoscu','-v','-to','5','-ta','5','-td','5',
+                              '-aec',ae,'127.0.0.1',port])
+        require(process.returncode == 0, f'{binary} shutdown exit {process.returncode}')
+        return 'Two independent DCMTK associations and clean SIGTERM shutdown'
 
     def qr_scp(self, mode, diagnostic=False):
         # Independent DCMTK SCUs exercise the actual CLI, including its file index.
@@ -575,6 +603,8 @@ class Validation:
         self.case('mwl.sequence',lambda:self.mwl(True),requires=['mwl.scu'])
         self.case('echo.scp',self.echo_scp,requires=['peer.preflight'])
         self.case('store.scp',self.store_scp,requires=['fixtures','peer.preflight'])
+        for name,binary in [('qr','qr_scp'),('worklist','worklist_scp'),('mpps','mpps_scp'),('pacs','pacs_server')]:
+            self.case('cli.'+name+'.tcp',lambda binary=binary:self.cli_tcp(binary),requires=['peer.preflight'])
         for mode in ('query','get','move'):
             self.case(mode+'.scp',lambda mode=mode:self.qr_scp(mode),requires=['fixtures','peer.preflight'])
         self.case('tls.scp',self.tls_scp,requires=['peer.tls'])

@@ -253,13 +253,6 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // findscu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
-
     // Setup: Start pacs_system query server with test data
     auto port = find_available_port();
     const std::string ae_title = "PACS_FIND_SCP";
@@ -622,10 +615,6 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
 
     SECTION("3 concurrent DCMTK findscu clients") {
         // findscu needs a pacs_system SCP that accepts TCP
-        if (!v1_server_accepts_tcp()) {
-            SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-                 "this section needs a dicom_server_v2 fixture");
-        }
 
         constexpr int num_clients = 3;
         std::vector<std::future<dcmtk_result>> futures;
@@ -769,10 +758,6 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
     }
 
     // findscu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "LEVEL_TEST_SCP";
@@ -835,10 +820,6 @@ TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]
     }
 
     // findscu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "SPECIAL_CHAR_SCP";

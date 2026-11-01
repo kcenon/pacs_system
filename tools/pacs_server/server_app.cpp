@@ -250,7 +250,7 @@ bool pacs_server_app::setup_server() {
         server_config.accept_unknown_calling_ae = false;
     }
 
-    server_ = std::make_unique<network::dicom_server>(server_config);
+    server_ = std::make_unique<network::v2::dicom_server_v2>(server_config);
 
     // Register Verification SCP
     server_->register_service(std::make_shared<services::verification_scp>());
@@ -300,14 +300,16 @@ bool pacs_server_app::setup_server() {
     server_->register_service(mpps_scp);
 
     // Set up callbacks
-    server_->on_association_established([](const network::association& assoc) {
+    server_->on_association_established([](const std::string& /* session_id */,
+                                          const std::string& calling_ae,
+                                          const std::string& called_ae) {
         std::cout << log_prefix() << "Association established: "
-                  << assoc.calling_ae() << " -> " << assoc.called_ae() << "\n";
+                  << calling_ae << " -> " << called_ae << "\n";
     });
 
-    server_->on_association_released([](const network::association& assoc) {
-        std::cout << log_prefix() << "Association released: "
-                  << assoc.calling_ae() << "\n";
+    server_->on_association_closed([](const std::string& session_id, bool graceful) {
+        std::cout << log_prefix() << "Association closed: "
+                  << session_id << (graceful ? " (released)" : " (aborted)") << "\n";
     });
 
     server_->on_error([](const std::string& error) {

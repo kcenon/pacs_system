@@ -78,10 +78,13 @@ namespace kcenon::pacs::network::v2 {
  * shared state and delegates I/O operations to network_system's thread model.
  *
  * ### Migration Path
- * This class is API-compatible with dicom_server. To migrate:
+ * Configuration and service registration are shared with dicom_server. To migrate:
  * 1. Replace `dicom_server` with `dicom_server_v2`
- * 2. No changes needed to service registration or callbacks
- * 3. Feature flag: `PACS_USE_NETWORK_SYSTEM_SERVER` (when available)
+ * 2. Keep service registration and server_config unchanged
+ * 3. Adapt established callbacks to (session_id, calling_ae, called_ae), and
+ *    release/abort callbacks to on_association_closed(session_id, graceful)
+ * 4. Stop the server from normal application code, never from a signal handler
+ *    or an I/O callback. stop() closes active sessions rather than draining them.
  *
  * @par Example: Usage
  * @code

@@ -18,7 +18,8 @@
  * @endcode
  */
 
-#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
+#include "../common/scp_lifecycle.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/services/verification_scp.h"
 
@@ -31,37 +32,6 @@
 #include <string>
 
 namespace {
-
-/// Global pointer to server for signal handling
-std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
-
-/// Global running flag for signal handling
-std::atomic<bool> g_running{true};
-
-/**
- * @brief Signal handler for graceful shutdown
- * @param signal The signal received
- */
-void signal_handler(int signal) {
-    std::cout << "\nReceived signal " << signal << ", shutting down...\n";
-    g_running = false;
-
-    auto* server = g_server.load();
-    if (server) {
-        server->stop();
-    }
-}
-
-/**
- * @brief Install signal handlers for graceful shutdown
- */
-void install_signal_handlers() {
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
-#ifndef _WIN32
-    std::signal(SIGHUP, signal_handler);
-#endif
-}
 
 /**
  * @brief Print usage information
@@ -235,22 +205,23 @@ bool run_server(
     config.implementation_version_name = "ECHO_SCP_001";
 
     // Create server
-    dicom_server server{config};
-    g_server = &server;
+    v2::dicom_server_v2 server{config};
 
     // Register verification service (handles C-ECHO)
     server.register_service(std::make_shared<verification_scp>());
 
     // Set up callbacks for logging
-    server.on_association_established([](const association& assoc) {
+    server.on_association_established([](const std::string& /* session_id */,
+                                         const std::string& calling_ae,
+                                         const std::string& called_ae) {
         std::cout << "[" << current_timestamp() << "] "
-                  << "Association established from: " << assoc.calling_ae()
-                  << " -> " << assoc.called_ae() << "\n";
+                  << "Association established from: " << calling_ae
+                  << " -> " << called_ae << "\n";
     });
 
-    server.on_association_released([](const association& assoc) {
+    server.on_association_closed([](const std::string& session_id, bool graceful) {
         std::cout << "[" << current_timestamp() << "] "
-                  << "Association released: " << assoc.calling_ae() << "\n";
+                  << "Association closed: " << session_id << (graceful ? " (released)" : " (aborted)") << "\n";
     });
 
     server.on_error([](const std::string& error) {
@@ -262,7 +233,7 @@ bool run_server(
     auto result = server.start();
     if (result.is_err()) {
         std::cerr << "Failed to start server: " << result.error().message << "\n";
-        g_server = nullptr;
+
         return false;
     }
 
@@ -272,7 +243,7 @@ bool run_server(
     std::cout << "=================================================\n\n";
 
     // Wait for shutdown
-    server.wait_for_shutdown();
+    kcenon::pacs::cli::wait_for_shutdown(server);
 
     // Print final statistics
     auto stats = server.get_statistics();
@@ -288,7 +259,6 @@ bool run_server(
     std::cout << "  Uptime:                " << stats.uptime().count() << " seconds\n";
     std::cout << "=================================================\n";
 
-    g_server = nullptr;
     return true;
 }
 
@@ -316,7 +286,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Install signal handlers
-    install_signal_handlers();
+    kcenon::pacs::cli::install_shutdown_signals();
 
     bool success = run_server(port, ae_title, max_associations, idle_timeout);
 

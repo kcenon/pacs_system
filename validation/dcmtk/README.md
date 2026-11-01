@@ -42,6 +42,12 @@ and startup log identify the project for later `docker compose -p ... -f ... dow
    import/index contract and external C-ECHO readiness. A zero-file import fails
    preparation. No test writes database rows directly. The original store-dependent
    chain keeps its case IDs, prerequisites and failures.
+   Plaintext CLI SCPs use the v2 TCP transport. Per-CLI C-ECHO checks cover QR,
+   worklist, MPPS and the complete PACS server, including repeat associations and
+   clean SIGTERM exit. Echo and storage CLI checks also enforce clean shutdown;
+   storage compares received objects with the independent fixtures. See
+   [ADR-004](../../docs/adr/ADR-004-cli-scp-tcp-transport.md) for the retained v1 API
+   and the separately tracked TLS migration.
 5. In the uncompressed profile, discover individual CTest and Catch2 cases before
    running every component suite listed in `features.json`,
    the existing integration suite, v2 TLS cases and bounded stress cases. JUnit

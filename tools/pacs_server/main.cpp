@@ -25,36 +25,11 @@
 
 #include "config.h"
 #include "server_app.h"
+#include "../common/scp_lifecycle.h"
 
 #include <atomic>
 #include <csignal>
 #include <iostream>
-
-namespace {
-
-/// Global pointer to server app for signal handling
-std::atomic<kcenon::pacs::example::pacs_server_app*> g_server{nullptr};
-
-/// Signal handler for graceful shutdown
-void signal_handler(int signal) {
-    std::cout << "\nReceived signal " << signal << ", shutting down...\n";
-
-    auto* server = g_server.load();
-    if (server) {
-        server->request_shutdown();
-    }
-}
-
-/// Install signal handlers
-void install_signal_handlers() {
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
-#ifndef _WIN32
-    std::signal(SIGHUP, signal_handler);
-#endif
-}
-
-}  // namespace
 
 int main(int argc, char* argv[]) {
     std::cout << R"(
@@ -74,11 +49,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Install signal handlers
-    install_signal_handlers();
+    kcenon::pacs::cli::install_shutdown_signals();
 
     // Create and initialize server
     kcenon::pacs::example::pacs_server_app server(config.value());
-    g_server = &server;
 
     if (!server.initialize()) {
         std::cerr << "Failed to initialize PACS server\n";
@@ -92,12 +66,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Wait for shutdown
-    server.wait_for_shutdown();
+    kcenon::pacs::cli::wait_for_shutdown(server);
 
     // Print final statistics
     server.print_statistics();
-
-    g_server = nullptr;
 
     std::cout << "PACS Server terminated\n";
     return 0;

@@ -15,7 +15,7 @@
 
 #include "kcenon/pacs/core/dicom_dataset.h"
 #include "kcenon/pacs/core/dicom_file.h"
-#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/services/mpps_scp.h"
 #include "kcenon/pacs/services/query_scp.h"
@@ -49,7 +49,7 @@ namespace kcenon::pacs::example {
  * +---------------------------------------------+
  * |                                             |
  * |  +----------------+   +------------------+  |
- * |  | dicom_server   |   | index_database   |  |
+ * |  | dicom_server_v2|   | index_database   |  |
  * |  +-------+--------+   +--------+---------+  |
  * |          |                     |            |
  * |  +-------v--------+   +--------v---------+  |
@@ -233,7 +233,7 @@ private:
     pacs_server_config config_;
 
     /// DICOM server
-    std::unique_ptr<network::dicom_server> server_;
+    std::unique_ptr<network::v2::dicom_server_v2> server_;
 
     /// File storage
     std::unique_ptr<storage::file_storage> file_storage_;

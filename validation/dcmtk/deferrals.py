@@ -87,6 +87,11 @@ def audit_deferrals(root, cases):
             exceptions.append(dict(kind='observed-product-failure', **disposition(
                 'product defect', 1316, 'MPPS/multimodal workflow failed in the Linux baseline',
                 'Repair the workflow and pass the existing status/state/error-count assertions.')))
+        if case['name'] in ('C-FIND: pacs_system SCP with DCMTK findscu',
+                            'C-FIND: Query level variations', 'C-FIND: Special character handling'):
+            exceptions.append(dict(kind='observed-fixture-failure', **disposition(
+                'fixture defect', 1240, 'dcmtk_tool::findscu always proposes the worklist model (-W)',
+                'Select the patient/study query model explicitly and verify exact returned keys and UID sets.')))
         case['deferrals'] = exceptions
         if exceptions:
             rows.append(dict(case_id=case['case_id'], name=case['name'], exceptions=exceptions))

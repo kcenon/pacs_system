@@ -219,7 +219,11 @@
     "diagnostic.move.scu",
     "diagnostic.query.scp",
     "diagnostic.get.scp",
-    "diagnostic.move.scp"
+    "diagnostic.move.scp",
+    "cli.qr.tcp",
+    "cli.worklist.tcp",
+    "cli.mpps.tcp",
+    "cli.pacs.tcp"
   ],
   "features": [
     {
@@ -266,7 +270,11 @@
       "interop": [
         "echo.primary",
         "echo.secondary",
-        "echo.scp"
+        "echo.scp",
+        "cli.qr.tcp",
+        "cli.worklist.tcp",
+        "cli.mpps.tcp",
+        "cli.pacs.tcp"
       ],
       "gaps": [
         "Independent negative negotiation/framing/timeout/limit cases from #1319 remain unverified."

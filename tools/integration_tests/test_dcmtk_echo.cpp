@@ -36,13 +36,6 @@ TEST_CASE("C-ECHO: pacs_system SCP with DCMTK echoscu", "[dcmtk][interop][echo]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // echoscu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
-
     // Setup: Start pacs_system echo server
     auto port = find_available_port();
     const std::string ae_title = "PACS_ECHO_SCP";
@@ -252,10 +245,6 @@ TEST_CASE("C-ECHO: Concurrent echo operations", "[dcmtk][interop][echo][stress]"
 
     SECTION("5 concurrent DCMTK echoscu clients") {
         // echoscu needs a pacs_system SCP that accepts TCP
-        if (!v1_server_accepts_tcp()) {
-            SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-                 "this section needs a dicom_server_v2 fixture");
-        }
 
         constexpr int num_clients = 5;
         std::vector<std::future<dcmtk_result>> futures;
@@ -387,10 +376,6 @@ TEST_CASE("C-ECHO: Protocol verification", "[dcmtk][interop][echo][protocol]") {
     }
 
     // echoscu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "PROTOCOL_SCP";

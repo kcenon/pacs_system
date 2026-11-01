@@ -25,6 +25,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/services/storage_scu.h"
@@ -145,21 +146,6 @@ inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
  */
 inline bool supports_real_tcp_dicom() {
     return network::association::tcp_transport_available;
-}
-
-/**
- * @brief Check if test_server (the v1 dicom_server) accepts TCP associations
- *
- * Always false: the v1 dicom_server serves only in-process associations
- * (its accept_worker closes every TCP connection), and dicom_server_v2 is
- * the SCP that serves TCP. The DCMTK cases that run a DCMTK SCU against a
- * v1-based fixture skip on this until their fixtures move to
- * dicom_server_v2 (follow-up of Issue #1240).
- *
- * @return true if the v1 dicom_server serves DICOM over TCP
- */
-inline bool v1_server_accepts_tcp() {
-    return false;
 }
 
 /**
@@ -569,7 +555,7 @@ public:
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.1";
         config.implementation_version_name = "TEST_SCP";
 
-        server_ = std::make_unique<network::dicom_server>(config);
+        server_ = std::make_unique<network::v2::dicom_server_v2>(config);
     }
 
     ~test_server() {
@@ -649,7 +635,7 @@ public:
     [[nodiscard]] bool is_running() const noexcept { return running_; }
 
     /// @return Reference to underlying server
-    [[nodiscard]] network::dicom_server& server() { return *server_; }
+    [[nodiscard]] network::v2::dicom_server_v2& server() { return *server_; }
 
 private:
     /**
@@ -734,7 +720,7 @@ private:
 
     uint16_t port_;
     std::string ae_title_;
-    std::unique_ptr<network::dicom_server> server_;
+    std::unique_ptr<network::v2::dicom_server_v2> server_;
     bool running_{false};
 };
 

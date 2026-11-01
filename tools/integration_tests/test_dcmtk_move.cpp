@@ -260,13 +260,6 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // movescu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
-
     // The case counts the files at the destination
     if (!move_scp_stores_to_destination()) {
         SKIP("retrieve_scp opens no association to the C-MOVE destination; "
@@ -393,10 +386,6 @@ TEST_CASE("C-MOVE: Unknown destination AE rejection", "[dcmtk][interop][move][er
     }
 
     // movescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "MOVE_SCP";
@@ -486,10 +475,6 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
     }
 
     // movescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto move_port = find_available_port();
     auto dest_port = find_available_port(move_port + 1);
