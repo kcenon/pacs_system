@@ -19,6 +19,7 @@
  * @endcode
  */
 
+#include "worklist_matching.h"
 #include "kcenon/pacs/core/dicom_dataset.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/vr_type.h"
@@ -632,10 +633,15 @@ public:
         std::string query_patient_name = query_keys.get_string(tags::patient_name, "");
         std::string query_accession = query_keys.get_string(tags::accession_number, "");
 
-        // Get Scheduled Procedure Step filters (flat structure - no sequence support)
-        std::string query_station_ae = query_keys.get_string(tags::scheduled_station_ae_title, "");
-        std::string query_start_date = query_keys.get_string(tags::scheduled_procedure_step_start_date, "");
-        std::string query_modality = query_keys.get_string(tags::modality, "");
+        const auto* steps = query_keys.get_sequence(tags::scheduled_procedure_step_sequence);
+        const dicom_dataset empty_step;
+        const auto& step_keys = steps != nullptr && steps->size() == 1 ? steps->front() : empty_step;
+        const auto query_station_ae = step_keys.get_string(tags::scheduled_station_ae_title);
+        const auto query_start_date = step_keys.get_string(tags::scheduled_procedure_step_start_date);
+        const auto query_start_time = step_keys.get_string(tags::scheduled_procedure_step_start_time);
+        const auto query_modality = step_keys.get_string(tags::modality);
+        const auto query_step_id = step_keys.get_string(tags::scheduled_procedure_step_id);
+        const auto query_physician = step_keys.get_string(tags::scheduled_performing_physician_name);
 
         for (const auto& item : items_) {
             // Apply filters (empty filter matches all)
@@ -651,10 +657,19 @@ public:
             if (!query_station_ae.empty() && !matches_wildcard(item.scheduled_station_ae_title, query_station_ae)) {
                 continue;
             }
-            if (!query_start_date.empty() && !matches_date_range(item.scheduled_procedure_step_start_date, query_start_date)) {
+            if (!worklist_cli::matches_schedule(item.scheduled_procedure_step_start_date,
+                                                item.scheduled_procedure_step_start_time,
+                                                query_start_date, query_start_time)) {
                 continue;
             }
             if (!query_modality.empty() && !matches_wildcard(item.modality, query_modality)) {
+                continue;
+            }
+
+            if (!query_step_id.empty() && !matches_wildcard(item.scheduled_procedure_step_id, query_step_id)) {
+                continue;
+            }
+            if (!query_physician.empty() && !matches_wildcard(item.scheduled_performing_physician, query_physician)) {
                 continue;
             }
 
@@ -677,15 +692,17 @@ public:
             ds.set_string(tags::requested_procedure_id, vr_type::SH, item.requested_procedure_id);
             ds.set_string(tags::requested_procedure_description, vr_type::LO, item.requested_procedure_description);
 
-            // Scheduled Procedure Step attributes (flat structure - no sequence support)
-            ds.set_string(tags::scheduled_station_ae_title, vr_type::AE, item.scheduled_station_ae_title);
-            ds.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, item.scheduled_procedure_step_start_date);
-            ds.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, item.scheduled_procedure_step_start_time);
-            ds.set_string(tags::modality, vr_type::CS, item.modality);
-            ds.set_string(tags::scheduled_performing_physician_name, vr_type::PN, item.scheduled_performing_physician);
-            ds.set_string(tags::scheduled_procedure_step_description, vr_type::LO, item.scheduled_procedure_step_description);
-            ds.set_string(tags::scheduled_procedure_step_id, vr_type::SH, item.scheduled_procedure_step_id);
-            ds.set_string(tags::scheduled_procedure_step_location, vr_type::SH, item.scheduled_procedure_step_location);
+            dicom_dataset step;
+            step.set_string(tags::scheduled_station_ae_title, vr_type::AE, item.scheduled_station_ae_title);
+            step.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, item.scheduled_procedure_step_start_date);
+            step.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, item.scheduled_procedure_step_start_time);
+            step.set_string(tags::modality, vr_type::CS, item.modality);
+            step.set_string(tags::scheduled_performing_physician_name, vr_type::PN, item.scheduled_performing_physician);
+            step.set_string(tags::scheduled_procedure_step_description, vr_type::LO, item.scheduled_procedure_step_description);
+            step.set_string(tags::scheduled_procedure_step_id, vr_type::SH, item.scheduled_procedure_step_id);
+            step.set_string(tags::scheduled_procedure_step_location, vr_type::SH, item.scheduled_procedure_step_location);
+
+            ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence).push_back(std::move(step));
 
             results.push_back(std::move(ds));
         }
@@ -731,28 +748,7 @@ private:
         return p == pattern.size();
     }
 
-    /**
-     * @brief Check if date matches range pattern
-     * Supports single date (YYYYMMDD) or range (YYYYMMDD-YYYYMMDD)
-     */
-    static bool matches_date_range(const std::string& value, const std::string& pattern) {
-        if (pattern.empty()) return true;
 
-        auto dash_pos = pattern.find('-');
-        if (dash_pos == std::string::npos) {
-            // Single date match
-            return value == pattern;
-        }
-
-        // Date range
-        std::string start_date = pattern.substr(0, dash_pos);
-        std::string end_date = pattern.substr(dash_pos + 1);
-
-        if (start_date.empty()) start_date = "00000000";
-        if (end_date.empty()) end_date = "99999999";
-
-        return value >= start_date && value <= end_date;
-    }
 };
 
 // =============================================================================

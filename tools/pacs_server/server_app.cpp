@@ -681,7 +681,12 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_create(
 
     auto result = database_->create_mpps(
         instance.sop_instance_uid,
-        instance.station_ae
+        instance.station_ae,
+        instance.data.get_string(core::tags::modality),
+        instance.data.get_string(core::tags::study_instance_uid),
+        instance.data.get_string(core::tags::accession_number),
+        instance.data.get_string(core::tags::performed_procedure_step_start_date) +
+            instance.data.get_string(core::tags::performed_procedure_step_start_time)
     );
 
     if (result.is_err()) {
@@ -693,7 +698,7 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_create(
 
 network::Result<std::monostate> pacs_server_app::handle_mpps_set(
     const std::string& sop_instance_uid,
-    [[maybe_unused]] const core::dicom_dataset& modifications,
+    const core::dicom_dataset& modifications,
     services::mpps_status new_status) {
 
     std::cout << log_prefix() << "MPPS N-SET: " << sop_instance_uid
@@ -701,7 +706,9 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_set(
 
     auto result = database_->update_mpps(
         sop_instance_uid,
-        std::string(services::to_string(new_status))
+        std::string(services::to_string(new_status)),
+        modifications.get_string(services::mpps_tags::performed_procedure_step_end_date) +
+            modifications.get_string(services::mpps_tags::performed_procedure_step_end_time)
     );
 
     if (result.is_err()) {

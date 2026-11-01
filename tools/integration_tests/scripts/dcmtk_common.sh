@@ -447,18 +447,27 @@ cleanup_dcmtk_temp_dir() {
 # Usage: find_available_port [start_port]
 # Outputs: Available port number
 find_available_port() {
-    local start_port="${1:-41200}"
-    local port="${start_port}"
+    # A closed listener can leave TIME_WAIT sockets, and a process can bind
+    # before listening. DCMTK cannot necessarily reuse either port. Test a
+    # wildcard bind without SO_REUSEADDR rather than only probing connections.
+    # This is discovery, not reservation: start_server still checks actual startup.
+    python3 - "${1:-41200}" <<'PY'
+import socket
+import sys
 
-    while is_port_listening "${port}"; do
-        port=$((port + 1))
-        if [[ "${port}" -gt $((start_port + 100)) ]]; then
-            log_fail "Could not find available port"
-            return 1
-        fi
-    done
-
-    echo "${port}"
+start = int(sys.argv[1])
+for port in range(start, min(start + 101, 65536)):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(('0.0.0.0', port))
+        except OSError:
+            continue
+        print(port)
+        break
+else:
+    print('Could not find a bindable test port', file=sys.stderr)
+    raise SystemExit(1)
+PY
 }
 
 # =============================================================================

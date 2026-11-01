@@ -421,16 +421,20 @@ worklist_item worklist_scu::parse_worklist_item(
 
     // Requested Procedure attributes
     item.requested_procedure_id = ds.get_string(tags::requested_procedure_id);
-    item.requested_procedure_description = ds.get_string(tags::study_description);
+    item.requested_procedure_description = ds.get_string(tags::requested_procedure_description);
 
-    // Scheduled Procedure Step attributes (flat structure)
-    item.scheduled_station_ae = ds.get_string(tags::scheduled_station_ae_title);
-    item.modality = ds.get_string(tags::modality);
-    item.scheduled_date = ds.get_string(tags::scheduled_procedure_step_start_date);
-    item.scheduled_time = ds.get_string(tags::scheduled_procedure_step_start_time);
-    item.scheduled_procedure_step_id = ds.get_string(tags::scheduled_procedure_step_id);
-    item.scheduled_procedure_step_description =
-        ds.get_string(tags::scheduled_procedure_step_description);
+    // PS3.4 K.6-1: a worklist response represents one scheduled step.
+    const auto* steps = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+    if (steps != nullptr && steps->size() == 1) {
+        const auto& step = steps->front();
+        item.scheduled_station_ae = step.get_string(tags::scheduled_station_ae_title);
+        item.modality = step.get_string(tags::modality);
+        item.scheduled_date = step.get_string(tags::scheduled_procedure_step_start_date);
+        item.scheduled_time = step.get_string(tags::scheduled_procedure_step_start_time);
+        item.scheduled_procedure_step_id = step.get_string(tags::scheduled_procedure_step_id);
+        item.scheduled_procedure_step_description =
+            step.get_string(tags::scheduled_procedure_step_description);
+    }
 
     // Store original dataset for full access
     item.dataset = ds;
@@ -470,20 +474,22 @@ core::dicom_dataset worklist_scu::build_query_dataset(
 
     // Requested Procedure attributes
     ds.set_string(tags::requested_procedure_id, vr_type::SH, keys.requested_procedure_id);
-    ds.set_string(tags::study_description, vr_type::LO, keys.requested_procedure_description);
+    ds.set_string(tags::requested_procedure_description, vr_type::LO, keys.requested_procedure_description);
 
-    // Scheduled Procedure Step attributes (flat structure)
-    ds.set_string(tags::scheduled_station_ae_title, vr_type::AE, keys.scheduled_station_ae);
-    ds.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, keys.scheduled_date);
-    ds.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, keys.scheduled_time);
-    ds.set_string(tags::modality, vr_type::CS, keys.modality);
-    ds.set_string(tags::scheduled_performing_physician_name, vr_type::PN, keys.scheduled_physician);
-    ds.set_string(tags::scheduled_procedure_step_id, vr_type::SH, keys.scheduled_procedure_step_id);
+    dicom_dataset step;
+    step.set_string(tags::scheduled_station_ae_title, vr_type::AE, keys.scheduled_station_ae);
+    step.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, keys.scheduled_date);
+    step.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, keys.scheduled_time);
+    step.set_string(tags::modality, vr_type::CS, keys.modality);
+    step.set_string(tags::scheduled_performing_physician_name, vr_type::PN, keys.scheduled_physician);
+    step.set_string(tags::scheduled_procedure_step_id, vr_type::SH, keys.scheduled_procedure_step_id);
 
     // Additional return keys
-    ds.set_string(tags::scheduled_procedure_step_description, vr_type::LO, "");
-    ds.set_string(tags::scheduled_station_name, vr_type::SH, "");
-    ds.set_string(tags::scheduled_procedure_step_location, vr_type::SH, "");
+    step.set_string(tags::scheduled_procedure_step_description, vr_type::LO, "");
+    step.set_string(tags::scheduled_station_name, vr_type::SH, "");
+    step.set_string(tags::scheduled_procedure_step_location, vr_type::SH, "");
+
+    ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence).push_back(std::move(step));
 
     return ds;
 }

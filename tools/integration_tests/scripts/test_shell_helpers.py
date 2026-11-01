@@ -114,6 +114,36 @@ class ShellHelpers(unittest.TestCase):
             with socket.create_connection(("127.0.0.1", port), timeout=1):
                 pass
 
+    def assert_allocator_skips(self, port):
+        result = self.shell('find_available_port "$3"', port)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        selected = [int(line) for line in result.stdout.splitlines() if line.isdigit()]
+        self.assertEqual(len(selected), 1, result.stdout)
+        self.assertGreater(selected[0], port)
+        with socket.socket() as check:
+            check.bind(('0.0.0.0', selected[0]))
+
+    def test_allocator_skips_bound_port_before_listen(self):
+        with socket.socket() as bound:
+            bound.bind(('127.0.0.1', 0))
+            self.assert_allocator_skips(bound.getsockname()[1])
+
+    def test_allocator_skips_time_wait_after_listener_closes(self):
+        with socket.socket() as listener:
+            listener.bind(('127.0.0.1', 0))
+            listener.listen()
+            port = listener.getsockname()[1]
+            with socket.create_connection(('127.0.0.1', port), timeout=1) as client:
+                accepted, _ = listener.accept()
+                # Server actively closes; the client acknowledges EOF before
+                # closing so the server port enters TIME_WAIT deterministically.
+                accepted.close()
+                self.assertEqual(client.recv(1), b'')
+        with socket.socket() as check:
+            with self.assertRaises(OSError):
+                check.bind(('0.0.0.0', port))
+        self.assert_allocator_skips(port)
+
     def test_server_crash_during_cleanup_fails_suite(self):
         with socket.socket() as sock:
             sock.bind(("127.0.0.1", 0))

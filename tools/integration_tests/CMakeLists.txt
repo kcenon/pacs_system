@@ -16,6 +16,7 @@ add_executable(pacs_integration_e2e
     test_connectivity.cpp
     test_store_query.cpp
     test_worklist_mpps.cpp
+    test_normalized_dispatch.cpp
     test_stress.cpp
     test_error_recovery.cpp
     test_xa_storage.cpp

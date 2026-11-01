@@ -249,6 +249,21 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_element
     auto value_data = data.subspan(0, length);
     data = data.subspan(length);
 
+    // Defined-length SQ values contain the same item stream as undefined-
+    // length sequences, bounded by the value length instead of a delimiter.
+    // DIMSE peers such as DCMTK use this representation for MWL responses.
+    if (vr == vr_type::SQ) {
+        core::dicom_element sequence{tag, vr_type::SQ};
+        while (!value_data.empty()) {
+            auto item = decode_sequence_item(value_data);
+            if (item.is_err()) {
+                return item.error();
+            }
+            sequence.sequence_items().push_back(std::move(item.value()));
+        }
+        return sequence;
+    }
+
     return core::dicom_element(tag, vr, value_data);
 }
 
@@ -367,7 +382,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
         core::dicom_dataset item;
 
         while (!data.empty()) {
-            if (data.size() < 4) {
+            if (data.size() < 8) {
                 return make_codec_error<core::dicom_dataset>(
                     kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for item delimiter check");
@@ -380,7 +395,7 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
             if (is_item_delimiter(elem_tag)) {
                 // Skip delimiter
                 data = data.subspan(8);
-                break;
+                return item;
             }
 
             auto elem_result = decode_element(data);
@@ -393,7 +408,9 @@ implicit_vr_codec::result<core::dicom_dataset> implicit_vr_codec::decode_sequenc
             item.insert(std::move(elem_result.value()));
         }
 
-        return item;
+        return make_codec_error<core::dicom_dataset>(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Missing Item Delimitation Item");
     }
 
     // Explicit item length

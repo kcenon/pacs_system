@@ -229,9 +229,9 @@ TEST_CASE("N-SET encode/decode", "[dimse][message][n-set][codec]") {
     REQUIRE(decoded.is_ok());
 
     CHECK(decoded.value().command() == command_field::n_set_rq);
-    // Note: UI VR may have trailing space padding for even length per DICOM
-    CHECK(decoded.value().requested_sop_class_uid().starts_with(mpps_class));
-    CHECK(decoded.value().requested_sop_instance_uid().starts_with(instance_uid));
+    // Command UIDs must be returned without their wire padding.
+    CHECK(decoded.value().requested_sop_class_uid() == mpps_class);
+    CHECK(decoded.value().requested_sop_instance_uid() == instance_uid);
 }
 
 // ============================================================================
@@ -550,8 +550,8 @@ TEST_CASE("N-DELETE encode/decode", "[dimse][message][n-delete][codec]") {
 
     CHECK(decoded.value().command() == command_field::n_delete_rq);
     CHECK(decoded.value().message_id() == 99);
-    // Note: UI VR may have trailing space padding for even length per DICOM
-    CHECK(decoded.value().requested_sop_class_uid().starts_with(print_class));
+    // Command UIDs must be returned without their wire padding.
+    CHECK(decoded.value().requested_sop_class_uid() == print_class);
     CHECK(decoded.value().requested_sop_instance_uid().starts_with(session_uid));
 }
 

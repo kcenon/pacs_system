@@ -109,9 +109,8 @@ private:
     /**
      * @brief Extract worklist item data from dataset
      *
-     * @note This implementation uses a flat dataset structure without nested
-     * sequences. The Scheduled Procedure Step attributes are extracted directly
-     * from the main dataset.
+     * Scheduled Procedure Step fields come from the single sequence item
+     * required by PS3.4 K.6-1. Root-level lookalikes are not used as fallbacks.
      */
     [[nodiscard]] worklist_item extract_item(
         const kcenon::pacs::core::dicom_dataset& ds) const {
@@ -130,13 +129,16 @@ private:
         item.study_uid = ds.get_string(tags::study_instance_uid);
         item.requested_procedure_id = ds.get_string(tags::requested_procedure_id);
 
-        // Scheduled Procedure Step attributes (flat structure)
-        item.scheduled_date = ds.get_string(tags::scheduled_procedure_step_start_date);
-        item.scheduled_time = ds.get_string(tags::scheduled_procedure_step_start_time);
-        item.modality = ds.get_string(tags::modality);
-        item.station_ae = ds.get_string(tags::scheduled_station_ae_title);
-        item.step_id = ds.get_string(tags::scheduled_procedure_step_id);
-        item.step_description = ds.get_string(tags::scheduled_procedure_step_description);
+        const auto* steps = ds.get_sequence(tags::scheduled_procedure_step_sequence);
+        if (steps != nullptr && steps->size() == 1) {
+            const auto& step = steps->front();
+            item.scheduled_date = step.get_string(tags::scheduled_procedure_step_start_date);
+            item.scheduled_time = step.get_string(tags::scheduled_procedure_step_start_time);
+            item.modality = step.get_string(tags::modality);
+            item.station_ae = step.get_string(tags::scheduled_station_ae_title);
+            item.step_id = step.get_string(tags::scheduled_procedure_step_id);
+            item.step_description = step.get_string(tags::scheduled_procedure_step_description);
+        }
 
         return item;
     }

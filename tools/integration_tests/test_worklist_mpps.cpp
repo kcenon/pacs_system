@@ -22,6 +22,7 @@
 #include "kcenon/pacs/services/mpps_scp.h"
 #include "kcenon/pacs/services/verification_scp.h"
 #include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/services/worklist_scu.h"
 
 #include <mutex>
 #include <vector>
@@ -71,6 +72,8 @@ public:
 
         server_ = std::make_unique<dicom_server>(config);
     }
+
+    ~ris_mock_server() { stop(); }
 
     bool initialize() {
         // Register Verification SCP
@@ -165,27 +168,37 @@ private:
         for (const auto& procedure : scheduled_procedures_) {
             bool matches = true;
 
+            const dicom_dataset empty_step;
+            const auto* query_steps = query_keys.get_sequence(tags::scheduled_procedure_step_sequence);
+            const auto& query_step = query_steps != nullptr && query_steps->size() == 1
+                ? query_steps->front() : empty_step;
+            const auto* result_steps = procedure.get_sequence(tags::scheduled_procedure_step_sequence);
+            if (result_steps == nullptr || result_steps->size() != 1) { continue; }
+            const auto& procedure_step = result_steps->front();
+            const auto patient_id = query_keys.get_string(tags::patient_id);
+            if (!patient_id.empty() && patient_id != procedure.get_string(tags::patient_id)) { continue; }
+
             // Check filter criteria
-            auto query_modality = query_keys.get_string(tags::modality);
+            auto query_modality = query_step.get_string(tags::modality);
             if (!query_modality.empty()) {
-                auto proc_modality = procedure.get_string(tags::modality);
+                auto proc_modality = procedure_step.get_string(tags::modality);
                 if (proc_modality != query_modality) {
                     matches = false;
                 }
             }
 
-            auto query_date = query_keys.get_string(tags::scheduled_procedure_step_start_date);
+            auto query_date = query_step.get_string(tags::scheduled_procedure_step_start_date);
             if (!query_date.empty()) {
-                auto proc_date = procedure.get_string(tags::scheduled_procedure_step_start_date);
+                auto proc_date = procedure_step.get_string(tags::scheduled_procedure_step_start_date);
                 // Simple exact match (production would handle date ranges)
                 if (proc_date != query_date && query_date != "*") {
                     matches = false;
                 }
             }
 
-            auto query_station = query_keys.get_string(tags::scheduled_station_ae_title);
+            auto query_station = query_step.get_string(tags::scheduled_station_ae_title);
             if (!query_station.empty()) {
-                auto proc_station = procedure.get_string(tags::scheduled_station_ae_title);
+                auto proc_station = procedure_step.get_string(tags::scheduled_station_ae_title);
                 if (proc_station != query_station && query_station != "*") {
                     matches = false;
                 }
@@ -278,12 +291,15 @@ dicom_dataset create_scheduled_procedure(
     ds.set_string(tags::patient_sex, vr_type::CS, "M");
 
     // Scheduled Procedure Step
-    ds.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, scheduled_date);
-    ds.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, scheduled_time);
-    ds.set_string(tags::modality, vr_type::CS, modality);
-    ds.set_string(tags::scheduled_station_ae_title, vr_type::AE, station_ae);
-    ds.set_string(tags::scheduled_procedure_step_description, vr_type::LO, procedure_desc);
-    ds.set_string(tags::scheduled_procedure_step_id, vr_type::SH, generate_uid());
+    dicom_dataset step;
+    step.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, scheduled_date);
+    step.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, scheduled_time);
+    step.set_string(tags::modality, vr_type::CS, modality);
+    step.set_string(tags::scheduled_station_ae_title, vr_type::AE, station_ae);
+    step.set_string(tags::scheduled_procedure_step_description, vr_type::LO, procedure_desc);
+    step.set_string(tags::scheduled_procedure_step_id, vr_type::SH, "SPS_" + patient_id);
+
+    ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence).push_back(std::move(step));
 
     // Requested Procedure
     ds.set_string(tags::requested_procedure_id, vr_type::SH, "RP_" + patient_id);
@@ -315,6 +331,56 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
     ris.add_scheduled_procedure(create_scheduled_procedure(
         "TEST^PATIENT3", "P003", "CT", "CT_SCANNER", "CT Abdomen", "20240202", "080000"));
 
+    SECTION("Typed SCU preserves all nested fields and matching keys") {
+        association_config config;
+        config.calling_ae_title = "MODALITY";
+        config.called_ae_title = ris.ae_title();
+        config.proposed_contexts = {{1, std::string(worklist_find_sop_class_uid),
+                                    {"1.2.840.10008.1.2.1"}}};
+        auto connected = association::connect("localhost", port, config, default_timeout());
+        REQUIRE(connected.is_ok());
+        auto& assoc = connected.value();
+        worklist_scu scu;
+        worklist_query_keys keys;
+        auto all = scu.query(assoc, keys);
+        REQUIRE(all.is_ok());
+        REQUIRE(all.value().is_success());
+        REQUIRE(all.value().items.size() == 3);
+        for (std::size_t i = 0; i < all.value().items.size(); ++i) {
+            const auto& item = all.value().items[i];
+            const auto patient_id = "P00" + std::to_string(i + 1);
+            CHECK(item.patient_id == patient_id);
+            CHECK(item.scheduled_procedure_step_id == "SPS_" + patient_id);
+            CHECK(item.scheduled_date == (i == 2 ? "20240202" : "20240201"));
+            CHECK(item.scheduled_time == (i == 0 ? "090000" : i == 1 ? "100000" : "080000"));
+            CHECK(item.modality == (i == 1 ? "MR" : "CT"));
+            CHECK(item.scheduled_station_ae == (i == 1 ? "MR_SCANNER" : "CT_SCANNER"));
+            CHECK_FALSE(item.requested_procedure_description.empty());
+            CHECK_FALSE(item.dataset.contains(tags::modality));
+        }
+        keys.modality = "CT";
+        auto ct = scu.query(assoc, keys);
+        REQUIRE(ct.is_ok());
+        REQUIRE(ct.value().items.size() == 2);
+        CHECK(ct.value().items[0].patient_id == "P001");
+        CHECK(ct.value().items[1].patient_id == "P003");
+        keys.scheduled_date = "20240201";
+        auto dated = scu.query(assoc, keys);
+        REQUIRE(dated.is_ok());
+        REQUIRE(dated.value().items.size() == 1);
+        CHECK(dated.value().items.front().patient_id == "P001");
+        keys.scheduled_station_ae = "MR_SCANNER";
+        auto none = scu.query(assoc, keys);
+        REQUIRE(none.is_ok());
+        CHECK(none.value().items.empty());
+        keys.modality = "MR";
+        auto mr = scu.query(assoc, keys);
+        REQUIRE(mr.is_ok());
+        REQUIRE(mr.value().items.size() == 1);
+        CHECK(mr.value().items.front().patient_id == "P002");
+        REQUIRE(assoc.release(default_timeout()).is_ok());
+    }
+
     SECTION("Query all scheduled procedures") {
         association_config config;
         config.calling_ae_title = "MODALITY";
@@ -336,9 +402,10 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         dicom_dataset query_keys;
         query_keys.set_string(tags::patient_name, vr_type::PN, "");
         query_keys.set_string(tags::patient_id, vr_type::LO, "");
-        query_keys.set_string(tags::modality, vr_type::CS, "");
-        query_keys.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, "");
-        query_keys.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
+        auto& query_step = query_keys.get_or_create_sequence(tags::scheduled_procedure_step_sequence).emplace_back();
+        query_step.set_string(tags::modality, vr_type::CS, "");
+        query_step.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, "");
+        query_step.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
 
         auto context_id = *assoc.accepted_context_id(worklist_find_sop_class_uid);
         auto find_rq = make_c_find_rq(1, worklist_find_sop_class_uid);
@@ -385,8 +452,9 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         // Query CT only
         dicom_dataset query_keys;
         query_keys.set_string(tags::patient_name, vr_type::PN, "");
-        query_keys.set_string(tags::modality, vr_type::CS, "CT");
-        query_keys.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
+        auto& query_step = query_keys.get_or_create_sequence(tags::scheduled_procedure_step_sequence).emplace_back();
+        query_step.set_string(tags::modality, vr_type::CS, "CT");
+        query_step.set_string(tags::scheduled_station_ae_title, vr_type::AE, "");
 
         auto context_id = *assoc.accepted_context_id(worklist_find_sop_class_uid);
         auto find_rq = make_c_find_rq(1, worklist_find_sop_class_uid);
@@ -411,7 +479,8 @@ TEST_CASE("Worklist query returns scheduled procedures", "[worklist][query]") {
         // Should return 2 CT procedures
         REQUIRE(results.size() == 2);
         for (const auto& result : results) {
-            REQUIRE(result.get_string(tags::modality) == "CT");
+            REQUIRE(result.get_sequence(tags::scheduled_procedure_step_sequence) != nullptr);
+            REQUIRE(result.get_sequence(tags::scheduled_procedure_step_sequence)->front().get_string(tags::modality) == "CT");
         }
 
         (void)assoc.release(default_timeout());
@@ -453,7 +522,8 @@ TEST_CASE("Complete MPPS workflow", "[worklist][mpps][workflow]") {
 
     dicom_dataset wl_query;
     wl_query.set_string(tags::patient_id, vr_type::LO, "MPPS001");
-    wl_query.set_string(tags::modality, vr_type::CS, "CT");
+    wl_query.get_or_create_sequence(tags::scheduled_procedure_step_sequence).emplace_back()
+        .set_string(tags::modality, vr_type::CS, "CT");
 
     auto wl_ctx = *wl_assoc.accepted_context_id(worklist_find_sop_class_uid);
     auto wl_rq = make_c_find_rq(1, worklist_find_sop_class_uid);

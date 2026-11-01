@@ -223,7 +223,9 @@
     "cli.qr.tcp",
     "cli.worklist.tcp",
     "cli.mpps.tcp",
-    "cli.pacs.tcp"
+    "cli.pacs.tcp",
+    "mwl.scp",
+    "mpps.protocol"
   ],
   "features": [
     {
@@ -378,10 +380,12 @@
       ],
       "interop": [
         "mwl.scu",
-        "mwl.sequence"
+        "mwl.sequence",
+        "mwl.scp",
+        "mpps.protocol"
       ],
       "gaps": [
-        "Independent MPPS N-CREATE/N-SET peer and MWL SCP roundtrip."
+        "Independent MPPS N-CREATE/N-SET reference implementation; controlled wire tests do not establish full SOP/IOD conformance."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1258",

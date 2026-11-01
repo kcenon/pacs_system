@@ -32,9 +32,6 @@ namespace {
 /// UID root for auto-generated MPPS UIDs
 constexpr const char* uid_root = "1.2.826.0.1.3680043.2.1545";
 
-/// Requested SOP Instance UID tag (used in N-SET command set)
-constexpr core::dicom_tag tag_requested_sop_instance_uid{0x0000, 0x1001};
-
 /**
  * @brief Create N-CREATE request message for MPPS
  */
@@ -61,17 +58,8 @@ network::dimse::dimse_message make_n_set_rq(
     std::string_view sop_instance_uid,
     core::dicom_dataset modifications) {
 
-    using namespace network::dimse;
-    using namespace encoding;
-
-    dimse_message msg{command_field::n_set_rq, message_id};
-    msg.set_affected_sop_class_uid(mpps_sop_class_uid);
-
-    // For N-SET, use Requested SOP Instance UID in command set
-    msg.command_set().set_string(
-        tag_requested_sop_instance_uid,
-        vr_type::UI,
-        std::string(sop_instance_uid));
+    auto msg = network::dimse::make_n_set_rq(
+        message_id, mpps_sop_class_uid, sop_instance_uid);
     msg.set_dataset(std::move(modifications));
 
     return msg;

@@ -4,6 +4,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include "kcenon/pacs/network/detail/request_context.h"
 #include <barrier>
 #include <future>
 #include <thread>
@@ -832,4 +833,63 @@ TEST_CASE("SCP request IDs have a bounded non-reusing lifetime", "[association][
         REQUIRE(result.value() == id);
     }
     CHECK(assoc.next_request_message_id().is_err());
+}
+
+TEST_CASE("Request dispatch validates command-specific SOP identity against negotiated context",
+          "[association][request-routing]") {
+    using namespace dimse;
+    auto assoc = response_test_association();
+    SECTION("Affected identity for composite and N-CREATE requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_c_echo_rq(1)).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_create_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+    }
+    SECTION("Requested identity for normalized requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_delete_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+    }
+    SECTION("wrong SOP class for accepted context") {
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
+    }
+    SECTION("unknown context") {
+        CHECK(detail::request_sop_class(assoc, 3, make_c_echo_rq(1)).is_err());
+    }
+    SECTION("missing Requested identity cannot fall back to Affected") {
+        auto msg = make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3");
+        msg.command_set().remove(tag_requested_sop_class_uid);
+        msg.set_affected_sop_class_uid(VERIFICATION_SOP_CLASS);
+        CHECK(detail::request_sop_class(assoc, 1, msg).is_err());
+    }
+    SECTION("conflicting command identities") {
+        auto msg = make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3");
+        msg.set_affected_sop_class_uid(CT_IMAGE_STORAGE);
+        CHECK(detail::request_sop_class(assoc, 1, msg).is_err());
+    }
+    SECTION("responses are not service requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_c_echo_rsp(1, status_success)).is_err());
+    }
+}
+
+TEST_CASE("Print Meta SOP contexts accept only their declared member SOP classes", "[association][request-routing]") {
+    using namespace dimse;
+    for (const auto& meta : {"1.2.840.10008.5.1.1.9", "1.2.840.10008.5.1.1.18"}) {
+        association_config proposed;
+        proposed.called_ae_title = "SCP";
+        proposed.calling_ae_title = "PEER";
+        proposed.proposed_contexts = {{1, meta, {EXPLICIT_VR_LE}}};
+        scp_config accepted;
+        accepted.ae_title = "SCP";
+        auto assoc = association::accept(association::propose(proposed).build_associate_rq(), accepted);
+        for (const auto& member : {"1.2.840.10008.5.1.1.1", "1.2.840.10008.5.1.1.2", "1.2.840.10008.5.1.1.16"}) {
+            auto result = detail::request_sop_class(assoc, 1, make_n_get_rq(1, member, "1.2.3"));
+            REQUIRE(result.is_ok());
+            CHECK(result.value() == meta);
+        }
+        const bool gray = std::string_view(meta) == "1.2.840.10008.5.1.1.9";
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1,
+              gray ? "1.2.840.10008.5.1.1.4" : "1.2.840.10008.5.1.1.4.1", "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1,
+              gray ? "1.2.840.10008.5.1.1.4.1" : "1.2.840.10008.5.1.1.4", "1.2.3")).is_err());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
+    }
 }

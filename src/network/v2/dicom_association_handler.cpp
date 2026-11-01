@@ -9,6 +9,7 @@
 
 #include "kcenon/pacs/network/v2/dicom_association_handler.h"
 #include "kcenon/pacs/network/detail/dimse_framing.h"
+#include "kcenon/pacs/network/detail/request_context.h"
 #include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
@@ -791,18 +792,14 @@ Result<std::monostate> dicom_association_handler::dispatch_to_service(
     if (!is_established()) {
         return error_info("Association closed before service dispatch");
     }
-    // Find the abstract syntax for this context
-    std::string abstract_syntax;
-    for (const auto& ctx : association_.accepted_contexts()) {
-        if (ctx.id == context_id) {
-            abstract_syntax = ctx.abstract_syntax;
-            break;
-        }
+    auto identity = detail::request_sop_class(association_, context_id, msg);
+    if (identity.is_err()) {
+        lock.unlock();
+        send_abort(abort_source::service_provider, abort_reason::invalid_pdu_parameter);
+        close_handler(false);
+        return identity.error();
     }
-
-    if (abstract_syntax.empty()) {
-        return error_info("Unknown presentation context ID");
-    }
+    const auto& abstract_syntax = identity.value();
 
     // Find service for this SOP class
     auto* service = find_service(abstract_syntax);

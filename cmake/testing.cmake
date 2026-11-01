@@ -89,6 +89,7 @@ if(PACS_BUILD_TESTS)
         tests/encoding/vr_info_test.cpp
         tests/encoding/implicit_vr_codec_test.cpp
         tests/encoding/explicit_vr_codec_test.cpp
+        tests/encoding/defined_length_sequence_test.cpp
         tests/encoding/byte_swap_test.cpp
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp

@@ -341,11 +341,67 @@ class Validation:
         items = result['worklistItems']
         require(result['resultCount']==3 and {i['patient']['id'] for i in items}=={'PAT001','PAT002','PAT003'},
                 'MWL patient IDs/count mismatch')
-        if sequences:
-            for item in items:
-                step = item['scheduledProcedureStep']
-                require(step['stationAETitle']=='MODALITY01' and step['modality'] in ('CT','MR','CR')
-                        and step['stepId'] and step['startDate'], 'Missing/malformed ScheduledProcedureStepSequence')
+        if not sequences:
+            return 'Three expected MWL patients returned'
+
+        fields = {'startDate': 'ScheduledProcedureStepStartDate',
+                  'startTime': 'ScheduledProcedureStepStartTime',
+                  'modality': 'Modality', 'stationAETitle': 'ScheduledStationAETitle',
+                  'stepId': 'ScheduledProcedureStepID',
+                  'description': 'ScheduledProcedureStepDescription'}
+        base_keys = ['PatientID=', 'PatientName='] + [
+            'ScheduledProcedureStepSequence[0].'+keyword+'=' for keyword in fields.values()]
+        comparisons = []
+
+        def compare(label, cli_filters=(), reference_filters=()):
+            directory = self.output/('mwl-reference-'+label)
+            directory.mkdir()
+            command = ['findscu', '-W', '-X', '-od', directory,
+                       '-aec', 'DCMTK_WLM', 'mwl-server', '11112']
+            for key in [*base_keys, *reference_filters]:
+                command += ['-k', key]
+            self.command(command)
+            expected = {}
+            for path in sorted(directory.glob('*.dcm')):
+                ds = pydicom.dcmread(path)
+                require('ScheduledProcedureStepSequence' in ds and
+                        len(ds.ScheduledProcedureStepSequence) == 1,
+                        'Reference MWL must contain exactly one scheduled step')
+                step = ds.ScheduledProcedureStepSequence[0]
+                patient_id = str(ds.PatientID)
+                require(patient_id not in expected, 'Duplicate reference MWL patient')
+                expected[patient_id] = {name: str(step.get(keyword, '')) for name, keyword in fields.items()}
+                require(all(expected[patient_id].values()), 'Reference MWL is missing scheduled-step values')
+            actual = json.loads(self.command(
+                [self.bin/'worklist_scu', '-aec', 'DCMTK_WLM', '--output', 'json',
+                 *cli_filters, 'mwl-server', '11112'], allowed=(0,) if expected else (1,)))
+            items = actual['worklistItems']
+            require(actual['resultCount'] == len(items) == len(expected), 'MWL filtered count mismatch: '+label)
+            received = {item['patient']['id']: item['scheduledProcedureStep'] for item in items}
+            require(len(received) == len(items), 'Duplicate PACS MWL patient')
+            require(received == expected, 'PACS/DCMTK nested MWL field mismatch: '+label)
+            comparisons.append(dict(query=label, patients=expected))
+            (self.output/'mwl-comparisons.json').write_text(json.dumps(comparisons, indent=2)+'\n')
+            return expected
+
+        baseline = compare('all')
+        require(set(baseline) == {'PAT001', 'PAT002', 'PAT003'}, 'Reference MWL patient set differs from locked fixture')
+        for modality in ('CT', 'MR', 'CR'):
+            compare('modality-'+modality, ['--modality', modality],
+                    ['ScheduledProcedureStepSequence[0].Modality='+modality])
+        first = baseline['PAT001']
+        for label, cli_option, keyword, value in [
+                ('station', '--station', 'ScheduledStationAETitle', first['stationAETitle']),
+                ('no-station', '--station', 'ScheduledStationAETitle', 'NO_SUCH_STATION'),
+                ('date', '--date', 'ScheduledProcedureStepStartDate', first['startDate']),
+                ('date-range', '--date', 'ScheduledProcedureStepStartDate', first['startDate']+'-'+first['startDate']),
+                ('time', '--time', 'ScheduledProcedureStepStartTime', first['startTime'])]:
+            compare(label, [cli_option, value], ['ScheduledProcedureStepSequence[0].'+keyword+'='+value])
+        compare('patient', ['--patient-id', 'PAT002'], ['PatientID=PAT002'])
+        compare('custom-step-id', ['-k', '0040,0009='+first['stepId']],
+                ['ScheduledProcedureStepSequence[0].ScheduledProcedureStepID='+first['stepId']])
+        return dict(tests=len(comparisons), failed=0, skipped=0,
+                    detail='PACS MWL fields and filtered results equal independently extracted DCMTK responses')
 
     @contextmanager
     def server(self, args, port, log_name=None):
@@ -370,6 +426,75 @@ class Validation:
                     except subprocess.TimeoutExpired:
                         os.killpg(p.pid,signal.SIGKILL)
                         p.wait()
+
+    def mpps_protocol(self):
+        directory = self.output/'mpps-protocol'
+        self.command(['python3', HERE/'tests/mpps_scp_protocol_probe.py',
+                      '--bin-dir', self.bin, '--output', directory], timeout=120)
+        result = json.loads((directory/'results.json').read_text())
+        require(len(result['cases']) == 15 and all(case['passed'] for case in result['cases']),
+                'Incomplete MPPS protocol/durability evidence')
+        return dict(tests=15, failed=0, skipped=0,
+                    detail='Public MPPS CLIs, controlled malformed wire peer, read-only SQLite state and process restart')
+
+    def mwl_scp(self):
+        directory = self.output/'mwl-scp'
+        directory.mkdir()
+        fields = {'scheduledProcedureStepStartDate': 'ScheduledProcedureStepStartDate',
+                  'scheduledProcedureStepStartTime': 'ScheduledProcedureStepStartTime',
+                  'modality': 'Modality', 'scheduledStationAeTitle': 'ScheduledStationAETitle',
+                  'scheduledProcedureStepId': 'ScheduledProcedureStepID',
+                  'scheduledProcedureStepDescription': 'ScheduledProcedureStepDescription'}
+        records = []
+        for index, (date, time_value) in enumerate([
+                ('20260705', '090000'), ('20260705', '100000'), ('20260706', '080000'),
+                ('20260707', '180000'), ('20260707', '190000')], 1):
+            records.append(dict(patientId='SCP'+str(index), patientName='WORKLIST^'+str(index),
+                                scheduledProcedureStepStartDate=date, scheduledProcedureStepStartTime=time_value,
+                                scheduledStationAeTitle='CT_STATION', modality='CT',
+                                scheduledProcedureStepId='STEP'+str(index),
+                                scheduledProcedureStepDescription='Synthetic CT step'))
+        source = directory/'worklist.json'
+        source.write_text(json.dumps(records, indent=2)+'\n')
+        queries = [
+            ('all', {}, {'SCP1', 'SCP2', 'SCP3', 'SCP4', 'SCP5'}),
+            ('modality', {'Modality': 'CT'}, {'SCP1', 'SCP2', 'SCP3', 'SCP4', 'SCP5'}),
+            ('no-modality', {'Modality': 'MR'}, set()),
+            ('station', {'ScheduledStationAETitle': 'CT_STATION'}, {'SCP1', 'SCP2', 'SCP3', 'SCP4', 'SCP5'}),
+            ('no-station', {'ScheduledStationAETitle': 'NO_STATION'}, set()),
+            ('date', {'ScheduledProcedureStepStartDate': '20260706'}, {'SCP3'}),
+            ('time', {'ScheduledProcedureStepStartTime': '080000'}, {'SCP3'}),
+            ('step', {'ScheduledProcedureStepID': 'STEP4'}, {'SCP4'}),
+            ('continuous-range', {'ScheduledProcedureStepStartDate': '20260705-20260707',
+                                  'ScheduledProcedureStepStartTime': '100000-180000'}, {'SCP2', 'SCP3', 'SCP4'})]
+        evidence = []
+        with self.server([self.bin/'worklist_scp', '22510', 'PACS_MWL', '--worklist-file', source], 22510) as process:
+            for label, filters, expected_ids in queries:
+                extracted = directory/label
+                extracted.mkdir()
+                args = ['findscu', '-W', '-X', '-od', extracted, '-aec', 'PACS_MWL',
+                        '127.0.0.1', '22510', '-k', 'PatientID=']
+                for keyword in fields.values():
+                    args += ['-k', 'ScheduledProcedureStepSequence[0].'+keyword+'='+filters.get(keyword, '')]
+                self.command(args)
+                actual = {}
+                for path in extracted.glob('*.dcm'):
+                    ds = pydicom.dcmread(path)
+                    require(len(ds.ScheduledProcedureStepSequence) == 1, 'Missing/ambiguous scheduled step')
+                    require('Modality' not in ds and 'ScheduledProcedureStepID' not in ds,
+                            'PACS worklist SCP flattened scheduled-step fields')
+                    patient = str(ds.PatientID)
+                    require(patient not in actual, 'Duplicate worklist response')
+                    step = ds.ScheduledProcedureStepSequence[0]
+                    actual[patient] = {key: str(step.get(keyword, '')) for key, keyword in fields.items()}
+                expected = {row['patientId']: {key: row[key] for key in fields}
+                            for row in records if row['patientId'] in expected_ids}
+                require(actual == expected, 'PACS MWL SCP differs from declared fixture: '+label)
+                evidence.append(dict(query=label, patients=actual))
+                (directory/'comparisons.json').write_text(json.dumps(evidence, indent=2)+'\n')
+        require(process.returncode == 0, 'Worklist SCP did not shut down cleanly')
+        return dict(tests=len(queries), failed=0, skipped=0,
+                    detail='DCMTK findscu compares nested PACS worklist results to independently declared fixtures')
 
     def echo_scp(self):
         with self.server([self.bin/'echo_scp','22501','PACS_ECHO'],22501) as process:
@@ -601,6 +726,8 @@ class Validation:
             self.case('get.'+mod,lambda mod=mod:self.get_scu(mod),requires=['store.primary'])
         self.case('mwl.scu',self.mwl,requires=['peer.preflight'])
         self.case('mwl.sequence',lambda:self.mwl(True),requires=['mwl.scu'])
+        self.case('mwl.scp', self.mwl_scp, requires=['peer.preflight'])
+        self.case('mpps.protocol', self.mpps_protocol)
         self.case('echo.scp',self.echo_scp,requires=['peer.preflight'])
         self.case('store.scp',self.store_scp,requires=['fixtures','peer.preflight'])
         for name,binary in [('qr','qr_scp'),('worklist','worklist_scp'),('mpps','mpps_scp'),('pacs','pacs_server')]:

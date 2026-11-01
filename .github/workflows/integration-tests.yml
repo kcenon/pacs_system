@@ -860,7 +860,8 @@ jobs:
           netcat-openbsd \
           lsof \
           dcmtk \
-          python3
+          python3 \
+          python3-pydicom
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -897,6 +898,11 @@ jobs:
       working-directory: pacs_system
       run: python3 tools/integration_tests/scripts/test_recursive_anonymization.py build
 
+    - name: Verify MPPS protocol and durable state
+      working-directory: pacs_system
+      run: python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py --bin-dir build/bin --output build/test-results/mpps-protocol
+      timeout-minutes: 3
+
     - name: Run Binary Integration Tests
       id: binary_tests
       working-directory: pacs_system
@@ -904,19 +910,12 @@ jobs:
       run: |
         bash tools/integration_tests/scripts/run_all_binary_tests.sh build --verbose 2>&1 | tee build/binary-shell.log
       timeout-minutes: 10
-      # #1258 fixes script contracts and real TLS. An odd-length MPPS UID
-      # retains its UI padding NUL during N-SET and returns 0xc001 (#1316).
-      # Remove this allowance after #1316 and the #1258 aggregate rerun pass.
-      continue-on-error: true
 
     - name: Record binary integration test outcome
       if: always()
       run: |
         outcome='${{ steps.binary_tests.outcome }}'
-        echo "Binary integration tests: ${outcome} (MPPS prerequisite #1316; acceptance #1258)" >> "$GITHUB_STEP_SUMMARY"
-        if [ "$outcome" = failure ]; then
-          echo "::warning title=MPPS prerequisite (#1316)::Binary aggregate failed; #1258 remains incomplete until MPPS and aggregate acceptance pass"
-        fi
+        echo "Binary integration tests: ${outcome}" >> "$GITHUB_STEP_SUMMARY"
 
     - name: Upload binary integration evidence
       if: always()
@@ -927,6 +926,7 @@ jobs:
           pacs_system/build/binary-shell.log
           pacs_system/build/test-results/shell/
           pacs_system/build/test-results/anonymization/
+          pacs_system/build/test-results/mpps-protocol/
         retention-days: 30
 
   # ============================================================================

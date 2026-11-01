@@ -372,3 +372,49 @@ into the session callback lock. Rejected/shutdown-time connections clear the
 adapter's self-capturing receive/error callbacks while preserving disconnection
 cleanup. The `shutdown-race` protocol case overlaps a blocked C-GET with connection
 churn and SIGTERM; run it with leak detection enabled.
+
+### Nested worklists and normalized request identity (#1316)
+
+`mwl.sequence` compares all six scheduled-step fields for the three pinned MWL
+patients with DICOM response files independently extracted by DCMTK `findscu`.
+Eleven queries cover modality, station, no matches, date/range, time, patient and
+custom step ID. `mwl.scp` sends nine DCMTK queries to the public `worklist_scp`
+using a separate declared fixture, including a continuous date/time range crossing
+midnight. Scheduled-step matching and return keys live inside the single
+Scheduled Procedure Step Sequence item (PS3.4 K.6.1.2.2). Both DIMSE VR decoders
+parse defined-length sequences as well as undefined-length sequences.
+
+`mpps.protocol` runs the public `pacs_server` and `mpps_scu` in separate processes.
+Fixed odd/even UIDs cover completion and discontinuation, immutable terminal
+states and restart persistence. The oracle opens SQLite read-only; only network
+operations create/update records. Seven malformed wire requests test wrong SOP,
+wrong/unknown context, conflicting or substituted Affected fields and absent
+Requested Instance UID, followed by a successful C-ECHO. Run it directly with:
+
+```sh
+python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py \
+  --bin-dir /path/to/build/bin --output /tmp/mpps-protocol-new-run
+```
+
+The output directory must be new. Python requires pydicom. The probe preserves
+command arguments, exits, output, command bytes, association responses, server
+logs and before/after database rows. Required binary CI runs this probe before the
+shell aggregate. Its controlled malformed peer is not an independent MPPS
+reference implementation or a full MPPS IOD conformance test.
+
+Catch2 `[dispatch]` runs actual retained v1 dispatch with file-backed database
+state and v2 dispatch over TCP, including database reopen, fixed UID parity,
+terminal rejection, N-GET routing and wrong-context rejection. The v1 transport
+is explicitly an in-process API; it is not external network evidence. Dispatch
+uses Requested SOP Class for N-GET/N-SET/N-ACTION/N-DELETE and Affected SOP Class
+for commands that require it. Command identity must agree with the negotiated
+context; Print Meta SOP contexts accept only their declared member SOP Classes.
+Other normalized service builders and full service validation remain in #1320.
+These focused cases do not establish the complete multi-profile validation gate.
+
+The shell port allocator checks a wildcard bind without address reuse, so bound
+but non-listening ports and TCP TIME_WAIT are excluded. Startup remains an actual
+required operation: discovery cannot reserve a port across unrelated processes.
+The #1258 aggregate CI allowance was removed after the deterministic MPPS probe,
+both aggregate modes and all four DCMTK shell suites passed locally. Hosted CI
+still supplies its own evidence; these local runs do not stand in for it.

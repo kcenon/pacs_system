@@ -201,26 +201,18 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
     }
 
     // Verify the SOP Class is MPPS
-    auto sop_class_uid = request.affected_sop_class_uid();
-    if (sop_class_uid.empty()) {
-        // For N-SET, use requested SOP class if affected is empty
-        sop_class_uid = request.command_set().get_string(
-            tag_requested_sop_class_uid);
-    }
-
-    if (sop_class_uid != mpps_sop_class_uid) {
+    if (request.requested_sop_class_uid() != mpps_sop_class_uid ||
+        !request.affected_sop_class_uid().empty()) {
         return send_n_set_response(
             assoc, context_id, request.message_id(),
             "", status_refused_sop_class_not_supported);
     }
 
-    // Get the SOP Instance UID (from Requested SOP Instance UID for N-SET)
-    auto sop_instance_uid = request.command_set().get_string(
-        tag_requested_sop_instance_uid);
-
-    if (sop_instance_uid.empty()) {
-        // Try affected SOP instance UID as fallback
-        sop_instance_uid = request.affected_sop_instance_uid();
+    // N-SET requires Requested SOP Instance UID; Affected is not a fallback.
+    auto sop_instance_uid = request.requested_sop_instance_uid();
+    if (!request.affected_sop_instance_uid().empty()) {
+        return send_n_set_response(assoc, context_id, request.message_id(),
+                                   sop_instance_uid, status_error_cannot_understand);
     }
 
     if (sop_instance_uid.empty()) {
