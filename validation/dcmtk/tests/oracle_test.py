@@ -81,6 +81,22 @@ class OracleTests(unittest.TestCase):
         self.v.case('timeout',lambda:self.v.command([sys.executable,'-c','import time; time.sleep(10)'],timeout=.1))
         self.assertEqual([r['status'] for r in self.v.results],['failed','failed'])
         self.assertIn('exit 124',self.v.results[-1]['detail'])
+        self.assertEqual(self.v.command_results[-1]['outcome'],'timeout')
+        self.assertEqual(self.v.command_results[-1]['returncode'],-9)
+
+    def test_missing_executable_and_signal_preserve_valid_parent_report(self):
+        import json
+        import xml.etree.ElementTree as ET
+        self.v.case('missing',lambda:self.v.command(['/does-not-exist/pacs-1311']))
+        self.v.case('signal',lambda:self.v.command([sys.executable,'-c',
+                    'import os,signal; os.kill(os.getpid(),signal.SIGTERM)']))
+        self.assertEqual([r['status'] for r in self.v.results],['failed','failed'])
+        self.assertEqual([r['outcome'] for r in self.v.command_results],['spawn_error','signal'])
+        self.assertIsNone(self.v.command_results[0]['returncode'])
+        self.assertEqual(self.v.command_results[1]['returncode'],-15)
+        ET.parse(self.v.output/'results.xml')
+        payload=json.loads((self.v.output/'results.json').read_text())
+        self.assertEqual(len(payload['commands']),2)
 
     def test_zero_and_skipped_component_cannot_pass(self):
         self.v.case('empty',lambda:dict(tests=0,failed=0,skipped=0))

@@ -49,23 +49,41 @@ class Validation:
         self.data, self.paths = {}, {}
         self.codec = CODECS[args.profile]
         self.test_inventory = None
+        self.command_results = []
 
     def command(self, args, timeout=30, allowed=(0,), env=None):
         args = [str(x) for x in args]
+        event = dict(case_id=self.current, command=args, timeout_seconds=timeout,
+                     expected_exit_codes=list(allowed), returncode=None, outcome='spawn_error')
         with (self.output/f'{self.current}.log').open('a') as log:
             log.write('COMMAND '+json.dumps(args)+'\n')
             log.flush()
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 start_new_session=True, env=env)
             try:
-                stdout, stderr = p.communicate(timeout=timeout)
-                rc = p.returncode
-            except subprocess.TimeoutExpired:
-                os.killpg(p.pid, signal.SIGKILL)
-                stdout, stderr = p.communicate()
-                rc = 124
-            log.write(stdout.decode(errors='replace')+stderr.decode(errors='replace'))
-            log.write(f'\nEXIT {rc}\n')
+                p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                     start_new_session=True, env=env)
+                try:
+                    stdout, stderr = p.communicate(timeout=timeout)
+                    rc = p.returncode
+                    event['outcome'] = 'signal' if rc < 0 else 'exited'
+                except subprocess.TimeoutExpired:
+                    try:
+                        os.killpg(p.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    stdout, stderr = p.communicate()
+                    rc = 124
+                    event['outcome'] = 'timeout'
+                event.update(returncode=p.returncode, reported_exit_code=rc)
+                log.write(stdout.decode(errors='replace')+stderr.decode(errors='replace'))
+                log.write(f'\nEXIT {rc}\n')
+            except OSError as exc:
+                event.update(error=str(exc), errno=exc.errno)
+                log.write(f'SPAWN ERROR {exc}\n')
+                raise
+            finally:
+                self.command_results.append(event)
+                with (self.output/'commands.jsonl').open('a') as records:
+                    records.write(json.dumps(event)+'\n')
         require(rc in allowed, f'exit {rc}: {args[0]}; see {self.current}.log')
         return stdout.decode(errors='replace')
 
@@ -105,7 +123,8 @@ class Validation:
         payload = dict(schema_version=1, profile=self.args.profile,
                        source_revision=self.args.source_revision, source_digest=self.args.source_digest,
                        peer_revision=json.loads((HERE/'lock.json').read_text())['revision'],
-                       manifest_digest=digest(HERE/'features.json'), cases=self.results)
+                       manifest_digest=digest(HERE/'features.json'), cases=self.results,
+                       commands=self.command_results)
         if self.test_inventory is not None:
             payload['test_inventory'] = self.test_inventory
         (self.output/'results.json').write_text(json.dumps(payload,indent=2)+'\n')

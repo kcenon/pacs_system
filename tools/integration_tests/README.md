@@ -849,8 +849,16 @@ The scripts use multiple fallback methods for detecting listening ports:
 ### Process Management
 
 The C++ `process_launcher` class handles platform differences:
-- POSIX: `fork()` + `exec()`, `kill()`, `waitpid()`
+- POSIX: `posix_spawnp()` with default signal handlers and a dedicated process
+  group, bounded output capture, `kill()`, and `waitpid()`. A failed spawn returns
+  immediately; a child never runs inherited Catch2/reporting shutdown handlers.
 - Windows: `CreateProcess()`, `TerminateProcess()`
+
+The integration executable reserves stdout for Catch2, including discovery and
+XML output. Its DCMTK echo-server helpers use `storescp`, which supports C-ECHO;
+DCMTK does not provide an `echoscp` executable. Missing DCMTK prerequisites are
+reported as unavailable, while a server failing to start after detection fails
+the test instead of being skipped.
 
 ### Timeouts
 

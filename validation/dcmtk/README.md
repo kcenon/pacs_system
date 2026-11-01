@@ -79,6 +79,8 @@ Each profile directory contains:
 
 - `evidence/results.json` and `results.xml`: scenario/component outcomes;
 - `evidence/*.log` and component JUnit files: command and assertion details;
+- `commands.jsonl` (driver and profile evidence): expected exit codes, actual exit
+  or signal, timeout versus spawn failure, and the associated command/case;
 - `evidence/fixture-manifest.json`: expected identifiers and complete pixel hashes;
 - `evidence/originals`, `inputs` and received objects: synthetic reproduction data;
 - `peers.log`, `startup.log`, `cleanup.log`, and `compose.json`: environment evidence.
@@ -145,3 +147,9 @@ PACS-specific TLS and retrieval tests have their own mandatory result IDs.
 The native-fixture baseline must not run with forced compressed outgoing C-MOVE:
 DCMTK's archive forwards precompressed data but does not encode native data on
 demand. The compressed peer suite verifies this supported path before testing PACS.
+
+Process-launch failures remain explicit failed cases. POSIX test utilities use
+`posix_spawnp` with reset signal handlers and an owned process group, report missing
+executables immediately, and reap terminated children. The integration executable
+lets Catch2 own stdout so listing/reporting never includes a decorative banner.
+Malformed XML is rejected in place; the validator never repairs it into a pass.

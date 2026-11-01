@@ -22,6 +22,59 @@ using namespace kcenon::pacs::integration_test;
 // DCMTK Availability Tests
 // =============================================================================
 
+TEST_CASE("process launcher reports a missing executable immediately", "[process][utility]") {
+    const auto started = std::chrono::steady_clock::now();
+    auto result = process_launcher::run("pacs-nonexistent-test-executable-1311", {},
+                                        std::chrono::seconds{5});
+    REQUIRE(result.exit_code != 0);
+    REQUIRE_FALSE(result.timed_out);
+    REQUIRE_FALSE(result.stderr_output.empty());
+    REQUIRE(std::chrono::steady_clock::now() - started < std::chrono::seconds{3});
+    REQUIRE(process_launcher::start_background("pacs-nonexistent-test-executable-1311")
+            == process_launcher::invalid_pid);
+}
+
+#ifndef _WIN32
+TEST_CASE("process launcher preserves exits signals and captured bytes", "[process][utility]") {
+    SECTION("PATH lookup and nonzero exit") {
+        auto result = process_launcher::run("sh", {"-c", "printf 'out'; printf 'err' >&2; exit 7"});
+        REQUIRE(result.exit_code == 7);
+        REQUIRE(result.stdout_output == "out");
+        REQUIRE(result.stderr_output == "err");
+    }
+    SECTION("signal termination does not run the parent's Catch2 handlers") {
+        auto result = process_launcher::run("sh", {"-c", "ulimit -c 0; kill -ABRT $$"});
+        REQUIRE(result.exit_code == -SIGABRT);
+        REQUIRE(result.stdout_output.empty());
+        REQUIRE(result.stderr_output.find("Catch") == std::string::npos);
+    }
+    SECTION("timeout is bounded and distinguished from an exit") {
+        auto result = process_launcher::run("sh", {"-c", "exec sleep 10"}, std::chrono::seconds{1});
+        REQUIRE(result.timed_out);
+        REQUIRE(result.exit_code == 124);
+        REQUIRE(result.duration < std::chrono::seconds{3});
+    }
+    SECTION("capture drains output while the child runs") {
+        auto result = process_launcher::run("sh", {"-c", "head -c 262144 /dev/zero; head -c 262144 /dev/zero >&2"});
+        REQUIRE(result.exit_code == 0);
+        REQUIRE(result.stdout_output.size() == 262144);
+        REQUIRE(result.stderr_output.size() == 262144);
+    }
+}
+
+TEST_CASE("background process ownership reaps exited children", "[process][utility]") {
+    auto pid = process_launcher::start_background("sleep", {"10"});
+    REQUIRE(pid != process_launcher::invalid_pid);
+    REQUIRE(process_launcher::is_running(pid));
+    REQUIRE(process_launcher::stop_background(pid));
+    REQUIRE_FALSE(process_launcher::is_running(pid));
+    int status = 0;
+    REQUIRE(waitpid(pid, &status, WNOHANG) == -1);
+    REQUIRE(errno == ECHILD);
+    REQUIRE(process_launcher::stop_background(pid));
+}
+#endif
+
 TEST_CASE("DCMTK availability check", "[dcmtk][utility]") {
     bool available = dcmtk_tool::is_available();
 
@@ -99,9 +152,7 @@ TEST_CASE("DCMTK storescp lifecycle", "[dcmtk][utility][server]") {
             auto server = dcmtk_tool::storescp(port, "TEST_SCP", output_dir.path());
 
             // Check if server started successfully
-            if (server.pid() == process_launcher::invalid_pid) {
-                SKIP("Failed to start storescp - may not be installed correctly");
-            }
+            REQUIRE(server.pid() != process_launcher::invalid_pid);
 
             REQUIRE(server.is_running());
 
@@ -128,9 +179,7 @@ TEST_CASE("DCMTK echoscp lifecycle", "[dcmtk][utility][server]") {
         {
             auto server = dcmtk_tool::echoscp(port, "TEST_ECHO_SCP");
 
-            if (server.pid() == process_launcher::invalid_pid) {
-                SKIP("Failed to start echoscp - may not be installed correctly");
-            }
+            REQUIRE(server.pid() != process_launcher::invalid_pid);
 
             REQUIRE(server.is_running());
             REQUIRE(process_launcher::is_port_listening(port));
@@ -152,14 +201,12 @@ TEST_CASE("dcmtk_server_guard wait_for_ready", "[dcmtk][utility][server]") {
 
     auto port = find_available_port();
 
-    dcmtk_server_guard server("echoscp", port, {
+    dcmtk_server_guard server("storescp", port, {
         "-aet", "TEST_SCP",
         std::to_string(port)
     });
 
-    if (!server.is_running()) {
-        SKIP("Failed to start echoscp");
-    }
+    REQUIRE(server.is_running());
 
     SECTION("wait_for_ready returns true when server is listening") {
         REQUIRE(server.wait_for_ready(std::chrono::seconds{10}));
@@ -178,14 +225,12 @@ TEST_CASE("dcmtk_server_guard move semantics", "[dcmtk][utility][server]") {
     auto port = find_available_port();
 
     SECTION("Move construction transfers ownership") {
-        dcmtk_server_guard server1("echoscp", port, {
+        dcmtk_server_guard server1("storescp", port, {
             "-aet", "TEST_SCP",
             std::to_string(port)
         });
 
-        if (!server1.is_running()) {
-            SKIP("Failed to start echoscp");
-        }
+        REQUIRE(server1.is_running());
 
         auto pid = server1.pid();
         dcmtk_server_guard server2(std::move(server1));
@@ -211,9 +256,7 @@ TEST_CASE("background_process_guard with DCMTK", "[dcmtk][utility]") {
 
         {
             auto temp_guard = dcmtk_tool::echoscp(port, "TEST_SCP");
-            if (temp_guard.pid() == process_launcher::invalid_pid) {
-                SKIP("Failed to start echoscp");
-            }
+            REQUIRE(temp_guard.pid() != process_launcher::invalid_pid);
 
             guard = std::move(temp_guard);
         }

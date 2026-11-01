@@ -92,16 +92,34 @@ class Driver:
             manifest_digest=digest(ROOT/'validation/dcmtk/features.json'))
 
     def command(self,args,log,timeout=180,allowed=(0,)):
+        event = dict(command=[str(a) for a in args], log=log, timeout_seconds=timeout,
+                     expected_exit_codes=list(allowed), returncode=None, outcome='spawn_error')
         with (self.output/log).open('a') as stream:
             stream.write('COMMAND '+json.dumps([str(a) for a in args])+'\n')
             stream.flush()
-            process = subprocess.Popen([str(a) for a in args],stdout=stream,stderr=subprocess.STDOUT,start_new_session=True)
-            try: code = process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid,signal.SIGKILL)
-                process.wait()
-                code = 124
-            stream.write(f'\nEXIT {code}\n')
+            try:
+                process = subprocess.Popen([str(a) for a in args],stdout=stream,
+                                           stderr=subprocess.STDOUT,start_new_session=True)
+                try:
+                    code = process.wait(timeout=timeout)
+                    event['outcome'] = 'signal' if code < 0 else 'exited'
+                except subprocess.TimeoutExpired:
+                    try:
+                        os.killpg(process.pid,signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    process.wait()
+                    code = 124
+                    event['outcome'] = 'timeout'
+                event.update(returncode=process.returncode, reported_exit_code=code)
+                stream.write(f'\nEXIT {code}\n')
+            except OSError as exc:
+                event.update(error=str(exc), errno=exc.errno)
+                stream.write(f'SPAWN ERROR {exc}\n')
+                raise
+            finally:
+                with (self.output/'commands.jsonl').open('a') as records:
+                    records.write(json.dumps(event)+'\n')
         if code not in allowed:
             raise RuntimeError(f'{log}: exit {code}')
         return code

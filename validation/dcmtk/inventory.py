@@ -71,7 +71,7 @@ def catch_results(path):
                             status='failed' if failed else 'skipped' if skipped else 'passed'))
     unique_catch(results)
     overall = root.find('OverallResultsCases')
-    total = sum(int(overall.get(key, '0')) for key in ('successes', 'failures', 'expectedFailures'))
+    total = sum(int(overall.get(key, '0')) for key in ('successes', 'failures', 'expectedFailures', 'skips'))
     if not results or total != len(results):
         raise ValueError('Catch2 case totals do not match executed identities')
     # Some reporters omit assertion details for allowed failures. Preserve the

@@ -103,6 +103,15 @@ class InventoryTests(unittest.TestCase):
             path.write_text(text)
             self.assertEqual(catch_results(path)[0]['status'],'failed')
 
+    def test_valid_skipped_case_is_preserved_as_skipped(self):
+        text = '<Catch2TestRun><TestCase name="x" tags="[unit]">'\
+               '<OverallResult success="true" skips="1"/></TestCase>'\
+               '<OverallResultsCases successes="0" failures="0" skips="1"/></Catch2TestRun>'
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'x.xml'
+            path.write_text(text)
+            self.assertEqual(catch_results(path)[0]['status'],'skipped')
+
     def test_incomplete_native_xml_or_duplicate_junit_names_fail(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'x.xml'

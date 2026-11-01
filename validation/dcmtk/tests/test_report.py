@@ -145,6 +145,24 @@ class TopologyTests(unittest.TestCase):
         self.assertEqual(config['services']['pacs-server']['environment']['GENERATE_TEST_DATA'],'false')
         self.assertIn('healthcheck',config['services']['test-client'])
 
+    def test_driver_preserves_spawn_exit_and_timeout_records(self):
+        spec=importlib.util.spec_from_file_location('driver',ROOT/'scripts/run_dcmtk_validation.py')
+        module=importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as directory:
+            driver=module.Driver.__new__(module.Driver)
+            driver.output=Path(directory)
+            with self.assertRaises(OSError):
+                driver.command(['/pacs-does-not-exist-1311'],'missing.log')
+            with self.assertRaises(RuntimeError):
+                driver.command([sys.executable,'-c','raise SystemExit(7)'],'exit.log')
+            with self.assertRaises(RuntimeError):
+                driver.command([sys.executable,'-c','import time; time.sleep(30)'],'timeout.log',timeout=.05)
+            events=[json.loads(line) for line in (driver.output/'commands.jsonl').read_text().splitlines()]
+            self.assertEqual([event['outcome'] for event in events],['spawn_error','exited','timeout'])
+            self.assertEqual(events[1]['returncode'],7)
+            self.assertEqual(events[2]['reported_exit_code'],124)
+
 
 if __name__=='__main__':
     unittest.main()
