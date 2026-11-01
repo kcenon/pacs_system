@@ -4,6 +4,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <kcenon/pacs/core/dicom_file.h>
 #include <kcenon/pacs/core/dicom_tag_constants.h>
@@ -2349,5 +2350,42 @@ TEST_CASE("dicom_file rejects inconsistent pixel representations",
         CHECK_FALSE(pixel->is_encapsulated_pixel_data());
         CHECK_FALSE(dicom_file::create(copied, transfer_syntax::explicit_vr_little_endian).to_bytes().empty());
         CHECK(dicom_file::create(copied, transfer_syntax::rle_lossless).to_bytes().empty());
+    }
+}
+
+TEST_CASE("dicom_file rejects a dataset that stops before its last element",
+          "[core][dicom_file][malformed]") {
+    dicom_dataset dataset;
+    dataset.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    dataset.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.1318");
+    dataset.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+    dataset.set_string(tags::patient_id, vr_type::LO, "PID1318");
+
+    const int which = GENERATE(0, 1, 2);
+    const auto syntax = which == 0   ? transfer_syntax::explicit_vr_little_endian
+                        : which == 1 ? transfer_syntax::implicit_vr_little_endian
+                                     : transfer_syntax::explicit_vr_big_endian;
+    INFO(syntax.name());
+    auto bytes = dicom_file::create(dataset, syntax).to_bytes();
+    REQUIRE(dicom_file::from_bytes(bytes).is_ok());
+
+    SECTION("value cut short") {
+        bytes.resize(bytes.size() - 2);
+        CHECK(dicom_file::from_bytes(bytes).is_err());
+    }
+    SECTION("element header cut short") {
+        bytes.resize(bytes.size() - 8 - 4);
+        CHECK(dicom_file::from_bytes(bytes).is_err());
+    }
+    SECTION("zero padding after the last element") {
+        bytes.insert(bytes.end(), 6, 0x00);
+        auto padded = dicom_file::from_bytes(bytes);
+        if (syntax == transfer_syntax::explicit_vr_big_endian) {
+            // The Big Endian decoder treats any incomplete trailing bytes as an error.
+            CHECK(padded.is_err());
+        } else {
+            REQUIRE(padded.is_ok());
+            CHECK(padded.value().dataset().get_string(tags::patient_id) == "PID1318");
+        }
     }
 }

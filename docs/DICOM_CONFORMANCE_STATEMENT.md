@@ -57,6 +57,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-11-01 | 1.8.0 | Correct SOP Class UIDs and names against PS3.6: Legacy Converted Enhanced CT (`.2.2`), US Multi-frame (`.3.1`, retired `.3`), Label Map (`.66.7`) and Height Map (`.66.8`) Segmentation, Waveform Presentation State (`.9.100.1`), Waveform Annotation SR (`.88.77`), Wide Field Ophthalmic Photography (`.77.1.5.5`). Section 3.2 now lists every registered class, and `store_scp` and `pacs_server` accept exactly that list by default. |
 | 2026-10-24 | 1.7.0 | Section 4 states PACS_SCP negotiation and codec support per transfer syntax: Explicit VR Big Endian, Deflated Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate are not negotiated, and the last four have no working codec; Appendix B lists these and the JPEG Lossless decoder limitation |
 | 2026-10-23 | 1.6.0 | Add JPEG-LS Lossless and Near-Lossless transfer syntaxes; list all optional codec libraries in Appendix B |
 | 2026-03-05 | 1.5.0 | Add HEVC, JPEG XL, Frame Deflate transfer syntaxes; Heightmap/Label Map Segmentation, Waveform PS/Annotation SOP classes; TLS 1.3 BCP 195 profiles; OAuth 2.0 and DICOMweb Storage Commitment |
@@ -214,7 +215,7 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | CT Image Storage | 1.2.840.10008.5.1.4.1.1.2 | Yes | Yes |
 | Enhanced CT Image Storage | 1.2.840.10008.5.1.4.1.1.2.1 | Yes | Yes |
-| CT For Processing Image Storage | 1.2.840.10008.5.1.4.1.1.2.2 | Yes | Yes |
+| Legacy Converted Enhanced CT Image Storage | 1.2.840.10008.5.1.4.1.1.2.2 | Yes | Yes |
 
 #### MR
 
@@ -228,17 +229,17 @@ Response command pattern: `response = request | 0x8000`
 | SOP Class | UID | SCP | SCU |
 |-----------|-----|-----|-----|
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | Yes | Yes |
-| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | Yes | Yes |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | Yes | Yes |
 | US Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.6 | Yes | Yes |
-| US Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3.1 | Yes | Yes |
+| US Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3 | Yes | Yes |
 
 #### XA / XRF
 
 | SOP Class | UID | SCP | SCU |
 |-----------|-----|-----|-----|
-| XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | Yes | Yes |
+| X-Ray Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | Yes | Yes |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | Yes | Yes |
-| XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | Yes | Yes |
+| X-Ray Radiofluoroscopic Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | Yes | Yes |
 | X-Ray 3D Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.1 | Yes | Yes |
 | X-Ray 3D Craniofacial Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.2 | Yes | Yes |
 
@@ -259,6 +260,10 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | CR Image Storage | 1.2.840.10008.5.1.4.1.1.1 | Yes | Yes |
 | Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7 | Yes | Yes |
+| Multi-frame Single Bit Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.1 | Yes | Yes |
+| Multi-frame Grayscale Byte Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.2 | Yes | Yes |
+| Multi-frame Grayscale Word Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.3 | Yes | Yes |
+| Multi-frame True Color Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.4 | Yes | Yes |
 
 #### NM
 
@@ -295,8 +300,8 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | Yes | Yes |
 | Surface Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.5 | Yes | Yes |
-| Heightmap Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.7 | Yes | Yes |
-| Label Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.8 | Yes | Yes |
+| Label Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.7 | Yes | Yes |
+| Height Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.8 | Yes | Yes |
 
 #### SR
 
@@ -321,18 +326,43 @@ Response command pattern: `response = request | 0x8000`
 | General ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.2 | Yes | Yes |
 | Ambulatory ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.3 | Yes | Yes |
 | Hemodynamic Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.2.1 | Yes | Yes |
-| Cardiac Electrophysiology Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.3.1 | Yes | Yes |
+| Basic Cardiac Electrophysiology Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.3.1 | Yes | Yes |
 | Basic Voice Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.1 | Yes | Yes |
 | General Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.2 | Yes | Yes |
 | Arterial Pulse Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.5.1 | Yes | Yes |
 | Respiratory Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.6.1 | Yes | Yes |
+| Multi-channel Respiratory Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.6.2 | Yes | Yes |
 | Routine Scalp EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.1 | Yes | Yes |
-| Electromyography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.2 | Yes | Yes |
-| Electrooculography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.3 | Yes | Yes |
+| Electromyogram Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.2 | Yes | Yes |
+| Electrooculogram Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.3 | Yes | Yes |
 | Sleep EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.4 | Yes | Yes |
 | Body Position Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.8.1 | Yes | Yes |
-| Waveform Presentation State Storage | 1.2.840.10008.5.1.4.1.1.11.11 | Yes | Yes |
-| Waveform Annotation Storage | 1.2.840.10008.5.1.4.1.1.11.12 | Yes | Yes |
+| Waveform Presentation State Storage | 1.2.840.10008.5.1.4.1.1.9.100.1 | Yes | Yes |
+| Waveform Annotation SR Storage | 1.2.840.10008.5.1.4.1.1.88.77 | Yes | Yes |
+
+#### Ophthalmic
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Ophthalmic Photography 8 Bit Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.1 | Yes | Yes |
+| Ophthalmic Photography 16 Bit Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.2 | Yes | Yes |
+| Ophthalmic Tomography Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.4 | Yes | Yes |
+| Wide Field Ophthalmic Photography Stereographic Projection Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.5 | Yes | Yes |
+| Ophthalmic OCT B-scan Volume Analysis Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.8 | Yes | Yes |
+
+#### Whole Slide Imaging and Parametric Maps
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| VL Whole Slide Microscopy Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.6 | Yes | Yes |
+| Parametric Map Storage | 1.2.840.10008.5.1.4.1.1.30 | Yes | Yes |
+
+#### Encapsulated Documents
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Encapsulated PDF Storage | 1.2.840.10008.5.1.4.1.1.104.1 | Yes | Yes |
+| Encapsulated CDA Storage | 1.2.840.10008.5.1.4.1.1.104.2 | Yes | Yes |
 
 ### 3.3 Query/Retrieve
 
@@ -532,7 +562,7 @@ PACS_SCP accepts the codec-backed syntaxes whether or not the build includes the
 stores the pixel data without decoding it. Encoding and decoding need the library named in the
 last column at build time ([Appendix B](#appendix-b-known-limitations)), and
 `codec_factory::is_available()` reports which codecs a given build includes. The built-in JPEG
-Lossless decoder has a limitation listed in Appendix B. HEVC, JPEG XL, and Frame Deflate are in
+Lossless codec has limitations listed in Appendix B. HEVC, JPEG XL, and Frame Deflate are in
 the registry, but their codecs are stubs whose encoding and decoding always fail, and PACS_SCP
 does not accept them.
 
@@ -559,8 +589,11 @@ as sequences whose Items and contents use Implicit VR Little Endian (PS3.5 6.2.2
 They are retained as `SQ` elements on re-encoding, preserving nested items and
 following elements. Defined-length `UN` remains opaque. Malformed UN item streams,
 invalid/missing delimiters and more than 64 nested sequence levels within that
-path return errors. This does not assert strict validation of every unrelated
-legacy parser path.
+path return errors. A dataset that ends before its last element is complete is
+rejected instead of being read as far as it goes. Little Endian files may have
+only zero bytes after the last element; Explicit VR Big Endian files also refuse
+trailing bytes too short for an element header, even when they are zero. This
+does not assert strict validation of every unrelated legacy parser path.
 
 ### 5.2 DICOMDIR
 
@@ -611,6 +644,7 @@ tool does not rename/copy files or validate every media filename/character-set r
 | Unicode UTF-8 | ISO_IR 192 | IR 192 | Full |
 | Korean (KS X 1001) | ISO 2022 IR 149 | IR 149 | Full |
 | Japanese Kanji (JIS X 0208) | ISO 2022 IR 87 | IR 87 | Full |
+| Japanese Katakana (JIS X 0201) | ISO_IR 13 | IR 13 | Full |
 | Japanese Katakana (JIS X 0201) | ISO 2022 IR 13 | IR 13 | Full |
 | Simplified Chinese (GB 2312) | ISO 2022 IR 58 | IR 58 | Full |
 
@@ -919,7 +953,7 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | JPEG 2000 Codec | Requires OpenJPEG at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG2000_CODEC`) | Optional dependency |
 | JPEG-LS Codec | Requires CharLS at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEGLS_CODEC`) | Optional dependency |
 | HTJ2K Codec | Requires OpenJPH at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library or, with `PACS_FETCH_OPENJPH=ON` (default), fetches it from GitHub (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
-| JPEG Lossless Decoder | Decodes with its built-in Huffman table and ignores DHT segments, so it decodes the streams it encodes but may fail on streams from encoders that use other tables | Section 4.2 |
+| JPEG Lossless Codec | Grayscale only. The decoder uses the Huffman tables in the stream, and refuses color frames and restart intervals instead of guessing | Section 4.2 |
 | HEVC, JPEG XL, Frame Deflate | Stub codecs: encoding and decoding always fail, and PACS_SCP does not negotiate these transfer syntaxes | Section 4.2 |
 | Explicit VR Big Endian | Not negotiated by PACS_SCP; Part 10 files only | Section 4.1 |
 | Deflated Explicit VR Little Endian | Not implemented and not negotiated | Section 4.1 |

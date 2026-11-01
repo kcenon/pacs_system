@@ -15,8 +15,11 @@
 #include "kcenon/pacs/network/dimse/command_field.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
 #include "kcenon/pacs/security/atna_service_auditor.h"
+#include "kcenon/pacs/services/sop_class_registry.h"
 
 #include <kcenon/common/patterns/event_bus.h>
+
+#include <algorithm>
 
 namespace kcenon::pacs::services {
 
@@ -241,61 +244,11 @@ void storage_scp::reset_statistics() noexcept {
 // =============================================================================
 
 std::vector<std::string> get_standard_storage_sop_classes() {
-    return {
-        // CT
-        std::string(ct_image_storage_uid),
-        std::string(enhanced_ct_image_storage_uid),
-
-        // MR
-        std::string(mr_image_storage_uid),
-        std::string(enhanced_mr_image_storage_uid),
-
-        // CR/DX
-        std::string(cr_image_storage_uid),
-        std::string(dx_image_storage_presentation_uid),
-        std::string(dx_image_storage_processing_uid),
-
-        // US
-        std::string(us_image_storage_uid),
-
-        // Secondary Capture
-        std::string(secondary_capture_image_storage_uid),
-
-        // RT
-        std::string(rt_image_storage_uid),
-        std::string(rt_dose_storage_uid),
-        std::string(rt_structure_set_storage_uid),
-        std::string(rt_plan_storage_uid),
-
-        // NM/PET
-        "1.2.840.10008.5.1.4.1.1.20",      // NM Image Storage
-        "1.2.840.10008.5.1.4.1.1.128",     // PET Image Storage
-        "1.2.840.10008.5.1.4.1.1.130",     // Enhanced PET Image Storage
-
-        // XA/RF
-        "1.2.840.10008.5.1.4.1.1.12.1",    // XA Image Storage
-        "1.2.840.10008.5.1.4.1.1.12.2",    // XRF Image Storage
-
-        // Mammography
-        "1.2.840.10008.5.1.4.1.1.1.2",     // Digital Mammography X-Ray - Presentation
-        "1.2.840.10008.5.1.4.1.1.1.2.1",   // Digital Mammography X-Ray - Processing
-
-        // Multi-frame
-        "1.2.840.10008.5.1.4.1.1.7.1",     // Multi-frame Single Bit SC
-        "1.2.840.10008.5.1.4.1.1.7.2",     // Multi-frame Grayscale Byte SC
-        "1.2.840.10008.5.1.4.1.1.7.3",     // Multi-frame Grayscale Word SC
-        "1.2.840.10008.5.1.4.1.1.7.4",     // Multi-frame True Color SC
-
-        // SR (Structured Reports)
-        "1.2.840.10008.5.1.4.1.1.88.11",   // Basic Text SR
-        "1.2.840.10008.5.1.4.1.1.88.22",   // Enhanced SR
-        "1.2.840.10008.5.1.4.1.1.88.33",   // Comprehensive SR
-        "1.2.840.10008.5.1.4.1.1.88.34",   // Comprehensive 3D SR
-
-        // Other common types
-        "1.2.840.10008.5.1.4.1.1.104.1",   // Encapsulated PDF
-        "1.2.840.10008.5.1.4.1.1.104.2",   // Encapsulated CDA
-    };
+    // One list only: the registry backs this default and the conformance statement,
+    // so advertising a class cannot drift from accepting it (#1318).
+    auto classes = sop_class_registry::instance().get_all_storage_classes(true);
+    std::sort(classes.begin(), classes.end());
+    return classes;
 }
 
 }  // namespace kcenon::pacs::services

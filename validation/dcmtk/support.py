@@ -4,6 +4,13 @@ from pathlib import Path
 import re
 
 
+# Storage classes and transfer syntaxes belong to the corpus (#1318). Query/Retrieve and
+# Verification negative paths are #1319; normalized services are #1320.
+OWNER_BY_SECTION = {'3.1 Verification': 1319, '3.3 Query/Retrieve': 1319, '3.4 Modality Worklist': 1320,
+                    '3.5 Modality Performed Procedure Step (MPPS)': 1320, '3.6 Storage Commitment Push Model': 1320,
+                    'SOP Classes': 1320}
+
+
 def declared_support(root):
     root = Path(root)
     document = root/'docs/DICOM_CONFORMANCE_STATEMENT.md'
@@ -40,10 +47,12 @@ def declared_support(root):
     # Preserve source identities for review of documentation/registry divergence.
     # This is a declaration inventory; runtime support/valid IOD combinations are
     # evaluated by their explicit external cases, never inferred from UID presence.
+    # "assigned" names an executing job (component.corpus); only its results pass anything.
     provenance = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
                   for path in sources}
     cases = []
     for sop in sops:
+        owner = OWNER_BY_SECTION.get(sop['section'], 1318)
         for role in sop['roles']:
             for condition in ('positive','negative'):
                 cases.append(dict(case_id=f'support.sop.{sop["uid"]}.{role}.{condition}',
@@ -55,8 +64,9 @@ def declared_support(root):
                     fixture='valid IOD/role fixture or designated invalid request',
                     oracle='independent peer responses and object/state comparison',
                     prerequisites=['qualified independent peer','valid SOP/syntax/pixel-format combination'],
-                    execution_lane='full-dicom', owner_issue=1318,
-                    assignment_status='unverified', evidence_schema='case result plus independent peer/object evidence'))
+                    execution_lane='full-dicom', owner_issue=owner,
+                    assignment_status='assigned' if owner == 1318 else 'unverified',
+                    evidence_schema='case result plus independent peer/object evidence'))
     for syntax in syntaxes:
         for boundary in ('network','file_or_codec'):
             supported = (syntax[boundary]=='Accepted' if boundary=='network'
@@ -70,7 +80,7 @@ def declared_support(root):
                 fixture='valid IOD and syntax-specific bytes; independent codec fixture when required',
                 oracle='negotiated syntax, file metadata and independent decoded pixels/structure',
                 prerequisites=[syntax['file_or_codec']], execution_lane='full-dicom', owner_issue=1318,
-                assignment_status='unverified', evidence_schema='case result plus wire/file/oracle evidence'))
+                assignment_status='assigned', evidence_schema='case result plus wire/file/oracle evidence'))
     return dict(schema_version=1, sources=provenance, sop_classes=sops, transfer_syntaxes=syntaxes,
                 cases=cases, combination_policy='Only valid SOP/role/syntax/pixel-format combinations; '
                 'no Cartesian product. Forwarding and codec availability are distinct.',

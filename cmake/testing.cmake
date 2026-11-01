@@ -182,6 +182,7 @@ if(PACS_BUILD_TESTS)
 
     # Services tests
     add_executable(services_tests
+        tests/services/storage_sop_contract_test.cpp
         tests/services/verification_scp_test.cpp
         tests/services/storage_scp_test.cpp
         tests/services/storage_scu_test.cpp
@@ -250,6 +251,10 @@ if(PACS_BUILD_TESTS)
             pacs_services
             pacs_storage
             Catch2::Catch2WithMain
+    )
+    # Read by tests/services/storage_sop_contract_test.cpp (Issue #1318)
+    target_compile_definitions(services_tests PRIVATE
+        PACS_CONFORMANCE_STATEMENT_PATH="${CMAKE_SOURCE_DIR}/docs/DICOM_CONFORMANCE_STATEMENT.md"
     )
     # Link pacs_integration for thread_pool_adapter (used by parallel_query_executor tests)
     if(TARGET pacs_integration)

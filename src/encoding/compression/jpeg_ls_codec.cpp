@@ -118,6 +118,14 @@ public:
             effective_near = std::clamp(effective_near, 0, kMaxNearValue);
         }
 
+        // The codec bounds errors on unsigned bit patterns, so a signed sample
+        // near the sign boundary could change by the whole range.
+        if (effective_near > 0 && params.pixel_representation != 0) {
+            return kcenon::pacs::pacs_error<compression_result>(
+                kcenon::pacs::error_codes::compression_error,
+                "JPEG-LS near-lossless does not support signed pixel data");
+        }
+
         try {
             // Create encoder
             charls::jpegls_encoder encoder;

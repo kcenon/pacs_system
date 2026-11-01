@@ -41,7 +41,7 @@ inline constexpr std::string_view us_image_storage_uid =
 
 /// US Multi-frame Image Storage SOP Class UID (cine loops)
 inline constexpr std::string_view us_multiframe_image_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.6.2";
+    "1.2.840.10008.5.1.4.1.1.3.1";
 
 /// @}
 
@@ -54,7 +54,7 @@ inline constexpr std::string_view us_image_storage_retired_uid =
 
 /// US Multi-frame Image Storage (Retired) - for legacy systems
 inline constexpr std::string_view us_multiframe_image_storage_retired_uid =
-    "1.2.840.10008.5.1.4.1.1.3.1";
+    "1.2.840.10008.5.1.4.1.1.3";
 
 /// @}
 

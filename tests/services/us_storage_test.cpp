@@ -24,9 +24,9 @@ using namespace kcenon::pacs::encoding;
 
 TEST_CASE("US Storage SOP Class UIDs are correct", "[services][us][sop_class]") {
     CHECK(us_image_storage_uid == "1.2.840.10008.5.1.4.1.1.6.1");
-    CHECK(us_multiframe_image_storage_uid == "1.2.840.10008.5.1.4.1.1.6.2");
+    CHECK(us_multiframe_image_storage_uid == "1.2.840.10008.5.1.4.1.1.3.1");
     CHECK(us_image_storage_retired_uid == "1.2.840.10008.5.1.4.1.1.6");
-    CHECK(us_multiframe_image_storage_retired_uid == "1.2.840.10008.5.1.4.1.1.3.1");
+    CHECK(us_multiframe_image_storage_retired_uid == "1.2.840.10008.5.1.4.1.1.3");
 }
 
 TEST_CASE("is_us_storage_sop_class identifies US classes", "[services][us][sop_class]") {

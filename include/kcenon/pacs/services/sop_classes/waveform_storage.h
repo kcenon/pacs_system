@@ -100,11 +100,11 @@ inline constexpr std::string_view body_position_waveform_storage_uid =
 
 /// Waveform Presentation State Storage SOP Class UID
 inline constexpr std::string_view waveform_presentation_state_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.11.11";
+    "1.2.840.10008.5.1.4.1.1.9.100.1";
 
-/// Waveform Annotation Storage SOP Class UID
+/// Waveform Annotation SR Storage SOP Class UID
 inline constexpr std::string_view waveform_annotation_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.11.12";
+    "1.2.840.10008.5.1.4.1.1.88.77";
 
 /// @}
 

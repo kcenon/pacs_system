@@ -22,6 +22,7 @@ constexpr uint8_t kSOI = 0xD8;   // Start of Image
 constexpr uint8_t kEOI = 0xD9;   // End of Image
 constexpr uint8_t kSOF3 = 0xC3;  // Start of Frame (Lossless)
 constexpr uint8_t kDHT = 0xC4;   // Define Huffman Table
+constexpr uint8_t kDRI = 0xDD;   // Define Restart Interval
 constexpr uint8_t kSOS = 0xDA;   // Start of Scan
 
 // DICOM JPEG Lossless default precision values
@@ -96,6 +97,8 @@ public:
         : data_(data), size_(size), pos_(0), bit_pos_(0), current_byte_(0) {
         if (size_ > 0) {
             current_byte_ = data_[0];
+        } else {
+            overrun_ = true;
         }
     }
 
@@ -120,6 +123,9 @@ public:
         return pos_ < size_ || bit_pos_ < 8;
     }
 
+    /// True once a read needed bits beyond the end of the scan.
+    [[nodiscard]] bool overrun() const noexcept { return overrun_; }
+
 private:
     void advance_byte() {
         ++pos_;
@@ -133,6 +139,10 @@ private:
                 }
             }
         }
+        if (pos_ >= size_) {
+            current_byte_ = 0;
+            overrun_ = true;
+        }
         bit_pos_ = 0;
     }
 
@@ -141,6 +151,7 @@ private:
     size_t pos_;
     int bit_pos_;
     uint8_t current_byte_;
+    bool overrun_ = false;
 };
 
 /**
@@ -187,6 +198,50 @@ struct huffman_table {
 };
 
 /**
+ * @brief Huffman decoding table read from a DHT segment.
+ */
+struct huffman_decoder {
+    std::array<int32_t, 17> min_code{};
+    std::array<int32_t, 17> max_code{};
+    std::array<int, 17> first_symbol{};
+    std::vector<uint8_t> symbols;
+
+    [[nodiscard]] bool defined() const noexcept { return !symbols.empty(); }
+
+    /// Reads one table; returns false when its code assignment is impossible.
+    bool build(const uint8_t* counts, const uint8_t* values, size_t value_count) {
+        symbols.assign(values, values + value_count);
+        int32_t code = 0;
+        int index = 0;
+        for (int length = 1; length <= 16; ++length) {
+            const int count = counts[length - 1];
+            first_symbol[length] = index;
+            min_code[length] = code;
+            max_code[length] = count > 0 ? code + count - 1 : -1;
+            code += count;
+            index += count;
+            if (code > (1 << length)) {
+                return false;
+            }
+            code <<= 1;
+        }
+        return static_cast<size_t>(index) == value_count;
+    }
+
+    /// Returns the next symbol, or -1 when no code matches.
+    int decode(bit_reader& reader) const {
+        int32_t code = 0;
+        for (int length = 1; length <= 16; ++length) {
+            code = (code << 1) | reader.read_bits(1);
+            if (max_code[length] >= 0 && code >= min_code[length] && code <= max_code[length]) {
+                return symbols[first_symbol[length] + code - min_code[length]];
+            }
+        }
+        return -1;
+    }
+};
+
+/**
  * @brief Calculates the category (number of bits needed) for a difference value.
  */
 inline int category(int diff) {
@@ -220,6 +275,7 @@ inline int encode_diff(int diff, int cat) {
  */
 inline int decode_diff(int value, int cat) {
     if (cat == 0) return 0;
+    if (cat == 16) return 32768;
     int half = 1 << (cat - 1);
     if (value < half) {
         // Negative value (one's complement)
@@ -354,15 +410,18 @@ private:
         int width = params.width;
         int height = params.height;
 
+        const int sample_mask = (1 << precision) - 1;
+
         auto get_pixel = [&](int x, int y) -> int {
             if (x < 0 || y < 0) return 0;
             size_t idx = static_cast<size_t>(y) * width + x;
             if (is_16bit) {
                 idx *= 2;
-                // Little-endian pixel data
-                return pixel_data[idx] | (pixel_data[idx + 1] << 8);
+                // Little-endian pixel data, reduced to Bits Stored: unused high
+                // bits (sign extension included) are not part of the sample.
+                return (pixel_data[idx] | (pixel_data[idx + 1] << 8)) & sample_mask;
             }
-            return pixel_data[idx];
+            return pixel_data[idx] & sample_mask;
         };
 
         for (int y = 0; y < height; ++y) {
@@ -412,8 +471,9 @@ private:
                 // Write Huffman code for category
                 writer.write_bits(ht.codes[cat], ht.code_lengths[cat]);
 
-                // Write additional bits for actual value
-                if (cat > 0) {
+                // Write additional bits for the value. Category 16 has none: it
+                // can only mean a difference of 32768 (ITU T.81 H.1.2.2).
+                if (cat > 0 && cat < 16) {
                     writer.write_bits(static_cast<uint32_t>(encoded), cat);
                 }
             }
@@ -538,7 +598,8 @@ private:
         int height = 0;
         int predictor = predictor_;
         int point_transform = point_transform_;
-        huffman_table ht;
+        int table_id = 0;
+        std::array<huffman_decoder, 4> tables;
         bool found_sof = false;
         bool found_sos = false;
         size_t scan_start = 0;
@@ -586,17 +647,43 @@ private:
                 precision = data[pos];
                 height = read_be16(&data[pos + 1]);
                 width = read_be16(&data[pos + 3]);
+                if (data[pos + 5] != 1) {
+                    return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "JPEG Lossless decoder supports one component only");
+                }
                 found_sof = true;
             } else if (marker == kDHT) {
-                // Parse DHT - use the table from the file
-                // For simplicity, we use our default table
-                // A full implementation would parse and use the embedded table
+                // A segment may define several tables (ITU T.81 B.2.4.2).
+                size_t offset = 0;
+                const size_t segment = length - 2u;
+                while (offset < segment) {
+                    if (segment - offset < 17) {
+                        return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid DHT: truncated table header");
+                    }
+                    const uint8_t selector = data[pos + offset];
+                    const uint8_t* counts = &data[pos + offset + 1];
+                    size_t value_count = 0;
+                    for (int i = 0; i < 16; ++i) {
+                        value_count += counts[i];
+                    }
+                    if ((selector >> 4) != 0 || (selector & 0x0F) > 3 || value_count == 0 ||
+                        segment - offset - 17 < value_count ||
+                        !tables[selector & 0x0F].build(counts, counts + 16, value_count)) {
+                        return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid DHT: malformed Huffman table");
+                    }
+                    offset += 17 + value_count;
+                }
+            } else if (marker == kDRI) {
+                if (length >= 4 && read_be16(&data[pos]) != 0) {
+                    return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "JPEG Lossless decoder does not support restart intervals");
+                }
             } else if (marker == kSOS) {
                 // Parse SOS
-                if (length >= 6) {
-                    predictor = data[pos + 3];
-                    point_transform = data[pos + 5] & 0x0F;
+                if (length < 8 || data[pos] != 1) {
+                    return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "JPEG Lossless decoder supports one component per scan only");
                 }
+                table_id = data[pos + 2] >> 4;
+                predictor = data[pos + 3];
+                point_transform = data[pos + 5] & 0x0F;
                 found_sos = true;
                 pos += length - 2;
                 scan_start = pos;
@@ -608,6 +695,14 @@ private:
 
         if (!found_sof || !found_sos) {
             return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid JPEG: missing required markers");
+        }
+
+        if (precision < kMinPrecision || precision > kMaxPrecision || width == 0 || height == 0 ||
+            predictor < 1 || predictor > 7 || point_transform >= precision) {
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid JPEG: unsupported frame or scan parameters");
+        }
+        if (table_id > 3 || !tables[table_id].defined()) {
+            return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid JPEG: scan uses an undefined Huffman table");
         }
 
         // Validate against params if provided
@@ -627,8 +722,8 @@ private:
             }
         }
 
-        // Decode image data
-        bool is_16bit = precision > 8;
+        // Decode image data. Bits Allocated decides the container when the caller knows it.
+        bool is_16bit = precision > 8 || params.bits_allocated > 8;
         size_t output_size = static_cast<size_t>(width) * height * (is_16bit ? 2 : 1);
         std::vector<uint8_t> output(output_size);
 
@@ -661,15 +756,18 @@ private:
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 // Decode Huffman category
-                int cat = decode_huffman_category(reader, ht);
+                int cat = tables[table_id].decode(reader);
                 if (cat < 0 || cat > 16) {
                     return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "Invalid Huffman code");
                 }
 
                 // Read additional bits
                 int encoded = 0;
-                if (cat > 0) {
+                if (cat > 0 && cat < 16) {
                     encoded = reader.read_bits(cat);
+                }
+                if (reader.overrun()) {
+                    return kcenon::pacs::pacs_error<compression_result>(kcenon::pacs::error_codes::decompression_error, "JPEG scan ended before the last sample");
                 }
 
                 // Decode difference
@@ -716,20 +814,6 @@ private:
         output_params.photometric = photometric_interpretation::monochrome2;
 
         return kcenon::pacs::ok<compression_result>(compression_result{std::move(output), output_params});
-    }
-
-    int decode_huffman_category(bit_reader& reader, const huffman_table& ht) const {
-        // Simple Huffman decoding - match against known codes
-        uint32_t code = 0;
-        for (int bits = 1; bits <= 16; ++bits) {
-            code = (code << 1) | reader.read_bits(1);
-            for (int cat = 0; cat <= 16; ++cat) {
-                if (ht.code_lengths[cat] == bits && ht.codes[cat] == code) {
-                    return cat;
-                }
-            }
-        }
-        return -1;  // Error
     }
 
     int predictor_;

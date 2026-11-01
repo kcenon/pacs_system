@@ -464,7 +464,7 @@ if (result.is_ok()) {
 | DX Image Storage | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | ✅ |
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
-| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | ✅ |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | ✅ |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ |
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |

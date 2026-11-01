@@ -219,8 +219,11 @@ is fixed, files are written without the Source Image Sequence item.
   Transfer Syntax: it decodes every frame of compressed Pixel Data, and checks
   native Pixel Data against Rows x Columns x Samples per Pixel x Bits
   Allocated / 8 x Number of Frames.
-- The JPEG Lossless decoder may fail on streams from other encoders (see
+- The JPEG Lossless codec handles grayscale only: color frames and restart
+  intervals are refused (see
   [Appendix B of the DICOM Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations)).
+- JPEG-LS near-lossless refuses signed Pixel Data: its error bound applies to bit
+  patterns, so a sample near the sign boundary could change by the whole range.
 
 ### DCM Anonymize
 

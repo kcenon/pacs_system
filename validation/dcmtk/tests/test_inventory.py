@@ -130,7 +130,9 @@ class InventoryTests(unittest.TestCase):
                     '1.2.840.10008.1.2.4.110','1.2.840.10008.1.2.11']:
             for boundary in ('network','file_or_codec'):
                 self.assertEqual(cases[f'support.syntax.{uid}.{boundary}']['condition'],'negative')
-        self.assertTrue(all(case['assignment_status']=='unverified' for case in scope['cases']))
+        for case in scope['cases']:
+            expected = 'assigned' if case['owner_issue'] == 1318 else 'unverified'
+            self.assertEqual(case['assignment_status'], expected, case['case_id'])
 
 
 if __name__ == '__main__':

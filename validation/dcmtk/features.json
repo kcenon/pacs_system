@@ -164,6 +164,12 @@
       "timeout_seconds": 60
     },
     {
+      "id": "component.corpus",
+      "kind": "corpus",
+      "args": [],
+      "timeout_seconds": 900
+    },
+    {
       "id": "component.discovery",
       "kind": "discovery",
       "args": [],
@@ -275,7 +281,8 @@
         "component.core_tests",
         "component.utilities_tests",
         "component.pacs_cli_roundtrip",
-        "component.cli"
+        "component.cli",
+        "component.corpus"
       ],
       "interop": [
         "file.big-endian",
@@ -283,14 +290,15 @@
         "file.undefined-un"
       ],
       "gaps": [
-        "Broader malformed/unknown-VR parsing and nesting behavior outside the undefined-length UN path (#1318)."
+        "Unknown-VR and parser-level fuzz behavior outside the undefined-length UN path and the corpus malformed cases."
       ],
       "known_issues": []
     },
     {
       "id": "encoding",
       "components": [
-        "component.encoding_tests"
+        "component.encoding_tests",
+        "component.corpus"
       ],
       "interop": [
         "fixtures",
@@ -300,7 +308,7 @@
         "file.big-endian"
       ],
       "gaps": [
-        "Independent valid SOP/codec fixtures for supported syntaxes; expected rejection for unsupported HEVC/JPEG XL/Frame Deflate/Deflated Explicit VR LE. Big Endian is file-only."
+        "No independent HTJ2K encoder is available: input comes from ojph_compress, which shares OpenJPH with PACS, or for signed samples from PACS streams that OpenJPEG has confirmed. Independent decoding of HTJ2K output is covered."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1292",
@@ -332,16 +340,15 @@
     {
       "id": "storage_service",
       "components": [
-        "component.services_tests"
+        "component.services_tests",
+        "component.corpus"
       ],
       "interop": [
         "store.primary",
         "store.secondary",
         "store.scp"
       ],
-      "gaps": [
-        "Extend CT/MR/CR transport fixtures to every advertised Storage SOP class."
-      ],
+      "gaps": [],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1303",
         "https://github.com/kcenon/pacs_system/issues/1292"
@@ -643,7 +650,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.core.negative",
@@ -683,7 +690,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.encoding.negative",
@@ -703,7 +710,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.association.positive",
@@ -763,7 +770,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.storage_service.negative",
@@ -1443,6 +1450,21 @@
       "issue": 1310,
       "change": "Separate unsupported codec rejection from valid supported codec coverage; Big Endian file I/O remains separate from DIMSE rejection.",
       "previous_encoding_gap": "JPEG 2000, HTJ2K, JPEG XL, HEVC and all supported syntax/SOP combinations need independent peer fixtures."
+    },
+    {
+      "issue": 1318,
+      "change": "component.corpus evaluates every declared Storage SOP in every valid role and syntax, PACS codecs against independent tools, unsupported syntax rejection and file formats. Invalid data and write-failure negatives stay open under requirement.storage_service.negative; parser fuzzing stays under requirement.core.negative.",
+      "previous_gaps": {
+        "encoding": [
+          "Independent valid SOP/codec fixtures for supported syntaxes; expected rejection for unsupported HEVC/JPEG XL/Frame Deflate/Deflated Explicit VR LE. Big Endian is file-only."
+        ],
+        "storage_service": [
+          "Extend CT/MR/CR transport fixtures to every advertised Storage SOP class."
+        ],
+        "core": [
+          "Broader malformed/unknown-VR parsing and nesting behavior outside the undefined-length UN path (#1318)."
+        ]
+      }
     }
   ]
 }

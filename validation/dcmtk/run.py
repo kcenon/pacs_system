@@ -687,7 +687,7 @@ class Validation:
                 errors.append(f'{binary}: discovery failed: {exc}')
                 all_tests[binary] = []
         for spec in self.manifest['components']:
-            if spec.get('kind') == 'discovery':
+            if spec.get('kind') in ('discovery', 'corpus'):
                 continue
             try:
                 if spec.get('kind') == 'ctest':
@@ -721,7 +721,21 @@ class Validation:
         (self.output/'test-inventory.json').write_text(json.dumps(self.test_inventory,indent=2)+'\n')
         self.save()
 
+    def corpus_matrix(self, spec):
+        """Report the corpus's own results; a nonzero exit only means some cases failed."""
+        directory = self.output/'corpus'
+        self.command(['python3', HERE/'tests/corpus_probe.py', '--output', directory,
+                      '--build-dir', self.args.build_dir, '--source-revision', self.args.source_revision,
+                      '--source-digest', self.args.source_digest],
+                     timeout=spec['timeout_seconds'], allowed=(0, 1))
+        counts = json.loads((directory/'corpus-summary.json').read_text())['counts']
+        return dict(tests=sum(counts.values()), failed=counts['failed']+counts['blocked'], skipped=0,
+                    detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
+                           'see corpus/corpus-summary.json')
+
     def component(self, spec):
+        if spec.get('kind') == 'corpus':
+            return self.corpus_matrix(spec)
         xml = self.output/(spec['id']+'.xml')
         native_xml = self.output/(spec['id']+'.catch.xml')
         if spec.get('kind') == 'discovery':

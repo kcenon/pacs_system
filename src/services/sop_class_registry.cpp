@@ -23,6 +23,7 @@
 #include "kcenon/pacs/services/sop_classes/waveform_storage.h"
 
 #include <algorithm>
+#include <array>
 
 namespace kcenon::pacs::services {
 
@@ -258,7 +259,7 @@ void sop_class_registry::register_xa_sop_classes() {
         std::string(sop_classes::enhanced_xa_image_storage_uid),
         sop_class_info{
             sop_classes::enhanced_xa_image_storage_uid,
-            "Enhanced X-Ray Angiographic Image Storage",
+            "Enhanced XA Image Storage",
             sop_class_category::storage,
             modality_type::xa,
             false,
@@ -413,12 +414,12 @@ void sop_class_registry::register_ct_sop_classes() {
         }
     );
 
-    // CT For Processing Image Storage (multi-energy/spectral CT)
+    // Legacy Converted Enhanced CT Image Storage
     registry_.emplace(
         "1.2.840.10008.5.1.4.1.1.2.2",
         sop_class_info{
             "1.2.840.10008.5.1.4.1.1.2.2",
-            "CT For Processing Image Storage",
+            "Legacy Converted Enhanced CT Image Storage",
             sop_class_category::storage,
             modality_type::ct,
             false,
@@ -670,12 +671,12 @@ void sop_class_registry::register_seg_sop_classes() {
         }
     );
 
-    // Heightmap Segmentation Storage (Supplement 240)
+    // Height Map Segmentation Storage (Supplement 240)
     registry_.emplace(
         std::string(sop_classes::heightmap_segmentation_storage_uid),
         sop_class_info{
             sop_classes::heightmap_segmentation_storage_uid,
-            "Heightmap Segmentation Storage",
+            "Height Map Segmentation Storage",
             sop_class_category::storage,
             modality_type::seg,
             false,
@@ -1044,12 +1045,12 @@ void sop_class_registry::register_ophthalmic_sop_classes() {
         }
     );
 
-    // Wide Field Ophthalmic Photography SOP Class Storage
+    // Wide Field Ophthalmic Photography Stereographic Projection Image Storage
     registry_.emplace(
         std::string(sop_classes::wide_field_ophthalmic_photo_storage_uid),
         sop_class_info{
             sop_classes::wide_field_ophthalmic_photo_storage_uid,
-            "Wide Field Ophthalmic Photography Storage",
+            "Wide Field Ophthalmic Photography Stereographic Projection Image Storage",
             sop_class_category::storage,
             modality_type::op,
             false,
@@ -1135,6 +1136,32 @@ void sop_class_registry::register_other_sop_classes() {
             false
         }
     );
+
+    // Multi-frame Secondary Capture and encapsulated documents
+    struct other_storage {
+        std::string_view uid;
+        std::string_view name;
+        modality_type modality;
+        bool multiframe;
+    };
+    static constexpr std::array<other_storage, 6> other_storage_classes{{
+        {"1.2.840.10008.5.1.4.1.1.7.1", "Multi-frame Single Bit Secondary Capture Image Storage",
+         modality_type::sc, true},
+        {"1.2.840.10008.5.1.4.1.1.7.2", "Multi-frame Grayscale Byte Secondary Capture Image Storage",
+         modality_type::sc, true},
+        {"1.2.840.10008.5.1.4.1.1.7.3", "Multi-frame Grayscale Word Secondary Capture Image Storage",
+         modality_type::sc, true},
+        {"1.2.840.10008.5.1.4.1.1.7.4", "Multi-frame True Color Secondary Capture Image Storage",
+         modality_type::sc, true},
+        {"1.2.840.10008.5.1.4.1.1.104.1", "Encapsulated PDF Storage", modality_type::other, false},
+        {"1.2.840.10008.5.1.4.1.1.104.2", "Encapsulated CDA Storage", modality_type::other, false},
+    }};
+    for (const auto& entry : other_storage_classes) {
+        registry_.emplace(
+            std::string(entry.uid),
+            sop_class_info{entry.uid, entry.name, sop_class_category::storage, entry.modality,
+                           false, entry.multiframe});
+    }
 
     // Verification SOP Class
     registry_.emplace(

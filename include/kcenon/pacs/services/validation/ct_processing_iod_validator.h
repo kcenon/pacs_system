@@ -11,6 +11,10 @@
  * store basis material decomposition images from multi-energy/spectral
  * CT acquisitions (dual-energy, photon-counting CT).
  *
+ * @note These rules are this project's multi-energy profile. The SOP Class UID
+ *       they accept is Legacy Converted Enhanced CT Image Storage in PS3.6, so
+ *       passing them does not establish conformance to that PS3.3 IOD.
+ *
  * @see DICOM PS3.3 - CT For Processing IOD
  * @see DICOM PS3.4 Section B - Storage Service Class
  * @see Issue #848 - Add CT For Processing SOP Classes

@@ -313,6 +313,16 @@ auto dicom_file::from_bytes(std::span<const uint8_t> data)
     size_t dataset_bytes_read = 0;
 
     auto dataset_result = decode_dataset(dataset_start, ts, dataset_bytes_read);
+    if (dataset_result.is_ok()) {
+        // The decoders stop at the first element that does not fit. Accepting that would
+        // silently drop every later element. Zero padding after the last one is harmless.
+        const auto rest = dataset_start.subspan((std::min)(dataset_bytes_read, dataset_start.size()));
+        if (std::any_of(rest.begin(), rest.end(), [](uint8_t byte) { return byte != 0; })) {
+            return kcenon::pacs::pacs_error<dicom_file>(
+                kcenon::pacs::error_codes::insufficient_data,
+                "Truncated or malformed dataset at offset " + std::to_string(dataset_bytes_read));
+        }
+    }
     if (dataset_result.is_err()) {
         return kcenon::pacs::Result<dicom_file>::err(dataset_result.error());
     }

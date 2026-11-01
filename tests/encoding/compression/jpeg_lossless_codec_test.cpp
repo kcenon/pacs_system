@@ -527,3 +527,131 @@ TEST_CASE("image_params validation for JPEG Lossless", "[encoding][compression][
         REQUIRE(params.valid_for_jpeg_lossless() == false);
     }
 }
+
+namespace {
+
+/// Builds a one-component SV1 stream that assigns its own 4-bit codes to categories 0-8.
+std::vector<uint8_t> lossless_stream(uint8_t precision, uint16_t rows, uint16_t columns, uint8_t components,
+                                     const std::vector<uint8_t>& dht_body, const std::vector<uint8_t>& scan) {
+    std::vector<uint8_t> out{0xFF, 0xD8, 0xFF, 0xC3};
+    const uint16_t sof_length = static_cast<uint16_t>(8 + 3 * components);
+    out.insert(out.end(), {static_cast<uint8_t>(sof_length >> 8), static_cast<uint8_t>(sof_length), precision,
+                           static_cast<uint8_t>(rows >> 8), static_cast<uint8_t>(rows),
+                           static_cast<uint8_t>(columns >> 8), static_cast<uint8_t>(columns), components});
+    for (uint8_t c = 1; c <= components; ++c) {
+        out.insert(out.end(), {c, 0x11, 0x00});
+    }
+    if (!dht_body.empty()) {
+        const uint16_t length = static_cast<uint16_t>(2 + dht_body.size());
+        out.insert(out.end(), {0xFF, 0xC4, static_cast<uint8_t>(length >> 8), static_cast<uint8_t>(length)});
+        out.insert(out.end(), dht_body.begin(), dht_body.end());
+    }
+    // SOS: one component, table 0, predictor 1, point transform 0.
+    out.insert(out.end(), {0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x01, 0x00, 0x00});
+    out.insert(out.end(), scan.begin(), scan.end());
+    out.insert(out.end(), {0xFF, 0xD9});
+    return out;
+}
+
+std::vector<uint8_t> four_bit_table() {
+    std::vector<uint8_t> body{0x00};
+    for (int length = 1; length <= 16; ++length) {
+        body.push_back(length == 4 ? 9 : 0);
+    }
+    for (uint8_t category = 0; category <= 8; ++category) {
+        body.push_back(category);
+    }
+    return body;
+}
+
+image_params gray_params(uint16_t rows, uint16_t columns, uint16_t bits) {
+    image_params params;
+    params.width = columns;
+    params.height = rows;
+    params.bits_allocated = bits > 8 ? 16 : 8;
+    params.bits_stored = bits;
+    params.high_bit = static_cast<uint16_t>(bits - 1);
+    params.samples_per_pixel = 1;
+    return params;
+}
+
+}  // namespace
+
+TEST_CASE("jpeg_lossless_codec decodes with the stream's Huffman table",
+          "[encoding][compression][lossless][dht]") {
+    // 133 is category 3 (bits 101) from the initial prediction 128; 130 is -3,
+    // category 2 (bits 00). With 4-bit codes: 0011 101 0010 00 then 1-bit padding.
+    const auto stream = lossless_stream(8, 1, 2, 1, four_bit_table(), {0x3A, 0x47});
+    jpeg_lossless_codec codec;
+    auto result = codec.decode(stream, gray_params(1, 2, 8));
+    REQUIRE(result.is_ok());
+    CHECK(result.value().data == std::vector<uint8_t>{133, 130});
+}
+
+TEST_CASE("jpeg_lossless_codec treats category 16 as 32768 with no additional bits",
+          "[encoding][compression][lossless][dht]") {
+    jpeg_lossless_codec codec;
+
+    SECTION("decoding a stream from another encoder") {
+        // Category 0 is 00 and 16 is 01: 0 from prediction 32768, then no change.
+        std::vector<uint8_t> table{0x00};
+        for (int length = 1; length <= 16; ++length) {
+            table.push_back(length == 2 ? 2 : 0);
+        }
+        table.insert(table.end(), {0, 16});
+        const auto stream = lossless_stream(16, 1, 2, 1, table, {0x4F});
+        auto result = codec.decode(stream, gray_params(1, 2, 16));
+        REQUIRE(result.is_ok());
+        CHECK(result.value().data == std::vector<uint8_t>{0, 0, 0, 0});
+    }
+
+    SECTION("encoding differences of exactly 32768 round-trips") {
+        const std::vector<uint8_t> pixels{0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0xFF, 0xFF};
+        auto params = gray_params(1, 4, 16);
+        auto encoded = codec.encode(pixels, params, {});
+        REQUIRE(encoded.is_ok());
+        auto decoded = codec.decode(encoded.value().data, params);
+        REQUIRE(decoded.is_ok());
+        CHECK(decoded.value().data == pixels);
+    }
+}
+
+TEST_CASE("jpeg_lossless_codec codes samples by Bits Stored",
+          "[encoding][compression][lossless]") {
+    // A sign-extended 12-bit sample has high bits that are not part of the sample.
+    const std::vector<uint8_t> pixels{0x00, 0xF8, 0xFF, 0x07, 0xFF, 0xFF, 0x00, 0x00};
+    auto params = gray_params(1, 4, 12);
+    params.pixel_representation = 1;
+    jpeg_lossless_codec codec;
+    auto encoded = codec.encode(pixels, params, {});
+    REQUIRE(encoded.is_ok());
+    auto decoded = codec.decode(encoded.value().data, params);
+    REQUIRE(decoded.is_ok());
+    const std::vector<uint8_t> masked{0x00, 0x08, 0xFF, 0x07, 0xFF, 0x0F, 0x00, 0x00};
+    CHECK(decoded.value().data == masked);
+}
+
+TEST_CASE("jpeg_lossless_codec refuses streams it cannot decode correctly",
+          "[encoding][compression][lossless][dht]") {
+    jpeg_lossless_codec codec;
+    const auto params = gray_params(1, 2, 8);
+
+    SECTION("no Huffman table in the stream") {
+        CHECK(codec.decode(lossless_stream(8, 1, 2, 1, {}, {0x3A, 0x47}), params).is_err());
+    }
+    SECTION("impossible Huffman table") {
+        std::vector<uint8_t> table{0x00, 3};
+        table.insert(table.end(), 15, 0);
+        table.insert(table.end(), {0, 1, 2});
+        CHECK(codec.decode(lossless_stream(8, 1, 2, 1, table, {0x3A, 0x47}), params).is_err());
+    }
+    SECTION("color frame") {
+        CHECK(codec.decode(lossless_stream(8, 1, 2, 3, four_bit_table(), {0x3A, 0x47}), {}).is_err());
+    }
+    SECTION("empty scan") {
+        CHECK(codec.decode(lossless_stream(8, 1, 2, 1, four_bit_table(), {}), params).is_err());
+    }
+    SECTION("scan shorter than the frame") {
+        CHECK(codec.decode(lossless_stream(8, 4, 4, 1, four_bit_table(), {0x3A}), gray_params(4, 4, 8)).is_err());
+    }
+}

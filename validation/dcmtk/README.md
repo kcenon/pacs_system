@@ -55,6 +55,43 @@ and startup log identify the project for later `docker compose -p ... -f ... dow
    Compare every job's selected case identities with its actual execution results.
 6. Evaluate the entire feature manifest. A subset cannot claim complete validation.
 
+### Supported object and codec corpus
+
+`component.corpus` runs `tests/corpus_probe.py` once, in the uncompressed profile. Its
+tables are in `corpus.py`, and `tests/test_corpus.py` holds them to the conformance
+statement. Every combination is either a case with a stable ID or an exclusion with a
+stated reason, never an arbitrary Cartesian product.
+
+| Case group | What it proves | Independent oracle |
+|------------|----------------|--------------------|
+| `corpus.fixture.<sop>` | A valid object exists for every declared Storage SOP class | dicom3tools `dciodvfy`; classes it has no table for are listed in `unvalidated_iods` |
+| `corpus.wire.{scp,scu,forward}.<sop>.<syntax>` | Storing and forwarding: PACS receives, sends and re-sends an object unchanged, without decoding it | DCMTK `storescu`/`storescp`, dataset values read by pydicom, compressed bytes compared exactly |
+| `corpus.negative.{scp,scu}.<sop>` | A refused SOP class stores or delivers nothing, and the sender reports it | DCMTK peers restricted to other classes |
+| `corpus.codec.{encode,decode}.<syntax>.<format>.f<frames>` | PACS encodes and decodes: every frame of every bit depth, sign, color and planar format | DCMTK, OpenJPEG, FFmpeg |
+| `corpus.jpeg-dht.*`, `corpus.offsets.*` | Other encoders' Huffman tables; empty, populated and extended offset tables; frames split across fragments | DCMTK, pydicom |
+| `corpus.reject.*`, `corpus.malformed.*` | HEVC, JPEG XL, Frame Deflate, Deflated and network Big Endian are refused; bad input fails with no signal, hang or output | Exit codes, archive contents, source digests |
+| `corpus.file.*` | Native syntaxes, every VR, nested undefined-length sequences, JSON, XML and character sets | pydicom, DCMTK and Python codecs |
+
+Lossless output must match every sample of every frame, read by Bits Stored. Lossy
+bounds are declared in `corpus.LOSSY_BOUNDS` and include the required metadata changes.
+Big Endian files, DICOMDIR and undefined-length UN keep their cases `file.big-endian`,
+`file.dicomdir` and `file.undefined-un`.
+
+Limits are stated rather than hidden. No independent HTJ2K encoder exists in this image:
+input comes from `ojph_compress`, which shares OpenJPH with PACS, or for signed samples
+from PACS streams that OpenJPEG has confirmed. `opj_compress` also loses signed 8-bit
+samples on aarch64, and FFmpeg is not exact on its own 12-bit streams, so FFmpeg checks
+8 and 16 bits only. Three `dciodvfy` tables contradict themselves; `IOD_VALIDATOR_CONFLICTS`
+holds the exact messages and reasons, and any other message remains an error. Invalid
+dataset content and storage write failures are not corpus cases.
+
+Run it on its own inside the validation image:
+
+```sh
+python3 /workspace/pacs_system/validation/dcmtk/tests/corpus_probe.py --output /results/corpus \
+  --source-revision ACTUAL_SOURCE_REVISION --source-digest ACTUAL_SOURCE_DIGEST
+```
+
 Native tests include core/encoding, network/services, storage, security, client,
 workflow, AI, monitoring, DI, web, ecosystem integration, XDS, CLI roundtrip and
 concurrency. In-memory/mock tests remain component evidence, not proof of external
@@ -69,7 +106,7 @@ matrices and additional external services are explicit outstanding requirements.
 - blocked scenarios whose prerequisite failed (zero tests, never a pass);
 - feature groups with passing implemented tests;
 - missing independent coverage, such as S3/Azure providers, AI service, XDS registry,
-  browser workflows, cross-protocol DICOMweb flows, and all advertised SOP classes.
+  browser workflows and cross-protocol DICOMweb flows.
 
 `features.json` maps **20 feature groups** to executable evidence and lists these
 remaining coverage requirements. They deliberately prevent an overall `passed`

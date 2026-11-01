@@ -22,6 +22,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/encoding/vr_type.h"
+#include "../common/utf8_text.h"
 
 #include <algorithm>
 #include <cctype>
@@ -878,13 +879,17 @@ int convert_file(const options& opts) {
             dataset.get(tags::pixel_data) == nullptr &&
             template_file->dataset().get(tags::pixel_data) != nullptr;
 
-        // Merge template data (XML values override template)
-        for (const auto& [tag, element] : template_file->dataset()) {
+        // Merge template data (XML values override template). XML text is
+        // UTF-8, so template text must become UTF-8 to share one declaration.
+        const auto template_text = kcenon::pacs::cli::utf8_text_copy(template_file->dataset());
+        for (const auto& [tag, element] : template_text) {
             if (dataset.get(tag) == nullptr) {
                 dataset.insert(element);
             }
         }
     }
+
+    kcenon::pacs::cli::declare_utf8_text(dataset);
 
     // Determine transfer syntax
     transfer_syntax ts = transfer_syntax::explicit_vr_little_endian;

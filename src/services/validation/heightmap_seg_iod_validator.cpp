@@ -16,9 +16,9 @@ namespace kcenon::pacs::services::validation {
 
 using namespace kcenon::pacs::core;
 
-// Heightmap Segmentation Storage SOP Class UID (Supplement 240)
+// Height Map Segmentation Storage SOP Class UID (Supplement 240)
 static constexpr std::string_view heightmap_segmentation_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.66.7";
+    "1.2.840.10008.5.1.4.1.1.66.8";
 
 // =============================================================================
 // heightmap_seg_iod_validator Implementation
