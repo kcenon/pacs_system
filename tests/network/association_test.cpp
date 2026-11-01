@@ -625,3 +625,63 @@ TEST_CASE("rejection_info description", "[association][rejection]") {
         CHECK(info.description.find("protocol version") != std::string::npos);
     }
 }
+
+TEST_CASE("association negotiates requestor storage roles without assuming acceptance",
+          "[association][roles]") {
+    association_config request;
+    request.calling_ae_title = "GET_SCU";
+    request.called_ae_title = "ARCHIVE";
+    request.proposed_contexts = {{1, CT_IMAGE_STORAGE, {EXPLICIT_VR_LE}},
+                                 {3, VERIFICATION_SOP_CLASS, {EXPLICIT_VR_LE}}};
+    request.role_selections.emplace_back(CT_IMAGE_STORAGE, false, true);
+    auto client = association::propose(request);
+    auto rq = client.build_associate_rq();
+    REQUIRE(rq.user_info.role_selections.size() == 1);
+    CHECK(rq.user_info.role_selections[0].scp_role);
+    CHECK_FALSE(rq.user_info.role_selections[0].scu_role);
+    scp_config acceptor;
+    acceptor.ae_title = "ARCHIVE";
+    SECTION("explicit acceptance survives move construction") {
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, true);
+        auto server = association::accept(rq, acceptor);
+        auto ac = server.build_associate_ac();
+        REQUIRE(ac.user_info.role_selections.size() == 1);
+        REQUIRE(client.process_associate_ac(ac));
+        auto moved = std::move(client);
+        CHECK(moved.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(moved.requestor_role(CT_IMAGE_STORAGE).scu_role);
+        CHECK(server.requestor_role(CT_IMAGE_STORAGE).scp_role);
+    }
+    SECTION("no response restores defaults rather than requested SCP role") {
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("explicit denial is retained") {
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, false);
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("unsolicited roles cannot grant privileges") {
+        auto ac = association::accept(rq, acceptor).build_associate_ac();
+        ac.user_info.role_selections.emplace_back(VERIFICATION_SOP_CLASS, false, true);
+        ac.user_info.role_selections.emplace_back(CT_IMAGE_STORAGE, true, true);
+        REQUIRE(client.process_associate_ac(ac));
+        CHECK_FALSE(client.requestor_role(VERIFICATION_SOP_CLASS).scp_role);
+        CHECK(client.requestor_role(VERIFICATION_SOP_CLASS).scu_role);
+        CHECK(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("role response cannot revive a rejected presentation context") {
+        acceptor.supported_abstract_syntaxes = {VERIFICATION_SOP_CLASS};
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, true);
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    CHECK_FALSE(client.requestor_role("9.9.9").scp_role);
+}

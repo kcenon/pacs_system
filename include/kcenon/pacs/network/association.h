@@ -198,6 +198,8 @@ struct association_config {
     std::string calling_ae_title;         ///< Our AE Title (16 chars max)
     std::string called_ae_title;          ///< Remote AE Title (16 chars max)
     std::vector<proposed_presentation_context> proposed_contexts;
+    /// Roles offered by the association requestor, keyed by SOP Class UID.
+    std::vector<scp_scu_role_selection> role_selections;
     uint32_t max_pdu_length = DEFAULT_MAX_PDU_LENGTH;
     std::string implementation_class_uid;
     std::string implementation_version_name;
@@ -213,6 +215,8 @@ struct scp_config {
     std::vector<std::string> accepted_ae_titles; ///< Allowed calling AE titles (empty = all)
     std::vector<std::string> supported_abstract_syntaxes;
     std::vector<std::string> supported_transfer_syntaxes;
+    /// Requestor roles this acceptor can support; omitted SOPs use default roles.
+    std::vector<scp_scu_role_selection> supported_requestor_roles;
     uint32_t max_pdu_length = DEFAULT_MAX_PDU_LENGTH;
     std::string implementation_class_uid;
     std::string implementation_version_name;
@@ -486,6 +490,11 @@ public:
     [[nodiscard]] Result<encoding::transfer_syntax> context_transfer_syntax(
         uint8_t pc_id) const;
 
+    /// Negotiated roles from the requestor's perspective (PS3.7 D.3.3.4).
+    /// An accepted context without a role response defaults to SCU=true/SCP=false.
+    /// A SOP Class without an accepted context has neither role.
+    [[nodiscard]] scp_scu_role_selection requestor_role(std::string_view sop_class_uid) const;
+
     /**
      * @brief Get all accepted presentation contexts.
      */
@@ -741,6 +750,8 @@ private:
 
     /// Proposed presentation contexts (SCU)
     std::vector<proposed_presentation_context> proposed_contexts_;
+    std::vector<scp_scu_role_selection> proposed_roles_;
+    std::vector<scp_scu_role_selection> accepted_roles_;
 
     /// Accepted presentation contexts
     std::vector<accepted_presentation_context> accepted_contexts_;

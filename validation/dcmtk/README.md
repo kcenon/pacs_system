@@ -242,3 +242,20 @@ unchanged BOT/fragments and exactly one delimiter. DIMSE validates the dataset
 against the negotiated syntax before encoding and after decoding. It rejects a
 native/encapsulated mismatch, defined-length compressed wire pixels and unsupported
 network byte order/encoding. It does not compress or decompress pixels implicitly.
+
+## C-GET requestor roles (#1315)
+
+`tests/get_scu_peer_probe.py` runs in a fresh pinned Compose topology for each
+profile. Independent DCMTK stores and retrieves 13 fixture objects first. PACS
+`retrieve_scu` then receives exactly 5 CT, 6 MR and 2 CR objects on the original
+association. Accepted Storage SCP roles, completed/received counters, file syntax,
+metadata and full decoded pixel hashes must match. This isolates C-GET SCU behavior
+from PACS C-STORE SCU and PACS retrieve SCP defects.
+
+`tests/get_scu_protocol_probe.py --fixture <native-CT.dcm> --output <new-directory>`
+executes the actual CLI against a controlled socket peer. It retains raw association
+PDUs and checks role denial/omission, partial contexts, multiple sub-operations,
+wrong counters, warning/cancellation responses, bounded timeout, wrong message ID,
+unnegotiated or missing-dataset stores, optional omitted final counters, stale
+existing files and escaped paths. This is protocol fault-injection evidence;
+independent archive interoperability comes from the peer probe above.

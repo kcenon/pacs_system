@@ -473,3 +473,14 @@ TEST_CASE("pdu_encoder constants", "[network][pdu_types]") {
         CHECK(UNLIMITED_MAX_PDU_LENGTH == 0);
     }
 }
+
+TEST_CASE("role selection encodes UID length without negotiation padding",
+          "[network][pdu_encoder][roles]") {
+    associate_rq rq;
+    rq.calling_ae_title = "GET_SCU";
+    rq.called_ae_title = "ARCHIVE";
+    rq.user_info.role_selections.emplace_back("1.2.3", false, true);
+    const auto bytes = pdu_encoder::encode_associate_rq(rq);
+    const std::vector<uint8_t> expected{0x54,0,0,9,0,5,'1','.','2','.','3',0,1};
+    CHECK(std::search(bytes.begin(), bytes.end(), expected.begin(), expected.end()) != bytes.end());
+}

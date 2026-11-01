@@ -312,6 +312,8 @@ association::association(association&& other) noexcept {
     remote_implementation_class_ = std::move(other.remote_implementation_class_);
     remote_implementation_version_ = std::move(other.remote_implementation_version_);
     proposed_contexts_ = std::move(other.proposed_contexts_);
+    proposed_roles_ = std::move(other.proposed_roles_);
+    accepted_roles_ = std::move(other.accepted_roles_);
     accepted_contexts_ = std::move(other.accepted_contexts_);
     abstract_syntax_to_context_ = std::move(other.abstract_syntax_to_context_);
     context_to_transfer_syntax_ = std::move(other.context_to_transfer_syntax_);
@@ -349,6 +351,8 @@ association& association::operator=(association&& other) noexcept {
         remote_implementation_class_ = std::move(other.remote_implementation_class_);
         remote_implementation_version_ = std::move(other.remote_implementation_version_);
         proposed_contexts_ = std::move(other.proposed_contexts_);
+        proposed_roles_ = std::move(other.proposed_roles_);
+        accepted_roles_ = std::move(other.accepted_roles_);
         accepted_contexts_ = std::move(other.accepted_contexts_);
         abstract_syntax_to_context_ = std::move(other.abstract_syntax_to_context_);
         context_to_transfer_syntax_ = std::move(other.context_to_transfer_syntax_);
@@ -443,6 +447,14 @@ association association::propose(const association_config& config) {
         assoc.proposed_contexts_.push_back(pc);
     }
 
+    for (const auto& role : config.role_selections) {
+        const bool has_context = std::any_of(config.proposed_contexts.begin(), config.proposed_contexts.end(),
+            [&](const auto& pc) { return pc.abstract_syntax == role.sop_class_uid; });
+        const bool duplicate = std::any_of(assoc.proposed_roles_.begin(), assoc.proposed_roles_.end(),
+            [&](const auto& offered) { return offered.sop_class_uid == role.sop_class_uid; });
+        if (has_context && !duplicate) assoc.proposed_roles_.push_back(role);
+    }
+
     // Transition to awaiting state
     assoc.transition(association_state::awaiting_associate_ac);
 
@@ -467,6 +479,18 @@ association association::accept(
 
     // Negotiate presentation contexts
     assoc.negotiate_contexts(rq, config);
+
+    for (const auto& requested : rq.user_info.role_selections) {
+        const auto supported = std::find_if(config.supported_requestor_roles.begin(),
+            config.supported_requestor_roles.end(), [&](const auto& role) {
+                return role.sop_class_uid == requested.sop_class_uid;
+            });
+        if (supported != config.supported_requestor_roles.end()) {
+            assoc.accepted_roles_.emplace_back(requested.sop_class_uid,
+                requested.scu_role && supported->scu_role,
+                requested.scp_role && supported->scp_role);
+        }
+    }
 
     // Build lookup maps
     assoc.build_context_map();
@@ -701,6 +725,17 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
 // PDU Access
 // =============================================================================
 
+scp_scu_role_selection association::requestor_role(std::string_view sop_class_uid) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!abstract_syntax_to_context_.contains(std::string(sop_class_uid))) {
+        return {std::string(sop_class_uid), false, false};
+    }
+    const auto role = std::find_if(accepted_roles_.begin(), accepted_roles_.end(),
+        [&](const auto& value) { return value.sop_class_uid == sop_class_uid; });
+    return role == accepted_roles_.end()
+        ? scp_scu_role_selection{std::string(sop_class_uid), true, false} : *role;
+}
+
 associate_rq association::build_associate_rq() const {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -716,6 +751,7 @@ associate_rq association::build_associate_rq() const {
     }
 
     // User information
+    rq.user_info.role_selections = proposed_roles_;
     rq.user_info.max_pdu_length = max_pdu_size_;
     rq.user_info.implementation_class_uid = our_implementation_class_;
     rq.user_info.implementation_version_name = our_implementation_version_;
@@ -738,6 +774,7 @@ associate_ac association::build_associate_ac() const {
     }
 
     // User information
+    ac.user_info.role_selections = accepted_roles_;
     ac.user_info.max_pdu_length = max_pdu_size_;
     ac.user_info.implementation_class_uid = our_implementation_class_;
     ac.user_info.implementation_version_name = our_implementation_version_;
@@ -786,6 +823,19 @@ bool association::process_associate_ac(const associate_ac& ac) {
                 break;
             }
         }
+    }
+
+    accepted_roles_.clear();
+    for (const auto& response : ac.user_info.role_selections) {
+        const auto offered = std::find_if(proposed_roles_.begin(), proposed_roles_.end(),
+            [&](const auto& role) { return role.sop_class_uid == response.sop_class_uid; });
+        // Ignore unsolicited role responses. Never grant a role we did not offer.
+        if (offered == proposed_roles_.end()) continue;
+        if (std::any_of(accepted_roles_.begin(), accepted_roles_.end(), [&](const auto& role) {
+                return role.sop_class_uid == response.sop_class_uid;
+            })) return false;
+        accepted_roles_.emplace_back(response.sop_class_uid,
+            offered->scu_role && response.scu_role, offered->scp_role && response.scp_role);
     }
 
     // Build lookup maps
