@@ -900,6 +900,11 @@ jobs:
       run: python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py --bin-dir build/bin --output build/test-results/mpps-protocol
       timeout-minutes: 3
 
+    - name: Verify undefined-length UN sequence preservation and malformed rejection
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_undefined_un.py build build/test-results/undefined-un
+      timeout-minutes: 3
+
     - name: Verify DICOMDIR offsets with independent readers and corrupt links
       working-directory: pacs_system
       run: python3 tools/integration_tests/scripts/test_dicomdir_offsets.py build build/test-results/dicomdir
@@ -967,6 +972,7 @@ jobs:
           pacs_system/build/test-results/mpps-protocol/
           pacs_system/build/test-results/big-endian/
           pacs_system/build/test-results/dicomdir/
+          pacs_system/build/test-results/undefined-un/
         retention-days: 30
 
   # ============================================================================

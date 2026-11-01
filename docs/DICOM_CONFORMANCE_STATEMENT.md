@@ -554,6 +554,14 @@ The implementation supports the DICOM File Format as defined in PS3.10:
 - File Meta Information (Group 0002)
 - Dataset encoding per negotiated Transfer Syntax
 
+Undefined-length `UN` values in Explicit VR Little or Big Endian files are decoded
+as sequences whose Items and contents use Implicit VR Little Endian (PS3.5 6.2.2).
+They are retained as `SQ` elements on re-encoding, preserving nested items and
+following elements. Defined-length `UN` remains opaque. Malformed UN item streams,
+invalid/missing delimiters and more than 64 nested sequence levels within that
+path return errors. This does not assert strict validation of every unrelated
+legacy parser path.
+
 ### 5.2 DICOMDIR
 
 DICOMDIR support is provided via the `dcm_dir` utility:

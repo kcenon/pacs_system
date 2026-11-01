@@ -56,6 +56,7 @@ if(PACS_BUILD_TESTS)
         tests/core/dicom_element_test.cpp
         tests/core/dicom_dataset_test.cpp
         tests/core/dicom_file_test.cpp
+        tests/core/undefined_un_test.cpp
         tests/core/tag_info_test.cpp
         tests/core/dicom_dictionary_test.cpp
         tests/core/events_test.cpp

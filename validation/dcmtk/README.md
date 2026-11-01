@@ -455,3 +455,11 @@ empty directories, add/rebuild updates, path resolution, 13 invalid link mutatio
 and malformed structure/metadata. Every command exit and synthetic artifact is
 retained. Requires pydicom plus DCMTK `dcmdump` and `dcmmkdir`; absent tools fail.
 The lane verifies the supported four-level hierarchy, not every media profile.
+
+Undefined-length UN acceptance (`file.undefined-un`) runs five independent CLI
+cases with explicit LE/BE outer files and implicit LE Item contents. It checks
+nested/empty/multiple Items, subsequent scalar and pixel values, cross-syntax
+re-encoding, opaque defined UN and 32 malformed item streams. DCMTK validates the
+original CP-246 fixtures; pydicom checks normalized SQ output. The pydicom 2.4
+reader cannot directly frame the original BE UN fixture, so it is not used as that
+input oracle. Missing binaries/dependencies fail; all command exits are retained.

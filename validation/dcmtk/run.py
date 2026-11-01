@@ -439,6 +439,14 @@ class Validation:
         return dict(tests=15, failed=0, skipped=0,
                     detail='Public MPPS CLIs, controlled malformed wire peer, read-only SQLite state and process restart')
 
+    def undefined_un_files(self):
+        directory = self.output/'undefined-un'
+        self.command(['python3', HERE.parent.parent/'tools/integration_tests/scripts/test_undefined_un.py',
+                      self.args.build_dir, directory], timeout=180)
+        result = json.loads((directory/'results.json').read_text())
+        require(result == dict(tests=5, failed=0, skipped=0), 'Incomplete undefined-length UN evidence')
+        return dict(result, detail='Implicit LE UN items in explicit LE/BE files, trailing values, DCMTK/pydicom and malformed streams')
+
     def dicomdir_files(self):
         directory = self.output/'dicomdir'
         self.command(['python3', HERE.parent.parent/'tools/integration_tests/scripts/test_dicomdir_offsets.py',
@@ -778,6 +786,7 @@ class Validation:
         self.case('mpps.protocol', self.mpps_protocol)
         self.case('file.big-endian', self.big_endian_files)
         self.case('file.dicomdir', self.dicomdir_files)
+        self.case('file.undefined-un', self.undefined_un_files)
         self.security_cases()
         self.case('echo.scp',self.echo_scp,requires=['peer.preflight'])
         self.case('store.scp',self.store_scp,requires=['fixtures','peer.preflight'])

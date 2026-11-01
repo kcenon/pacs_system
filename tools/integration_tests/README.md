@@ -1021,3 +1021,14 @@ Use a new evidence directory. Nine cases exercise actual `dcm_dir` creation,
 listing, verification and add/rebuild updates against pydicom FileSet and DCMTK,
 including shuffled physical order, empty directories and corrupt offsets. The
 script requires pydicom, `dcmdump` and `dcmmkdir`; missing tools fail the run.
+
+Independent undefined-length UN acceptance:
+
+```sh
+python3 tools/integration_tests/scripts/test_undefined_un.py build build/test-results/undefined-un
+```
+
+Requires pydicom, `dcmdump` and `dcmconv`, and a new evidence directory. Five cases
+verify actual conversions between explicit LE/BE with implicit LE UN Items,
+trailing values, defined UN preservation and 32 malformed inputs. DCMTK validates
+the original BE UN input; pydicom validates the normalized SQ output.

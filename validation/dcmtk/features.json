@@ -265,7 +265,8 @@
     "security.logs.scanner-regression",
     "security.logs.public-clean",
     "file.big-endian",
-    "file.dicomdir"
+    "file.dicomdir",
+    "file.undefined-un"
   ],
   "features": [
     {
@@ -278,14 +279,13 @@
       ],
       "interop": [
         "file.big-endian",
-        "file.dicomdir"
+        "file.dicomdir",
+        "file.undefined-un"
       ],
       "gaps": [
-        "Independent general malformed/undefined-length sequence regression fixtures (#1302)."
+        "Broader malformed/unknown-VR parsing and nesting behavior outside the undefined-length UN path (#1318)."
       ],
-      "known_issues": [
-        "https://github.com/kcenon/pacs_system/issues/1302"
-      ]
+      "known_issues": []
     },
     {
       "id": "encoding",
