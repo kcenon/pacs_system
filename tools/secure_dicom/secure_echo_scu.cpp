@@ -23,7 +23,6 @@
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/services/verification_scp.h"
-#include "kcenon/pacs/integration/network_adapter.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -242,7 +241,6 @@ bool perform_secure_echo(
     using namespace kcenon::pacs::network;
     using namespace kcenon::pacs::network::dimse;
     using namespace kcenon::pacs::services;
-    using namespace kcenon::pacs::integration;
 
     std::cout << "Connecting securely to " << host << ":" << port << "...\n";
     std::cout << "  Calling AE:       " << calling_ae << "\n";
@@ -266,15 +264,9 @@ bool perform_secure_echo(
         ? tls_config::tls_version::v1_3
         : tls_config::tls_version::v1_2;
 
-    // Validate TLS configuration
-    auto tls_result = network_adapter::configure_tls(tls_cfg);
-    if (tls_result.is_err()) {
-        std::cerr << "TLS configuration error: " << tls_result.error().message << "\n";
-        return false;
-    }
-
     // Configure association
     association_config config;
+    config.tls = tls_cfg;
     config.calling_ae_title = calling_ae;
     config.called_ae_title = called_ae;
     config.implementation_class_uid = "1.2.826.0.1.3680043.2.1545.1";
@@ -293,8 +285,6 @@ bool perform_secure_echo(
     // Establish secure association
     auto start_time = std::chrono::steady_clock::now();
 
-    // Note: In a full implementation, the connect method would accept TLS config
-    // For this sample, we demonstrate the TLS configuration pattern
     auto connect_result = association::connect(host, port, config, timeout);
 
     if (connect_result.is_err()) {

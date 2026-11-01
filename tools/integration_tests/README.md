@@ -438,8 +438,10 @@ The DCMTK interoperability test suite validates bidirectional compatibility betw
 > returned identifiers and metadata, including empty matches and UTF-8 names.
 > C-MOVE tests verify actual destination objects. Missing DCMTK can skip local
 > cases; CI requires the tools and rejects empty/all-skipped protocol selections.
-> Broader external TLS/security and shell-script acceptance remain separate
-> follow-ups (#1317 and #1258). See [Association Transports](#association-transports-c).
+> Shell scripts check executable contracts, retain command/server evidence, and
+> verify actual received objects; see [shell test instructions](scripts/README.md).
+> Broader external TLS/security validation remains under #1317.
+> See [Association Transports](#association-transports-c).
 
 ### Test Scenarios
 

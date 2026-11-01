@@ -62,8 +62,8 @@ must be tested independently of successful association establishment.
 Run DCMTK tools as separate processes against the actual CLI listeners. Check
 negotiated contexts, stored instance identities/metadata/pixels, subsequent
 associations and clean SIGTERM exit. Run the Binary Integration and DCMTK shell
-suites as well; their argument drift is tracked by #1258 and cannot be waived by
-transport success. #1240 owns remaining cross-process query/retrieve fixture work.
+suites as well; #1258 adds explicit CLI contracts, bounded processes and exact
+object checks. Their success is separate from the #1240 C++ fixtures.
 
 C-MOVE delivery/counters (#1304), C-GET roles/sub-operations (#1306), compressed
 representation (#1292/#1314), indexing (#1315), MWL/MPPS semantics (#1316) and TLS

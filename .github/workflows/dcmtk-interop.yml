@@ -280,71 +280,51 @@ jobs:
       run: |
         chmod +x ./tools/integration_tests/scripts/*.sh
 
-    # The four shell test steps are known failing, so each reports failure
-    # without failing the job: the scripts run pacs_system SCPs and SCUs as
-    # separate processes against DCMTK. TCP and v2 fixtures are available;
-    # remaining shell invocation/counting/timeout fixes belong to #1258.
-    # shell: bash sets pipefail, so the script's exit code survives the tee.
-    # Remove continue-on-error when #1258 is verified.
+    - name: Check shell test helpers
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_shell_helpers.py
+
     - name: Run DCMTK Echo Shell Test
       id: shell_echo
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_echo.sh" ]; then
-          echo "=== Running C-ECHO Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_echo.sh 2>&1 | tee build/dcmtk-echo-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_echo.sh build 2>&1 | tee build/dcmtk-echo-shell.log
 
     - name: Run DCMTK Store Shell Test
       id: shell_store
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_store.sh" ]; then
-          echo "=== Running C-STORE Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_store.sh 2>&1 | tee build/dcmtk-store-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_store.sh build 2>&1 | tee build/dcmtk-store-shell.log
 
     - name: Run DCMTK Find Shell Test
       id: shell_find
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_find.sh" ]; then
-          echo "=== Running C-FIND Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_find.sh 2>&1 | tee build/dcmtk-find-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_find.sh build 2>&1 | tee build/dcmtk-find-shell.log
 
     - name: Run DCMTK Move Shell Test
       id: shell_move
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_move.sh" ]; then
-          echo "=== Running C-MOVE Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_move.sh 2>&1 | tee build/dcmtk-move-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_move.sh build 2>&1 | tee build/dcmtk-move-shell.log
 
     - name: Record shell test outcomes
       if: always()
       run: |
-        # continue-on-error above keeps the job green; record the real outcomes
-        # so the known failures (#1258) stay visible in the job summary
         echo_outcome='${{ steps.shell_echo.outcome }}'
         store_outcome='${{ steps.shell_store.outcome }}'
         find_outcome='${{ steps.shell_find.outcome }}'
         move_outcome='${{ steps.shell_move.outcome }}'
         {
-          echo "### DCMTK shell tests (known failures, quarantined under #1258)"
+          echo "### DCMTK shell tests"
           echo ""
           echo "| Test | Outcome |"
           echo "|---|---|"
@@ -353,12 +333,6 @@ jobs:
           echo "| C-FIND | ${find_outcome} |"
           echo "| C-MOVE | ${move_outcome} |"
         } >> "$GITHUB_STEP_SUMMARY"
-        for outcome in "$echo_outcome" "$store_outcome" "$find_outcome" "$move_outcome"; do
-          if [ "$outcome" = failure ]; then
-            echo "::warning title=Known failure (#1258)::DCMTK shell tests failed; continue-on-error keeps this job green until #1258 is fixed"
-            break
-          fi
-        done
 
     - name: Upload Shell Test Logs
       uses: actions/upload-artifact@v7
@@ -367,6 +341,7 @@ jobs:
         name: dcmtk-shell-logs-${{ matrix.os }}
         path: |
           pacs_system/build/dcmtk-*-shell.log
+          pacs_system/build/test-results/shell/
         retention-days: 30
 
   # ============================================================================

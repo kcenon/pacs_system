@@ -501,13 +501,27 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_query(
             if (!id.empty()) {
                 query.patient_id = id;
             }
+            auto name = query_keys.get_string(core::tags::patient_name);
+            if (!name.empty()) {
+                query.patient_name = name;
+            }
             auto uid = query_keys.get_string(core::tags::study_instance_uid);
             if (!uid.empty()) {
                 query.study_uid = uid;
             }
             auto date = query_keys.get_string(core::tags::study_date);
             if (!date.empty()) {
-                query.study_date = date;
+                const auto separator = date.find('-');
+                if (separator == std::string::npos) {
+                    query.study_date = date;
+                } else {
+                    if (separator > 0) {
+                        query.study_date_from = date.substr(0, separator);
+                    }
+                    if (separator + 1 < date.size()) {
+                        query.study_date_to = date.substr(separator + 1);
+                    }
+                }
             }
 
             auto studies_result = database_->search_studies(query);

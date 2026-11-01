@@ -161,10 +161,12 @@ run_findscu() {
 
     log_info "Running C-FIND (${level}): ${called_ae}@${host}:${port}"
 
+    local model=-S
+    [[ "${level}" == PATIENT ]] && model=-P
     run_with_timeout 30 findscu \
         -aec "${called_ae}" \
         -aet "FINDSCU" \
-        -W \
+        "${model}" \
         -k "QueryRetrieveLevel=${level}" \
         "${key_args[@]}" \
         "${host}" "${port}" 2>&1
@@ -189,7 +191,9 @@ run_movescu() {
 
     log_info "Running C-MOVE (${level}): ${dest_ae} <- ${called_ae}@${host}:${port}"
 
-    run_with_timeout 120 movescu \
+    local model=-S
+    [[ "${level}" == PATIENT ]] && model=-P
+    run_with_timeout 120 movescu "${model}" \
         -aec "${called_ae}" \
         -aet "MOVESCU" \
         -aem "${dest_ae}" \
@@ -350,23 +354,23 @@ verify_received_dicom() {
     local expected_count="${2:-1}"
 
     local actual_count
-    actual_count=$(find "${output_dir}" -name "*.dcm" -type f 2>/dev/null | wc -l | tr -d ' ')
+    actual_count=$(count_dicom_files "${output_dir}") || return 1
 
-    if [[ "${actual_count}" -ge "${expected_count}" ]]; then
-        log_pass "Received ${actual_count} DICOM file(s) (expected >= ${expected_count})"
+    if [[ "${actual_count}" -eq "${expected_count}" ]]; then
+        log_pass "Received ${actual_count} DICOM file(s) (expected ${expected_count})"
         return 0
     else
-        log_fail "Received ${actual_count} DICOM file(s) (expected >= ${expected_count})"
+        log_fail "Received ${actual_count} DICOM file(s) (expected ${expected_count})"
         return 1
     fi
 }
 
 # Count DICOM files in a directory
 # Usage: count_dicom_files <directory>
-# Outputs: Number of .dcm files
+# Outputs: Number of parsed Part 10 objects, including extensionless storescp output
 count_dicom_files() {
     local directory="$1"
-    find "${directory}" -name "*.dcm" -type f 2>/dev/null | wc -l | tr -d ' '
+    python3 "${SCRIPT_DIR}/dicom_inventory.py" count "${directory}"
 }
 
 # List DICOM files in a directory
@@ -374,7 +378,16 @@ count_dicom_files() {
 # Outputs: One file path per line
 list_dicom_files() {
     local directory="$1"
-    find "${directory}" -name "*.dcm" -type f 2>/dev/null | sort
+    python3 "${SCRIPT_DIR}/dicom_inventory.py" list "${directory}"
+}
+
+# Usage: verify_received_uids <directory> <expected-file> [expected-file ...]
+verify_received_uids() {
+    python3 "${SCRIPT_DIR}/dicom_inventory.py" verify "$@"
+}
+
+dicom_value() {
+    python3 "${SCRIPT_DIR}/dicom_inventory.py" value "$@"
 }
 
 # Verify C-ECHO was successful
@@ -489,4 +502,5 @@ run_dcmtk_test() {
 }
 
 # Mark DCMTK common as sourced
+# shellcheck disable=SC2034 # Public sourcing guard for callers.
 DCMTK_COMMON_SH_SOURCED=1

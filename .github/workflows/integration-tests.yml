@@ -858,7 +858,9 @@ jobs:
           ninja-build \
           cmake \
           netcat-openbsd \
-          lsof
+          lsof \
+          dcmtk \
+          python3
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -887,33 +889,40 @@ jobs:
           chmod +x ./tools/integration_tests/scripts/*.sh
         fi
 
+    - name: Check shell test helpers
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_shell_helpers.py
+
     - name: Run Binary Integration Tests
       id: binary_tests
       working-directory: pacs_system
+      shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
-          cd tools/integration_tests/scripts
-          ./run_all_binary_tests.sh ../../../build --verbose
-        else
-          echo "Binary integration test scripts not found"
-        fi
+        bash tools/integration_tests/scripts/run_all_binary_tests.sh build --verbose 2>&1 | tee build/binary-shell.log
       timeout-minutes: 10
-      # Known failing, so this step reports failure without failing the job:
-      # TCP and v2 fixtures are available. The remaining CLI arguments,
-      # timeout and result-counting fixes are tracked in #1258.
-      # Remove continue-on-error when #1258 is verified.
+      # #1258 fixes script contracts and real TLS. An odd-length MPPS UID
+      # retains its UI padding NUL during N-SET and returns 0xc001 (#1316).
+      # Remove this allowance after #1316 and the #1258 aggregate rerun pass.
       continue-on-error: true
 
     - name: Record binary integration test outcome
       if: always()
       run: |
-        # continue-on-error above keeps the job green; record the real outcome
-        # so the known failure (#1258) stays visible in the job summary
         outcome='${{ steps.binary_tests.outcome }}'
-        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1258)" >> "$GITHUB_STEP_SUMMARY"
+        echo "Binary integration tests: ${outcome} (MPPS prerequisite #1316; acceptance #1258)" >> "$GITHUB_STEP_SUMMARY"
         if [ "$outcome" = failure ]; then
-          echo "::warning title=Known failure (#1258)::Binary integration tests failed; continue-on-error keeps this job green until #1258 is fixed"
+          echo "::warning title=MPPS prerequisite (#1316)::Binary aggregate failed; #1258 remains incomplete until MPPS and aggregate acceptance pass"
         fi
+
+    - name: Upload binary integration evidence
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: binary-shell-test-results
+        path: |
+          pacs_system/build/binary-shell.log
+          pacs_system/build/test-results/shell/
+        retention-days: 30
 
   # ============================================================================
   # Test Summary

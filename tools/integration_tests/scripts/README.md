@@ -1,63 +1,89 @@
 # Binary Integration Test Scripts
 
-Shell scripts for testing PACS binaries at the process level.
-
-## Quick Start
+Run the network suites against a build with examples, storage and OpenSSL enabled:
 
 ```bash
-# Run all tests
-./run_all_binary_tests.sh
-
-# Run individual test suites
-./test_connectivity.sh      # Echo SCP/SCU tests
-./test_store_retrieve.sh    # Storage workflow tests
-./test_worklist_mpps.sh     # RIS workflow tests
-./test_secure_dicom.sh      # TLS communication tests
-
-# Run DCMTK interoperability tests
-./test_dcmtk_echo.sh        # DCMTK C-ECHO tests
-./test_dcmtk_store.sh       # DCMTK C-STORE tests
-./test_dcmtk_find.sh        # DCMTK C-FIND tests
-./test_dcmtk_move.sh        # DCMTK C-MOVE tests
+bash tools/integration_tests/scripts/run_all_binary_tests.sh build --verbose
+bash tools/integration_tests/scripts/test_dcmtk_echo.sh build
+bash tools/integration_tests/scripts/test_dcmtk_store.sh build
+bash tools/integration_tests/scripts/test_dcmtk_find.sh build
+bash tools/integration_tests/scripts/test_dcmtk_move.sh build
+python3 tools/integration_tests/scripts/test_shell_helpers.py
 ```
 
-## Script Descriptions
+The scripts require Bash, Python 3, OpenSSL and DCMTK (`echoscu`, `storescu`,
+`storescp`, `findscu`, `movescu`, `dcmdump`, `dcmodify`). GNU `timeout` or macOS
+`gtimeout` is used when available; the Python fallback also enforces a deadline
+and kills remaining child processes. Individual commands have deadlines and the
+aggregate limits each suite to 240 seconds.
 
-| Script | Purpose | Binaries/Tools Tested |
-|--------|---------|----------------------|
-| `common.sh` | Shared utilities (sourced by other scripts) | - |
-| `dcmtk_common.sh` | DCMTK interoperability helpers (Issue #450) | - |
-| `test_connectivity.sh` | Basic DICOM echo operations | echo_scp, echo_scu |
-| `test_store_retrieve.sh` | Storage and query workflow | pacs_server, store_scu, query_scu |
-| `test_worklist_mpps.sh` | Modality worklist and MPPS | worklist_scu, mpps_scu |
-| `test_secure_dicom.sh` | TLS encrypted communication | echo_scp, echo_scu (with TLS) |
-| `test_dcmtk_echo.sh` | DCMTK C-ECHO interoperability (Issue #451) | echoscu, pacs_server |
-| `test_dcmtk_store.sh` | DCMTK C-STORE interoperability (Issue #452) | storescu, storescp, pacs_server |
-| `test_dcmtk_find.sh` | DCMTK C-FIND interoperability (Issue #453) | findscu, pacs_server |
-| `test_dcmtk_move.sh` | DCMTK C-MOVE interoperability (Issue #454) | movescu, storescp, pacs_server |
-| `run_all_binary_tests.sh` | Master test runner | All |
+| Suite | Required executables | Checks |
+|---|---|---|
+| `test_connectivity.sh` | echo_scp, echo_scu | C-ECHO, repeated requests, calling AE, connection and argument errors |
+| `test_store_retrieve.sh` | pacs_server, store_scu, query_scu, echo_scu | Storage/query, duplicate rejection, three concurrent distinct instances |
+| `test_worklist_mpps.sh` | pacs_server, worklist_scu, mpps_scu, echo_scu | Empty MWL success and MPPS create/complete using the returned UID |
+| `test_secure_dicom.sh` | secure_echo_scp, secure_echo_scu | Encrypted C-ECHO, client certificate requirement, wrong CA, independent OpenSSL handshake |
+| `test_dcmtk_echo.sh` | echo_scp, echo_scu | Bidirectional C-ECHO and DCMTK baseline via storescp |
+| `test_dcmtk_store.sh` | pacs_server, store_scu | Bidirectional C-STORE, DCMTK baseline, exact received SOP Instance UIDs |
+| `test_dcmtk_find.sh` | pacs_server | Seeded query results, Patient/Study Root models, wildcard/date/empty matching |
+| `test_dcmtk_move.sh` | qr_scp | Registered destination, actual received object, unknown destination and connection rejection |
+| `test_cli_tools.sh` | File utility executables | Separate existing file utility suite; not part of the network aggregate |
 
-## Options
+`pacs_server` has no CLI destination registration option. The C-MOVE suite uses
+`qr_scp --peer AE:host:port` with an isolated pre-indexed source directory.
+Retrieval is covered there; `test_store_retrieve.sh` covers storage and query.
+The default duplicate policy rejects resends, so concurrent storage uses distinct
+SOP Instance UIDs and duplicate rejection is checked separately.
+
+## CLI contracts and results
+
+Every network suite checks its required executables' `--help` output before
+starting servers. Some existing executables return 1 or 2 for help; the checks
+pin the expected status and required usage text. Actual operations must return
+their expected status. `worklist_scu` returns 1 for an empty successful query;
+that case also requires a successful final DIMSE response in verbose output.
+
+`echo_scu`, `store_scu` and `worklist_scu` use `-aec`/`-aet` before positional
+host/port arguments. `query_scu`, `mpps_scu` and `secure_echo_scu` retain positional
+called AE arguments. MPPS uses positional `create`/`set` commands. Secure tools
+receive separate certificate and key files generated with `generate_certs.sh`.
+The secure SCP uses the v2 TLS server; the SCU sets `association_config::tls`.
+
+Received objects are recognized by Part 10 `DICM` bytes and parsed with DCMTK,
+regardless of suffix. `dicom_inventory.py` rejects missing, extra, wrong or
+duplicate SOP Instance UIDs. Find responses are parsed separately because query
+datasets need not contain a SOP Instance UID. Logs and non-DICOM files are never
+counted as stored objects.
+
+## Selection, deadlines and evidence
 
 ```bash
-./run_all_binary_tests.sh [OPTIONS] [build_dir]
-
-Options:
-  -v, --verbose    Show detailed test output
-  -p, --parallel   Run test suites in parallel
-  -h, --help       Show help message
-
-Example:
-  ./run_all_binary_tests.sh -v -p /path/to/build
+# Select one or more suites; --parallel runs them concurrently.
+bash tools/integration_tests/scripts/run_all_binary_tests.sh build --storage --worklist
+PACS_TEST_LOG_DIR=/tmp/pacs-shell-evidence \
+  bash tools/integration_tests/scripts/run_all_binary_tests.sh build --parallel --verbose
 ```
 
-## Exit Codes
+The default evidence directory is `<build>/test-results/shell/`. Each run gets a
+unique directory containing full server logs, command output, quoted arguments
+and raw exit statuses. The aggregate also writes `suite-exits.tsv`. Startup
+failures print the server log and exit status; an occupied port is refused.
+Cleanup stops only owned processes, removes temporary databases/data and private
+keys, and retains logs. CI uploads the evidence even when a suite fails.
 
-- `0` - All tests passed
-- `1` - One or more tests failed
-- `2` - Prerequisites not met (binaries missing)
+Exit 0 requires all selected suites to pass. Missing binaries, missing test data,
+empty selections and skipped prerequisites cannot establish a pass. Suite exits
+are 1 for test/startup failures and 2 for missing prerequisites. Expected command
+failures are asserted explicitly; timeout exits (124, or 137 after forced GNU
+timeout termination) are never accepted as successful negative tests.
 
-## See Also
+The helper regression suite exercises deadlines, status/log preservation,
+startup failures, port ownership, extensionless objects and UID mismatches.
+It requires DCMTK and fails if that prerequisite is missing.
 
-- [Integration Tests README](../README.md) - Full documentation
-- [Test Fixtures](../test_fixtures.h) - C++ utilities
+The four DCMTK shell steps are required in CI. The binary aggregate still has
+an advisory allowance pending #1316: an odd-length MPPS UID retains a trailing
+UI padding NUL during N-SET, causing status `0xc001` after a successful N-CREATE.
+Both sequential and parallel execution use the returned UID and preserve this
+failure. Remove that allowance only after the product fix and #1258 acceptance
+rerun; a passing run with even-length generated UIDs does not settle it.
