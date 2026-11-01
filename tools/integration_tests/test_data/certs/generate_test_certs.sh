@@ -170,22 +170,40 @@ EOF
         -out "$CERT_DIR/expired.csr" \
         -config "$CERT_DIR/expired.cnf"
 
-    # Create certificate that expired yesterday
-    openssl x509 -req \
-        -in "$CERT_DIR/expired.csr" \
-        -CA "$CERT_DIR/ca.crt" \
-        -CAkey "$CERT_DIR/ca.key" \
-        -CAcreateserial \
-        -out "$CERT_DIR/expired.crt" \
-        -days -1 \
-        -sha256 \
-        -extensions v3_req \
-        -extfile "$CERT_DIR/expired.cnf" 2>/dev/null || {
-        # Fallback: create with faketime if available
-        echo "Note: Could not create backdated certificate"
-        rm -f "$CERT_DIR/expired.key" "$CERT_DIR/expired.csr" "$CERT_DIR/expired.cnf"
-        return
-    }
+    # OpenSSL 3.5 rejects `x509 -days -1`. Use explicit historical dates;
+    # absence of this negative fixture must fail setup instead of silently skip.
+    local signing_dir signing_config_dir cert_config_dir
+    signing_dir="$(mktemp -d "$CERT_DIR/expired-sign.XXXXXX")"
+    signing_config_dir="$signing_dir"
+    cert_config_dir="$CERT_DIR"
+    # Paths inside an OpenSSL config do not receive Git Bash argv conversion.
+    if command -v cygpath >/dev/null 2>&1; then
+        signing_config_dir="$(cygpath -m "$signing_dir")"
+        cert_config_dir="$(cygpath -m "$CERT_DIR")"
+    fi
+    touch "$signing_dir/index"
+    printf '1000\n' > "$signing_dir/serial"
+    cat > "$signing_dir/ca.cnf" << EOF
+[ca]
+default_ca = test_ca
+[test_ca]
+database = "$signing_config_dir/index"
+serial = "$signing_config_dir/serial"
+new_certs_dir = "$signing_config_dir"
+certificate = "$cert_config_dir/ca.crt"
+private_key = "$cert_config_dir/ca.key"
+default_md = sha256
+policy = subject_policy
+[subject_policy]
+commonName = supplied
+organizationName = optional
+organizationalUnitName = optional
+EOF
+    openssl ca -batch -notext -config "$signing_dir/ca.cnf" \
+        -in "$CERT_DIR/expired.csr" -out "$CERT_DIR/expired.crt" \
+        -startdate 20000101000000Z -enddate 20010101000000Z \
+        -extensions v3_req -extfile "$CERT_DIR/expired.cnf" 2>/dev/null
+    rm -rf "$signing_dir"
 
     rm -f "$CERT_DIR/expired.csr" "$CERT_DIR/expired.cnf"
 }

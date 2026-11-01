@@ -778,6 +778,7 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         CHECK(dataset.get_string(tags::patient_name) == "DOE^JOHN");
     }
 
+#ifdef PACS_WITH_DIGITAL_SIGNATURES
     SECTION("Encrypt succeeds with valid key") {
         std::array<std::uint8_t, 32> key{};
         for (std::size_t i = 0; i < key.size(); ++i) {
@@ -792,10 +793,10 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         auto dataset = create_test_dataset();
         auto original_name = dataset.get_string(tags::patient_name);
         auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.empty());
 
         auto encrypted = dataset.get_string(tags::patient_name);
-        // With OpenSSL: encrypted hex output
-        // Without OpenSSL: may keep original or show error
         CHECK(encrypted != original_name);
     }
 
@@ -812,8 +813,12 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         auto ds1 = create_test_dataset();
         auto ds2 = create_test_dataset();
 
-        (void)anon.anonymize(ds1);
-        (void)anon.anonymize(ds2);
+        auto first = anon.anonymize(ds1);
+        auto second = anon.anonymize(ds2);
+        REQUIRE(first.is_ok());
+        REQUIRE(second.is_ok());
+        REQUIRE(first.value().errors.empty());
+        REQUIRE(second.value().errors.empty());
 
         auto enc1 = ds1.get_string(tags::patient_name);
         auto enc2 = ds2.get_string(tags::patient_name);
@@ -836,12 +841,34 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
                            tag_action_config{.action = tag_action::encrypt});
 
         auto dataset = create_test_dataset();
-        (void)anon.anonymize(dataset);
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.empty());
 
         auto encrypted = dataset.get_string(tags::patient_id);
-        if (!encrypted.empty()) {
-            CHECK(encrypted.find_first_not_of("0123456789abcdef")
-                  == std::string::npos);
-        }
+        REQUIRE_FALSE(encrypted.empty());
+        CHECK(encrypted.find_first_not_of("0123456789abcdef") == std::string::npos);
     }
+#else
+    SECTION("Unavailable encryption reports a failed action without claiming a replacement") {
+        std::array<std::uint8_t, 32> key{};
+        REQUIRE(anon.set_encryption_key(key).is_ok());
+        anon.set_detailed_reporting(true);
+        anon.add_tag_action(tags::patient_name, tag_action_config{.action = tag_action::encrypt});
+        auto dataset = create_test_dataset();
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.size() == 1);
+        CHECK(result.value().errors.front() ==
+              "Encryption requires OpenSSL (build with PACS_WITH_DIGITAL_SIGNATURES)");
+        CHECK(dataset.get_string(tags::patient_name) == "DOE^JOHN");
+        const auto& actions = result.value().action_records;
+        const auto action = std::find_if(actions.begin(), actions.end(), [](const auto& record) {
+            return record.tag == tags::patient_name;
+        });
+        REQUIRE(action != actions.end());
+        CHECK_FALSE(action->success);
+        CHECK(action->new_value.empty());
+    }
+#endif
 }

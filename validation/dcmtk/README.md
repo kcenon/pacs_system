@@ -82,7 +82,7 @@ SCP behavior (#1304/#1306), compressed storage (#1292), v2 TLS (#1305), C-GET
 role negotiation and a utility invoking nonexistent `echoscp`. Subsequent fixes
 have dedicated regression evidence; run this validator against the current source
 and rebuilt images to establish the integrated result. Cross-platform TLS and the
-broader external security/audit matrix (#1317) still require their own evidence.
+broader external security/audit matrix (#1317) require their own execution evidence.
 
 The primary outputs are the actual results, not the workflow's existence. The
 [CI workflow](../../.github/workflows/dcmtk-validation.yml) runs the same command
@@ -418,3 +418,19 @@ required operation: discovery cannot reserve a port across unrelated processes.
 The #1258 aggregate CI allowance was removed after the deterministic MPPS probe,
 both aggregate modes and all four DCMTK shell suites passed locally. Hosted CI
 still supplies its own evidence; these local runs do not stand in for it.
+
+## External security matrix (#1317)
+
+`security.matrix` runs `validation/security/run.py` and imports all 36 individual
+TLS, audit, anonymization and public-output checks as required `security.*` cases.
+The matrix uses actual encrypted CLI/API services, independent DCMTK and Python
+peers, and #1300's seven recursive anonymization cases. A missing peer or setup
+failure leaves explicit blocked results and fails the aggregate.
+
+See [security validation](../security/README.md) for exact scope, commands and
+negative policies. Keys and raw identifying security fixtures live in a separate
+mode-0700 temporary directory, not `/results`; keys are deleted on exit. The
+legacy `tls.scp` and component certificate material also live outside `/results`.
+Security public artifacts contain hashes and checked metadata; raw payloads and
+exact private command arguments remain in the private evidence location recorded
+in `security/results.json`. A focused run does not establish the full release gate.

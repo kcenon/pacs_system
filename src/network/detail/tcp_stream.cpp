@@ -311,8 +311,13 @@ kcenon::pacs::VoidResult tcp_stream::start_tls(
         const int rc = SSL_connect(ssl);
         if (rc == 1) break;
         const int error = SSL_get_error(ssl, rc);
-        if (error != SSL_ERROR_WANT_READ && error != SSL_ERROR_WANT_WRITE)
-            return fail(tls_error("TLS handshake failed"));
+        if (error != SSL_ERROR_WANT_READ && error != SSL_ERROR_WANT_WRITE) {
+            auto message = tls_error("TLS handshake failed");
+            const auto verification = SSL_get_verify_result(ssl);
+            if (verification != X509_V_OK)
+                message += std::string("; peer certificate: ") + X509_verify_cert_error_string(verification);
+            return fail(std::move(message));
+        }
         const auto ready = wait_for_socket(to_native(handle_), error == SSL_ERROR_WANT_WRITE, deadline);
         if (ready == wait_result::timeout)
             return error_info{connection_timeout, "TLS handshake timeout", "network"};

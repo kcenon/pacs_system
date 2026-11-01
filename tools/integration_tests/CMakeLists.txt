@@ -101,6 +101,12 @@ target_link_libraries(generate_test_data
 
 target_compile_features(generate_test_data PRIVATE cxx_std_20)
 
+# External security validation harness (not an installed product CLI).
+add_executable(pacs_security_probe ${CMAKE_SOURCE_DIR}/validation/security/security_probe.cpp)
+target_link_libraries(pacs_security_probe PRIVATE
+    pacs_services pacs_network pacs_storage pacs_security pacs_integration Threads::Threads)
+target_compile_features(pacs_security_probe PRIVATE cxx_std_20)
+
 # Custom target to generate test data
 add_custom_target(generate_binary_test_data
     COMMAND generate_test_data ${CMAKE_CURRENT_SOURCE_DIR}/test_data

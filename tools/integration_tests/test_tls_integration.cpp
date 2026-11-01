@@ -79,7 +79,8 @@ public:
         tls_valid_ = true;
 
         // Create server with TLS
-        server_ = network_adapter::create_server(config, tls_cfg_);
+        config.tls = tls_cfg_;
+        server_ = std::make_unique<kcenon::pacs::network::v2::dicom_server_v2>(config);
     }
 
     ~tls_test_server() {
@@ -122,13 +123,13 @@ public:
     [[nodiscard]] const std::string& ae_title() const noexcept { return ae_title_; }
     [[nodiscard]] bool is_running() const noexcept { return running_; }
     [[nodiscard]] bool is_tls_valid() const noexcept { return tls_valid_; }
-    [[nodiscard]] kcenon::pacs::network::dicom_server* server() { return server_.get(); }
+    [[nodiscard]] kcenon::pacs::network::v2::dicom_server_v2* server() { return server_.get(); }
 
 private:
     uint16_t port_;
     std::string ae_title_;
     tls_config tls_cfg_;
-    std::unique_ptr<kcenon::pacs::network::dicom_server> server_;
+    std::unique_ptr<kcenon::pacs::network::v2::dicom_server_v2> server_;
     bool running_{false};
     bool tls_valid_{false};
 };
@@ -145,12 +146,6 @@ public:
         const std::string& calling_ae,
         const tls_config& tls_cfg,
         const std::vector<std::string>& sop_classes = {std::string(verification_sop_class_uid)}) {
-
-        // Validate TLS configuration
-        auto tls_result = network_adapter::configure_tls(tls_cfg);
-        if (tls_result.is_err()) {
-            return tls_result.error();
-        }
 
         // Configure association
         kcenon::pacs::network::association_config config;
@@ -172,8 +167,9 @@ public:
             context_id += 2;
         }
 
-        // Connect with TLS configuration
-        // Note: In full implementation, TLS config would be passed to connect
+        config.tls = tls_cfg;
+        // A server-only certificate validator must not reject a valid client
+        // configuration that intentionally has no client certificate.
         return kcenon::pacs::network::association::connect(host, port, config, default_timeout());
     }
 };
@@ -187,11 +183,7 @@ public:
 TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
     auto certs = get_test_certificates();
 
-    // Skip if certificates not available
-    if (!certs.all_exist()) {
-        WARN("Skipping TLS tests: certificates not found at " << certs.ca_cert.parent_path());
-        SKIP("Test certificates not available");
-    }
+    REQUIRE(certs.all_exist());
 
     SECTION("TLS server accepts connection and responds to C-ECHO") {
         // Configure TLS server
@@ -206,10 +198,7 @@ TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
         auto port = find_available_port();
         tls_test_server server(port, "TLS_SCP", server_tls);
 
-        if (!server.is_tls_valid()) {
-            WARN("TLS configuration not valid, skipping test");
-            SKIP("TLS not properly configured");
-        }
+        REQUIRE(server.is_tls_valid());
 
         server.register_service(std::make_shared<verification_scp>());
         REQUIRE(server.start());
@@ -260,9 +249,7 @@ TEST_CASE("TLS C-ECHO connection", "[tls][connectivity]") {
 TEST_CASE("TLS certificate validation", "[tls][security]") {
     auto certs = get_test_certificates();
 
-    if (!certs.all_exist()) {
-        SKIP("Test certificates not available");
-    }
+    REQUIRE(certs.all_exist());
 
     // Start TLS server
     tls_config server_tls;
@@ -276,9 +263,7 @@ TEST_CASE("TLS certificate validation", "[tls][security]") {
     auto port = find_available_port();
     tls_test_server server(port, "TLS_SCP", server_tls);
 
-    if (!server.is_tls_valid()) {
-        SKIP("TLS not properly configured");
-    }
+    REQUIRE(server.is_tls_valid());
 
     server.register_service(std::make_shared<verification_scp>());
     REQUIRE(server.start());
@@ -299,12 +284,7 @@ TEST_CASE("TLS certificate validation", "[tls][security]") {
     }
 
     SECTION("Wrong CA fails validation") {
-        // Skip if other_ca doesn't exist
-        if (!std::filesystem::exists(certs.other_ca_cert)) {
-            WARN("other_ca.crt not found, skipping wrong CA test");
-            server.stop();
-            return;
-        }
+        REQUIRE(std::filesystem::exists(certs.other_ca_cert));
 
         tls_config client_tls;
         client_tls.enabled = true;
@@ -315,13 +295,8 @@ TEST_CASE("TLS certificate validation", "[tls][security]") {
         auto result = tls_test_client::connect(
             "localhost", port, server.ae_title(), "TLS_SCU", client_tls);
 
-        // Should fail due to certificate verification failure
-        // Note: Actual behavior depends on implementation
-        // Some implementations may still connect but with warnings
-        if (result.is_ok()) {
-            auto& assoc = result.value();
-            assoc.abort();
-        }
+        REQUIRE(result.is_err());
+        CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("certificate verify failed"));
     }
 
     SECTION("TLS configuration validation") {
@@ -346,9 +321,7 @@ TEST_CASE("TLS certificate validation", "[tls][security]") {
 TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
     auto certs = get_test_certificates();
 
-    if (!certs.all_exist()) {
-        SKIP("Test certificates not available");
-    }
+    REQUIRE(certs.all_exist());
 
     SECTION("Client with valid certificate succeeds") {
         // Server requires client certificate
@@ -363,9 +336,7 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
         auto port = find_available_port();
         tls_test_server server(port, "MTLS_SCP", server_tls);
 
-        if (!server.is_tls_valid()) {
-            SKIP("TLS not properly configured");
-        }
+        REQUIRE(server.is_tls_valid());
 
         server.register_service(std::make_shared<verification_scp>());
         REQUIRE(server.start());
@@ -416,9 +387,7 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
         auto port = find_available_port();
         tls_test_server server(port, "MTLS_SCP", server_tls);
 
-        if (!server.is_tls_valid()) {
-            SKIP("TLS not properly configured");
-        }
+        REQUIRE(server.is_tls_valid());
 
         server.register_service(std::make_shared<verification_scp>());
         REQUIRE(server.start());
@@ -434,13 +403,8 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
         auto result = tls_test_client::connect(
             "localhost", port, server.ae_title(), "NO_CERT_SCU", client_tls);
 
-        // Should fail due to missing client certificate
-        // Note: Actual behavior depends on server configuration
-        if (result.is_ok()) {
-            auto& assoc = result.value();
-            // Connection might succeed but operations may fail
-            assoc.abort();
-        }
+        REQUIRE(result.is_err());
+        CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("certificate required"));
 
         server.stop();
     }
@@ -453,9 +417,7 @@ TEST_CASE("Mutual TLS authentication", "[tls][mtls]") {
 TEST_CASE("TLS version negotiation", "[tls][version]") {
     auto certs = get_test_certificates();
 
-    if (!certs.all_exist()) {
-        SKIP("Test certificates not available");
-    }
+    REQUIRE(certs.all_exist());
 
     SECTION("TLS 1.2 connection") {
         tls_config server_tls;
@@ -469,9 +431,7 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
         auto port = find_available_port();
         tls_test_server server(port, "TLS12_SCP", server_tls);
 
-        if (!server.is_tls_valid()) {
-            SKIP("TLS not properly configured");
-        }
+        REQUIRE(server.is_tls_valid());
 
         server.register_service(std::make_shared<verification_scp>());
         REQUIRE(server.start());
@@ -503,9 +463,7 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
         auto port = find_available_port();
         tls_test_server server(port, "TLS13_SCP", server_tls);
 
-        if (!server.is_tls_valid()) {
-            SKIP("TLS not properly configured");
-        }
+        REQUIRE(server.is_tls_valid());
 
         server.register_service(std::make_shared<verification_scp>());
         REQUIRE(server.start());
@@ -519,13 +477,8 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
         auto result = tls_test_client::connect(
             "localhost", port, server.ae_title(), "TLS13_SCU", client_tls);
 
-        // TLS 1.3 may not be supported on all systems
-        if (result.is_ok()) {
-            auto& assoc = result.value();
-            (void)assoc.release(default_timeout());
-        } else {
-            INFO("TLS 1.3 not supported: " << result.error().message);
-        }
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().release(default_timeout()).is_ok());
 
         server.stop();
     }
@@ -538,9 +491,7 @@ TEST_CASE("TLS version negotiation", "[tls][version]") {
 TEST_CASE("Multiple concurrent TLS connections", "[tls][concurrent]") {
     auto certs = get_test_certificates();
 
-    if (!certs.all_exist()) {
-        SKIP("Test certificates not available");
-    }
+    REQUIRE(certs.all_exist());
 
     tls_config server_tls;
     server_tls.enabled = true;
@@ -553,9 +504,7 @@ TEST_CASE("Multiple concurrent TLS connections", "[tls][concurrent]") {
     auto port = find_available_port();
     tls_test_server server(port, "CONCURRENT_TLS", server_tls);
 
-    if (!server.is_tls_valid()) {
-        SKIP("TLS not properly configured");
-    }
+    REQUIRE(server.is_tls_valid());
 
     server.register_service(std::make_shared<verification_scp>());
     REQUIRE(server.start());

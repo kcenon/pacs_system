@@ -32,11 +32,11 @@ inside v1 or silently change the public v1 callback/registry contract.
 | `worklist_scp` | JSON source, query handler, result limit | v2 TCP |
 | `mpps_scp` | N-CREATE/N-SET handlers and JSON persistence | v2 TCP |
 | `pacs_server` | Storage/index, query/retrieve, MWL/MPPS, AE whitelist | v2 TCP |
-| `secure_echo_scp` | Certificate/key/CA, peer verification and TLS minimum | Deferred to #1305/#1317: adapter currently validates settings without configuring the listener |
+| `secure_echo_scp` | Certificate/key/CA, peer verification and TLS minimum | v2 encrypted TCP; external TLS/mTLS matrix in `validation/security` |
 
-TLS must be applied to an encrypted listener with the requested verification
-policy. Substituting a plaintext v2 listener for `secure_echo_scp` is not a valid
-migration. This outstanding requirement keeps complete SCP acceptance open.
+TLS is applied to the v2 listener with the requested verification policy. The
+minimum is TLS 1.2 by default or TLS 1.3 when configured. Independent peers test
+DIMSE success, certificate failures, plaintext rejection and version policy.
 
 ## Compatibility and lifecycle
 
@@ -50,6 +50,10 @@ available for in-process consumers. They do not provide external TCP DICOM
 service. Existing v1 unit/workflow fixtures remain to check this retained API;
 the shared external DCMTK fixture uses v2 and no longer has
 `v1_server_accepts_tcp()` skip gates.
+
+The retained factory preserves TLS settings and v1 rejects them at `start()`;
+it cannot silently downgrade a TLS request. Historical `[tls]~[v2]` fixture
+names now execute the v2 encrypted listener. They do not claim v1 TLS support.
 
 CLI signal handlers only set a lock-free atomic flag. The main thread performs
 shutdown and joins transport threads, avoiding logging, server locks and I/O

@@ -991,3 +991,14 @@ When adding new binary tests:
 ## License
 
 See the main project [LICENSE](../../LICENSE) file.
+
+### External security evidence (#1317)
+
+Run `python3 validation/security/run.py --bin-dir build/bin --output /tmp/security-public-new --private-output /tmp/security-private-new`
+from the repository root. The required binary integration job runs this matrix,
+including the seven recursive anonymization cases; only checked public evidence
+is uploaded. See [scope and prerequisites](../../validation/security/README.md).
+Historical non-v2-tagged TLS cases now use the actual v2 encrypted listener. The
+retained v1 factory preserves TLS settings and rejects unsupported TLS at start.
+The certificate generator requires an expired fixture and uses fixed historical
+validity dates supported by OpenSSL 3.5; generation failure is fatal.

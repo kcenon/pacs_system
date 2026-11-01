@@ -20,7 +20,9 @@
 #include "kcenon/pacs/core/result.h"
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <string>
 
 namespace kcenon::pacs::security {
@@ -134,6 +136,9 @@ struct syslog_transport_config {
 
     /// Whether to verify server certificate (disable only for testing)
     bool verify_server{true};
+
+    /// Bound blocking TLS socket I/O, including the close-notify exchange.
+    std::chrono::milliseconds io_timeout{5000};
 };
 
 // =============================================================================
@@ -195,6 +200,8 @@ public:
      *
      * @param xml_message RFC 3881 XML audit message string
      * @return VoidResult indicating success or transport error
+     * @thread_safety Concurrent send/close calls are serialized. Move/destruction
+     * require exclusive ownership, as do references returned by config().
      */
     [[nodiscard]] kcenon::pacs::VoidResult send(const std::string& xml_message);
 
@@ -254,6 +261,7 @@ private:
     [[nodiscard]] kcenon::pacs::VoidResult send_udp(const std::string& syslog_message);
     [[nodiscard]] kcenon::pacs::VoidResult send_tls(const std::string& syslog_message);
     [[nodiscard]] kcenon::pacs::VoidResult ensure_tls_connected();
+    void close_unlocked();
 
     [[nodiscard]] static std::string get_local_hostname();
     [[nodiscard]] static std::string get_timestamp();
@@ -265,6 +273,7 @@ private:
     // =========================================================================
 
     syslog_transport_config config_;
+    mutable std::mutex mutex_;
 
     // Socket handle (-1 = not connected)
 #ifdef _WIN32

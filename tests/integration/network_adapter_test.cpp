@@ -158,6 +158,22 @@ TEST_CASE("network_adapter server creation", "[network_adapter][server]") {
         auto server = network_adapter::create_server(srv_config, tls);
         REQUIRE(server == nullptr);
     }
+
+    SECTION("Retained factory preserves TLS and rejects unsupported startup") {
+        server_config config;
+        config.ae_title = "TLS_REQUIRED";
+        config.port = 11113;
+        tls_config tls;
+        tls.enabled = true;
+        tls.cert_path = "server.crt";
+        tls.key_path = "server.key";
+        auto server = network_adapter::create_server(config, tls);
+        REQUIRE(server != nullptr);
+        auto started = server->start();
+        REQUIRE(started.is_err());
+        REQUIRE(started.error().message.find("TLS requires dicom_server_v2") != std::string::npos);
+        REQUIRE_FALSE(server->is_running());
+    }
 }
 
 // =============================================================================

@@ -175,7 +175,8 @@
       "args": [
         "[tls]~[v2]"
       ],
-      "timeout_seconds": 180
+      "timeout_seconds": 180,
+      "description": "Historical TLS test names now use actual v2 TLS transport; retained v1 rejects TLS explicitly in network adapter tests."
     }
   ],
   "interop_cases": [
@@ -225,7 +226,44 @@
     "cli.mpps.tcp",
     "cli.pacs.tcp",
     "mwl.scp",
-    "mpps.protocol"
+    "mpps.protocol",
+    "security.matrix",
+    "security.dicom.dcmtk-mtls",
+    "security.dicom.tls12",
+    "security.dicom.tls13",
+    "security.dicom.plaintext",
+    "security.dicom.untrusted-client",
+    "security.dicom.expired-client",
+    "security.dicom.missing-client",
+    "security.dicom.reject-tls11",
+    "security.dicom.reject-tls12-under13",
+    "security.dicom.tls13-policy",
+    "security.dicom.recovery",
+    "security.dicom.client-untrusted-server",
+    "security.dicom.client-expired-server",
+    "security.dicom.client-hostname-mismatch",
+    "security.dicom.client-independent-mtls",
+    "security.audit.tls-single",
+    "security.audit.tls-concurrent",
+    "security.audit.udp-concurrent",
+    "security.audit.reject-hostname",
+    "security.audit.reject-untrusted-server",
+    "security.audit.reject-expired-server",
+    "security.audit.reject-untrusted-client",
+    "security.audit.reject-missing-client",
+    "security.audit.reject-mismatched-key",
+    "security.audit.reject-incomplete-key",
+    "security.audit.store-tls",
+    "security.audit.store-udp",
+    "security.deid.test_batch_without_mapping_file_shares_uid_replacements",
+    "security.deid.test_clean_descriptions_retains_clean_request_item",
+    "security.deid.test_diagnostics_do_not_echo_retained_identifiers",
+    "security.deid.test_failed_recursive_action_never_writes_output",
+    "security.deid.test_nested_references_all_length_and_vr_encodings",
+    "security.deid.test_retain_uid_preserves_references_while_cleaning_items",
+    "security.deid.test_x_z_d_and_unknown_sequence_fallback",
+    "security.logs.scanner-regression",
+    "security.logs.public-clean"
   ],
   "features": [
     {
@@ -411,10 +449,47 @@
         "component.legacy_tls"
       ],
       "interop": [
-        "tls.scp"
+        "tls.scp",
+        "security.matrix",
+        "security.dicom.dcmtk-mtls",
+        "security.dicom.tls12",
+        "security.dicom.tls13",
+        "security.dicom.plaintext",
+        "security.dicom.untrusted-client",
+        "security.dicom.expired-client",
+        "security.dicom.missing-client",
+        "security.dicom.reject-tls11",
+        "security.dicom.reject-tls12-under13",
+        "security.dicom.tls13-policy",
+        "security.dicom.recovery",
+        "security.dicom.client-untrusted-server",
+        "security.dicom.client-expired-server",
+        "security.dicom.client-hostname-mismatch",
+        "security.dicom.client-independent-mtls",
+        "security.audit.tls-single",
+        "security.audit.tls-concurrent",
+        "security.audit.udp-concurrent",
+        "security.audit.reject-hostname",
+        "security.audit.reject-untrusted-server",
+        "security.audit.reject-expired-server",
+        "security.audit.reject-untrusted-client",
+        "security.audit.reject-missing-client",
+        "security.audit.reject-mismatched-key",
+        "security.audit.reject-incomplete-key",
+        "security.audit.store-tls",
+        "security.audit.store-udp",
+        "security.deid.test_batch_without_mapping_file_shares_uid_replacements",
+        "security.deid.test_clean_descriptions_retains_clean_request_item",
+        "security.deid.test_diagnostics_do_not_echo_retained_identifiers",
+        "security.deid.test_failed_recursive_action_never_writes_output",
+        "security.deid.test_nested_references_all_length_and_vr_encodings",
+        "security.deid.test_retain_uid_preserves_references_while_cleaning_items",
+        "security.deid.test_x_z_d_and_unknown_sequence_fallback",
+        "security.logs.scanner-regression",
+        "security.logs.public-clean"
       ],
       "gaps": [
-        "TLS client certificate rejection and protocol-version matrix; external ATNA receiver and nested anonymization roundtrip."
+        "Native TLS authentication-failure audit hooks, early service-rejection audits and full DICOM audit-schema conformance remain outside the C-STORE delivery probe (#1325)."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1305",
@@ -912,7 +987,7 @@
       "condition": "positive",
       "expected_outcome": "passed",
       "oracle": "TLS/mTLS exchanges, cleaned nested data and external audit receipt satisfy configured policy",
-      "fixture": "Synthetic security fixtures with independently declared expected data/state",
+      "fixture": "Isolated CA/client/server identities and #1300 synthetic nested corpus",
       "execution_lane": "full-required",
       "owner_issue": 1317,
       "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
@@ -921,9 +996,15 @@
       "syntaxes": [],
       "build_os": "supported configurations from case discovery",
       "prerequisites": [
-        "feature-specific peer/build prerequisites"
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned",
+      "jobs": [
+        "security.matrix"
+      ],
+      "case_inventory": "validation/security/cases.json"
     },
     {
       "case_id": "requirement.security.negative",
@@ -932,7 +1013,7 @@
       "condition": "negative",
       "expected_outcome": "passed",
       "oracle": "Plaintext/bad certificates/unauthorized actions reject and identifiers or secrets do not leak",
-      "fixture": "Synthetic security fixtures with independently declared expected data/state",
+      "fixture": "Isolated CA/client/server identities and #1300 synthetic nested corpus",
       "execution_lane": "full-required",
       "owner_issue": 1317,
       "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
@@ -941,9 +1022,15 @@
       "syntaxes": [],
       "build_os": "supported configurations from case discovery",
       "prerequisites": [
-        "feature-specific peer/build prerequisites"
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned",
+      "jobs": [
+        "security.matrix"
+      ],
+      "case_inventory": "validation/security/cases.json"
     },
     {
       "case_id": "requirement.storage_backend.positive",

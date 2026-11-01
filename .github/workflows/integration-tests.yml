@@ -894,14 +894,42 @@ jobs:
       working-directory: pacs_system
       run: python3 tools/integration_tests/scripts/test_shell_helpers.py
 
-    - name: Verify recursive anonymization with DCMTK
-      working-directory: pacs_system
-      run: python3 tools/integration_tests/scripts/test_recursive_anonymization.py build
-
     - name: Verify MPPS protocol and durable state
       working-directory: pacs_system
       run: python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py --bin-dir build/bin --output build/test-results/mpps-protocol
       timeout-minutes: 3
+
+    - name: Verify external TLS, audit delivery and public-output confidentiality
+      working-directory: pacs_system
+      run: python3 validation/security/run.py --bin-dir build/bin --output build/test-results/security --private-output "${{ runner.temp }}/pacs-security-private"
+      timeout-minutes: 4
+
+    - name: Check security evidence publication eligibility
+      id: security_evidence
+      if: always()
+      working-directory: pacs_system
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import json, os
+        from pathlib import Path
+        path = Path('build/test-results/security/results.json')
+        try:
+            cases = json.loads(path.read_text())['cases']
+            safe = any(case['id'] == 'logs.public-clean' and case['status'] == 'passed' for case in cases)
+        except (OSError, ValueError, KeyError, TypeError):
+            safe = False
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('publish=' + str(safe).lower() + '\n')
+        PY
+
+    - name: Upload checked public security evidence
+      if: always() && steps.security_evidence.outputs.publish == 'true'
+      uses: actions/upload-artifact@v7
+      with:
+        name: security-public-evidence
+        path: pacs_system/build/test-results/security/
+        retention-days: 30
 
     - name: Run Binary Integration Tests
       id: binary_tests
@@ -925,7 +953,6 @@ jobs:
         path: |
           pacs_system/build/binary-shell.log
           pacs_system/build/test-results/shell/
-          pacs_system/build/test-results/anonymization/
           pacs_system/build/test-results/mpps-protocol/
         retention-days: 30
 

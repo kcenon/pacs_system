@@ -210,10 +210,11 @@ public:
     // ─────────────────────────────────────────────────────
 
     /**
-     * @brief Create a DICOM server using network_system
+     * @brief Create a retained v1 DICOM server
      *
-     * Creates and configures a network_system messaging_server (or
-     * secure_messaging_server if TLS is enabled) for DICOM communication.
+     * The returned v1 server supports in-process associations. TLS configuration
+     * is preserved and start() rejects it explicitly. Use dicom_server_v2 with
+     * server_config::tls for TCP/TLS; this factory never downgrades TLS silently.
      *
      * @param config Server configuration
      * @param tls_cfg Optional TLS configuration

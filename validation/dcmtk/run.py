@@ -13,6 +13,7 @@ import shutil
 import signal
 import socket
 import subprocess
+import tempfile
 import time
 import uuid
 
@@ -53,6 +54,7 @@ class Validation:
         self.command_results = []
         self.run_uid = '2.25.'+str(uuid.uuid4().int)
         self.fixture_sets = {}
+        self.private = Path(tempfile.mkdtemp(prefix='pacs-validation-private-'))
 
     def command(self, args, timeout=30, allowed=(0,), env=None):
         args = [str(x) for x in args]
@@ -437,6 +439,36 @@ class Validation:
         return dict(tests=15, failed=0, skipped=0,
                     detail='Public MPPS CLIs, controlled malformed wire peer, read-only SQLite state and process restart')
 
+    def security_matrix(self):
+        directory = self.output/'security'
+        self.command(['python3', HERE.parent/'security/run.py', '--bin-dir', self.bin,
+                      '--output', directory, '--private-output', self.private/'security'],
+                     timeout=240)
+        result = json.loads((directory/'results.json').read_text())
+        required = json.loads((HERE.parent/'security/cases.json').read_text())['cases']
+        expected = {case['id'] for case in required}
+        actual = result['cases']
+        require(len(actual) == len(expected) and {case['id'] for case in actual} == expected,
+                'Security matrix has missing/duplicate/unexpected case identities')
+        return dict(tests=len(actual), failed=sum(c['status'] != 'passed' for c in actual), skipped=0,
+                    detail='Individually registered external TLS, audit, anonymization and disclosure checks')
+
+    def security_cases(self):
+        self.case('security.matrix', self.security_matrix)
+        required = json.loads((HERE.parent/'security/cases.json').read_text())['cases']
+        path = self.output/'security/results.json'
+        try:
+            actual = {case['id']: case for case in json.loads(path.read_text())['cases']}
+        except (OSError, ValueError, KeyError, TypeError):
+            actual = {}
+        for declaration in required:
+            result = actual.get(declaration['id'])
+            if result is None:
+                result = dict(status='blocked', tests=0, failed=0, skipped=0, detail='Security peer/setup unavailable')
+            self.results.append(dict(result, id='security.'+declaration['id'], phase='product',
+                                     chain='security', executed=result['status'] != 'blocked', prerequisites=[]))
+        self.save()
+
     def mwl_scp(self):
         directory = self.output/'mwl-scp'
         directory.mkdir()
@@ -604,7 +636,7 @@ class Validation:
                       requires=['diagnostic.scp.ready'],chain=chain)
 
     def tls_scp(self):
-        cert = self.output/'tls-certs'
+        cert = self.private/'tls-certs'
         self.command(['bash','/usr/local/bin/gen-certs.sh',cert])
         secure = ['echoscu','+tls',cert/'client-key.pem',cert/'client-cert.pem',
                   '+cf',cert/'ca-cert.pem','-aec','PACS_TLS','127.0.0.1','22504']
@@ -675,7 +707,7 @@ class Validation:
             return dict(tests=1, failed=int(assessment['status'] != 'passed'), skipped=0,
                         status=assessment['status'], detail=json.dumps(assessment))
         env = os.environ.copy()
-        env['PACS_TEST_CERT_DIR'] = str(self.output/'pacs-certs')
+        env['PACS_TEST_CERT_DIR'] = str(self.private/'pacs-certs')
         failure = None
         try:
             command = (['ctest','--test-dir',self.args.build_dir,'--output-on-failure','--no-tests=error',
@@ -728,6 +760,7 @@ class Validation:
         self.case('mwl.sequence',lambda:self.mwl(True),requires=['mwl.scu'])
         self.case('mwl.scp', self.mwl_scp, requires=['peer.preflight'])
         self.case('mpps.protocol', self.mpps_protocol)
+        self.security_cases()
         self.case('echo.scp',self.echo_scp,requires=['peer.preflight'])
         self.case('store.scp',self.store_scp,requires=['fixtures','peer.preflight'])
         for name,binary in [('qr','qr_scp'),('worklist','worklist_scp'),('mpps','mpps_scp'),('pacs','pacs_server')]:
@@ -745,7 +778,7 @@ class Validation:
             self.current = 'certificate-setup'
             try:
                 self.command(['bash',HERE.parent.parent/'tools/integration_tests/test_data/certs/generate_test_certs.sh',
-                              self.output/'pacs-certs'])
+                              self.private/'pacs-certs'])
             except Exception as exc:
                 self.case('certificate-setup',lambda:require(False,str(exc)))
             for spec in self.manifest['components']:
@@ -770,7 +803,14 @@ def main():
     p.add_argument('--source-digest', required=True)
     p.add_argument('--interop-only', action='store_true', help='Diagnostic subset; cannot pass the full gate')
     args = p.parse_args()
-    return Validation(args).run()
+    validation = Validation(args)
+    try:
+        return validation.run()
+    finally:
+        # Retain synthetic source/audit evidence privately, but never signing keys.
+        for path in validation.private.rglob('*'):
+            if path.is_file() and (path.suffix == '.key' or path.name.endswith('-key.pem')):
+                path.unlink()
 
 
 if __name__=='__main__':

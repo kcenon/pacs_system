@@ -1,0 +1,473 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "dicom.dcmtk-mtls",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.tls12",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.tls13",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.plaintext",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.untrusted-client",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.expired-client",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.missing-client",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.reject-tls11",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.reject-tls12-under13",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.tls13-policy",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.recovery",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.client-untrusted-server",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.client-expired-server",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.client-hostname-mismatch",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "dicom.client-independent-mtls",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.tls-single",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.tls-concurrent",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.udp-concurrent",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-hostname",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-untrusted-server",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-expired-server",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-untrusted-client",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-missing-client",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-mismatched-key",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.reject-incomplete-key",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Exact TLS rejection reason and zero delivery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.store-tls",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "audit.store-udp",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_batch_without_mapping_file_shares_uid_replacements",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_clean_descriptions_retains_clean_request_item",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_diagnostics_do_not_echo_retained_identifiers",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_failed_recursive_action_never_writes_output",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_nested_references_all_length_and_vr_encodings",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_retain_uid_preserves_references_while_cleaning_items",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "deid.test_x_z_d_and_unknown_sequence_fallback",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "logs.scanner-regression",
+      "condition": "negative",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    },
+    {
+      "id": "logs.public-clean",
+      "condition": "positive",
+      "owner_issue": 1317,
+      "expected_outcome": "passed",
+      "oracle": "Independent wire, receiver, file or output inspection",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "evidence": "Public results/commands/hashes; private raw synthetic fixtures and audit payloads"
+    }
+  ]
+}
