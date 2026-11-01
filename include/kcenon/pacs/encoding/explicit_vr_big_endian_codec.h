@@ -58,8 +58,8 @@ namespace kcenon::pacs::encoding {
  * Byte swapping is required for:
  * - Tag group and element numbers
  * - Length fields (16-bit and 32-bit)
- * - Numeric VR values (US, UL, SS, SL, FL, FD, AT)
- * - Bulk data VRs (OW, OL, OF, OD)
+ * - Numeric VR values (US, UL, SS, SL, FL, FD, SV, UV, AT)
+ * - Bulk data VRs (OW, OL, OF, OD, OV)
  *
  * @note This transfer syntax is retired in DICOM 2024 but implementation
  *       is required for legacy system interoperability.
@@ -82,6 +82,7 @@ public:
      * @brief Encode a dataset to bytes using Explicit VR Big Endian
      * @param dataset The dataset to encode
      * @return Encoded byte vector
+     * @throws std::invalid_argument for an incomplete binary value, including in sequence items
      */
     [[nodiscard]] static std::vector<uint8_t> encode(
         const core::dicom_dataset& dataset);
@@ -102,6 +103,7 @@ public:
      * @brief Encode a single element to bytes
      * @param element The element to encode
      * @return Encoded byte vector
+     * @throws std::invalid_argument for an incomplete binary value
      */
     [[nodiscard]] static std::vector<uint8_t> encode_element(
         const core::dicom_element& element);
@@ -128,13 +130,11 @@ public:
      * @return Big-endian encoded data
      *
      * Performs byte swapping based on VR type:
-     * - US/SS: 16-bit swap
-     * - UL/SL/FL/AT: 32-bit swap
-     * - FD: 64-bit swap
-     * - OW: 16-bit word swap for each word
-     * - OL/OF: 32-bit swap for each value
-     * - OD: 64-bit swap for each value
-     * - String VRs: No swap needed
+     * - US/SS/OW/AT: 16-bit swap (AT keeps group and element order)
+     * - UL/SL/FL/OL/OF: 32-bit swap
+     * - FD/SV/UV/OD/OV: 64-bit swap
+     * - OB, UN and string VRs: No swap
+     * @throws std::invalid_argument for an incomplete binary value
      */
     [[nodiscard]] static std::vector<uint8_t> to_big_endian(
         vr_type vr, std::span<const uint8_t> data);

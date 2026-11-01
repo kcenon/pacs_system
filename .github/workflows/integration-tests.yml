@@ -861,7 +861,8 @@ jobs:
           lsof \
           dcmtk \
           python3 \
-          python3-pydicom
+          python3-pydicom \
+          python3-numpy
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -897,6 +898,11 @@ jobs:
     - name: Verify MPPS protocol and durable state
       working-directory: pacs_system
       run: python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py --bin-dir build/bin --output build/test-results/mpps-protocol
+      timeout-minutes: 3
+
+    - name: Verify Big Endian intermediate bytes and independent pixels
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_big_endian_values.py build build/test-results/big-endian
       timeout-minutes: 3
 
     - name: Verify external TLS, audit delivery and public-output confidentiality
@@ -954,6 +960,7 @@ jobs:
           pacs_system/build/binary-shell.log
           pacs_system/build/test-results/shell/
           pacs_system/build/test-results/mpps-protocol/
+          pacs_system/build/test-results/big-endian/
         retention-days: 30
 
   # ============================================================================

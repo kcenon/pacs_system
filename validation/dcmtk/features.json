@@ -263,7 +263,8 @@
     "security.deid.test_retain_uid_preserves_references_while_cleaning_items",
     "security.deid.test_x_z_d_and_unknown_sequence_fallback",
     "security.logs.scanner-regression",
-    "security.logs.public-clean"
+    "security.logs.public-clean",
+    "file.big-endian"
   ],
   "features": [
     {
@@ -274,13 +275,14 @@
         "component.pacs_cli_roundtrip",
         "component.cli"
       ],
-      "interop": [],
+      "interop": [
+        "file.big-endian"
+      ],
       "gaps": [
-        "Independent malformed/undefined-length sequence and big-endian raw-value regression fixtures."
+        "Independent general malformed/undefined-length sequence regression fixtures (#1302)."
       ],
       "known_issues": [
-        "https://github.com/kcenon/pacs_system/issues/1302",
-        "https://github.com/kcenon/pacs_system/issues/1293"
+        "https://github.com/kcenon/pacs_system/issues/1302"
       ]
     },
     {
@@ -292,7 +294,8 @@
         "fixtures",
         "integrity.ct",
         "integrity.mr",
-        "integrity.cr"
+        "integrity.cr",
+        "file.big-endian"
       ],
       "gaps": [
         "Independent valid SOP/codec fixtures for supported syntaxes; expected rejection for unsupported HEVC/JPEG XL/Frame Deflate/Deflated Explicit VR LE. Big Endian is file-only."

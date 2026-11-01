@@ -223,6 +223,32 @@ enum class vr_type : uint16_t {
 }
 
 /**
+ * @brief Unit reversed when converting a value between little and big endian.
+ * AT is a pair of 16-bit components, not a 32-bit integer. OW always uses
+ * 16-bit words, including Pixel Data whose Bits Allocated is eight.
+ * A unit of one means the byte stream is unaffected (OB, text, UN, SQ).
+ */
+[[nodiscard]] constexpr unsigned vr_swap_unit_size(vr_type vr) noexcept {
+    switch (vr) {
+        case vr_type::US: case vr_type::SS: case vr_type::OW: case vr_type::AT:
+            return 2;
+        case vr_type::UL: case vr_type::SL: case vr_type::FL:
+        case vr_type::OL: case vr_type::OF:
+            return 4;
+        case vr_type::FD: case vr_type::SV: case vr_type::UV:
+        case vr_type::OD: case vr_type::OV:
+            return 8;
+        default:
+            return 1;
+    }
+}
+
+/** @brief Required value alignment for binary endian conversion (AT is four bytes). */
+[[nodiscard]] constexpr unsigned vr_endian_value_alignment(vr_type vr) noexcept {
+    return vr == vr_type::AT ? 4 : vr_swap_unit_size(vr);
+}
+
+/**
  * @brief Checks if a VR requires 32-bit length field in Explicit VR encoding.
  * @param vr The VR type to check
  * @return true if the VR requires extended 32-bit length encoding

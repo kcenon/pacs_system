@@ -497,6 +497,13 @@ supported" or "Not implemented".
 
 DIMSE messages carry datasets only in Implicit and Explicit VR Little Endian, so PACS_SCP does
 not accept Explicit VR Big Endian; the `dicom_file` Part 10 reader and writer handle it.
+File byte-order conversion applies recursively to sequence items: US/SS/OW/AT
+use 16-bit units, UL/SL/FL/OL/OF use 32-bit units, and FD/SV/UV/OD/OV use
+64-bit units. AT preserves group/element order; OW uses 16-bit words even with
+Bits Allocated 8. OB and text are unchanged. Incomplete binary values are rejected
+during Big Endian decoding or writing. Independent intermediate-byte and DCMTK
+pixel checks are in `tools/integration_tests/scripts/test_big_endian_values.py`;
+this does not expand retired Big Endian network negotiation.
 pacs_system has no inflate or deflate code, so it does not support Deflated Explicit VR Little
 Endian at all.
 

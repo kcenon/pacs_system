@@ -21,9 +21,11 @@
 #include <cstdint>
 #include <cstring>
 #include <span>
+#include <stdexcept>
 #include <vector>
 
 #include "simd/simd_utils.h"
+#include "vr_type.h"
 
 namespace kcenon::pacs::encoding {
 
@@ -214,6 +216,26 @@ inline void write_be64(std::vector<uint8_t>& buffer, uint64_t value) {
     std::vector<uint8_t> result(data.size());
     simd::swap_bytes_64_simd(data.data(), result.data(), data.size());
     return result;
+}
+
+/**
+ * @brief Convert a DICOM value's byte order using the shared VR policy.
+ * @throws std::invalid_argument if the value contains an incomplete binary value.
+ * Empty values are valid. No arithmetic conversion is performed, preserving all
+ * integer and floating-point bit patterns, including NaN payloads.
+ */
+[[nodiscard]] inline std::vector<uint8_t> swap_vr_value_bytes(
+    vr_type vr, std::span<const uint8_t> data) {
+    if (data.size() % vr_endian_value_alignment(vr) != 0) {
+        throw std::invalid_argument("Incomplete binary value for endian conversion");
+    }
+    if (data.empty()) return {};
+    switch (vr_swap_unit_size(vr)) {
+        case 2: return swap_ow_bytes(data);
+        case 4: return swap_ol_bytes(data);
+        case 8: return swap_od_bytes(data);
+        default: return {data.begin(), data.end()};
+    }
 }
 
 /**

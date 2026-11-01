@@ -136,6 +136,10 @@ public:
      * encapsulate_frames()), Pixel Data is written as OB with undefined
      * length, its items, and a Sequence Delimitation Item (PS3.5 A.4). Any
      * other Pixel Data value is written unchanged with its defined length.
+     * Big Endian binary values use the shared VR swap policy, including AT's
+     * two 16-bit components and OW with eight-bit pixel allocation. Incomplete
+     * binary values return an empty vector; save() reports encode_error without
+     * writing a destination file.
      */
     [[nodiscard]] auto to_bytes() const -> std::vector<uint8_t>;
 

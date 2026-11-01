@@ -14,6 +14,7 @@
 #include "kcenon/pacs/core/memory_mapped_file.h"
 #include "kcenon/pacs/core/private_tag_registry.h"
 #include "kcenon/pacs/encoding/compression/codec_factory.h"
+#include "kcenon/pacs/encoding/byte_swap.h"
 
 #include <algorithm>
 #include <cstring>
@@ -351,7 +352,7 @@ auto dicom_file::save(const std::filesystem::path& path) const
     if (bytes.empty()) {
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::encode_error,
-            "Cannot serialize DICOM file with inconsistent Pixel Data or unsupported transfer syntax");
+            "Cannot serialize DICOM file with malformed binary values, inconsistent Pixel Data or unsupported transfer syntax");
     }
 
     std::ofstream file(path, std::ios::binary);
@@ -392,8 +393,14 @@ auto dicom_file::to_bytes() const -> std::vector<uint8_t> {
 
     // Encode and write main dataset using appropriate Transfer Syntax
     auto ts = transfer_syntax();
-    auto dataset_bytes = encode_dataset(dataset_, ts);
-    result.insert(result.end(), dataset_bytes.begin(), dataset_bytes.end());
+    try {
+        auto dataset_bytes = encode_dataset(dataset_, ts);
+        result.insert(result.end(), dataset_bytes.begin(), dataset_bytes.end());
+    } catch (const std::invalid_argument&) {
+        // Preserve the vector-returning API's failure convention. save() turns
+        // this into an encode_error and never opens/truncates the destination.
+        return {};
+    }
 
     return result;
 }
@@ -920,7 +927,9 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
 
         if (encoding::has_explicit_32bit_length(vr)) {
             if (offset + 12 > data.size()) {
-                break;
+                return kcenon::pacs::pacs_error<dicom_dataset>(
+                    kcenon::pacs::error_codes::insufficient_data,
+                    "Truncated Big Endian extended value header");
             }
             // Skip 2 reserved bytes, then read 4-byte length (big-endian)
             length = read_uint32_be(data.subspan(offset + 8, 4));
@@ -942,6 +951,7 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
                     data.subspan(offset + header_size),
                     seq_bytes_read, true, true);
 
+                if (seq_result.is_err()) return seq_result.error();
                 if (seq_result.is_ok()) {
                     // Create sequence element with parsed items
                     dicom_element seq_elem{tag, vr};
@@ -974,40 +984,35 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
         }
 
         // Validate value bounds
-        if (offset + header_size + length > data.size()) {
-            break;
+        if (length > data.size() - offset - header_size) {
+            return kcenon::pacs::pacs_error<dicom_dataset>(
+                kcenon::pacs::error_codes::insufficient_data,
+                "Truncated Big Endian value");
         }
 
         // Read value - need to swap bytes for numeric types
         const auto value_data = data.subspan(offset + header_size, length);
         if (vr == encoding::vr_type::SQ) {
-            dataset.insert(decode_defined_length_sequence(tag, value_data, true, true));
+            size_t sequence_bytes = 0;
+            auto items = parse_sequence_items(value_data, sequence_bytes, true, true);
+            if (items.is_err()) return items.error();
+            if (sequence_bytes != value_data.size()) {
+                return kcenon::pacs::pacs_error<dicom_dataset>(
+                    kcenon::pacs::error_codes::invalid_sequence,
+                    "Invalid defined-length Big Endian sequence");
+            }
+            dicom_element sequence{tag, vr};
+            for (auto& item : items.value()) sequence.add_sequence_item(std::move(item));
+            dataset.insert(std::move(sequence));
             offset += header_size + length;
             continue;
         }
-        std::vector<uint8_t> swapped_data(value_data.begin(), value_data.end());
-
-        // Swap bytes for numeric VRs
-        if (encoding::is_numeric_vr(vr)) {
-            const size_t element_size = encoding::fixed_length(vr);
-            if (element_size == 2) {
-                for (size_t i = 0; i + 1 < swapped_data.size(); i += 2) {
-                    std::swap(swapped_data[i], swapped_data[i + 1]);
-                }
-            } else if (element_size == 4) {
-                for (size_t i = 0; i + 3 < swapped_data.size(); i += 4) {
-                    std::swap(swapped_data[i], swapped_data[i + 3]);
-                    std::swap(swapped_data[i + 1], swapped_data[i + 2]);
-                }
-            } else if (element_size == 8) {
-                for (size_t i = 0; i + 7 < swapped_data.size(); i += 8) {
-                    std::swap(swapped_data[i], swapped_data[i + 7]);
-                    std::swap(swapped_data[i + 1], swapped_data[i + 6]);
-                    std::swap(swapped_data[i + 2], swapped_data[i + 5]);
-                    std::swap(swapped_data[i + 3], swapped_data[i + 4]);
-                }
-            }
+        if (value_data.size() % encoding::vr_endian_value_alignment(vr) != 0) {
+            return kcenon::pacs::pacs_error<dicom_dataset>(
+                kcenon::pacs::error_codes::invalid_length_encoding,
+                "Incomplete binary value in Big Endian dataset");
         }
+        auto swapped_data = encoding::swap_vr_value_bytes(vr, value_data);
 
         dicom_element elem{tag, vr, std::span<const uint8_t>(swapped_data)};
         dataset.insert(std::move(elem));
@@ -1015,6 +1020,11 @@ auto dicom_file::decode_explicit_vr_be(std::span<const uint8_t> data,
         offset += header_size + length;
     }
 
+    if (offset < data.size() && data.size() - offset < 8) {
+        return kcenon::pacs::pacs_error<dicom_dataset>(
+            kcenon::pacs::error_codes::insufficient_data,
+            "Truncated Big Endian element header");
+    }
     bytes_read = offset;
     return kcenon::pacs::Result<dicom_dataset>::ok(std::move(dataset));
 }
@@ -1086,32 +1096,8 @@ auto dicom_file::encode_explicit_vr_be(const dicom_dataset& dataset)
             write_uint16_be(result, static_cast<uint16_t>(length));
         }
 
-        // Write value - swap bytes for numeric types
-        if (encoding::is_numeric_vr(element.vr())) {
-            const size_t element_size = encoding::fixed_length(element.vr());
-            std::vector<uint8_t> swapped_data(raw_data.begin(), raw_data.end());
-
-            if (element_size == 2) {
-                for (size_t i = 0; i + 1 < swapped_data.size(); i += 2) {
-                    std::swap(swapped_data[i], swapped_data[i + 1]);
-                }
-            } else if (element_size == 4) {
-                for (size_t i = 0; i + 3 < swapped_data.size(); i += 4) {
-                    std::swap(swapped_data[i], swapped_data[i + 3]);
-                    std::swap(swapped_data[i + 1], swapped_data[i + 2]);
-                }
-            } else if (element_size == 8) {
-                for (size_t i = 0; i + 7 < swapped_data.size(); i += 8) {
-                    std::swap(swapped_data[i], swapped_data[i + 7]);
-                    std::swap(swapped_data[i + 1], swapped_data[i + 6]);
-                    std::swap(swapped_data[i + 2], swapped_data[i + 5]);
-                    std::swap(swapped_data[i + 3], swapped_data[i + 4]);
-                }
-            }
-            result.insert(result.end(), swapped_data.begin(), swapped_data.end());
-        } else {
-            result.insert(result.end(), raw_data.begin(), raw_data.end());
-        }
+        auto swapped_data = encoding::swap_vr_value_bytes(element.vr(), raw_data);
+        result.insert(result.end(), swapped_data.begin(), swapped_data.end());
     }
 
     return result;
@@ -1222,6 +1208,7 @@ auto dicom_file::parse_sequence_items(
             size_t item_bytes_read = 0;
             auto item_result = decode_item(data.subspan(offset), item_bytes_read);
 
+            if (big_endian && item_result.is_err()) return item_result.error();
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));
             }
@@ -1237,12 +1224,18 @@ auto dicom_file::parse_sequence_items(
         } else {
             // Item with defined length
             if (offset + item_length > data.size()) {
+                if (big_endian) {
+                    return kcenon::pacs::pacs_error<std::vector<dicom_dataset>>(
+                        kcenon::pacs::error_codes::insufficient_data,
+                        "Truncated Big Endian item value");
+                }
                 break;
             }
             size_t item_bytes_read = 0;
             auto item_data = data.subspan(offset, item_length);
             auto item_result = decode_item(item_data, item_bytes_read);
 
+            if (big_endian && item_result.is_err()) return item_result.error();
             if (item_result.is_ok()) {
                 items.push_back(std::move(item_result.value()));
             }

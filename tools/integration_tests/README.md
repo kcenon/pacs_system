@@ -1002,3 +1002,11 @@ Historical non-v2-tagged TLS cases now use the actual v2 encrypted listener. The
 retained v1 factory preserves TLS settings and rejects unsupported TLS at start.
 The certificate generator requires an expired fixture and uses fixed historical
 validity dates supported by OpenSSL 3.5; generation failure is fatal.
+
+### Big Endian file conversion (#1293)
+
+`python3 tools/integration_tests/scripts/test_big_endian_values.py build /tmp/be-new-run`
+checks raw intermediate values, independent DCMTK files and pydicom/NumPy pixels,
+including OW with eight-bit allocation. Its six cases are required in binary CI
+and the full DCMTK driver. These are file-format checks; retired Big Endian is
+still excluded from PACS_SCP presentation-context negotiation.

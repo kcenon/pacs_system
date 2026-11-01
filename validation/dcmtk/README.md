@@ -434,3 +434,16 @@ legacy `tls.scp` and component certificate material also live outside `/results`
 Security public artifacts contain hashes and checked metadata; raw payloads and
 exact private command arguments remain in the private evidence location recorded
 in `security/results.json`. A focused run does not establish the full release gate.
+
+## Big Endian Part 10 values (#1293)
+
+`file.big-endian` requires six independent CLI cases from
+`tools/integration_tests/scripts/test_big_endian_values.py`. They check all 14
+binary VRs against intermediate wire bytes, root and mixed-length nested
+sequences, independently assembled BE inputs, DCMTK-generated 16-bit OW and
+8-bit OW/OB images, decoded pixel arrays and 42 malformed-value rejections.
+Python requires pydicom and NumPy; missing tools are failures. Run with
+`python3 tools/integration_tests/scripts/test_big_endian_values.py build /tmp/be-new-run`.
+Command arguments/exits/stdout/stderr and synthetic files are retained. The BE
+codec and Part 10 implementation share one swap policy; SCP negotiation continues
+to reject the retired syntax. General parser failure behavior remains #1301/#1302.
