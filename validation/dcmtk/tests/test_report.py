@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'validation/dcmtk'))
 from report import evaluate, junit_counts, validate_manifest, write_junit
+from inventory import attach_results, build_inventory
 
 
 class GateTests(unittest.TestCase):
@@ -22,6 +23,24 @@ class GateTests(unittest.TestCase):
             if profile=='uncompressed': ids += [c['id'] for c in self.manifest['components']]
             self.reports.append(self.provenance | dict(profile=profile,cases=[
                 dict(id=i,status='passed',tests=1,failed=0,skipped=0) for i in ids]))
+        # Synthetic, fully executed inventory for the report-contract tests.
+        all_tests, selections, registered = {}, {}, []
+        for spec in self.manifest['components']:
+            if spec.get('kind')=='discovery':
+                continue
+            record = dict(name=spec['id'],tags=[],source='synthetic',line='1')
+            selections[spec['id']] = [record]
+            if 'binary' in spec:
+                all_tests.setdefault(spec['binary'],[]).append(record)
+                registered.append(dict(name=spec['id'],command=[spec['binary'],spec['id']]))
+            else:
+                registered.append(dict(name=spec['id'],command=['synthetic-tool']))
+        inventory = build_inventory(self.manifest,dict(tests=registered),all_tests,selections,{})
+        self.reports[0]['test_inventory'] = inventory
+        for result in self.reports[0]['cases']:
+            if result['id'] in selections:
+                records = [dict(r,status='passed') for r in selections[result['id']]]
+                result['case_results'] = attach_results(inventory,result['id'],records)
 
     def evaluate(self):
         return evaluate(self.manifest,self.reports,self.provenance)
@@ -49,6 +68,15 @@ class GateTests(unittest.TestCase):
     def test_missing_case_fails(self):
         self.reports[0]['cases'].pop()
         self.assertTrue(any('missing component.' in e for e in self.evaluate()['validation_errors']))
+
+    def test_binary_success_without_individual_results_fails(self):
+        for result in self.reports[0]['cases']:
+            result.pop('case_results',None)
+        self.assertTrue(any('individual execution' in error for error in self.evaluate()['validation_errors']))
+
+    def test_missing_inventory_fails_even_when_all_component_counts_pass(self):
+        del self.reports[0]['test_inventory']
+        self.assertTrue(any('individual test inventory' in error for error in self.evaluate()['validation_errors']))
 
     def test_zero_tests_skips_failures_and_unknown_states_fail(self):
         original = copy.deepcopy(self.reports[0]['cases'][0])

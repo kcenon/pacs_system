@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import re
 import shutil
@@ -17,6 +18,9 @@ import uuid
 
 import pydicom
 from report import digest, junit_counts, passed, validate_manifest, write_junit
+from inventory import (attach_results, build_inventory, catch_listing, catch_results,
+                       ctest_results, evaluate_inventory)
+from support import declared_support
 
 HERE = Path(__file__).resolve().parent
 CODECS = {
@@ -44,6 +48,7 @@ class Validation:
         self.current = 'setup'
         self.data, self.paths = {}, {}
         self.codec = CODECS[args.profile]
+        self.test_inventory = None
 
     def command(self, args, timeout=30, allowed=(0,), env=None):
         args = [str(x) for x in args]
@@ -101,6 +106,8 @@ class Validation:
                        source_revision=self.args.source_revision, source_digest=self.args.source_digest,
                        peer_revision=json.loads((HERE/'lock.json').read_text())['revision'],
                        manifest_digest=digest(HERE/'features.json'), cases=self.results)
+        if self.test_inventory is not None:
+            payload['test_inventory'] = self.test_inventory
         (self.output/'results.json').write_text(json.dumps(payload,indent=2)+'\n')
         write_junit(self.output/'results.xml', self.results)
 
@@ -336,24 +343,65 @@ class Validation:
             self.command(['echoscu','-to','2','-ta','2','-aec','PACS_TLS','127.0.0.1','22504'],allowed=(1,))
             self.command(secure)
 
+    def prepare_inventory(self):
+        self.current = 'inventory-setup'
+        text = self.command(['ctest','--test-dir',self.args.build_dir,'--show-only=json-v1'])
+        registered = json.loads(text)
+        (self.output/'ctest-inventory.json').write_text(text)
+        require(bool(registered['tests']), 'CTest registered no tests')
+        all_tests, selections, errors = {}, {}, []
+        for binary in sorted({s['binary'] for s in self.manifest['components'] if 'binary' in s}):
+            try:
+                # Explicit * includes Catch2 hidden tests, unlike the default filter.
+                text = self.command([self.bin/binary, '*', '--list-tests', '--reporter', 'xml'])
+                (self.output/(binary+'.discovery.xml')).write_text(text)
+                all_tests[binary] = catch_listing(text)
+            except Exception as exc:
+                errors.append(f'{binary}: discovery failed: {exc}')
+                all_tests[binary] = []
+        for spec in self.manifest['components']:
+            if spec.get('kind') == 'discovery':
+                continue
+            try:
+                if spec.get('kind') == 'ctest':
+                    text = self.command(['ctest','--test-dir',self.args.build_dir,
+                                         '--show-only=json-v1',*spec['args']])
+                    selections[spec['id']] = json.loads(text)['tests']
+                    suffix = '.selection.json'
+                else:
+                    text = self.command([self.bin/spec['binary'],*spec['args'],
+                                         '--list-tests','--reporter','xml'])
+                    selections[spec['id']] = catch_listing(text)
+                    suffix = '.selection.xml'
+                (self.output/(spec['id']+suffix)).write_text(text)
+            except Exception as exc:
+                errors.append(f'{spec["id"]}: selection failed: {exc}')
+        cache = Path(self.args.build_dir)/'CMakeCache.txt'
+        options = {}
+        if cache.exists():
+            for line in cache.read_text().splitlines():
+                match = re.match(r'((?:PACS_|CMAKE_)[^:]+):[^=]+=(.*)', line)
+                if match:
+                    options[match[1]] = match[2]
+        configuration = dict(os=platform.system(), architecture=platform.machine(),
+                             cmake_cache_digest=digest(cache) if cache.exists() else None,
+                             options=options)
+        self.test_inventory = build_inventory(self.manifest, registered, all_tests, selections, configuration)
+        self.test_inventory['discovery_errors'] += errors
+        self.test_inventory['support_requirements'] = self.manifest['support_requirements']
+        self.test_inventory['declared_support'] = declared_support(HERE.parent.parent)
+        (self.output/'test-inventory.json').write_text(json.dumps(self.test_inventory,indent=2)+'\n')
+        self.save()
+
     def component(self, spec):
         xml = self.output/(spec['id']+'.xml')
+        native_xml = self.output/(spec['id']+'.catch.xml')
         if spec.get('kind') == 'discovery':
-            text = self.command(['ctest','--test-dir',self.args.build_dir,'--show-only=json-v1'])
-            inventory = json.loads(text)
-            (self.output/'ctest-inventory.json').write_text(text)
-            tests = inventory['tests']
-            require(bool(tests), 'CTest registered no tests')
-            binaries = {s['binary'] for s in self.manifest['components'] if 'binary' in s}
-            unmapped = []
-            for test in tests:
-                labels = next((p['value'] for p in test.get('properties',[]) if p['name']=='LABELS'),[])
-                command = test.get('command',[])
-                if (not command or (Path(command[0]).name not in binaries and 'cli' not in labels
-                    and test['name'] not in ('pacs_factory_result_compat','storage_boundary_guard'))):
-                    unmapped.append(test['name'])
-            require(not unmapped, 'CTest cases outside the manifest: '+str(unmapped))
-            return dict(tests=1,failed=0,skipped=0,detail=f'{len(tests)} registered CTest cases mapped to runners')
+            executions = {result['id']: result.get('case_results') for result in self.results}
+            assessment = evaluate_inventory(self.test_inventory, executions)
+            (self.output/'test-inventory-assessment.json').write_text(json.dumps(assessment,indent=2)+'\n')
+            return dict(tests=1, failed=int(assessment['status'] != 'passed'), skipped=0,
+                        status=assessment['status'], detail=json.dumps(assessment))
         env = os.environ.copy()
         env['PACS_TEST_CERT_DIR'] = str(self.output/'pacs-certs')
         failure = None
@@ -361,13 +409,21 @@ class Validation:
             command = (['ctest','--test-dir',self.args.build_dir,'--output-on-failure','--no-tests=error',
                         '--timeout','60','--output-junit',str(xml),*spec['args']] if spec.get('kind')=='ctest'
                        else [self.bin/spec['binary'],*spec['args'],'--warn','UnmatchedTestSpec',
-                             '--reporter','console','--reporter',f'junit::out={xml}'])
+                             '--reporter','console','--reporter',f'junit::out={xml}',
+                             '--reporter',f'xml::out={native_xml}'])
             self.command(command,
                          timeout=spec['timeout_seconds'],env=env)
         except Exception as exc:
             failure = str(exc)
         try:
-            counts = junit_counts(xml)
+            # Keep JUnit for CI consumers, but do not guess TEST_CASE identity
+            # from its flattened section names.
+            junit_counts(xml)
+            results = ctest_results(xml) if spec.get('kind') == 'ctest' else catch_results(native_xml)
+            require(self.test_inventory is not None, 'individual discovery did not complete')
+            results = attach_results(self.test_inventory, spec['id'], results)
+            counts = dict(tests=len(results),failed=sum(r['status']=='failed' for r in results),
+                          skipped=sum(r['status']=='skipped' for r in results),case_results=results)
         except Exception as exc:
             return dict(tests=0,failed=1,skipped=0,status='failed',
                         detail=f'{failure or "No process failure"}; invalid/missing JUnit: {exc}')
@@ -404,6 +460,10 @@ class Validation:
             self.case(mode+'.scp',lambda mode=mode:self.qr_scp(mode),requires=['fixtures','peer.preflight'])
         self.case('tls.scp',self.tls_scp,requires=['peer.tls'])
         if self.args.profile=='uncompressed' and not self.args.interop_only:
+            try:
+                self.prepare_inventory()
+            except Exception as exc:
+                self.case('inventory-setup',lambda:require(False,str(exc)))
             self.current = 'certificate-setup'
             try:
                 self.command(['bash',HERE.parent.parent/'tools/integration_tests/test_data/certs/generate_test_certs.sh',
@@ -411,7 +471,12 @@ class Validation:
             except Exception as exc:
                 self.case('certificate-setup',lambda:require(False,str(exc)))
             for spec in self.manifest['components']:
+                if spec.get('kind') == 'discovery':
+                    continue
                 self.case(spec['id'],lambda spec=spec:self.component(spec))
+            for spec in self.manifest['components']:
+                if spec.get('kind') == 'discovery':
+                    self.case(spec['id'],lambda spec=spec:self.component(spec))
         self.save()
         return int(any(r['status']!='passed' for r in self.results))
 

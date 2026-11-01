@@ -35,9 +35,11 @@ and startup log identify the project for later `docker compose -p ... -f ... dow
    Check exact UID sets, counts, metadata and whole decoded PixelData hashes.
    Compressed cases also require the received file's transfer syntax; silently
    falling back to native encoding fails. Check MWL nested scheduled-step fields.
-5. In the uncompressed profile, run every component suite listed in `features.json`,
+5. In the uncompressed profile, discover individual CTest and Catch2 cases before
+   running every component suite listed in `features.json`,
    the existing integration suite, v2 TLS cases and bounded stress cases. JUnit
    failures, unexpected skips, missing binaries, empty results and timeouts fail.
+   Compare every job's selected case identities with its actual execution results.
 6. Evaluate the entire feature manifest. A subset cannot claim complete validation.
 
 Native tests include core/encoding, network/services, storage, security, client,
@@ -87,6 +89,42 @@ IDs. Dependency versions are pinned; apt security revisions can change the image
 ID, so an image tag alone is not treated as immutable evidence.
 
 ## Focused diagnosis
+
+### Individual case inventory
+
+`test-inventory.json` records every discovered case, its feature owners, build/OS
+configuration, fixture/oracle, expected outcome, execution jobs and evidence format.
+Catch2 discovery uses an explicit `*` filter to include hidden tests. Each execution
+filter is evaluated by Catch2 or CTest itself. Filtered-out cases remain explicitly
+unverified and fail completeness; the presence of their binary cannot cover them.
+
+Catch2 identities include the binary, full test name and tags. Native Catch2 XML
+provides those same identities after execution. JUnit remains available to CI, but
+its flattened section names are not used to guess which test ran. Allowed assertion
+failures (`!mayfail`) remain failures. CTest registrations and aliases are retained,
+including duplicate names; ambiguous registrations are reported rather than merged.
+
+`test-inventory-assessment.json` compares discovery, assignment and execution sets
+after all component jobs, including legacy TLS. Missing, duplicate, unknown,
+mismatched and skipped results cannot pass. The top-level report independently
+repeats this comparison rather than trusting the discovery component's pass count.
+
+`features.json` records positive/negative evaluation requirements for all feature
+groups. The inventory also expands the conformance statement's SOP roles and syntax
+boundaries into individually identified requirements. These are declarations,
+explicitly unverified until independent cases supply evidence. File-only Big Endian
+support is distinct from DIMSE rejection; unsupported codecs require rejection
+tests, while forwarding and codec availability remain separate capabilities.
+Registry, policy, build-option and web-script source digests accompany this scope.
+Required browser, modules, installed-consumer and SDK build discovery remains
+explicitly unverified until its owning jobs contribute inventories (#1322/#1324/#1327).
+
+The original broad gap text is retained in the feature manifest; scope history
+records the correction to unsupported-codec expectations. Assigning an owner or
+recording a declaration never removes a coverage gap. #1313 owns fixture/filter
+defects exposed by inventory, and #1328 integrates the later execution jobs.
+
+### Commands
 
 ```sh
 python3 scripts/run_dcmtk_validation.py \

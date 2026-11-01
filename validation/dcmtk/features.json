@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "profiles": [
     "uncompressed",
     "jpeg-lossless",
@@ -235,7 +235,7 @@
         "integrity.cr"
       ],
       "gaps": [
-        "JPEG 2000, HTJ2K, JPEG XL, HEVC and all supported syntax/SOP combinations need independent peer fixtures."
+        "Independent valid SOP/codec fixtures for supported syntaxes; expected rejection for unsupported HEVC/JPEG XL/Frame Deflate/Deflated Explicit VR LE. Big Endian is file-only."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1292",
@@ -252,7 +252,9 @@
         "echo.secondary",
         "echo.scp"
       ],
-      "gaps": [],
+      "gaps": [
+        "Independent negative negotiation/framing/timeout/limit cases from #1319 remain unverified."
+      ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1240",
         "https://github.com/kcenon/pacs_system/issues/1303"
@@ -495,6 +497,816 @@
         "https://github.com/kcenon/pacs_system/issues/1266",
         "https://github.com/kcenon/pacs_system/issues/1288"
       ]
+    }
+  ],
+  "individual_test_inventory": true,
+  "support_requirements": [
+    {
+      "case_id": "requirement.core.positive",
+      "feature_id": "core",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "File, sequence, charset, JSON/XML and DICOMDIR round trips preserve values/references",
+      "fixture": "Synthetic core fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.core.negative",
+      "feature_id": "core",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Malformed lengths, delimiters, offsets and invalid input fail explicitly without losing trailing valid data",
+      "fixture": "Synthetic core fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.encoding.positive",
+      "feature_id": "encoding",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Valid supported codec/bit-depth/color/multiframe combinations meet exact lossless or predefined lossy bounds",
+      "fixture": "Synthetic encoding fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.encoding.negative",
+      "feature_id": "encoding",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unsupported syntax or unavailable codec rejects explicitly; malformed input causes no corruption",
+      "fixture": "Synthetic encoding fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.association.positive",
+      "feature_id": "association",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent peer negotiates intended context and completes framed DIMSE exchange",
+      "fixture": "Synthetic association fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.association.negative",
+      "feature_id": "association",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Rejected contexts, malformed PDUs, timeouts and limits produce bounded failure with no false success",
+      "fixture": "Synthetic association fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.storage_service.positive",
+      "feature_id": "storage_service",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Every supported Storage SOP/role preserves its valid IOD, UID, syntax and content",
+      "fixture": "Synthetic storage_service fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.storage_service.negative",
+      "feature_id": "storage_service",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Invalid SOP/context/data and write failure reject without success acknowledgement",
+      "fixture": "Synthetic storage_service fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.query.positive",
+      "feature_id": "query",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Supported model/level and wildcard/date/Unicode keys return the exact expected UID set",
+      "fixture": "Synthetic query fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.query.negative",
+      "feature_id": "query",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Nonmatching keys return empty results; invalid levels and cancellation have correct status",
+      "fixture": "Synthetic query fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.move.positive",
+      "feature_id": "move",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Destination receives exact objects and response counters match actual sub-operations",
+      "fixture": "Synthetic move fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1304,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.move.negative",
+      "feature_id": "move",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unknown AE, refusal, partial failures and cancellation never claim undelivered objects as complete",
+      "fixture": "Synthetic move fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1304,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.get.positive",
+      "feature_id": "get",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Accepted requestor SCP roles deliver exact objects on the C-GET association",
+      "fixture": "Synthetic get fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1315,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.get.negative",
+      "feature_id": "get",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Role/context rejection, timeout and cancellation terminate without deadlock or false completion",
+      "fixture": "Synthetic get fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1315,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.mwl_mpps.positive",
+      "feature_id": "mwl_mpps",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Nested MWL keys/results and MPPS creation/completion agree with independent state",
+      "fixture": "Synthetic mwl_mpps fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1316,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.mwl_mpps.negative",
+      "feature_id": "mwl_mpps",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Nonmatching MWL and invalid/post-completion MPPS updates reject without changing completed state",
+      "fixture": "Synthetic mwl_mpps fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1316,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.normalized_services.positive",
+      "feature_id": "normalized_services",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent Storage Commitment, UPS, Print, N-GET and PIR peers verify legal states and reverse events",
+      "fixture": "Synthetic normalized_services fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1320,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.normalized_services.negative",
+      "feature_id": "normalized_services",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Invalid actions, referenced SOP failures, illegal transitions and retry errors produce correct status/state",
+      "fixture": "Synthetic normalized_services fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1320,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.security.positive",
+      "feature_id": "security",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "TLS/mTLS exchanges, cleaned nested data and external audit receipt satisfy configured policy",
+      "fixture": "Synthetic security fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1317,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.security.negative",
+      "feature_id": "security",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Plaintext/bad certificates/unauthorized actions reject and identifiers or secrets do not leak",
+      "fixture": "Synthetic security fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1317,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.storage_backend.positive",
+      "feature_id": "storage_backend",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Acknowledged objects and matching indexes survive declared restart/recovery faults",
+      "fixture": "Synthetic storage_backend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.storage_backend.negative",
+      "feature_id": "storage_backend",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Incomplete objects, disk/database failures and duplicate retries follow explicit recovery policy",
+      "fixture": "Synthetic storage_backend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.cloud.positive",
+      "feature_id": "cloud",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Enabled AWS/Azure SDKs persist exact objects verified by independent provider clients",
+      "fixture": "Synthetic cloud fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1324,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.cloud.negative",
+      "feature_id": "cloud",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "SDK-disabled, auth, multipart/block and injected service failures cannot fall back to mock success",
+      "fixture": "Synthetic cloud fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1324,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.web.positive",
+      "feature_id": "web",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "STOW-to-DIMSE and DIMSE-to-QIDO/WADO preserve exact objects, frames and references",
+      "fixture": "Synthetic web fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1321,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.web.negative",
+      "feature_id": "web",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unauthorized, invalid media, pagination/filter errors and partial failures return defined results",
+      "fixture": "Synthetic web fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1321,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.workflow.positive",
+      "feature_id": "workflow",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Two-peer routing/prefetch/sync/jobs agree with receiver objects and persisted job state",
+      "fixture": "Synthetic workflow fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.workflow.negative",
+      "feature_id": "workflow",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Duplicate input, restart, retries, cancellation and remote failure do not create unintended jobs/objects",
+      "fixture": "Synthetic workflow fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.ai.positive",
+      "feature_id": "ai",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Separate AI service submission/completion stores results with correct source UID references",
+      "fixture": "Synthetic ai fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.ai.negative",
+      "feature_id": "ai",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Timeout, malformed result and service failure produce correct terminal state without orphan results",
+      "fixture": "Synthetic ai fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.ihe.positive",
+      "feature_id": "ihe",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent XDS registration/query/retrieval and ATNA agree on content and references",
+      "fixture": "Synthetic ihe fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1325,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.ihe.negative",
+      "feature_id": "ihe",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "SOAP/MTOM errors, missing documents and reference mismatch reject without inconsistent registrations",
+      "fixture": "Synthetic ihe fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1325,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.monitoring_di.positive",
+      "feature_id": "monitoring_di",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Metrics, readiness, DI replacement and external audit agree with observed transfers",
+      "fixture": "Synthetic monitoring_di fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.monitoring_di.negative",
+      "feature_id": "monitoring_di",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Induced failures and shutdown update signals accurately without duplicate/missing required events",
+      "fixture": "Synthetic monitoring_di fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.frontend.positive",
+      "feature_id": "frontend",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Actual browser login/query/selection/job flows match live API and server state",
+      "fixture": "Synthetic frontend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1322,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.frontend.negative",
+      "feature_id": "frontend",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Authorization, empty results and server errors produce correct visible and backend outcomes",
+      "fixture": "Synthetic frontend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1322,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.reliability.positive",
+      "feature_id": "reliability",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Configured endurance and fault recovery preserve acknowledged data within fixed resource limits",
+      "fixture": "Synthetic reliability fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.reliability.negative",
+      "feature_id": "reliability",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Faults, sanitizer findings, skipped stress cases and failed fuzz replay cannot be hidden by retries",
+      "fixture": "Synthetic reliability fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.packaging.positive",
+      "feature_id": "packaging",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Required OS/compiler/options, installed consumer and module examples execute functional cases",
+      "fixture": "Synthetic packaging fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1327,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.packaging.negative",
+      "feature_id": "packaging",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Missing required dependencies, disabled features and empty test selection fail according to contract",
+      "fixture": "Synthetic packaging fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1327,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    }
+  ],
+  "scope_history": [
+    {
+      "issue": 1310,
+      "change": "Separate unsupported codec rejection from valid supported codec coverage; Big Endian file I/O remains separate from DIMSE rejection.",
+      "previous_encoding_gap": "JPEG 2000, HTJ2K, JPEG XL, HEVC and all supported syntax/SOP combinations need independent peer fixtures."
     }
   ]
 }

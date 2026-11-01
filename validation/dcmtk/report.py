@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
+from inventory import evaluate_inventory
 
 
 def digest(path):
@@ -41,7 +42,7 @@ def passed(result):
 
 def evaluate(manifest, reports, provenance):
     """Missing/empty/skipped evidence cannot certify a feature or a complete run."""
-    errors, seen, evidence = [], set(), {}
+    errors, seen, evidence, inventories = [], set(), {}, {}
     profiles = manifest['profiles']
     for report in reports:
         if not isinstance(report, dict):
@@ -82,6 +83,14 @@ def evaluate(manifest, reports, provenance):
         for key in local.keys() - set(required):
             if local[key].get('status') != 'passed':
                 errors.append(f'{profile}: additional failure {key}')
+        if profile == 'uncompressed' and manifest.get('individual_test_inventory'):
+            try:
+                assessment = evaluate_inventory(report.get('test_inventory'),
+                    {key: value.get('case_results') for key,value in local.items()})
+            except (KeyError, TypeError, ValueError, AttributeError) as exc:
+                assessment = dict(status='failed',errors=[f'invalid inventory evidence: {exc}'])
+            inventories[profile] = assessment
+            errors += [f'{profile}: inventory: {error}' for error in assessment['errors']]
     for profile in set(profiles) - seen:
         errors.append(f'missing profile: {profile}')
     gaps = [dict(feature=f['id'], requirement=g) for f in manifest['features'] for g in f.get('gaps', [])]
@@ -95,10 +104,26 @@ def evaluate(manifest, reports, provenance):
                              missing_or_failed=bad, gaps=feature.get('gaps', [])))
     return dict(schema_version=1, status='passed' if not errors and not gaps else 'failed',
                 validation_errors=errors, coverage_gaps=gaps, features=features,
-                provenance=provenance)
+                provenance=provenance, test_inventories=inventories)
 
 
 def validate_manifest(manifest):
+    if manifest.get('individual_test_inventory'):
+        requirements = manifest.get('support_requirements', [])
+        if not requirements or len({r['case_id'] for r in requirements}) != len(requirements):
+            raise ValueError('support requirement IDs must be nonempty and unique')
+        fields = ('case_id','feature_id','support_status','condition','expected_outcome',
+                  'oracle','fixture','execution_lane','owner_issue','evidence_schema')
+        features_by_id = {f['id'] for f in manifest['features']}
+        for requirement in requirements:
+            if any(not requirement.get(field) for field in fields):
+                raise ValueError('support requirement missing an evaluation or execution contract')
+            if requirement['feature_id'] not in features_by_id:
+                raise ValueError('support requirement references unknown feature')
+        for feature in features_by_id:
+            conditions = {r['condition'] for r in requirements if r['feature_id'] == feature}
+            if not {'positive','negative'} <= conditions:
+                raise ValueError(f'{feature}: positive and negative requirements are mandatory')
     components = [c['id'] for c in manifest['components']]
     interop = manifest['interop_cases']
     ids = components + interop
