@@ -8,6 +8,10 @@
 # Use this after the last brew install of a job, since installing or upgrading openssl@4
 # links it again. Formulas built against openssl@4, such as dcmtk, keep working: they
 # load it from opt/openssl@4, which brew unlink leaves in place.
+#
+# --overwrite is needed because the image also points bin/openssl at openssl@1.1. Unlinking
+# openssl@4 first is still needed: overwriting replaces only the files both versions name,
+# and would leave the rest of OpenSSL 4 linked beside OpenSSL 3.
 
 name: 'Link OpenSSL 3'
 description: 'Link Homebrew openssl@3 in place of openssl@4 on macOS'
@@ -21,7 +25,7 @@ runs:
         if brew list --versions openssl@4 > /dev/null; then
           brew unlink openssl@4
         fi
-        brew link --force openssl@3
+        brew link --force --overwrite openssl@3
         linked=$("$(brew --prefix)/bin/openssl" version)
         echo "$linked"
         case "$linked" in
