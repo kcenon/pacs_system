@@ -122,6 +122,10 @@ jobs:
       run: |
         brew install ninja pkg-config sqlite3 openssl@3 googletest fmt jpeg-turbo
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1

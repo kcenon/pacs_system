@@ -99,6 +99,10 @@ jobs:
           brew install openjpeg charls
         fi
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
