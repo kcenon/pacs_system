@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-15]
 
     steps:
     - name: Checkout pacs_system
@@ -230,7 +230,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-15]
 
     steps:
     - name: Checkout pacs_system
@@ -399,7 +399,7 @@ jobs:
         echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
-        for os in ubuntu-24.04 macos-14; do
+        for os in ubuntu-24.04 macos-15; do
           status="⏭️ Skipped"
           if [ -d "test-results/dcmtk-cpp-results-$os" ]; then
             status="✅ Completed"
@@ -413,7 +413,7 @@ jobs:
         echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
-        for os in ubuntu-24.04 macos-14; do
+        for os in ubuntu-24.04 macos-15; do
           status="⏭️ Skipped"
           if [ -d "test-results/dcmtk-shell-logs-$os" ]; then
             status="✅ Completed"
