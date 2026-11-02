@@ -80,6 +80,10 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -248,6 +252,10 @@ jobs:
         brew link --overwrite blake3 &>/dev/null || echo "blake3 already linked or link failed"
         brew link --overwrite ccache &>/dev/null || echo "ccache already linked or link failed"
         brew link --overwrite fmt &>/dev/null || echo "fmt already linked or link failed"
+
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
 
     # Setup ccache for faster C++ compilation
     # Must run after Install dependencies (macOS) to ensure ccache is linked
@@ -581,6 +589,10 @@ jobs:
       run: |
         # coreutils provides gtimeout; macOS runners have no timeout command
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache coreutils
+
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
 
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'

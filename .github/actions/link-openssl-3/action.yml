@@ -1,0 +1,30 @@
+# Make Homebrew link OpenSSL 3 on macOS runners.
+#
+# The macos-15 image links openssl@4, which Homebrew aliases to openssl, and keeps
+# openssl@3 keg-only, so "brew install openssl@3" alone leaves CMake finding OpenSSL 4.
+# The Asio pinned by network_system does not compile against it: ASN1_STRING is opaque
+# there (asio/ssl/impl/rfc2818_verification.ipp).
+#
+# Use this after the last brew install of a job, since installing or upgrading openssl@4
+# links it again. Formulas built against openssl@4, such as dcmtk, keep working: they
+# load it from opt/openssl@4, which brew unlink leaves in place.
+
+name: 'Link OpenSSL 3'
+description: 'Link Homebrew openssl@3 in place of openssl@4 on macOS'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Link openssl@3
+      shell: bash
+      run: |
+        if brew list --versions openssl@4 > /dev/null; then
+          brew unlink openssl@4
+        fi
+        brew link --force openssl@3
+        linked=$("$(brew --prefix)/bin/openssl" version)
+        echo "$linked"
+        case "$linked" in
+          "OpenSSL 3."*) ;;
+          *) echo "::error::Homebrew links $linked, not OpenSSL 3"; exit 1 ;;
+        esac
