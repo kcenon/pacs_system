@@ -26,9 +26,9 @@ namespace kcenon::pacs::services {
 // SOP Class UID
 // =============================================================================
 
-/// UPS Query Information Model - FIND SOP Class UID (PS3.4 Table CC.2-1)
+/// UPS Query SOP Class UID (PS3.4 CC.3.1); ...34.6.4 is UPS Event.
 inline constexpr std::string_view ups_query_find_sop_class_uid =
-    "1.2.840.10008.5.1.4.34.6.4";
+    "1.2.840.10008.5.1.4.34.6.5";
 
 // =============================================================================
 // Handler Types
@@ -82,7 +82,7 @@ using ups_query_cancel_check = std::function<bool()>;
  *  |                                     |
  *  |  C-FIND-RQ                          |
  *  |  +-------------------------------+  |
- *  |  | SOPClass: ...34.6.4           |  |
+ *  |  | SOPClass: ...34.6.5           |  |
  *  |  | ProcedureStepState: SCHEDULED |  |
  *  |  | Priority: HIGH               |  |
  *  |  +-------------------------------+  |
@@ -158,12 +158,14 @@ private:
         network::association& assoc,
         uint8_t context_id,
         uint16_t message_id,
+        std::string_view sop_class_uid,
         const core::dicom_dataset& result);
 
     [[nodiscard]] network::Result<std::monostate> send_final_response(
         network::association& assoc,
         uint8_t context_id,
         uint16_t message_id,
+        std::string_view sop_class_uid,
         network::dimse::status_code status);
 
     // =========================================================================

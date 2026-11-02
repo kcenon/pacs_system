@@ -39,6 +39,15 @@ network::Result<n_get_result> n_get_scu::get(
     std::string_view sop_class_uid,
     std::string_view sop_instance_uid,
     const std::vector<core::dicom_tag>& attribute_tags) {
+    return get(assoc, sop_class_uid, sop_instance_uid, attribute_tags, sop_class_uid);
+}
+
+network::Result<n_get_result> n_get_scu::get(
+    network::association& assoc,
+    std::string_view sop_class_uid,
+    std::string_view sop_instance_uid,
+    const std::vector<core::dicom_tag>& attribute_tags,
+    std::string_view negotiated_sop_class) {
 
     using namespace network::dimse;
 
@@ -65,7 +74,7 @@ network::Result<n_get_result> n_get_scu::get(
     }
 
     // Get accepted presentation context
-    auto context_id = assoc.accepted_context_id(sop_class_uid);
+    auto context_id = assoc.accepted_context_id(negotiated_sop_class);
     if (!context_id) {
         return kcenon::pacs::pacs_error<n_get_result>(
             kcenon::pacs::error_codes::n_get_context_not_accepted,

@@ -449,6 +449,33 @@ adapter's self-capturing receive/error callbacks while preserving disconnection
 cleanup. The `shutdown-race` protocol case overlaps a blocked C-GET with connection
 churn and SIGTERM; run it with leak detection enabled.
 
+### Normalized services against independent peers (#1320)
+
+`component.dimse_n` runs `tests/dimse_n_probe.py` once, against peers in separate processes that share no
+PACS code; `validation/peers/dimse-n/README.md` lists each one, its version and license, and what it was
+qualified against. Expected statuses are in `dimse_n.py`, transcribed from PS3.4, and
+`tests/test_dimse_n.py` holds them to the standard's tables and to the conformance statement.
+
+The `dimse_n.peer.*` cases run first with no PACS process. dcm4che `mppsscu`/`mppsscp`, `stgcmtscu`/`dcmqrscp`,
+`upsscu` against a reference SCP, DCMTK `dcmprscu`/`dcmprscp` and the scripted peers must work with each other, and
+the same tables must hold, before a PACS case runs. A PACS case whose prerequisite failed reports blocked.
+
+Results rest on more than a status. Storage Commitment compares the Transaction UID and both instance lists of the
+report a separate process received, on the association that delivered it. UPS runs every cell of Table CC.1.1-2,
+then reads the state back with N-GET and from the database, and checks that receivers got each report in order.
+Print compares the spooled pixels with those sent, in both directions. MPPS holds the database row and, for the
+SCU role, the instance dcm4che stored after validating the IOD. Restarts, late and absent listeners, simultaneous
+claims and a report answered with a failure are all cases. Run it directly with:
+
+```sh
+python3 validation/peers/dimse-n/install.py /opt/pacs-peers
+python3 validation/dcmtk/tests/dimse_n_probe.py --output /tmp/dimse-n --build-dir build \
+  --source-revision "$(git rev-parse HEAD)" --source-digest "$(git rev-parse HEAD^{tree})"
+```
+
+`--groups` narrows it to `mpps`, `mwl`, `stgcmt`, `ups`, `print` or `nget`, and `none` runs only the qualification.
+`validation/peers/dimse-n/compose.yaml` runs each as a Compose profile from the validation image.
+
 ### Nested worklists and normalized request identity (#1316)
 
 `mwl.sequence` compares all six scheduled-step fields for the three pinned MWL

@@ -12,6 +12,7 @@
 #include "kcenon/pacs/network/dimse/status_codes.h"
 
 #include <chrono>
+#include <ctime>
 #include <random>
 #include <sstream>
 
@@ -23,11 +24,24 @@ namespace kcenon::pacs::services {
 
 namespace {
 
+/// DT of now, in UTC, for a step with no scheduled start of its own.
+std::string current_datetime() {
+    const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm parts{};
+#ifdef _WIN32
+    gmtime_s(&parts, &now);
+#else
+    gmtime_r(&now, &parts);
+#endif
+    char text[16];
+    std::strftime(text, sizeof(text), "%Y%m%d%H%M%S", &parts);
+    return text;
+}
+
 /// UID root for auto-generated UPS workitem UIDs
 constexpr const char* uid_root = "1.2.826.0.1.3680043.2.1545.3";
 
 /// Requested SOP Instance UID tag (used in N-SET/N-GET/N-ACTION command set)
-constexpr core::dicom_tag tag_requested_sop_instance_uid{0x0000, 0x1001};
 
 /**
  * @brief Create N-CREATE request message for UPS
@@ -59,11 +73,8 @@ network::dimse::dimse_message make_ups_n_set_rq(
     using namespace encoding;
 
     dimse_message msg{command_field::n_set_rq, message_id};
-    msg.set_affected_sop_class_uid(ups_push_sop_class_uid);
-    msg.command_set().set_string(
-        tag_requested_sop_instance_uid,
-        vr_type::UI,
-        std::string(sop_instance_uid));
+    msg.set_requested_sop_class_uid(ups_push_sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
     msg.set_dataset(std::move(modifications));
 
     return msg;
@@ -206,7 +217,7 @@ network::Result<ups_result> ups_push_scu::set(
             "Workitem UID is required for N-SET");
     }
 
-    auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
+    auto context_id = assoc.accepted_context_id(ups_pull_sop_class_uid);
     if (!context_id) {
         return kcenon::pacs::pacs_error<ups_result>(
             kcenon::pacs::error_codes::ups_context_not_accepted,
@@ -398,7 +409,7 @@ network::Result<ups_result> ups_push_scu::change_state(
             "Transaction UID is required for state change");
     }
 
-    auto context_id = assoc.accepted_context_id(ups_push_sop_class_uid);
+    auto context_id = assoc.accepted_context_id(ups_pull_sop_class_uid);
     if (!context_id) {
         return kcenon::pacs::pacs_error<ups_result>(
             kcenon::pacs::error_codes::ups_context_not_accepted,
@@ -602,6 +613,24 @@ core::dicom_dataset ups_push_scu::build_create_dataset(
     // Procedure Step State - always SCHEDULED for N-CREATE
     ds.set_string(ups_tags::procedure_step_state, vr_type::CS, "SCHEDULED");
 
+    // PS3.4 Table CC.2.5-3: Type 1 and Type 2 attributes of the N-CREATE. The start of a step
+    // nobody scheduled for later is now, and its input is ready.
+    ds.set_string(ups_tags::input_readiness_state, vr_type::CS, "READY");
+    ds.set_string(tags::patient_name, vr_type::PN, "");
+    ds.set_string(tags::patient_id, vr_type::LO, "");
+    ds.set_string(tags::patient_birth_date, vr_type::DA, "");
+    ds.set_string(tags::patient_sex, vr_type::CS, "");
+    ds.set_string(tags::study_instance_uid, vr_type::UI, "");
+    ds.set_string(dicom_tag{0x0008, 0x1080}, vr_type::LO, "");  // Admitting Diagnoses Description
+    ds.set_string(ups_tags::transaction_uid, vr_type::UI, "");
+    (void)ds.get_or_create_sequence(dicom_tag{0x0008, 0x1084});  // Admitting Diagnoses Code Sequence
+    (void)ds.get_or_create_sequence(dicom_tag{0x0040, 0xA370});  // Referenced Request Sequence
+    (void)ds.get_or_create_sequence(ups_tags::scheduled_station_name_code_sequence);
+    (void)ds.get_or_create_sequence(dicom_tag{0x0040, 0x4018});  // Scheduled Workitem Code Sequence
+    (void)ds.get_or_create_sequence(ups_tags::input_information_sequence);
+    (void)ds.get_or_create_sequence(ups_tags::performed_procedure_sequence);
+    (void)ds.get_or_create_sequence(ups_tags::procedure_step_progress_information_sequence);
+
     // Procedure Step Label (required)
     if (!data.procedure_step_label.empty()) {
         ds.set_string(ups_tags::procedure_step_label, vr_type::LO,
@@ -615,17 +644,13 @@ core::dicom_dataset ups_push_scu::build_create_dataset(
     }
 
     // Priority
-    if (!data.priority.empty()) {
-        ds.set_string(ups_tags::scheduled_procedure_step_priority, vr_type::CS,
-                      data.priority);
-    }
+    ds.set_string(ups_tags::scheduled_procedure_step_priority, vr_type::CS,
+                  data.priority.empty() ? std::string("MEDIUM") : data.priority);
 
     // Scheduled start datetime
-    if (!data.scheduled_start_datetime.empty()) {
-        ds.set_string(
-            dicom_tag{0x0040, 0x4005}, vr_type::DT,
-            data.scheduled_start_datetime);
-    }
+    ds.set_string(
+        ups_tags::scheduled_procedure_step_start_datetime, vr_type::DT,
+        data.scheduled_start_datetime.empty() ? current_datetime() : data.scheduled_start_datetime);
 
     // Expected completion datetime
     if (!data.expected_completion_datetime.empty()) {

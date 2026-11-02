@@ -25,7 +25,11 @@ Options:
   --log-level <level>     Log level: trace, debug, info, warning, error, critical
                           (default: info)
   --max-associations <n>  Maximum concurrent associations (default: 50)
-  --peer <AE:host:port>   C-MOVE destination (repeatable)
+  --peer <AE:host:port>   C-MOVE destination and N-EVENT-REPORT receiver (repeatable)
+  --event-attempts <n>    Attempts per N-EVENT-REPORT on a new association (default: 3)
+  --event-retry-delay <s> Seconds between those attempts (default: 5)
+  --print-spool <path>    Print job directory (default: <storage-dir>.print-spool)
+  --ups-dir <path>        UPS instance directory (default: <storage-dir>.ups)
   --help, -h              Show this help message
 
 Supported DICOM Services:
@@ -164,6 +168,37 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
                 return std::nullopt;
             }
             config.move_destinations.push_back(std::move(destination));
+            continue;
+        }
+
+        if (arg == "--event-attempts" || arg == "--event-retry-delay") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            try {
+                const int value = std::stoi(argv[++i]);
+                if (value < (arg == "--event-attempts" ? 1 : 0)) {
+                    throw std::out_of_range("value");
+                }
+                if (arg == "--event-attempts") {
+                    config.event_attempts = value;
+                } else {
+                    config.event_retry_delay = std::chrono::seconds{value};
+                }
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid value for " << arg << "\n";
+                return std::nullopt;
+            }
+            continue;
+        }
+
+        if (arg == "--print-spool" || arg == "--ups-dir") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            (arg == "--print-spool" ? config.print_spool_directory : config.ups_directory) = argv[++i];
             continue;
         }
 

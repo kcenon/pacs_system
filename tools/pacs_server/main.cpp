@@ -19,7 +19,11 @@
  *   --db-path <path>        Database path (default: ./pacs.db)
  *   --log-level <level>     Log level (default: info)
  *   --max-associations <n>  Max concurrent associations (default: 50)
- *   --peer <AE:host:port>   C-MOVE destination (repeatable)
+ *   --peer <AE:host:port>   C-MOVE destination and N-EVENT-REPORT receiver (repeatable)
+ *   --event-attempts <n>    Attempts per N-EVENT-REPORT on a new association
+ *   --event-retry-delay <s> Seconds between those attempts
+ *   --print-spool <path>    Print job directory
+ *   --ups-dir <path>        UPS instance directory
  *   --help                  Show help message
  * @endcode
  */

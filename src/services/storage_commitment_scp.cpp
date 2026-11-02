@@ -26,6 +26,18 @@ storage_commitment_scp::storage_commitment_scp(
     : scp_service(std::move(logger))
     , storage_(std::move(storage)) {}
 
+void storage_commitment_scp::set_instance_verifier(commitment_verifier verifier) {
+    verifier_ = std::move(verifier);
+}
+
+void storage_commitment_scp::set_event_sender(std::shared_ptr<event_sender> sender) {
+    event_sender_ = std::move(sender);
+}
+
+void storage_commitment_scp::set_event_response_timeout(std::chrono::milliseconds timeout) {
+    event_response_timeout_ = timeout;
+}
+
 // =============================================================================
 // scp_service Interface
 // =============================================================================
@@ -112,6 +124,13 @@ network::Result<std::monostate> storage_commitment_scp::handle_n_action(
             status_error_no_such_action_type);
     }
 
+    // PS3.4 J.3: the request goes to the well-known instance, and no other exists.
+    if (request.requested_sop_instance_uid() != storage_commitment_push_model_sop_instance_uid) {
+        return send_n_action_response(
+            assoc, context_id, request.message_id(),
+            status_error_invalid_object_instance);
+    }
+
     // Verify we have a dataset
     if (!request.has_dataset()) {
         return send_n_action_response(
@@ -131,7 +150,7 @@ network::Result<std::monostate> storage_commitment_scp::handle_n_action(
 
     // Parse Referenced SOP Sequence (0008,1199)
     auto references = parse_referenced_sop_sequence(dataset);
-    if (references.empty()) {
+    if (!references) {
         return send_n_action_response(
             assoc, context_id, request.message_id(),
             status_error_missing_attribute);
@@ -149,7 +168,7 @@ network::Result<std::monostate> storage_commitment_scp::handle_n_action(
     ++actions_processed_;
 
     // Verify instances against storage
-    auto result = verify_instances(transaction_uid, references);
+    auto result = verify_instances(transaction_uid, *references);
 
     // Update instance statistics
     instances_committed_ += result.success_references.size();
@@ -172,11 +191,16 @@ commitment_result storage_commitment_scp::verify_instances(
     result.timestamp = std::chrono::system_clock::now();
 
     for (const auto& ref : references) {
-        if (storage_ && storage_->exists(ref.sop_instance_uid)) {
-            result.success_references.push_back(ref);
+        std::optional<commitment_failure_reason> failure;
+        if (verifier_) {
+            failure = verifier_(ref);
+        } else if (!storage_ || !storage_->exists(ref.sop_instance_uid)) {
+            failure = commitment_failure_reason::no_such_object_instance;
+        }
+        if (failure) {
+            result.failed_references.emplace_back(ref, *failure);
         } else {
-            result.failed_references.emplace_back(
-                ref, commitment_failure_reason::no_such_object_instance);
+            result.success_references.push_back(ref);
         }
     }
 
@@ -199,19 +223,49 @@ network::Result<std::monostate> storage_commitment_scp::send_event_report(
         ? storage_commitment_event_type_success
         : storage_commitment_event_type_failure;
 
-    // Build N-EVENT-REPORT-RQ
+    auto event_dataset = build_event_report_dataset(result);
+
+    // PS3.4 J.3.3: same AE Title, and an association of its own when the requestor can be reached.
+    const std::string requestor{assoc.calling_ae()};
+    if (event_sender_ && event_sender_->knows(requestor)) {
+        event_report report;
+        report.receiving_ae = requestor;
+        report.abstract_syntax = storage_commitment_push_model_sop_class_uid;
+        report.sop_class_uid = storage_commitment_push_model_sop_class_uid;
+        report.sop_instance_uid = storage_commitment_push_model_sop_instance_uid;
+        report.event_type_id = event_type;
+        report.information = std::move(event_dataset);
+        event_sender_->send(std::move(report));
+        return kcenon::pacs::ok();
+    }
+
+    auto message_id = assoc.next_request_message_id();
+    if (message_id.is_err()) {
+        return message_id.error();
+    }
     auto event_rq = make_n_event_report_rq(
-        1,  // message_id
+        message_id.value(),
         storage_commitment_push_model_sop_class_uid,
         storage_commitment_push_model_sop_instance_uid,
         event_type);
-
-    // Build and attach event dataset
-    auto event_dataset = build_event_report_dataset(result);
     event_rq.set_dataset(std::move(event_dataset));
 
-    // Send N-EVENT-REPORT-RQ
-    return assoc.send_dimse(context_id, event_rq);
+    auto sent = assoc.send_request(context_id, event_rq);
+    if (sent.is_err()) {
+        logger_->error("Storage Commitment: N-EVENT-REPORT to " + requestor + " for transaction " +
+                       result.transaction_uid + " not sent: " + sent.error().message);
+        return sent;
+    }
+    auto response = assoc.receive_response(event_response_timeout_);
+    if (response.is_err()) {
+        assoc.cancel_response_wait();
+        logger_->error("Storage Commitment: N-EVENT-REPORT to " + requestor + " for transaction " +
+                       result.transaction_uid + " not answered: " + response.error().message);
+        return response.error();
+    }
+    logger_->info("Storage Commitment: N-EVENT-REPORT answered with status " +
+                  std::to_string(response.value().status()));
+    return kcenon::pacs::ok();
 }
 
 // =============================================================================
@@ -240,24 +294,26 @@ network::Result<std::monostate> storage_commitment_scp::send_n_action_response(
 // Dataset Parsing Helpers
 // =============================================================================
 
-std::vector<sop_reference> storage_commitment_scp::parse_referenced_sop_sequence(
+std::optional<std::vector<sop_reference>> storage_commitment_scp::parse_referenced_sop_sequence(
     const core::dicom_dataset& dataset) {
 
-    std::vector<sop_reference> references;
-
     const auto* seq = dataset.get_sequence(core::tags::referenced_sop_sequence);
-    if (seq == nullptr) {
-        return references;
+    if (seq == nullptr || seq->empty()) {
+        return std::nullopt;
     }
 
+    std::vector<sop_reference> references;
+    references.reserve(seq->size());
     for (const auto& item : *seq) {
         sop_reference ref;
         ref.sop_class_uid = item.get_string(core::tags::referenced_sop_class_uid);
         ref.sop_instance_uid = item.get_string(core::tags::referenced_sop_instance_uid);
 
-        if (!ref.sop_class_uid.empty() && !ref.sop_instance_uid.empty()) {
-            references.push_back(std::move(ref));
+        // Dropping an item would leave it out of both result lists, which J.3.3 forbids.
+        if (ref.sop_class_uid.empty() || ref.sop_instance_uid.empty()) {
+            return std::nullopt;
         }
+        references.push_back(std::move(ref));
     }
 
     return references;

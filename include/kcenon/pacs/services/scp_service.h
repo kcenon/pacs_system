@@ -111,6 +111,10 @@ public:
         return {};
     }
 
+    /// The association is over. A service that keeps state for one drops it here;
+    /// no further request of that association reaches the service after this call.
+    virtual void association_ended(const network::association& assoc) { (void)assoc; }
+
     /**
      * @brief Handle an incoming DIMSE message
      *

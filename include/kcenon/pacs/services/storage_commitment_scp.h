@@ -20,13 +20,17 @@
 #ifndef PACS_SERVICES_STORAGE_COMMITMENT_SCP_HPP
 #define PACS_SERVICES_STORAGE_COMMITMENT_SCP_HPP
 
+#include "event_sender.h"
 #include "scp_service.h"
 #include "storage_commitment_types.h"
 
 #include <kcenon/pacs/storage/storage_interface.h>
 
 #include <atomic>
+#include <chrono>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace kcenon::pacs::services {
@@ -56,6 +60,10 @@ namespace kcenon::pacs::services {
  *  │── N-EVENT-REPORT-RSP ──────────►│
  * ```
  */
+/// Why one referenced instance cannot be committed, or nothing when it can.
+using commitment_verifier =
+    std::function<std::optional<commitment_failure_reason>(const sop_reference& reference)>;
+
 class storage_commitment_scp final : public scp_service {
 public:
     /**
@@ -69,6 +77,20 @@ public:
         std::shared_ptr<di::ILogger> logger = nullptr);
 
     ~storage_commitment_scp() override = default;
+
+    /// Decide per instance instead of asking the storage backend whether the UID exists.
+    void set_instance_verifier(commitment_verifier verifier);
+
+    /**
+     * @brief Report on a new association to requestors whose address is known
+     *
+     * PS3.4 J.3.3: the SCU may release as soon as it has the N-ACTION response. An AE the
+     * sender does not know can only be answered on the association that asked, while it lasts.
+     */
+    void set_event_sender(std::shared_ptr<event_sender> sender);
+
+    /// How long a report on the requesting association waits for its N-EVENT-REPORT-RSP.
+    void set_event_response_timeout(std::chrono::milliseconds timeout);
 
     // =========================================================================
     // scp_service Interface
@@ -133,7 +155,8 @@ private:
     // Dataset Parsing Helpers
     // =========================================================================
 
-    [[nodiscard]] static std::vector<sop_reference> parse_referenced_sop_sequence(
+    /// Nothing when the sequence is absent, empty, or names an item without both UIDs.
+    [[nodiscard]] static std::optional<std::vector<sop_reference>> parse_referenced_sop_sequence(
         const core::dicom_dataset& dataset);
 
     [[nodiscard]] static core::dicom_dataset build_event_report_dataset(
@@ -144,6 +167,9 @@ private:
     // =========================================================================
 
     std::shared_ptr<storage::storage_interface> storage_;
+    commitment_verifier verifier_;
+    std::shared_ptr<event_sender> event_sender_;
+    std::chrono::milliseconds event_response_timeout_{30000};
 
     std::atomic<size_t> actions_processed_{0};
     std::atomic<size_t> instances_committed_{0};

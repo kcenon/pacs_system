@@ -350,6 +350,7 @@ add_library(pacs_services
     src/services/storage_scu.cpp
     src/services/query_scu.cpp
     src/services/retrieve_scu.cpp
+    src/services/event_sender.cpp
     src/services/qr_index.cpp
     src/services/qr_matching.cpp
     src/services/query_scp.cpp
@@ -364,7 +365,10 @@ add_library(pacs_services
     src/services/storage_commitment_scu.cpp
     src/services/print_scp.cpp
     src/services/print_scu.cpp
+    src/services/ups/ups_index.cpp
     src/services/ups/ups_push_scp.cpp
+    src/services/ups/ups_rules.cpp
+    src/services/ups/ups_scp.cpp
     src/services/ups/ups_push_scu.cpp
     src/services/ups/ups_query_scp.cpp
     src/services/ups/ups_watch_scp.cpp

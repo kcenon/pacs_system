@@ -313,6 +313,12 @@ public:
 
         std::lock_guard<std::mutex> lock(mutex_);
 
+        if (records_.contains(instance.sop_instance_uid)) {
+            return kcenon::common::make_error<std::monostate>(
+                kcenon::pacs::network::dimse::status_error_duplicate_sop_instance,
+                "Duplicate MPPS instance", "mpps_scp");
+        }
+
         // Extract data from the MPPS instance
         mpps_record record;
         record.sop_instance_uid = instance.sop_instance_uid;
@@ -366,24 +372,21 @@ public:
         // Find existing record
         auto it = records_.find(sop_instance_uid);
         if (it == records_.end()) {
-            // If not found, create a minimal record
-            mpps_record record;
-            record.sop_instance_uid = sop_instance_uid;
-            record.created_at = current_timestamp();
-            records_[sop_instance_uid] = record;
-            it = records_.find(sop_instance_uid);
+            return kcenon::common::make_error<std::monostate>(
+                kcenon::pacs::network::dimse::status_error_no_such_object_instance,
+                "No such MPPS instance", "mpps_scp");
         }
 
         auto& record = it->second;
 
-        // Check if already in final state
+        // Check if already in final state (PS3.4 F.7.2.2: may no longer be updated)
         if (record.status == "COMPLETED" || record.status == "DISCONTINUED") {
             std::cerr << "[" << current_timestamp() << "] "
                       << "Warning: Cannot modify MPPS in final state: "
                       << record.sop_instance_uid << "\n";
-            return kcenon::pacs::pacs_error<std::monostate>(
-                kcenon::pacs::error_codes::mpps_invalid_state,
-                "Cannot modify MPPS in final state");
+            return kcenon::common::make_error<std::monostate>(
+                kcenon::pacs::network::dimse::status_error_processing_failure,
+                "Cannot modify MPPS in final state", "mpps_scp");
         }
 
         // Update status

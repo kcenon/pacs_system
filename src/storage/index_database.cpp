@@ -1676,6 +1676,11 @@ auto index_database::unsubscribe_ups(std::string_view subscriber_ae,
     return ups_repository_->unsubscribe_ups(subscriber_ae, workitem_uid);
 }
 
+auto index_database::suspend_ups_global_subscription(std::string_view subscriber_ae)
+    -> VoidResult {
+    return ups_repository_->suspend_ups_global_subscription(subscriber_ae);
+}
+
 auto index_database::get_ups_subscriptions(std::string_view subscriber_ae) const
     -> Result<std::vector<ups_subscription>> {
     return ups_repository_->get_ups_subscriptions(subscriber_ae);

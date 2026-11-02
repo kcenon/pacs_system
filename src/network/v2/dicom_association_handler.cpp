@@ -14,6 +14,7 @@
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 
+#include <algorithm>
 #include <span>
 #include <set>
 #include <sstream>
@@ -537,8 +538,10 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     // Perform association negotiation
     association_ = association::accept(rq, scp_cfg);
 
-    // Check if any presentation contexts were accepted
-    if (association_.accepted_contexts().empty()) {
+    // accepted_contexts() lists the refused ones too. With nothing usable, an A-ASSOCIATE-AC
+    // would leave the peer an association it cannot send anything on.
+    const auto& answered = association_.accepted_contexts();
+    if (std::none_of(answered.begin(), answered.end(), [](const auto& context) { return context.is_accepted(); })) {
         report_error("No presentation contexts accepted");
         send_associate_rj(reject_result::rejected_permanent,
                           static_cast<uint8_t>(reject_source::service_user),
@@ -656,10 +659,15 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
             }
         } else {
             // An outbound-only Storage context does not authorize an incoming
-            // C-STORE request on that same context.
+            // C-STORE request on that same context. An N-EVENT-REPORT is the one
+            // request a requestor sends as SCP (PS3.4 J.3.3), so it needs that role.
+            const bool sent_as_scp = message.command() == dimse::command_field::n_event_report_rq;
             for (const auto& context : association_.accepted_contexts()) {
-                if (context.id == context_id &&
-                    !association_.requestor_role(context.abstract_syntax).scu_role) {
+                if (context.id != context_id) {
+                    continue;
+                }
+                const auto role = association_.requestor_role(context.abstract_syntax);
+                if (sent_as_scp ? !role.scp_role : !role.scu_role) {
                     send_abort(abort_source::service_provider, abort_reason::unexpected_pdu_parameter);
                     close_handler(false);
                     return;
@@ -785,6 +793,13 @@ void dicom_association_handler::run_services() {
         service_running_ = false;
         service_ready_.wait(lock, [this] { return service_stopping_ || !service_requests_.empty(); });
         if (service_stopping_) {
+            lock.unlock();
+            std::set<services::scp_service*> told;
+            for (const auto& [uid, service] : services_) {
+                if (told.insert(service).second) {
+                    service->association_ended(association_);
+                }
+            }
             return;
         }
         auto [context_id, message] = std::move(service_requests_.front());

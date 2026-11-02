@@ -39,6 +39,23 @@ uint32_t read_le32(const uint8_t* data) {
 // Element Encoding Tests
 // ============================================================================
 
+TEST_CASE("an undefined length on an unknown tag is a sequence", "[encoding][implicit_vr]") {
+    // PS3.5 7.5: (0009,0010) is in no dictionary; only a sequence can have an undefined length here.
+    const std::vector<uint8_t> bytes{
+        0x09, 0x00, 0x10, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,  // tag, undefined length
+        0xFE, 0xFF, 0x00, 0xE0, 0xFF, 0xFF, 0xFF, 0xFF,  // item, undefined length
+        0x10, 0x00, 0x20, 0x00, 0x04, 0x00, 0x00, 0x00, 'P', 'I', 'D', ' ',  // Patient ID
+        0xFE, 0xFF, 0x0D, 0xE0, 0x00, 0x00, 0x00, 0x00,  // item delimiter
+        0xFE, 0xFF, 0xDD, 0xE0, 0x00, 0x00, 0x00, 0x00,  // sequence delimiter
+    };
+    auto decoded = kcenon::pacs::encoding::implicit_vr_codec::decode(bytes);
+    REQUIRE(decoded.is_ok());
+    const auto* sequence = decoded.value().get_sequence(kcenon::pacs::core::dicom_tag{0x0009, 0x0010});
+    REQUIRE(sequence != nullptr);
+    REQUIRE(sequence->size() == 1);
+    CHECK(sequence->front().get_string(kcenon::pacs::core::dicom_tag{0x0010, 0x0020}) == "PID");
+}
+
 TEST_CASE("implicit_vr_codec element encoding", "[encoding][implicit]") {
     SECTION("simple string element") {
         auto elem = dicom_element::from_string(

@@ -47,6 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `pacs_server` now provides Storage Commitment, Print and Unified Procedure Step, and reports N-EVENT-REPORTs on associations it opens to the peers named with `--peer`. `tools/dimse_n_scu` hosts the SCU classes that had no tool.
+- UPS: answer every status of PS3.4 Tables CC.1.1-2 and CC.2.6, keep the whole instance, never return the Transaction UID, read Receiving AE and Deletion Lock from the request, and carry each operation on the SOP Class CC.2 gives it. `ups_action_request_cancel` is now 2 and `ups_query_find_sop_class_uid` is now `...34.6.5`: the old values were those of other operations, and no other implementation could interoperate with them.
+- Storage Commitment: commit an instance only when the index holds it under that SOP Class and its file exists, and report on the requesting association only after waiting for the N-EVENT-REPORT-RSP.
+- Print: read Requested SOP identity on N-SET, N-GET, N-ACTION and N-DELETE, tie each Film Session to its association and each Film Box to the session it names, and answer invalid requests with their Annex H status instead of ending the association. `print_scu` can now send an image.
+- MPPS: answer duplicates, unknown instances and final states with PS3.4 F.7.2 statuses, and `mpps_scu` sends every Type 1 and Type 2 attribute. `pacs_server` matches Worklist keys and returns the scheduled step.
+- Implicit VR: add the Storage Commitment, UPS, MPPS, Worklist and Print attributes to the data dictionary, and read an undefined length on an unknown tag as a sequence. Implicit VR requests of these services failed to decode or lost their values.
+- `dicom_server_v2`: answer an association with no acceptable presentation context with A-ASSOCIATE-RJ instead of an A-ASSOCIATE-AC refusing them all.
 - Release workflow version check: replace grep parsing that missed the multi-line `project()` and `version-semver` with `scripts/verify_release_version.py`, which also checks Doxygen `PROJECT_NUMBER` and the overlay manifest ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - `cmake --preset vcpkg`: resolve the ecosystem packages installed by the published registry ports, and add `kcenon-logger-system` and `libjpeg-turbo` to the root manifest to match the overlay's default dependency set ([#1175](https://github.com/kcenon/pacs_system/issues/1175))
 - Replace thread-unsafe `std::localtime` with `localtime_r`/`localtime_s` ([#990](https://github.com/kcenon/pacs_system/issues/990))

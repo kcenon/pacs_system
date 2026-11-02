@@ -53,6 +53,7 @@ cmake --build build
 - [Move SCU](#move-scu) - dcmtk-compatible C-MOVE
 - [Get SCU](#get-scu) - dcmtk-compatible C-GET
 - [Print SCU](#print-scu) - Print Management client
+- [DIMSE-N SCU](#dimse-n-scu) - Storage Commitment, UPS and N-GET client
 
 ### Server Applications
 - [Store SCP](#store-scp) - Storage server
@@ -761,6 +762,12 @@ DICOM Print Management client for sending print requests to remote Print SCP sys
   --orientation PORTRAIT \
   --film-size 8INX10IN
 
+# Print an image: its Image Pixel attributes go in the first Image Box
+./build/bin/print_scu localhost 10400 PRINTER_SCP print --medium PAPER --image image.dcm
+
+# Print an RGB image through the Basic Color Print Meta SOP Class
+./build/bin/print_scu localhost 10400 PRINTER_SCP print --medium PAPER --image rgb.dcm --color
+
 # Query printer status
 ./build/bin/print_scu localhost 10400 PRINTER_SCP status
 
@@ -777,6 +784,34 @@ Features:
 - **Image Box**: N-SET for setting pixel data on image positions
 - **Printer Status**: N-GET for querying printer status (NORMAL, WARNING, FAILURE)
 - **Meta SOP Class**: Supports Basic Grayscale and Color Print Meta SOP Classes
+
+Without `--image` the printer answers B603H, an empty page, and the tool ends with exit 1.
+
+### DIMSE-N SCU
+
+Runs one operation of the SCU classes that have no tool of their own, and prints one JSON object with the
+status the peer answered. Validation drives the classes through it.
+
+```bash
+# Storage Commitment, with the result arriving on an association the SCP opens
+./build/bin/dimse_n_scu localhost 11112 MY_PACS stgcmt --calling-ae MY_AE --listen 11115 \
+  --transaction 1.2.3 --ref 1.2.840.10008.5.1.4.1.1.7:1.2.3.4
+
+# The same, with the result on this association
+./build/bin/dimse_n_scu localhost 11112 MY_PACS stgcmt --transaction 1.2.3 --ref 1.2.840.10008.5.1.4.1.1.7:1.2.3.4
+
+# Unified Procedure Step
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-create --uid 1.2.3 --label "Reconstruct"
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-state --uid 1.2.3 --state "IN PROGRESS" --transaction 1.2.3.9
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-subscribe --uid 1.2.3 --receiving-ae WATCHER --lock
+
+# N-GET, here of a Printer under a Print Meta SOP Class
+./build/bin/dimse_n_scu localhost 10400 PRINTER n-get --context 1.2.840.10008.5.1.1.9 \
+  --class 1.2.840.10008.5.1.1.16 --instance 1.2.840.10008.5.1.1.17 --tag 21100010
+```
+
+Other operations: `ups-get`, `ups-set`, `ups-cancel`, `ups-unsubscribe`, `ups-suspend`. Exit codes: 0 Success or
+Warning; 1 the peer answered with a failure status; 2 usage or connection error; 3 no commitment report in time.
 
 ---
 
@@ -958,9 +993,20 @@ Full PACS server example with configuration.
 # Run with configuration
 ./build/tools/pacs_server/pacs_server --config pacs_server.yaml
 
-# Allow C-MOVE to a destination. Without --peer, every C-MOVE is refused with A801.
+# Name a peer. Without --peer, a C-MOVE to it is refused with A801 and it cannot subscribe to UPS events.
 ./build/bin/pacs_server --port 11112 --ae-title MY_PACS --peer VIEWER:192.168.1.10:11113
 ```
+
+| Option | Meaning |
+|--------|---------|
+| `--peer AE:host:port` | C-MOVE destination and N-EVENT-REPORT receiver (repeatable) |
+| `--event-attempts N` | Attempts per N-EVENT-REPORT on a new association (default 3) |
+| `--event-retry-delay S` | Seconds between those attempts (default 5) |
+| `--print-spool PATH` | Print job directory (default `<storage-dir>.print-spool`) |
+| `--ups-dir PATH` | UPS instance directory (default `<storage-dir>.ups`) |
+
+It provides Verification, Storage, Query/Retrieve, Worklist, MPPS, Storage Commitment, Print and Unified
+Procedure Step. Commitment reports and UPS events to a named peer go on associations it opens.
 
 **Sample Configuration** (`pacs_server.yaml`):
 ```yaml

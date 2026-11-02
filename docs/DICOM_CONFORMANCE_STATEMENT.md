@@ -57,6 +57,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-11-02 | 1.10.0 | Declare the normalized services as measured against independent peers: Worklist matching and return keys (Section 3.4), MPPS statuses (Section 3.5), commitment reports on a new association (Section 3.6), the Print contract and its spool (Section 3.7), and the UPS SOP Classes, which `pacs_server` now provides (Section 3.8). `pacs_server` also provides Storage Commitment and Print, which this statement already claimed for it. Implicit VR requests of these services are now readable: their attributes were missing from the data dictionary. |
 | 2026-11-01 | 1.9.0 | Declare the Query/Retrieve contract: keys, matching, responses, retrieve rules and association limits (Section 3.3). The retired Patient/Study Only model is SCP only. |
 | 2026-11-01 | 1.8.0 | Correct SOP Class UIDs and names against PS3.6: Legacy Converted Enhanced CT (`.2.2`), US Multi-frame (`.3.1`, retired `.3`), Label Map (`.66.7`) and Height Map (`.66.8`) Segmentation, Waveform Presentation State (`.9.100.1`), Waveform Annotation SR (`.88.77`), Wide Field Ophthalmic Photography (`.77.1.5.5`). Section 3.2 now lists every registered class, and `store_scp` and `pacs_server` accept exactly that list by default. |
 | 2026-10-24 | 1.7.0 | Section 4 states PACS_SCP negotiation and codec support per transfer syntax: Explicit VR Big Endian, Deflated Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate are not negotiated, and the last four have no working codec; Appendix B lists these and the JPEG Lossless decoder limitation |
@@ -110,15 +111,17 @@ monitoring_system, network_system).
 
 | AE | Function |
 |----|----------|
-| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Print SCP, Verification SCP |
-| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Print SCU, Verification SCU |
+| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Print SCP, UPS SCP, Verification SCP |
+| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Print SCU, UPS SCU, Verification SCU |
 
 ### 2.2 AE Specifications
 
 #### 2.2.1 PACS_SCP Application Entity
 
 **Description**: Accepts incoming associations for storage, query/retrieve,
-worklist, MPPS, storage commitment, print management, and verification services.
+worklist, MPPS, storage commitment, print management, Unified Procedure Step, and
+verification services. It opens associations of its own to deliver C-MOVE objects and
+N-EVENT-REPORT messages, to the peers named with `--peer AE:host:port`.
 
 ##### Association Policies
 
@@ -145,7 +148,7 @@ worklist, MPPS, storage commitment, print management, and verification services.
 #### 2.2.2 PACS_SCU Application Entity
 
 **Description**: Initiates outgoing associations for storage, query/retrieve,
-worklist, MPPS, storage commitment, and print management operations.
+worklist, MPPS, storage commitment, print management, and Unified Procedure Step operations.
 
 ##### Association Policies
 
@@ -458,6 +461,14 @@ not affected in this way, because each object waits for its acknowledgement.
 |-----------|-----|-----|-----|
 | Modality Worklist Information Model - FIND | 1.2.840.10008.5.1.4.31 | Yes | Yes |
 
+An identifier without the Scheduled Procedure Step Sequence, a required key (PS3.4 K.6.1.2.2), is
+refused with A900H. `pacs_server` answers from its worklist table with the matching of Section 3.3,
+and returns the keys asked for: Patient ID, Name, Birth Date and Sex, Accession Number, Study Instance
+UID, Referring Physician, Requested Procedure ID, and in the sequence Modality, Scheduled Station AE
+Title and Name, Start Date and Time, Scheduled Procedure Step ID and Description. A key it does not hold
+matches nothing and comes back empty when it has no value; the table has no Requested Procedure
+Description. A failure status from an SCP ends `worklist_scu` with exit 2, not with an empty worklist.
+
 ### 3.5 Modality Performed Procedure Step (MPPS)
 
 | SOP Class | UID | SCP | SCU |
@@ -465,6 +476,16 @@ not affected in this way, because each object waits for its acknowledgement.
 | Modality Performed Procedure Step | 1.2.840.10008.3.1.2.3.3 | Yes | Yes |
 
 MPPS status transitions: IN PROGRESS -> COMPLETED | DISCONTINUED
+
+| Request | Status (PS3.4 F.7.2) |
+|---------|----------------------|
+| N-CREATE of an existing instance | 0111H |
+| N-SET of an instance that does not exist | 0112H |
+| N-SET after COMPLETED or DISCONTINUED | 0110H, and nothing changes |
+
+`pacs_server` keeps instances in its database, so they can be completed after a restart. It reads the
+study from the Scheduled Step Attributes Sequence, where the standard puts it. `mpps_scu` sends every
+Type 1 and Type 2 attribute of Table F.7.2-1, so a peer that validates the request accepts it.
 
 ### 3.6 Storage Commitment Push Model
 
@@ -509,6 +530,27 @@ SCU (Requestor)                    SCP (Provider)
 | Transaction UID tracking | Yes |
 | Asynchronous commit verification | Yes |
 | Well-known SOP Instance UID (1.2.840.10008.1.20.1.1) | Yes |
+
+#### Delivering the Result
+
+A requestor named with `--peer` gets its report on an association `pacs_server` opens: the same AE Title as
+the request, proposing the SCP role through Role Selection, as PS3.4 J.3.3 requires, since the SCU may
+release as soon as it has the N-ACTION response. Without an address the report goes on the requesting
+association, which only reaches a requestor that holds it open. Reports to one AE keep their order.
+
+A report no attempt could deliver is tried `--event-attempts` times (default 3), `--event-retry-delay`
+seconds apart (default 5), then logged and dropped. A status from the peer, even a failure, ends the
+attempts, because the peer has the report. Waiting reports are not kept across a restart; the requestor
+asks again with a new Transaction UID, and what is stored is still committed.
+
+An instance is committed when the index holds it under that SOP Class and its file exists. An instance
+the index names under another SOP Class fails with 0119H, and one whose file is gone with 0112H.
+
+| Request | Status |
+|---------|--------|
+| Action Type other than 1 | 0123H |
+| Requested SOP Instance other than the well-known one | 0117H |
+| No Transaction UID, no Referenced SOP Sequence, or an item without both UIDs | 0120H |
 
 #### Failure Reason Codes
 
@@ -577,6 +619,97 @@ Workstation (Print SCU)                      Printer (Print SCP)
 | N-GET Printer Status | Yes |
 | Well-Known Printer SOP Instance UID (1.2.840.10008.5.1.1.17) | Yes |
 | Meta SOP Class fallback negotiation | Yes |
+
+A Film Session belongs to the association that created it (PS3.4 H.4.1): another association cannot
+reach it, a second one on the same association is refused, and it ends with the association. A Film Box
+joins the session it names. A Color Print Meta context prints Color Image Boxes.
+
+Image Display Format is `STANDARD\C,R`, `ROW\R1,R2,...` or `COL\C1,C2,...`, up to 4096 Image Boxes.
+SLIDE, SUPERSLIDE and CUSTOM are refused. The layout is fixed by the N-CREATE.
+
+| Request | Status |
+|---------|--------|
+| Film Box with no Referenced Film Session Sequence or Image Display Format | 0120H |
+| Film Box naming a session this association does not hold, or a format it cannot lay out | 0106H |
+| Number of Copies that is not a positive number | 0106H |
+| Second Film Session on an association | 0213H |
+| Image Box with no position or no image sequence of its class | 0120H |
+| Image Box with the position of another | 0106H |
+| Film Session, Film Box or Image Box this association does not hold | 0112H |
+| Printer instance other than the well-known one | 0112H |
+| Action Type other than 1 | 0123H |
+| Printing a Film Box with no image | B603H, and no job |
+| Printing a Film Session with no Film Box | C600H |
+| A job the spool cannot take | C602H |
+
+`pacs_server` has no physical printer. Each printed Film Box becomes a directory under `--print-spool`
+(default `<storage-dir>.print-spool`), holding `job.json` and the pixel bytes of each image. The manifest
+appears last, so a job with a manifest has all its images. Print Job, Presentation LUT and Annotation Box
+are not provided. `print_scu` sends one image with `--image`, and through Color Print Meta with `--color`;
+without an image the printer answers B603H and the tool ends with exit 1.
+
+### 3.8 Unified Procedure Step (PS3.4 Annex CC)
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Unified Procedure Step - Push | 1.2.840.10008.5.1.4.34.6.1 | Yes | Yes |
+| Unified Procedure Step - Watch | 1.2.840.10008.5.1.4.34.6.2 | Yes | Yes |
+| Unified Procedure Step - Pull | 1.2.840.10008.5.1.4.34.6.3 | Yes | Yes |
+| Unified Procedure Step - Event | 1.2.840.10008.5.1.4.34.6.4 | Yes | No |
+| Unified Procedure Step - Query | 1.2.840.10008.5.1.4.34.6.5 | Yes | No |
+
+Each request carries the UPS Push SOP Class UID, whichever of these was negotiated (CC.2). A request a
+negotiated class does not carry is answered 0211H: N-CREATE on Push; N-SET and Change UPS State on Pull;
+Request UPS Cancel on Push and Watch; subscriptions on Watch; C-FIND on Pull, Watch and Query; N-GET on all
+four. The SCU classes cover N-CREATE, N-GET, N-SET, the N-ACTIONs and subscriptions, and parse event reports;
+no client sends C-FIND on Pull or Query, and no product listens for UPS events as an SCU.
+
+Change UPS State follows Table CC.1.1-2:
+
+| Request | SCHEDULED | IN PROGRESS | COMPLETED | CANCELED | No such UPS |
+|---------|-----------|-------------|-----------|----------|-------------|
+| To IN PROGRESS, correct Transaction UID | Success | C302H | C300H | C300H | C307H |
+| To COMPLETED, correct Transaction UID | C310H | Success or C304H | B306H | C300H | C307H |
+| To CANCELED, correct Transaction UID | C310H | Success or C304H | C300H | B304H | C307H |
+| Any of these, incorrect Transaction UID | C301H | C301H | C301H | C301H | C307H |
+| To SCHEDULED | C303H | C303H | C303H | C303H | C307H |
+| Request UPS Cancel | Canceled | Reported, or C312H | C311H | B304H | C307H |
+| N-CREATE of this UID | 0111H | 0111H | 0111H | 0111H | Created |
+
+In SCHEDULED no Transaction UID is recorded, so "correct" means one was offered. COMPLETED needs, in the
+Performed Procedure Sequence, the Station Name and Workitem Code Sequences, the Start and End DateTime, and
+an Output Information Sequence, which may be empty. CANCELED needs a Procedure Step Cancellation DateTime.
+Otherwise the answer is C304H. A step in progress is not canceled by a request: its subscribers hear
+of it, and with none to tell the answer is C312H. A SCHEDULED step goes through IN PROGRESS to CANCELED.
+
+| Other requests | Status |
+|----------------|--------|
+| N-CREATE with a state other than SCHEDULED | C309H |
+| N-CREATE with a Transaction UID, or a UID or priority that is not valid | 0106H |
+| N-CREATE without a Type 1 attribute of Table CC.2.5-3 | 0120H |
+| N-SET in SCHEDULED, with a Transaction UID | C310H |
+| N-SET in IN PROGRESS, without the recorded Transaction UID | C301H |
+| N-SET in COMPLETED or CANCELED | C300H |
+| N-SET of the Procedure Step State | 0106H |
+| N-SET or N-GET of a UPS that does not exist | C307H |
+| Subscribing without Receiving AE or Deletion Lock | 0120H |
+| Subscribing a Receiving AE without an address | C308H |
+| Subscribing to a UPS that does not exist, or a filtered global subscription | C307H |
+| Suspending anything but the global subscription | C314H |
+
+The SCP creates the UID when an N-CREATE has none, and the Worklist Label when it has none. N-GET and C-FIND
+never return the Transaction UID, which is the lock. An N-SET may add attributes the N-CREATE did not have.
+C-FIND matches the keys with values by VR, as in Section 3.3, and does not look inside sequence keys.
+
+Reports go to the Receiving AE on an association `pacs_server` opens, as in Section 3.6, on the UPS Event
+context with the UPS Push class: 1 State Report, with an initial one on subscribing (Table CC.2.3-2), 2 Cancel
+Requested with the Requesting AE, 3 Progress when the progress sequence is set, 5 Assigned when the station or
+performer is set. A restart sends 4 SCP Status Change, RESTARTED with both lists WARM START, under the global
+subscription UID. A failed delivery changes neither the subscription nor the lock, and blocks no request.
+
+The state, the lock and subscriptions are in the database and the whole instance in a Part 10 file under
+`--ups-dir` (default `<storage-dir>.ups`), so they survive a restart. Nothing deletes a workitem, so deletion
+locks hold trivially. `dimse_n_scu` hosts the SCU classes.
 
 ---
 
@@ -1022,7 +1155,8 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | Area | Limitation | Reference |
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
-| Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
+| Storage Commitment | Push Model SCP/SCU implemented (N-ACTION, N-EVENT-REPORT). Reports waiting for a retry do not survive a restart | Section 3.6 |
+| Unified Procedure Step | Filtered global subscriptions are refused with C307H. No client for C-FIND on Pull or Query, and no product listens for events as an SCU | Section 3.8 |
 | JPEG Baseline Codec | Requires libjpeg-turbo at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG_CODEC`) | Optional dependency |
 | JPEG 2000 Codec | Requires OpenJPEG at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG2000_CODEC`) | Optional dependency |
 | JPEG-LS Codec | Requires CharLS at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEGLS_CODEC`) | Optional dependency |
@@ -1032,7 +1166,9 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | Explicit VR Big Endian | Not negotiated by PACS_SCP; Part 10 files only | Section 4.1 |
 | Deflated Explicit VR Little Endian | Not implemented and not negotiated | Section 4.1 |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
-| Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
+| Print Management | Film Session, Film Box, Image Box and Printer (SCP + SCU). No Print Job, Presentation LUT or Annotation Box; `pacs_server` writes jobs to a spool directory | Section 3.7 |
+| Patient Information Reconciliation | A local library service with no DIMSE exchange, so not part of this statement | N/A |
+| Generic N-GET SCP | `n_get_scp` has no product host. N-GET is provided by the UPS and Printer services | Section 3.8 |
 
 `PACS_BUILD_CODECS=OFF` disables all four optional codecs. With it on, CMake looks for each library at
 configure time and disables only the codec whose library is missing, with a warning

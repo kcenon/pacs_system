@@ -176,6 +176,12 @@
       "timeout_seconds": 1500
     },
     {
+      "id": "component.dimse_n",
+      "kind": "dimse-n",
+      "args": [],
+      "timeout_seconds": 1500
+    },
+    {
       "id": "component.discovery",
       "kind": "discovery",
       "args": [],
@@ -451,11 +457,17 @@
     {
       "id": "normalized_services",
       "components": [
-        "component.services_tests"
+        "component.services_tests",
+        "component.dimse_n"
       ],
       "interop": [],
       "gaps": [
-        "Independent Storage Commitment/UPS/Print/N-GET/PIR workflows, including reverse event reports."
+        "Patient Information Reconciliation: patient_reconciliation_service is a local library call with no DIMSE exchange, so no peer can reach it. Nothing in the conformance statement claims it.",
+        "The generic n_get_scp class has no product host: it is only reachable from its unit tests. N-GET is exercised through the UPS and Printer services, and n_get_scu against DCMTK dcmprscp.",
+        "Filtered global UPS subscriptions are refused with C307H, as CC.2.3.3 allows; no peer exercises their matching.",
+        "UPS Pull and UPS Query as SCU: the library has no C-FIND client for them. UPS Event as SCU: ups_watch_scu parses reports, but no product listens for them.",
+        "Commitment reports waiting for a retry are not kept across a restart; a requester asks again, and the objects are still committed.",
+        "Reverse delivery was exercised over TCP only; no peer was run over TLS."
       ],
       "known_issues": []
     },
@@ -964,7 +976,7 @@
       "support_status": "supported",
       "condition": "positive",
       "expected_outcome": "passed",
-      "oracle": "Independent Storage Commitment, UPS, Print, N-GET and PIR peers verify legal states and reverse events",
+      "oracle": "Independent Storage Commitment, UPS, MPPS, Worklist, Print and N-GET peers verify legal states, reverse events, received objects and persistent state",
       "fixture": "Synthetic normalized_services fixtures with independently declared expected data/state",
       "execution_lane": "full-required",
       "owner_issue": 1320,
@@ -976,7 +988,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.normalized_services.negative",
@@ -996,7 +1008,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.security.positive",
@@ -1487,6 +1499,15 @@
         ],
         "get": [
           "Refused role negotiation, cancellation and mixed failure counters."
+        ]
+      }
+    },
+    {
+      "issue": 1320,
+      "change": "component.dimse_n runs each normalized service against peers in separate processes that share no PACS code: dcm4che 5.35.2, pynetdicom 2.1.1 and DCMTK print tools, each qualified against the others before any PACS result counts.",
+      "previous_gaps": {
+        "normalized_services": [
+          "Independent Storage Commitment/UPS/Print/N-GET/PIR workflows, including reverse event reports."
         ]
       }
     }

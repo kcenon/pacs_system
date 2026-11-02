@@ -172,6 +172,7 @@ class Driver:
                 context.mkdir()
                 self.provenance['source_digest'] = snapshot(ROOT,context/'pacs_system')
                 shutil.copytree(context/'pacs_system/validation/dcmtk',context/'harness')
+                shutil.copytree(context/'pacs_system/validation/peers',context/'peers')
                 shutil.copy2(context/'pacs_system/scripts/run_dcmtk_validation.py',context/'driver.py')
                 (context/'.dockerignore').write_text('pacs_system/validation/\npacs_system/scripts/run_dcmtk_validation.py\n')
                 self.command(['git','init',str(peer_source)],'checkout.log')

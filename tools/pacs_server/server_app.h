@@ -17,10 +17,14 @@
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/event_sender.h"
 #include "kcenon/pacs/services/mpps_scp.h"
+#include "kcenon/pacs/services/print_scp.h"
 #include "kcenon/pacs/services/query_scp.h"
 #include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_commitment_scp.h"
 #include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/services/ups/ups_index.h"
 #include "kcenon/pacs/services/verification_scp.h"
 #include "kcenon/pacs/services/worklist_scp.h"
 #include "kcenon/pacs/storage/file_storage.h"
@@ -193,6 +197,17 @@ private:
     // Service Handlers
     // =========================================================================
 
+    /// One worklist item as a C-FIND response, or nothing when the keys do not match it
+    [[nodiscard]] std::optional<core::dicom_dataset> worklist_row(
+        const storage::worklist_item& item, const core::dicom_dataset& keys) const;
+
+    /// Why an instance cannot be committed, or nothing when it is held
+    [[nodiscard]] std::optional<services::commitment_failure_reason> verify_commitment(
+        const services::sop_reference& reference) const;
+
+    /// Write a print job to the spool directory
+    [[nodiscard]] network::Result<std::monostate> spool_print_job(const services::print_job& job);
+
     /// Handle incoming C-STORE request
     services::storage_status handle_store(
         const core::dicom_dataset& dataset,
@@ -231,6 +246,12 @@ private:
 
     /// Index database
     std::unique_ptr<storage::index_database> database_;
+
+    /// Sends N-EVENT-REPORTs on associations this server opens
+    std::shared_ptr<services::event_sender> events_;
+
+    /// UPS workitems; declared after the database and the sender it uses
+    std::unique_ptr<services::ups_index> ups_index_;
 
     /// Shutdown flag
     std::atomic<bool> shutdown_requested_{false};

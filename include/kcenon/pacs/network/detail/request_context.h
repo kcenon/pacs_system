@@ -62,7 +62,14 @@ inline Result<std::string> request_sop_class(
          sop_class == "1.2.840.10008.5.1.1.16" ||
          (print_gray && sop_class == "1.2.840.10008.5.1.1.4") ||
          (print_color && sop_class == "1.2.840.10008.5.1.1.4.1"));
-    if (sop_class != abstract_syntax && !print_member) {
+    // PS3.4 CC.2: every UPS is an instance of the UPS Push SOP Class, so a request
+    // on a Pull, Watch or Query context, or an event report, still names UPS Push.
+    const bool ups_member = sop_class == "1.2.840.10008.5.1.4.34.6.1" &&
+        (abstract_syntax == "1.2.840.10008.5.1.4.34.6.2" ||
+         abstract_syntax == "1.2.840.10008.5.1.4.34.6.3" ||
+         abstract_syntax == "1.2.840.10008.5.1.4.34.6.4" ||
+         abstract_syntax == "1.2.840.10008.5.1.4.34.6.5");
+    if (sop_class != abstract_syntax && !print_member && !ups_member) {
         return kcenon::common::error_info("Command SOP Class UID does not match presentation context");
     }
     return abstract_syntax;

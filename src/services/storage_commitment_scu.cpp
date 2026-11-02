@@ -33,6 +33,50 @@ void storage_commitment_scu::set_commitment_callback(commitment_callback cb) {
 }
 
 // =============================================================================
+// Reports on associations the SCP opens
+// =============================================================================
+
+storage_commitment_event_scu::storage_commitment_event_scu(
+    std::shared_ptr<storage_commitment_scu> scu,
+    std::shared_ptr<di::ILogger> logger)
+    : scp_service(std::move(logger))
+    , scu_(std::move(scu)) {}
+
+std::vector<std::string> storage_commitment_event_scu::supported_sop_classes() const {
+    return {std::string(storage_commitment_push_model_sop_class_uid)};
+}
+
+std::vector<std::string> storage_commitment_event_scu::outbound_sop_classes() const {
+    return {std::string(storage_commitment_push_model_sop_class_uid)};
+}
+
+std::string_view storage_commitment_event_scu::service_name() const noexcept {
+    return "Storage Commitment Event SCU";
+}
+
+network::Result<std::monostate> storage_commitment_event_scu::handle_message(
+    network::association& assoc,
+    uint8_t context_id,
+    const network::dimse::dimse_message& request) {
+
+    using namespace network::dimse;
+
+    if (request.command() != command_field::n_event_report_rq) {
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::storage_commitment_unexpected_command,
+            "Expected N-EVENT-REPORT-RQ, got: " + std::string(to_string(request.command())));
+    }
+    auto report = scu_->handle_event_report(request);
+    if (report.is_err()) {
+        logger_->error("Storage Commitment report refused: " + report.error().message);
+    }
+    return assoc.send_dimse(context_id, make_n_event_report_rsp(
+        request.message_id(), request.affected_sop_class_uid(), request.affected_sop_instance_uid(),
+        request.event_type_id().value_or(0),
+        report.is_ok() ? status_success : status_error_processing_failure));
+}
+
+// =============================================================================
 // N-ACTION Request
 // =============================================================================
 

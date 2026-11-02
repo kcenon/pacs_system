@@ -127,6 +127,9 @@ struct film_session {
 
     /// Complete dataset from request
     core::dicom_dataset data;
+
+    /// The association this session belongs to; it ends with it (PS3.4 H.4.1)
+    const void* owner{nullptr};
 };
 
 /**
@@ -197,6 +200,23 @@ using print_session_handler = std::function<network::Result<std::monostate>(
 using print_action_handler = std::function<network::Result<std::monostate>(
     const std::string& film_box_uid)>;
 
+/// One Film Box to print, with the session around it and the images set on it.
+struct print_job {
+    film_session session;
+    film_box box;
+    std::vector<image_box> images;
+};
+
+/**
+ * @brief Handler that receives what to print
+ *
+ * Runs before the N-ACTION is answered, so its failure reaches the SCU as C602H.
+ *
+ * @param job The film box, its session and the image boxes holding images
+ * @return Success when the job is queued
+ */
+using print_job_handler = std::function<network::Result<std::monostate>(const print_job& job)>;
+
 /**
  * @brief Handler for printer status query
  *
@@ -266,6 +286,11 @@ public:
     void set_print_handler(print_action_handler handler);
 
     /**
+     * @brief Set the handler that receives the content of each printed Film Box
+     */
+    void set_job_handler(print_job_handler handler);
+
+    /**
      * @brief Set handler for printer status query
      */
     void set_printer_status_handler(printer_status_handler handler);
@@ -298,6 +323,9 @@ public:
      * @return "Print SCP"
      */
     [[nodiscard]] std::string_view service_name() const noexcept override;
+
+    /// A Film Session and what it holds end with the association that created it.
+    void association_ended(const network::association& assoc) override;
 
     // =========================================================================
     // Statistics
@@ -368,6 +396,18 @@ private:
         network::dimse::status_code status);
 
     // =========================================================================
+    // State of one association; each expects mutex_ to be held
+    // =========================================================================
+
+    [[nodiscard]] const film_session* owned_session(const std::string& uid, const network::association& assoc) const;
+    [[nodiscard]] film_box* owned_box(const std::string& uid, const network::association& assoc);
+    [[nodiscard]] image_box* owned_image_box(const std::string& uid, const network::association& assoc);
+    void remove_session_contents(const film_session& session);
+    [[nodiscard]] network::Result<std::monostate> print_boxes(
+        const film_session& session, const std::vector<std::string>& box_uids,
+        const std::string& requested_uid, bool& any_image);
+
+    // =========================================================================
     // UID Generation
     // =========================================================================
 
@@ -379,6 +419,7 @@ private:
 
     print_session_handler session_handler_;
     print_action_handler print_handler_;
+    print_job_handler job_handler_;
     printer_status_handler printer_status_handler_;
 
     /// Active film sessions indexed by SOP Instance UID
@@ -403,6 +444,9 @@ private:
     std::atomic<size_t> prints_executed_{0};
     std::atomic<size_t> printer_queries_{0};
 };
+
+/// The one Printer instance (PS3.4 H.4.6)
+inline constexpr std::string_view printer_sop_instance_uid = "1.2.840.10008.5.1.1.17";
 
 // =============================================================================
 // Print-specific DICOM Tags (PS3.4 Annex H)
@@ -436,6 +480,9 @@ inline constexpr core::dicom_tag film_size_id{0x2010, 0x0050};
 
 /// Magnification Type (2010,0060)
 inline constexpr core::dicom_tag magnification_type{0x2010, 0x0060};
+
+/// Pixel Data (7FE0,0010)
+inline constexpr core::dicom_tag pixel_data{0x7FE0, 0x0010};
 
 /// Referenced Film Session Sequence (2010,0500)
 inline constexpr core::dicom_tag referenced_film_session_sequence{0x2010, 0x0500};

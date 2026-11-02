@@ -526,6 +526,12 @@ int perform_query(const options& opts) {
     auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
 
+    // A failure from the SCP is not an empty worklist.
+    if (!query_result.is_success() && !query_result.is_cancelled()) {
+        std::cerr << "Query failed with status: 0x" << std::hex << query_result.status << std::dec << "\n";
+        return 2;
+    }
+
     // Convert worklist_items to dicom_datasets for formatter
     std::vector<kcenon::pacs::core::dicom_dataset> result_datasets;
     result_datasets.reserve(query_result.items.size());

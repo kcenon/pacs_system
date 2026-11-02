@@ -112,8 +112,19 @@ struct pacs_server_config {
     /// Access control settings
     access_control_config access_control;
 
-    /// C-MOVE destinations. Without one, every C-MOVE is refused as A801.
+    /// Known peers: C-MOVE destinations and receivers of N-EVENT-REPORT. Without an entry,
+    /// a C-MOVE to that AE is refused as A801 and that AE cannot subscribe to UPS events.
     std::vector<move_destination> move_destinations;
+
+    /// Attempts per N-EVENT-REPORT on an association of its own, and the wait between them.
+    int event_attempts{3};
+    std::chrono::seconds event_retry_delay{5};
+
+    /// Where print jobs are written, since no physical printer is attached.
+    std::filesystem::path print_spool_directory;
+
+    /// Where the UPS instances are kept.
+    std::filesystem::path ups_directory;
 
     /**
      * @brief Parse configuration from command line arguments

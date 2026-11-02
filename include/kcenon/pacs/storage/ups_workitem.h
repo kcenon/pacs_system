@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "kcenon/pacs/core/dicom_dataset.h"
+
 #include <chrono>
 #include <optional>
 #include <string>
@@ -232,6 +234,9 @@ struct ups_workitem {
 
     /// Record last update timestamp
     std::chrono::system_clock::time_point updated_at;
+
+    /// The whole UPS instance, for hosts that keep one; never read from or written to a column.
+    core::dicom_dataset attributes;
 
     /**
      * @brief Check if this record has valid data

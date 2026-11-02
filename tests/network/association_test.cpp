@@ -893,3 +893,28 @@ TEST_CASE("Print Meta SOP contexts accept only their declared member SOP classes
         CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
     }
 }
+
+TEST_CASE("UPS contexts carry requests that name UPS Push", "[association][request-routing]") {
+    using namespace dimse;
+    constexpr const char* push = "1.2.840.10008.5.1.4.34.6.1";
+    for (const auto& context : {push, "1.2.840.10008.5.1.4.34.6.2", "1.2.840.10008.5.1.4.34.6.3", "1.2.840.10008.5.1.4.34.6.5"}) {
+        association_config proposed;
+        proposed.called_ae_title = "SCP";
+        proposed.calling_ae_title = "PEER";
+        proposed.proposed_contexts = {{1, context, {EXPLICIT_VR_LE}}};
+        scp_config accepted;
+        accepted.ae_title = "SCP";
+        auto assoc = association::accept(association::propose(proposed).build_associate_rq(), accepted);
+
+        // PS3.4 CC.2: every UPS is an instance of UPS Push, whatever context the request came on.
+        auto result = detail::request_sop_class(assoc, 1, make_n_action_rq(1, push, "1.2.3", 1));
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == context);
+
+        // Only UPS Push: another UPS class is not a member of this context.
+        const char* another = std::string_view(context) == "1.2.840.10008.5.1.4.34.6.2" ? "1.2.840.10008.5.1.4.34.6.3"
+                                                                                          : "1.2.840.10008.5.1.4.34.6.2";
+        CHECK(detail::request_sop_class(assoc, 1, make_n_action_rq(1, another, "1.2.3", 1)).is_err());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
+    }
+}

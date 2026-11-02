@@ -105,7 +105,8 @@ class Probe:
         output = self.command([self.bin/'mpps_scu', '127.0.0.1', self.port, 'MPPS_TEST', 'set',
                                '--mpps-uid', uid, '--status', status], expected)
         if expected:
-            require('0xc001' in output.lower(), 'Post-terminal request failed without the expected DIMSE status')
+            # PS3.4 F.7.2.2, and what dcm4che mppsscp answers: 0110H, may no longer be updated.
+            require('0x110' in output.lower(), 'Post-terminal request failed without the expected DIMSE status')
 
     def connect(self, label):
         sock = socket.create_connection(('127.0.0.1', self.port), 5)

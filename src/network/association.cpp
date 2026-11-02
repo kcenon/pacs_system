@@ -767,8 +767,9 @@ Result<std::monostate> association::send_request(
                 "Response routing requires an established externally dispatched association", "network"};
         }
     }
-    if (request.command() != command_field::c_store_rq && request.command() != command_field::c_echo_rq) {
-        return error_info{pdu_error, "Only single-response C-STORE/C-ECHO exchanges are supported", "network"};
+    if (request.command() != command_field::c_store_rq && request.command() != command_field::c_echo_rq &&
+        request.command() != command_field::n_event_report_rq) {
+        return error_info{pdu_error, "Only single-response C-STORE/C-ECHO/N-EVENT-REPORT exchanges are supported", "network"};
     }
     {
         std::lock_guard<std::mutex> lock(responses_->mutex);

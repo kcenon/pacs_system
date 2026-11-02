@@ -270,8 +270,9 @@ implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_element
 implicit_vr_codec::result<core::dicom_element> implicit_vr_codec::decode_undefined_length(
     core::dicom_tag tag, vr_type vr,
     std::span<const uint8_t>& data) {
-    // If this is a sequence (SQ), decode sequence items
-    if (vr == vr_type::SQ) {
+    // If this is a sequence (SQ), decode sequence items. In Implicit VR only a sequence can
+    // have an undefined length, so a tag the dictionary does not know is one as well (PS3.5 7.5).
+    if (vr == vr_type::SQ || vr == vr_type::UN) {
         core::dicom_element seq_element(tag, vr_type::SQ);
 
         while (!data.empty()) {

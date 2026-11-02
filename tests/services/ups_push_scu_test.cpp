@@ -322,7 +322,7 @@ TEST_CASE("ups_push_sop_class_uid is correct", "[services][ups][scu]") {
 
 TEST_CASE("UPS Push SCU N-ACTION type constants", "[services][ups][scu]") {
     CHECK(ups_action_change_state == 1);
-    CHECK(ups_action_request_cancel == 3);
+    CHECK(ups_action_request_cancel == 2);
 }
 
 // ============================================================================

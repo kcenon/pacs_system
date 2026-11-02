@@ -187,6 +187,7 @@ if(PACS_BUILD_TESTS)
         tests/services/storage_scp_test.cpp
         tests/services/storage_scu_test.cpp
         tests/services/retrieve_scu_test.cpp
+        tests/services/print_scp_flow_test.cpp
         tests/services/qr_index_test.cpp
         tests/services/qr_matching_test.cpp
         tests/services/query_scp_test.cpp
@@ -203,6 +204,7 @@ if(PACS_BUILD_TESTS)
         tests/services/print_scp_test.cpp
         tests/services/print_scu_test.cpp
         tests/services/ups_push_scp_test.cpp
+        tests/services/ups_rules_test.cpp
         tests/services/ups_push_scu_test.cpp
         tests/services/ups_query_scp_test.cpp
         tests/services/ups_watch_scp_test.cpp

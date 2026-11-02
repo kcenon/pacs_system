@@ -7,13 +7,17 @@
 
 #include "kcenon/pacs/core/utf8_text.h"
 #include "kcenon/pacs/services/qr_index.h"
+#include "kcenon/pacs/services/qr_matching.h"
 
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/services/storage_status.h"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace kcenon::pacs::example {
 
@@ -106,6 +110,11 @@ bool pacs_server_app::start() {
     if (result.is_err()) {
         std::cerr << log_prefix() << "Error: Failed to start server\n";
         return false;
+    }
+
+    if (ups_index_) {
+        // Delivery runs on its own thread, so this does not hold up serving.
+        ups_index_->report_restart();
     }
 
     std::cout << log_prefix() << "PACS Server started successfully\n";
@@ -234,6 +243,9 @@ bool pacs_server_app::setup_services() {
     std::cout << log_prefix() << "  - Retrieve SCP (C-MOVE/C-GET)\n";
     std::cout << log_prefix() << "  - Worklist SCP (MWL)\n";
     std::cout << log_prefix() << "  - MPPS SCP (N-CREATE/N-SET)\n";
+    std::cout << log_prefix() << "  - Storage Commitment SCP (N-ACTION/N-EVENT-REPORT)\n";
+    std::cout << log_prefix() << "  - UPS SCP (Push, Pull, Watch, Query, Event)\n";
+    std::cout << log_prefix() << "  - Print SCP (Film Session/Box, Image Box, Printer)\n";
     std::cout << log_prefix() << "All DICOM services configured\n";
     return true;
 }
@@ -307,6 +319,52 @@ bool pacs_server_app::setup_server() {
             return handle_mpps_set(uid, mods, status);
         });
     server_->register_service(mpps_scp);
+
+    // Reverse-direction reports, to the peers named on the command line
+    services::event_sender_config event_config;
+    event_config.local_ae_title = config_.server.ae_title;
+    event_config.attempts = config_.event_attempts;
+    event_config.retry_delay = config_.event_retry_delay;
+    events_ = std::make_shared<services::event_sender>(
+        event_config,
+        [this](const std::string& ae_title) -> std::optional<std::pair<std::string, uint16_t>> {
+            for (const auto& destination : config_.move_destinations) {
+                if (destination.ae_title == ae_title) {
+                    return std::make_pair(destination.host, destination.port);
+                }
+            }
+            return std::nullopt;
+        });
+    events_->set_observer([](const services::event_report& report, std::optional<uint16_t> status, int attempts) {
+        if (status) {
+            std::cout << log_prefix() << "N-EVENT-REPORT type " << report.event_type_id << " to " << report.receiving_ae
+                      << " answered with status " << *status << " after " << attempts << " attempt(s)\n";
+        } else {
+            std::cerr << log_prefix() << "N-EVENT-REPORT type " << report.event_type_id << " to " << report.receiving_ae
+                      << " not delivered after " << attempts << " attempt(s)\n";
+        }
+    });
+
+    // Register Storage Commitment SCP
+    auto commitment_scp = std::make_shared<services::storage_commitment_scp>(nullptr);
+    commitment_scp->set_event_sender(events_);
+    commitment_scp->set_instance_verifier(
+        [this](const services::sop_reference& reference) { return verify_commitment(reference); });
+    server_->register_service(commitment_scp);
+
+    // Register UPS SCP
+    auto ups_directory = config_.ups_directory;
+    if (ups_directory.empty()) {
+        ups_directory = config_.storage.directory.string() + ".ups";
+    }
+    ups_index_ = std::make_unique<services::ups_index>(*database_, ups_directory, events_);
+    server_->register_service(ups_index_->make_service());
+
+    // Register Print SCP
+    auto print_scp = std::make_shared<services::print_scp>();
+    print_scp->set_job_handler(
+        [this](const services::print_job& job) { return spool_print_job(job); });
+    server_->register_service(print_scp);
 
     // Set up callbacks
     server_->on_association_established([](const std::string& /* session_id */,
@@ -468,6 +526,201 @@ services::storage_status pacs_server_app::handle_store(
     return services::storage_status::success;
 }
 
+namespace {
+
+/// One attribute of a worklist item as PS3.4 K.6.1.2.2 has it: how a key matches it, and its value.
+struct worklist_attribute {
+    core::dicom_tag tag;
+    encoding::vr_type vr;
+    services::key_matching matching;
+    std::string value;
+};
+
+/// Keys are honored and returned as asked; an attribute nobody keeps comes back empty.
+bool answer_keys(const std::vector<worklist_attribute>& attributes, const core::dicom_dataset& keys,
+                 core::dicom_dataset& row) {
+    for (const auto& [tag, key] : keys) {
+        if (key.is_sequence() || tag == core::tags::specific_character_set) {
+            continue;
+        }
+        const auto found = std::find_if(attributes.begin(), attributes.end(),
+                                        [&](const worklist_attribute& attribute) { return attribute.tag == tag; });
+        const std::string wanted = keys.get_string(tag);
+        if (found == attributes.end()) {
+            if (!wanted.empty()) {
+                return false;  // A key this SCP does not keep cannot match a value.
+            }
+            row.insert(core::dicom_element(tag, key.vr()));
+            continue;
+        }
+        if (!wanted.empty() && !services::key_matches(found->matching, wanted, found->value)) {
+            return false;
+        }
+        row.set_string(tag, found->vr, found->value);
+    }
+    return true;
+}
+
+}  // namespace
+
+std::optional<core::dicom_dataset> pacs_server_app::worklist_row(
+    const storage::worklist_item& item, const core::dicom_dataset& keys) const {
+
+    using services::key_matching;
+    using encoding::vr_type;
+
+    const std::vector<worklist_attribute> patient{
+        {core::tags::patient_id, vr_type::LO, key_matching::text, item.patient_id},
+        {core::tags::patient_name, vr_type::PN, key_matching::person_name, item.patient_name},
+        {core::tags::patient_birth_date, vr_type::DA, key_matching::date, item.birth_date},
+        {core::tags::patient_sex, vr_type::CS, key_matching::text, item.sex},
+        {core::tags::accession_number, vr_type::SH, key_matching::text, item.accession_no},
+        {core::tags::study_instance_uid, vr_type::UI, key_matching::uid, item.study_uid},
+        {core::tags::referring_physician_name, vr_type::PN, key_matching::person_name, item.referring_phys},
+        {core::dicom_tag{0x0040, 0x1001}, vr_type::SH, key_matching::text, item.requested_proc_id},
+    };
+    const std::vector<worklist_attribute> step{
+        {core::tags::modality, vr_type::CS, key_matching::text, item.modality},
+        {core::dicom_tag{0x0040, 0x0001}, vr_type::AE, key_matching::text, item.station_ae},
+        {core::dicom_tag{0x0040, 0x0010}, vr_type::SH, key_matching::text, item.station_name},
+        {core::dicom_tag{0x0040, 0x0002}, vr_type::DA, key_matching::date, item.scheduled_datetime.substr(0, 8)},
+        {core::dicom_tag{0x0040, 0x0003}, vr_type::TM, key_matching::time,
+         item.scheduled_datetime.size() > 8 ? item.scheduled_datetime.substr(8) : std::string{}},
+        {core::dicom_tag{0x0040, 0x0009}, vr_type::SH, key_matching::text, item.step_id},
+        {core::dicom_tag{0x0040, 0x0007}, vr_type::LO, key_matching::text, item.procedure_desc},
+    };
+
+    core::dicom_dataset row;
+    if (!answer_keys(patient, keys, row)) {
+        return std::nullopt;
+    }
+
+    // worklist_scp has refused an identifier without this sequence before this runs.
+    const auto* step_keys = keys.get_sequence(core::tags::scheduled_procedure_step_sequence);
+    core::dicom_dataset step_row;
+    if (step_keys != nullptr && !step_keys->empty() && !answer_keys(step, step_keys->front(), step_row)) {
+        return std::nullopt;
+    }
+    row.get_or_create_sequence(core::tags::scheduled_procedure_step_sequence).push_back(std::move(step_row));
+
+    const auto non_ascii = [](const std::string& text) {
+        return std::any_of(text.begin(), text.end(), [](char c) { return static_cast<unsigned char>(c) >= 0x80; });
+    };
+    if (non_ascii(item.patient_name) || non_ascii(item.procedure_desc) || non_ascii(item.referring_phys)) {
+        row.set_string(core::tags::specific_character_set, vr_type::CS, "ISO_IR 192");
+    }
+    return row;
+}
+
+std::optional<services::commitment_failure_reason> pacs_server_app::verify_commitment(
+    const services::sop_reference& reference) const {
+
+    using reason = services::commitment_failure_reason;
+
+    auto instance = database_->find_instance(reference.sop_instance_uid);
+    if (!instance) {
+        return reason::no_such_object_instance;
+    }
+    if (instance->sop_class_uid != reference.sop_class_uid) {
+        return reason::class_instance_conflict;
+    }
+    // Commitment promises the object can be retrieved, so the file itself has to be there.
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(instance->file_path, error) || error) {
+        return reason::no_such_object_instance;
+    }
+    return std::nullopt;
+}
+
+network::Result<std::monostate> pacs_server_app::spool_print_job(const services::print_job& job) {
+    auto spool = config_.print_spool_directory;
+    if (spool.empty()) {
+        spool = config_.storage.directory.string() + ".print-spool";
+    }
+    // The UID was checked at N-CREATE, and it arrived from the network, so it stays a plain name.
+    const auto& box_uid = job.box.sop_instance_uid;
+    if (box_uid.empty() || !std::all_of(box_uid.begin(), box_uid.end(), [](char c) { return (c >= '0' && c <= '9') || c == '.'; })) {
+        return kcenon::common::make_error<std::monostate>(1, "Film Box UID cannot name a job", "print");
+    }
+    const auto directory = spool / box_uid;
+    std::error_code error;
+    std::filesystem::create_directories(directory, error);
+    if (error) {
+        return kcenon::common::make_error<std::monostate>(1, "Cannot create " + directory.string(), "print");
+    }
+
+    const auto quoted = [](std::string text) {
+        std::string out = "\"";
+        for (const char c : text) {
+            if (c == '"' || c == '\\') {
+                out += '\\';
+            }
+            if (static_cast<unsigned char>(c) >= 0x20) {
+                out += c;
+            }
+        }
+        return out + "\"";
+    };
+
+    std::ostringstream manifest;
+    manifest << "{\n  \"film_box\": " << quoted(box_uid)
+             << ",\n  \"film_session\": " << quoted(job.session.sop_instance_uid)
+             << ",\n  \"copies\": " << job.session.number_of_copies
+             << ",\n  \"priority\": " << quoted(job.session.print_priority)
+             << ",\n  \"medium_type\": " << quoted(job.session.medium_type)
+             << ",\n  \"film_destination\": " << quoted(job.session.film_destination)
+             << ",\n  \"display_format\": " << quoted(job.box.image_display_format)
+             << ",\n  \"orientation\": " << quoted(job.box.film_orientation)
+             << ",\n  \"film_size\": " << quoted(job.box.film_size_id)
+             << ",\n  \"images\": [";
+    bool first = true;
+    for (const auto& image : job.images) {
+        const auto* gray = image.data.get_sequence(services::print_tags::basic_grayscale_image_sequence);
+        const auto* color = image.data.get_sequence(services::print_tags::basic_color_image_sequence);
+        const auto* sequence = gray != nullptr ? gray : color;
+        if (sequence == nullptr || sequence->empty()) {
+            continue;
+        }
+        const auto& content = sequence->front();
+        const auto* pixels = content.get(services::print_tags::pixel_data);
+        if (pixels == nullptr) {
+            continue;
+        }
+        const auto name = "image-" + std::to_string(image.image_position) + ".pixels";
+        const auto bytes = pixels->raw_data();
+        std::ofstream output(directory / name, std::ios::binary);
+        output.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+        if (!output) {
+            return kcenon::common::make_error<std::monostate>(1, "Cannot write " + name, "print");
+        }
+        manifest << (first ? "" : ",") << "\n    {\"position\": " << image.image_position
+                 << ", \"rows\": " << content.get_numeric<uint16_t>(core::tags::rows).value_or(0)
+                 << ", \"columns\": " << content.get_numeric<uint16_t>(core::tags::columns).value_or(0)
+                 << ", \"photometric\": " << quoted(content.get_string(core::tags::photometric_interpretation))
+                 << ", \"pixels\": " << quoted(name) << "}";
+        first = false;
+    }
+    manifest << "\n  ]\n}\n";
+
+    // The manifest appears whole and last: a job with a manifest has all its images.
+    const auto manifest_path = directory / "job.json";
+    auto temporary = manifest_path;
+    temporary += ".tmp";
+    {
+        std::ofstream output(temporary, std::ios::binary);
+        output << manifest.str();
+        if (!output) {
+            return kcenon::common::make_error<std::monostate>(1, "Cannot write the job manifest", "print");
+        }
+    }
+    std::filesystem::rename(temporary, manifest_path, error);
+    if (error) {
+        return kcenon::common::make_error<std::monostate>(1, "Cannot finish the job manifest", "print");
+    }
+    std::cout << log_prefix() << "Print job " << box_uid << " spooled to " << directory.string() << "\n";
+    return std::monostate{};
+}
+
 std::vector<core::dicom_dataset> pacs_server_app::handle_worklist_query(
     const core::dicom_dataset& query_keys,
     const std::string& calling_ae) {
@@ -476,22 +729,13 @@ std::vector<core::dicom_dataset> pacs_server_app::handle_worklist_query(
 
     std::vector<core::dicom_dataset> results;
 
-    storage::worklist_query query;
-    auto id = query_keys.get_string(core::tags::patient_id);
-    if (!id.empty()) {
-        query.patient_id = id;
-    }
-
-    auto items_result = database_->query_worklist(query);
+    auto items_result = database_->query_worklist(storage::worklist_query{});
 
     if (items_result.is_ok()) {
         for (const auto& item : items_result.value()) {
-            core::dicom_dataset ds;
-            ds.set_string(core::tags::patient_id, encoding::vr_type::LO, item.patient_id);
-            ds.set_string(core::tags::patient_name, encoding::vr_type::PN, item.patient_name);
-            ds.set_string(core::tags::accession_number, encoding::vr_type::SH, item.accession_no);
-            ds.set_string(core::tags::study_instance_uid, encoding::vr_type::UI, item.study_uid);
-            results.push_back(std::move(ds));
+            if (auto row = worklist_row(item, query_keys)) {
+                results.push_back(std::move(*row));
+            }
         }
     }
 
@@ -504,12 +748,26 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_create(
 
     std::cout << log_prefix() << "MPPS N-CREATE: " << instance.sop_instance_uid << "\n";
 
+    if (database_->find_mpps(instance.sop_instance_uid)) {
+        return kcenon::common::make_error<std::monostate>(
+            network::dimse::status_error_duplicate_sop_instance, "Duplicate MPPS instance", "mpps");
+    }
+
+    // PS3.4 Table F.7.2-1: the study is named inside the Scheduled Step Attributes Sequence.
+    std::string study_uid = instance.data.get_string(core::tags::study_instance_uid);
+    std::string accession = instance.data.get_string(core::tags::accession_number);
+    if (const auto* scheduled = instance.data.get_sequence(core::dicom_tag{0x0040, 0x0270});
+        scheduled != nullptr && !scheduled->empty()) {
+        study_uid = scheduled->front().get_string(core::tags::study_instance_uid);
+        accession = scheduled->front().get_string(core::tags::accession_number);
+    }
+
     auto result = database_->create_mpps(
         instance.sop_instance_uid,
         instance.station_ae,
         instance.data.get_string(core::tags::modality),
-        instance.data.get_string(core::tags::study_instance_uid),
-        instance.data.get_string(core::tags::accession_number),
+        study_uid,
+        accession,
         instance.data.get_string(core::tags::performed_procedure_step_start_date) +
             instance.data.get_string(core::tags::performed_procedure_step_start_time)
     );
@@ -528,6 +786,17 @@ network::Result<std::monostate> pacs_server_app::handle_mpps_set(
 
     std::cout << log_prefix() << "MPPS N-SET: " << sop_instance_uid
               << " -> " << services::to_string(new_status) << "\n";
+
+    // PS3.4 F.7.2.2: 0112H for an unknown instance, 0110H once it may no longer be updated.
+    const auto existing = database_->find_mpps(sop_instance_uid);
+    if (!existing) {
+        return kcenon::common::make_error<std::monostate>(
+            network::dimse::status_error_no_such_object_instance, "No such MPPS instance", "mpps");
+    }
+    if (existing->status != "IN PROGRESS") {
+        return kcenon::common::make_error<std::monostate>(
+            network::dimse::status_error_processing_failure, "MPPS may no longer be updated", "mpps");
+    }
 
     auto result = database_->update_mpps(
         sop_instance_uid,
