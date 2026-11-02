@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -188,7 +188,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -555,7 +555,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -1009,7 +1009,7 @@ jobs:
           if [ -f "test-results/${suite}-test-results-ubuntu-24.04/${suite}-test-results.xml" ]; then
             ubuntu_status="✅ Passed"
           fi
-          if [ -f "test-results/${suite}-test-results-macos-14/${suite}-test-results.xml" ]; then
+          if [ -f "test-results/${suite}-test-results-macos-15/${suite}-test-results.xml" ]; then
             macos_status="✅ Passed"
           fi
           if [ -f "test-results/${suite}-test-results-windows-2022/${suite}-test-results.xml" ]; then
