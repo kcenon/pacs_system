@@ -798,6 +798,8 @@ class Validation:
             return self.probe_matrix(spec, HERE/'tests/workflow_probe.py', 'workflow')
         if spec.get('kind') == 'ai-contract':
             return self.probe_matrix(spec, HERE/'tests/ai_probe.py', 'ai')
+        if spec.get('kind') == 'reliability':
+            return self.probe_matrix(spec, HERE.parent/'reliability/fault_probe.py', 'reliability')
         if spec.get('kind') == 'browser':
             return self.browser_flows(spec)
         if spec.get('kind') == 'corpus':
@@ -818,6 +820,8 @@ class Validation:
                         status=assessment['status'], detail=json.dumps(assessment))
         env = os.environ.copy()
         env['PACS_TEST_CERT_DIR'] = str(self.private/'pacs-certs')
+        # A component may declare settings its tests read, such as a run's duration.
+        env.update(spec.get('env', {}))
         failure = None
         try:
             command = (['ctest','--test-dir',self.args.build_dir,'--output-on-failure','--no-tests=error',

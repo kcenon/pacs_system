@@ -159,7 +159,14 @@ auto archive_instance(file_storage& files, index_database& database, const core:
     const auto sop_uid = text.get_string(tags::sop_instance_uid);
 
     const std::scoped_lock lock(lock_for(sop_uid));
-    const bool held = files.exists(sop_uid);
+    // Held means filed and indexed. A file without its index rows is what a store ends with when the
+    // process dies between the two; nothing can find it, so it is replaced rather than refusing the
+    // object as a duplicate of it for ever.
+    const bool filed = files.exists(sop_uid);
+    const bool held = filed && database.find_instance(sop_uid).has_value();
+    if (filed && !held) {
+        (void)files.remove(sop_uid);
+    }
     if (held && files.duplicate_handling() == duplicate_policy::reject) {
         return {archive_status::duplicate_refused, "SOP Instance "+sop_uid+" is already held", files.get_file_path(sop_uid)};
     }

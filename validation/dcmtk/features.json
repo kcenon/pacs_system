@@ -146,6 +146,25 @@
       "timeout_seconds": 180
     },
     {
+      "id": "component.stress_hidden",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[.stress]"
+      ],
+      "timeout_seconds": 900
+    },
+    {
+      "id": "component.stability_slow",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[.slow]"
+      ],
+      "env": {
+        "PACS_STABILITY_TEST_DURATION": "60"
+      },
+      "timeout_seconds": 4500
+    },
+    {
       "id": "component.cli",
       "kind": "ctest",
       "args": [
@@ -204,6 +223,12 @@
       "kind": "ai-contract",
       "args": [],
       "timeout_seconds": 600
+    },
+    {
+      "id": "component.reliability_faults",
+      "kind": "reliability",
+      "args": [],
+      "timeout_seconds": 900
     },
     {
       "id": "component.discovery",
@@ -665,14 +690,20 @@
       "id": "reliability",
       "components": [
         "component.concurrency_tests",
-        "component.stress"
+        "component.stress",
+        "component.reliability_faults",
+        "component.stress_hidden",
+        "component.stability_slow"
       ],
       "interop": [
         "peer.preflight",
         "peer.tls"
       ],
       "gaps": [
-        "Long-duration soak, sanitizer/fuzz campaigns and loss-of-power recovery are separate required evidence."
+        "Endurance: validation/reliability/endurance.json declares 24 hours at a fixed load and limits; only shorter runs, which report themselves diagnostic, have been made.",
+        "Power loss and block-device failure: no acknowledged object is flushed to the device (no fsync, SQLite synchronous=NORMAL), and nothing tests it; docs/DURABILITY.md states the limit.",
+        "Fuzz corpus replay needs clang and libFuzzer; the verification container has GCC only, so no replay ran for #1326.",
+        "A failed write or an unavailable index is answered 0xC001 (Cannot Understand) rather than 0xA7xx (Out of Resources), because the archive cannot yet tell a resource failure from an object it cannot encode."
       ],
       "known_issues": []
     },
@@ -1592,6 +1623,15 @@
         ],
         "frontend": [
           "No page shows transfer jobs: pacs_server has no job manager, and job_manager simulates C-STORE jobs (#1323)."
+        ]
+      }
+    },
+    {
+      "issue": 1326,
+      "change": "component.reliability_faults kills pacs_server just before and just after the rename of a stored file, kills the server and the client in the middle of a batch, fills the disk and locks the index, then reads the index, the files and leftovers without PACS code: every acknowledged object stays indexed with its pixels and every fixture ends held once. docs/DURABILITY.md states the contract. component.stress_hidden and component.stability_slow run the two hidden cases of pacs_integration_e2e, [.stress] and [.slow] (60 minutes, PACS_STABILITY_TEST_DURATION), which no job ran before.",
+      "previous_gaps": {
+        "reliability": [
+          "Long-duration soak, sanitizer/fuzz campaigns and loss-of-power recovery are separate required evidence."
         ]
       }
     }

@@ -2389,3 +2389,18 @@ TEST_CASE("dicom_file rejects a dataset that stops before its last element",
         }
     }
 }
+
+#ifdef __linux__
+TEST_CASE("dicom_file::save fails when the device is full", "[core][dicom_file]") {
+    // /dev/full answers every write with ENOSPC. The object is small enough to wait in the stream's
+    // buffer until the file is closed, which is where the failure has to surface: save() used to
+    // report success there, and a store then acknowledged an empty file.
+    REQUIRE(std::filesystem::exists("/dev/full"));
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+    ds.set_string(tags::patient_name, vr_type::PN, "TEST^PATIENT");
+    const auto file = dicom_file::create(std::move(ds), transfer_syntax::explicit_vr_little_endian);
+    CHECK(file.save("/dev/full").is_err());
+}
+#endif

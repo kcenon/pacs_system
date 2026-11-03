@@ -18,6 +18,8 @@
 #include <fstream>
 #include <random>
 #include <set>
+#include <string>
+#include <vector>
 
 namespace kcenon::pacs::storage {
 
@@ -49,6 +51,35 @@ auto generate_temp_filename(const std::filesystem::path& base)
     return base.parent_path() / temp_name;
 }
 
+/// Removes the temporary files generate_temp_filename() names, "<file><extension>.tmp.<digits>". One is on
+/// disk only while store() writes it, so any found before this storage stores anything is left over from a
+/// process that died mid-write: nothing will rename it, and it held no acknowledged object.
+void remove_leftover_temporaries(const std::filesystem::path& root, const std::string& extension) {
+    const auto marker = extension + ".tmp.";
+    std::vector<std::filesystem::path> leftovers;
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(root, ec)) {
+        std::error_code entry_error;
+        if (!entry.is_regular_file(entry_error)) {
+            continue;
+        }
+        const auto name = entry.path().filename().string();
+        const auto at = name.rfind(marker);
+        if (at == std::string::npos) {
+            continue;
+        }
+        const auto digits = name.substr(at + marker.size());
+        if (!digits.empty() && std::all_of(digits.begin(), digits.end(),
+                                           [](unsigned char c) { return c >= '0' && c <= '9'; })) {
+            leftovers.push_back(entry.path());
+        }
+    }
+    for (const auto& path : leftovers) {
+        std::error_code ignored;
+        std::filesystem::remove(path, ignored);
+    }
+}
+
 }  // namespace
 
 // ============================================================================
@@ -64,8 +95,9 @@ file_storage::file_storage(const file_storage_config& config)
         // Ignore error - will be caught during store operations
     }
 
-    // Rebuild index from existing files
+    // Rebuild index from existing files, after removing what an interrupted store() left behind
     if (std::filesystem::exists(config_.root_path)) {
+        remove_leftover_temporaries(config_.root_path, config_.file_extension);
         (void)rebuild_index();
     }
 }

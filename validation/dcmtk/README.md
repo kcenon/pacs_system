@@ -516,6 +516,21 @@ sync and prefetch with and without the studies already held; and a graceful stop
 job, which the next run finishes. The C-STORE counters of `GET /api/v1/system/metrics`, the totals of
 `GET /api/v1/system/status` and the audit trail are compared with the same events, and the reported storage use with the file system.
 
+### Store faults and endurance (#1326)
+
+`component.reliability_faults` runs `validation/reliability/fault_probe.py` against the contract in
+`docs/DURABILITY.md`. `faultshim.c`, preloaded into `pacs_server`, kills it just before or just after the n-th
+rename into the archive and makes archive writes fail with ENOSPC while a flag file exists; the probe also kills
+the server and the client in the middle of a batch and holds the index under an exclusive lock. The state is read
+without PACS code: index rows from the SQLite file, objects and pixel digests from the files, leftovers from the
+directory. Each case requires every object storescu saw acknowledged to be indexed and filed with its pixels, no
+index row without its file, and each fixture held once after everything is sent again. Process death here is
+SIGKILL, so nothing in it speaks for power loss.
+
+`validation/reliability/endurance.py` runs the load, duration, warm-up and limits `validation/reliability/endurance.json`
+declares (24 hours). A shorter run, given with `--duration`, reports status `diagnostic` and exit 3: it is evidence of
+a trend, never a pass.
+
 ### AI service contract (#1323)
 
 `component.ai_contract` runs `tests/ai_probe.py`. It starts `validation/peers/ai/ai_contract_service.py`, an inference service

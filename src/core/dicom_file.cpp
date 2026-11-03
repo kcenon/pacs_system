@@ -372,8 +372,13 @@ auto dicom_file::save(const std::filesystem::path& path) const
             "Failed to open file for writing: " + path.string());
     }
 
-    if (!file.write(reinterpret_cast<const char*>(bytes.data()),
-                    static_cast<std::streamsize>(bytes.size()))) {
+    file.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+    // A small object stays in the stream's buffer until the file is closed. Closing here, not in the
+    // destructor, is what makes a write that fails then, as on a full disk, fail the save: it used to
+    // report success for a file left empty.
+    file.close();
+    if (!file) {
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::file_write_error,
             "Failed to write to file: " + path.string());

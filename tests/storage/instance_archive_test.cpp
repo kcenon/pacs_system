@@ -22,6 +22,7 @@
 #include <atomic>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -138,6 +139,42 @@ TEST_CASE("archive_instance keeps the file and the rows together", "[storage][ar
     REQUIRE(study);
     CHECK(study->accession_number == "A1");
     CHECK(archive.database().find_patient("PATIENT").has_value());
+}
+
+TEST_CASE("archive_instance stores an object whose file was never indexed", "[storage][archive]") {
+    test_archive archive;
+    const auto dataset = an_object();
+    // What a process that died between writing the file and writing its rows leaves behind.
+    REQUIRE(archive.files().store(dataset, transfer_syntax::explicit_vr_little_endian).is_ok());
+    REQUIRE_FALSE(archive.database().find_instance("1.2.3.1.1").has_value());
+
+    // It used to be refused as a duplicate of that file, so it could never be indexed.
+    const auto result = archive.offer(dataset);
+    CHECK(result.status == archive_status::stored);
+    CHECK(archive.database().find_instance("1.2.3.1.1").has_value());
+    CHECK(archive.file_count() == 1);
+    CHECK(archive.offer(dataset).status == archive_status::duplicate_refused);
+}
+
+TEST_CASE("file_storage removes the temporary files an interrupted store left", "[storage][archive]") {
+    const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const auto root = std::filesystem::temp_directory_path() / ("leftovers_" + std::to_string(stamp));
+    const auto series = root / "1.2.3" / "1.2.3.1";
+    std::filesystem::create_directories(series);
+    const auto write = [](const std::filesystem::path& path) { std::ofstream(path) << "partial"; };
+    write(series / "1.2.3.1.1.dcm.tmp.42");
+    write(root / "notes.tmp.txt");
+    write(series / "1.2.3.1.2.dcm.tmp.draft");
+    {
+        file_storage_config config;
+        config.root_path = root;
+        const file_storage files(config);
+    }
+    CHECK_FALSE(std::filesystem::exists(series / "1.2.3.1.1.dcm.tmp.42"));
+    CHECK(std::filesystem::exists(root / "notes.tmp.txt"));
+    CHECK(std::filesystem::exists(series / "1.2.3.1.2.dcm.tmp.draft"));
+    std::error_code ignored;
+    std::filesystem::remove_all(root, ignored);
 }
 
 TEST_CASE("archive_instance indexes UTF-8, whatever the object uses", "[storage][archive]") {

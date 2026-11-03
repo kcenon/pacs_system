@@ -11,7 +11,8 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 # Components that report their own cases from a probe of their own, not individual Catch2/CTest tests.
-PROBE_KINDS = ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser', 'workflow', 'ai-contract')
+PROBE_KINDS = ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser', 'workflow', 'ai-contract',
+               'reliability')
 
 
 def identity(kind, binary, name):
