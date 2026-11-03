@@ -188,6 +188,12 @@
       "timeout_seconds": 1500
     },
     {
+      "id": "component.browser",
+      "kind": "browser",
+      "args": [],
+      "timeout_seconds": 1800
+    },
+    {
       "id": "component.discovery",
       "kind": "discovery",
       "args": [],
@@ -564,9 +570,7 @@
       "gaps": [
         "HTTP was exercised without TLS; rest_server_config.enable_tls has no peer here.",
         "Retrieve builds each response in memory, so a study larger than memory cannot be retrieved. The request body limit is checked after the body is read.",
-        "Rendered resources refuse a viewport with a source rectangle, and PALETTE COLOR and uncompressed YBR_FULL_422 images.",
-        "Most REST API routes under /api check no credentials, and OAuth 2.0 tokens do not cover them, so pacs_server does not serve them. Owned by the browser flows of #1322.",
-        "CORS preflight gets no Access-Control headers: Crow answers OPTIONS itself, so the routes meant to answer it never run, and a browser can only make requests that need no preflight. Owned by #1322."
+        "Rendered resources refuse a viewport with a source rectangle, and PALETTE COLOR and uncompressed YBR_FULL_422 images."
       ],
       "known_issues": []
     },
@@ -621,10 +625,15 @@
     },
     {
       "id": "frontend",
-      "components": [],
+      "components": [
+        "component.browser"
+      ],
       "interop": [],
       "gaps": [
-        "Browser workflow tests against live authenticated PACS APIs; build/lint is not behavioral verification."
+        "No page shows transfer jobs: pacs_server has no job manager, and job_manager simulates C-STORE jobs (#1323).",
+        "Signing in means pasting a token from the identity provider; no OpenID Connect redirect flow, so an identity provider was never part of a run.",
+        "One browser, Chromium headless shell; no Firefox or WebKit, no accessibility audit beyond the labels the tests use.",
+        "Configuration is read-only: the server reads its settings at start and has no way to change them while running."
       ],
       "known_issues": []
     },
@@ -1371,7 +1380,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.frontend.negative",
@@ -1391,7 +1400,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.reliability.positive",
@@ -1528,6 +1537,19 @@
       "previous_gaps": {
         "normalized_services": [
           "Independent Storage Commitment/UPS/Print/N-GET/PIR workflows, including reverse event reports."
+        ]
+      }
+    },
+    {
+      "issue": 1322,
+      "change": "component.browser runs the built web app in Chromium against pacs_server with its REST API on and OAuth 2.0 tokens required. Pages are checked against values declared before any page opens, against the REST API asked directly, and the worklist through DCMTK findscu.",
+      "previous_gaps": {
+        "frontend": [
+          "Browser workflow tests against live authenticated PACS APIs; build/lint is not behavioral verification."
+        ],
+        "web": [
+          "Most REST API routes under /api check no credentials, and OAuth 2.0 tokens do not cover them, so pacs_server does not serve them. Owned by the browser flows of #1322.",
+          "CORS preflight gets no Access-Control headers: Crow answers OPTIONS itself, so the routes meant to answer it never run, and a browser can only make requests that need no preflight. Owned by #1322."
         ]
       }
     }

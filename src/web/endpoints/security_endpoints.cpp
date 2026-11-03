@@ -11,6 +11,8 @@
  */
 
 #include "kcenon/pacs/web/endpoints/security_endpoints.h"
+
+#include "../rest_app.h"
 #include "kcenon/pacs/security/access_control_manager.h"
 #include "kcenon/pacs/security/role.h"
 #include "kcenon/pacs/security/user.h"
@@ -18,8 +20,10 @@
 
 namespace kcenon::pacs::web::endpoints {
 
-void register_security_endpoints_impl(
-    crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx) {
+namespace {
+
+template <typename App>
+void add_routes(App &app, std::shared_ptr<rest_server_context> ctx) {
 
   // POST /api/v1/security/users - Create a new user
   CROW_ROUTE(app, "/api/v1/security/users")
@@ -106,6 +110,16 @@ void register_security_endpoints_impl(
         }
         return res;
       });
+}
+
+} // namespace
+
+void register_security_endpoints_impl(crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx) {
+  add_routes(app, std::move(ctx));
+}
+
+void register_security_endpoints_impl(rest_app &app, std::shared_ptr<rest_server_context> ctx) {
+  add_routes(app, std::move(ctx));
 }
 
 } // namespace kcenon::pacs::web::endpoints

@@ -34,6 +34,7 @@ Options:
   --http-bind <address>   Address the HTTP API listens on (default: 127.0.0.1)
   --http-max-body-mb <n>  Largest HTTP request body in MiB (default: 512)
   --http-cors-origin <o>  Origin named in Access-Control-Allow-Origin (default: none)
+  --http-rest-api         Also serve the REST API under /api; needs the OAuth 2.0 options
   --oauth2-issuer <url>   Require OAuth 2.0 bearer tokens from this issuer on DICOMweb
   --oauth2-audience <id>  Audience those tokens must name
   --oauth2-jwks <path>    JWKS file holding the keys that sign them
@@ -197,6 +198,11 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
                 std::cerr << "Error: Invalid value for " << arg << "\n";
                 return std::nullopt;
             }
+            continue;
+        }
+
+        if (arg == "--http-rest-api") {
+            config.http_rest_api = true;
             continue;
         }
 

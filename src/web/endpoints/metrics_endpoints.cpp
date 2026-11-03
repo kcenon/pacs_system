@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 #include "kcenon/pacs/services/monitoring/database_metrics_service.h"
 #include "kcenon/pacs/web/auth/oauth2_middleware.h"
 #include "kcenon/pacs/web/endpoints/metrics_endpoints.h"
@@ -92,9 +94,10 @@ bool check_metrics_auth(const std::shared_ptr<rest_server_context>& ctx,
 
 }  // namespace
 
-void register_metrics_endpoints_impl(
-    crow::SimpleApp& app,
-    std::shared_ptr<rest_server_context> ctx) {
+namespace {
+
+template <typename App>
+void add_routes(App &app, std::shared_ptr<rest_server_context> ctx) {
 
     // GET /api/health/database - Database health check
     CROW_ROUTE(app, "/api/health/database")
@@ -264,6 +267,16 @@ void register_metrics_endpoints_impl(
             res.code = 200;
             return res;
         });
+}
+
+} // namespace
+
+void register_metrics_endpoints_impl(crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx) {
+  add_routes(app, std::move(ctx));
+}
+
+void register_metrics_endpoints_impl(rest_app &app, std::shared_ptr<rest_server_context> ctx) {
+  add_routes(app, std::move(ctx));
 }
 
 }  // namespace kcenon::pacs::web::endpoints

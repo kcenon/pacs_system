@@ -1004,7 +1004,7 @@ original values and must be treated as sensitive data.
 ## 8. DICOMweb Support
 
 The implementation plays the role of origin server, natively: `pacs_server --http-port` serves these resources under
-`/dicomweb` and WADO-URI under `/wado`, and not the REST API under `/api`, on the same database and storage as its DICOM services, so an
+`/dicomweb` and WADO-URI under `/wado`, and the REST API under `/api` only when asked to and with OAuth 2.0, on the same database and storage as its DICOM services, so an
 object stored over either protocol is found, unchanged, over both. `validation/dcmtk/tests/dicomweb_probe.py` measures this with curl, dcm4che and DCMTK, after
 the same tables hold on another implementation.
 
@@ -1117,8 +1117,8 @@ answer is 401 with `WWW-Authenticate: Bearer`, and with the wrong scope it is 40
 | `dicomweb.write` | Store and commitment requests |
 
 **When it is not enabled, DICOMweb has no authorization at all**: everyone who can reach the port can read and store objects.
-`pacs_server` therefore listens on loopback unless told otherwise, says so when it starts, allows no web origin unless told one (and answers no CORS preflight, so a browser can only make requests that need none), and refuses
-to start with only some of its OAuth settings. These tokens protect DICOMweb and WADO-URI. Most of the REST API under `/api` checks no credentials at all, which is why `pacs_server` does not serve it; a host of `rest_server` that keeps it must protect it some other way. Keys come from a JWKS file. Fetching a JWKS from a URL needs an embedder to set a fetcher.
+`pacs_server` therefore listens on loopback unless told otherwise, says so when it starts, allows no web origin unless told one, and refuses
+to start with only some of its OAuth settings. These tokens protect DICOMweb and WADO-URI, and the REST API when `--http-rest-api` serves it: there one gate in front of every route requires `pacs.read` to read, `pacs.write` to change, and `pacs.admin` for settings, accounts, the audit trail and deleting a study, and `pacs_server` refuses that option without its OAuth settings. A host of `rest_server` that serves the REST API without OAuth 2.0 leaves it open, and must protect it some other way. Keys come from a JWKS file. Fetching a JWKS from a URL needs an embedder to set a fetcher.
 
 ### 8.6 Supported Media Types
 

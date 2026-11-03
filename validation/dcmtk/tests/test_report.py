@@ -26,7 +26,7 @@ class GateTests(unittest.TestCase):
         # Synthetic, fully executed inventory for the report-contract tests.
         all_tests, selections, registered = {}, {}, []
         for spec in self.manifest['components']:
-            if spec.get('kind') in ('discovery','corpus','qr-matrix','dimse-n','dicomweb'):
+            if spec.get('kind') in ('discovery','corpus','qr-matrix','dimse-n','dicomweb', 'browser'):
                 continue
             record = dict(name=spec['id'],tags=[],source='synthetic',line='1')
             selections[spec['id']] = [record]

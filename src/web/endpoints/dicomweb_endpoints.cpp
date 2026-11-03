@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -3477,7 +3479,7 @@ void add_included_fields(core::dicom_dataset& row, const dicomweb::search_parame
 
 }  // namespace
 
-void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
+void register_dicomweb_endpoints_impl(rest_app& app,
                                       std::shared_ptr<rest_server_context> ctx) {
     // ========================================================================
     // WADO-RS: Instance and Metadata Resources

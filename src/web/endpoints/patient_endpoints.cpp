@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 #include "kcenon/pacs/storage/index_database.h"
 #include "kcenon/pacs/storage/patient_record.h"
 #include "kcenon/pacs/storage/study_record.h"
@@ -141,7 +143,7 @@ std::pair<size_t, size_t> parse_pagination(const crow::request &req) {
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_patient_endpoints_impl(crow::SimpleApp &app,
+void register_patient_endpoints_impl(rest_app &app,
                                      std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/patients - List patients (paginated)
   CROW_ROUTE(app, "/api/v1/patients")

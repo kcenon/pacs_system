@@ -606,6 +606,27 @@ struct rest_server_config {
 } // namespace pacs::web
 ```
 
+### Authorization, audit and CORS in front of every route
+
+Every route of `rest_server` registers with one Crow application whose middleware runs before and after it, so
+no route can be added without the check (#1322).
+
+- **Tokens**: with an OAuth 2.0 middleware enabled, a request under `/api` needs a valid bearer token holding a
+  scope that allows it, or gets 401 (with `WWW-Authenticate: Bearer`) or 403. `pacs.read` reads, `pacs.write` also
+  changes, and `pacs.admin` is needed for `/api/v1/security`, `/api/v1/audit`, `/api/v1/system/config` and deleting a
+  study. DICOMweb, WADO-URI and the metrics routes check their own scopes. Without OAuth 2.0 nothing is checked, so
+  `pacs_server` refuses `--http-rest-api` without its OAuth options. `X-User-ID` is ignored when OAuth 2.0 is on.
+- **Audit**: every change under `/api/v1` and every refused attempt at one is written to the audit trail with the
+  token's subject, method, path and status.
+- **CORS**: Crow answers OPTIONS itself, before any route and before the request's headers are read, so the
+  preflight answer names the configured origin rather than echoing the request's. Refusals carry the origin too.
+- **Signals**: `start_async()` leaves SIGINT and SIGTERM to the host. Crow used to take them for itself and stop
+  only itself, so `pacs_server` with `--http-port` never exited on SIGTERM.
+
+Corrected answers: `GET /api/v1/system/status` returns the health checker's JSON (it returned an empty body);
+`PUT /api/v1/system/config` answers 501, because nothing can change settings while the server runs (it answered
+success and changed nothing); a worklist status other than SCHEDULED, STARTED or COMPLETED is 400, not 500.
+
 ### DICOMweb (WADO-RS) API
 
 The DICOMweb module implements the WADO-RS (Web Access to DICOM Objects - RESTful) specification

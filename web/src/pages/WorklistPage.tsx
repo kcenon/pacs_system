@@ -14,24 +14,24 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { WorklistForm, DeleteConfirmDialog, StatusUpdateDialog } from '@/components/worklist';
+import { ApiErrorNotice } from '@/components/ui/api-error';
+import { useToast } from '@/components/ui/use-toast';
 import { apiClient } from '@/api/client';
 import { formatDateTime } from '@/lib/utils';
 import type { WorklistItem, WorklistItemInput, PaginatedResponse } from '@/types/api';
 
-type WorklistStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISCONTINUED';
+type WorklistStatus = 'SCHEDULED' | 'STARTED' | 'COMPLETED';
 
 function getStatusBadge(status: WorklistStatus) {
   const variants: Record<WorklistStatus, 'default' | 'secondary' | 'success' | 'warning' | 'destructive'> = {
     SCHEDULED: 'default',
-    IN_PROGRESS: 'warning',
+    STARTED: 'warning',
     COMPLETED: 'success',
-    DISCONTINUED: 'destructive',
   };
   const labels: Record<WorklistStatus, string> = {
     SCHEDULED: 'Scheduled',
-    IN_PROGRESS: 'In Progress',
+    STARTED: 'Started',
     COMPLETED: 'Completed',
-    DISCONTINUED: 'Discontinued',
   };
   return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
 }
@@ -60,8 +60,13 @@ export function WorklistPage() {
       }),
   });
 
+  const { addToast } = useToast();
+  const reportFailure = (title: string) => (failure: Error) =>
+    addToast({ title, description: failure.message, variant: 'destructive' });
+
   const createMutation = useMutation({
     mutationFn: (item: WorklistItemInput) => apiClient.createWorklistItem(item),
+    onError: reportFailure('Could not create the item'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worklist'] });
       setIsFormOpen(false);
@@ -71,6 +76,7 @@ export function WorklistPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ pk, status }: { pk: number; status: string }) =>
       apiClient.updateWorklistItem(pk, { step_status: status }),
+    onError: reportFailure('Could not update the item'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worklist'] });
       setStatusUpdateItem(null);
@@ -79,6 +85,7 @@ export function WorklistPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (pk: number) => apiClient.deleteWorklistItem(pk),
+    onError: reportFailure('Could not delete the item'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worklist'] });
       setDeletingItem(null);
@@ -99,31 +106,33 @@ export function WorklistPage() {
     setIsFormOpen(true);
   };
 
+  // Failures reach the user through each mutation's onError, and the dialog stays open.
   const handleFormSubmit = async (formData: WorklistItemInput) => {
-    if (editingItem) {
-      await updateStatusMutation.mutateAsync({
-        pk: editingItem.pk,
-        status: formData.step_status || editingItem.step_status,
-      });
-      setIsFormOpen(false);
-      setEditingItem(null);
-    } else {
-      await createMutation.mutateAsync(formData);
+    try {
+      if (editingItem) {
+        await updateStatusMutation.mutateAsync({
+          pk: editingItem.pk,
+          status: formData.step_status || editingItem.step_status,
+        });
+        setIsFormOpen(false);
+        setEditingItem(null);
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
+    } catch {
+      return;
     }
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (statusUpdateItem) {
-      await updateStatusMutation.mutateAsync({
-        pk: statusUpdateItem.pk,
-        status: newStatus,
-      });
+      await updateStatusMutation.mutateAsync({ pk: statusUpdateItem.pk, status: newStatus }).catch(() => undefined);
     }
   };
 
   const handleDelete = async () => {
     if (deletingItem) {
-      await deleteMutation.mutateAsync(deletingItem.pk);
+      await deleteMutation.mutateAsync(deletingItem.pk).catch(() => undefined);
     }
   };
 
@@ -163,7 +172,9 @@ export function WorklistPage() {
                 className="pl-8"
               />
             </div>
+            {/* The server can list every status or the scheduled steps only; it filters by nothing else. */}
             <select
+              aria-label="Status filter"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -171,20 +182,15 @@ export function WorklistPage() {
               }}
               className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="">All Status</option>
-              <option value="SCHEDULED">Scheduled</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="DISCONTINUED">Discontinued</option>
+              <option value="">All statuses</option>
+              <option value="SCHEDULED">Scheduled only</option>
             </select>
           </div>
 
           {isLoading ? (
             <div className="py-8 text-center text-muted-foreground">Loading worklist...</div>
           ) : error ? (
-            <div className="py-8 text-center text-destructive">
-              Error loading worklist. Make sure the API server is running.
-            </div>
+            <ApiErrorNotice error={error} what="the worklist" />
           ) : items.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />

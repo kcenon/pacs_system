@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `pacs_server --http-rest-api` serves the REST API under `/api` for the web app, with OAuth 2.0 only. The web app signs in with a bearer token, and `pacs_server` writes C-STORE, C-FIND, retrieve and association events to the audit trail it shows.
+- Browser flows: `npm run test:e2e` (Playwright 1.64.1, pinned) runs the built web app against the real server through `validation/browser/browser_probe.py`, which the validation driver runs as `component.browser`.
 - Formalize the four PACS medical-domain release gates (DICOM conformance, TLS/ATNA audit logging, anonymization, storage/index migration) in `docs/RELEASE_GATES.md`: a gate matrix mapping each gate to its exact Catch2 tag / CTest selector, test source, authoritative conformance doc, and CI-enforcing workflow, plus a pre-release checklist that is followable without reading test source. Linked from `CONTRIBUTING.md` and surfaced as a "Release Gates" section in the generated release notes (`release.yml`) ([#1176](https://github.com/kcenon/pacs_system/issues/1176))
 - IHE XDS.b Document Source actor (ITI-41) at `src/ihe/xds/` with pugixml + libcurl transport stack ([#1128](https://github.com/kcenon/pacs_system/issues/1128))
 - IHE XDS.b Document Consumer actor (ITI-43) at `src/ihe/xds/` with retrieve envelope builder and MTOM/XOP response parser ([#1129](https://github.com/kcenon/pacs_system/issues/1129))
@@ -57,6 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The data dictionary now holds all of PS3.6, so no standard Keyword is refused in a search and no standard attribute reads as UN from Implicit VR.
 - `pacs_server` refuses to start when it cannot open its HTTP port, instead of running without it.
 - `pacs_server` logs timestamps through `localtime_r`. `std::localtime` shares one static buffer, and handlers log from several association threads: ThreadSanitizer reported the race.
+- `pacs_server --http-port` never exited on SIGTERM: Crow took SIGINT and SIGTERM for itself and stopped only itself. `rest_server::start_async()` now leaves signals to the host.
+- `rest_server::stop()` called Crow's `stop()` from the caller's thread, which writes a plain flag Crow's accept loop reads on its own thread; Crow's tick now stops it on that thread. ThreadSanitizer reported the race once `pacs_server` stopped cleanly.
+- `pacs_database_adapter` kept one last rowid and one last error for whichever thread wrote last, though every thread of `pacs_server` shares it; each thread now reads its own, and an INSERT and its rowid are taken under one lock.
+- CORS preflight is answered, with the configured origin; Crow answered OPTIONS itself and the handlers meant to add the headers never ran.
+- `GET /api/v1/system/status` returned an empty body; it returns the health status. `PUT /api/v1/system/config` answered success and changed nothing; it answers 501.
+- The worklist REST routes parse JSON with a JSON parser (they missed fields written with spaces), and an unknown step status is 400 rather than 500.
+- Web app: worklist statuses the server refuses (In Progress, Discontinued), audit filters with values the trail never holds, an Associations page calling a route that does not exist, Configuration tabs showing hard-coded values as the server's and saving to routes that do not exist, a dashboard reporting healthy components and a storage chart the server never sent, patient search that matched whole names only, form labels bound to no field, and `npm run lint` failing.
+- `std::gmtime` in six REST endpoint files and the audit repository is replaced by `gmtime_r`, now that the routes run on several threads in `pacs_server`.
 - `pacs_server` now provides Storage Commitment, Print and Unified Procedure Step, and reports N-EVENT-REPORTs on associations it opens to the peers named with `--peer`. `tools/dimse_n_scu` hosts the SCU classes that had no tool.
 - UPS: answer every status of PS3.4 Tables CC.1.1-2 and CC.2.6, keep the whole instance, never return the Transaction UID, read Receiving AE and Deletion Lock from the request, and carry each operation on the SOP Class CC.2 gives it. `ups_action_request_cancel` is now 2 and `ups_query_find_sop_class_uid` is now `...34.6.5`: the old values were those of other operations, and no other implementation could interoperate with them.
 - Storage Commitment: commit an instance only when the index holds it under that SOP Class and its file exists, and report on the requesting association only after waiting for the N-EVENT-REPORT-RSP.
@@ -73,6 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rest_server_config::enable_rest_api`: most routes under `/api` check no credentials, and OAuth 2.0 tokens do not cover them. `pacs_server` serves DICOMweb and WADO-URI only, and allows no web origin unless `--http-cors-origin` names one.
 - DICOMweb: nine read routes skipped authorization even with OAuth 2.0 enabled, including instance, frames and metadata retrieval and `/dicomweb/series` and `/dicomweb/instances`: anyone could read objects without a token. Every route now passes through one check.
 - OAuth 2.0: an RSA key from a JWKS was built with its modulus and exponent in the wrong byte order on little-endian hosts, so every RS256 token failed verification.
+- REST API: one gate in front of every route requires an OAuth 2.0 token with `pacs.read`, `pacs.write` or `pacs.admin`; most routes checked nothing. `pacs_server --http-rest-api` serves the REST API only with OAuth 2.0, and changes and refused attempts go to the audit trail.
+- Web app: it sent `X-User-ID: admin` with every request, and the server trusted that header for the system routes. It now signs in with a bearer token and keeps it for the tab only; the header is ignored when OAuth 2.0 is on.
 - `file_storage` refuses a UID of only dots, which `sanitize_uid` would have left able to name a directory above the archive.
 - Implement AES-256-GCM encryption for anonymizer `encrypt_value()` ([#987](https://github.com/kcenon/pacs_system/issues/987))
 - Replace non-cryptographic `std::hash` with SHA-256 in anonymizer `hash_value()` ([#988](https://github.com/kcenon/pacs_system/issues/988))

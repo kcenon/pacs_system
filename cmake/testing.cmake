@@ -400,6 +400,7 @@ if(PACS_BUILD_TESTS)
         add_executable(web_tests
             tests/web/rest_server_test.cpp
             tests/web/rest_http_smoke_test.cpp
+            tests/web/rest_gate_test.cpp
             tests/web/system_endpoints_test.cpp
             tests/web/patient_study_endpoints_test.cpp
             tests/web/worklist_audit_endpoints_test.cpp

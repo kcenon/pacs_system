@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "rest_app.h"
+
 #include "kcenon/pacs/web/endpoints/annotation_endpoints.h"
 #include "kcenon/pacs/web/endpoints/association_endpoints.h"
 #include "kcenon/pacs/web/endpoints/audit_endpoints.h"
@@ -55,46 +57,48 @@ namespace kcenon::pacs::web {
 
 // Forward declare internal registration functions
 namespace endpoints {
-void register_system_endpoints_impl(crow::SimpleApp &app,
+void register_system_endpoints_impl(rest_app &app,
                                     std::shared_ptr<rest_server_context> ctx);
-void register_patient_endpoints_impl(crow::SimpleApp &app,
+void register_patient_endpoints_impl(rest_app &app,
                                      std::shared_ptr<rest_server_context> ctx);
-void register_study_endpoints_impl(crow::SimpleApp &app,
+void register_study_endpoints_impl(rest_app &app,
                                    std::shared_ptr<rest_server_context> ctx);
-void register_series_endpoints_impl(crow::SimpleApp &app,
+void register_series_endpoints_impl(rest_app &app,
                                     std::shared_ptr<rest_server_context> ctx);
-void register_worklist_endpoints_impl(crow::SimpleApp &app,
+void register_worklist_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
-void register_audit_endpoints_impl(crow::SimpleApp &app,
+void register_audit_endpoints_impl(rest_app &app,
                                    std::shared_ptr<rest_server_context> ctx);
-void register_association_endpoints_impl(crow::SimpleApp &app,
+void register_association_endpoints_impl(rest_app &app,
                                          std::shared_ptr<rest_server_context> ctx);
-void register_dicomweb_endpoints_impl(crow::SimpleApp &app,
+void register_dicomweb_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
-void register_remote_nodes_endpoints_impl(crow::SimpleApp &app,
+void register_remote_nodes_endpoints_impl(rest_app &app,
                                           std::shared_ptr<rest_server_context> ctx);
-void register_jobs_endpoints_impl(crow::SimpleApp &app,
+void register_jobs_endpoints_impl(rest_app &app,
                                   std::shared_ptr<rest_server_context> ctx);
-void register_routing_endpoints_impl(crow::SimpleApp &app,
+void register_routing_endpoints_impl(rest_app &app,
                                      std::shared_ptr<rest_server_context> ctx);
-void register_thumbnail_endpoints_impl(crow::SimpleApp &app,
+void register_thumbnail_endpoints_impl(rest_app &app,
                                        std::shared_ptr<rest_server_context> ctx);
-void register_metadata_endpoints_impl(crow::SimpleApp &app,
+void register_metadata_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
-void register_annotation_endpoints_impl(crow::SimpleApp &app,
+void register_annotation_endpoints_impl(rest_app &app,
                                         std::shared_ptr<rest_server_context> ctx);
-void register_measurement_endpoints_impl(crow::SimpleApp &app,
+void register_measurement_endpoints_impl(rest_app &app,
                                          std::shared_ptr<rest_server_context> ctx);
-void register_key_image_endpoints_impl(crow::SimpleApp &app,
+void register_key_image_endpoints_impl(rest_app &app,
                                        std::shared_ptr<rest_server_context> ctx);
-void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
+void register_viewer_state_endpoints_impl(rest_app &app,
                                           std::shared_ptr<rest_server_context> ctx);
-void register_wado_uri_endpoints_impl(crow::SimpleApp &app,
+void register_wado_uri_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
 void register_storage_commitment_endpoints_impl(
-    crow::SimpleApp &app, std::shared_ptr<rest_server_context> ctx);
+    rest_app &app, std::shared_ptr<rest_server_context> ctx);
 #ifdef PACS_WITH_DATABASE_SYSTEM
-void register_metrics_endpoints_impl(crow::SimpleApp &app,
+void register_security_endpoints_impl(rest_app &app,
+                                      std::shared_ptr<rest_server_context> ctx);
+void register_metrics_endpoints_impl(rest_app &app,
                                      std::shared_ptr<rest_server_context> ctx);
 #endif
 } // namespace endpoints
@@ -105,10 +109,13 @@ void register_metrics_endpoints_impl(crow::SimpleApp &app,
 struct rest_server::impl {
   rest_server_config config;
   std::shared_ptr<rest_server_context> context;
-  std::unique_ptr<crow::SimpleApp> app;
+  std::unique_ptr<rest_app> app;
   std::thread server_thread;
   std::atomic<bool> running{false};
   std::atomic<std::uint16_t> actual_port{0};
+
+  /// Set by stop(); the app's tick acts on it on Crow's I/O thread
+  std::atomic<bool> stop_requested{false};
   std::mutex mutex;
 
   /// Serializes start(), start_async() and stop(); guards app and
@@ -139,11 +146,22 @@ struct rest_server::impl {
   /// returned. Crow's stop() only stops a server that run() has already
   /// created, so calling it earlier races with run() and leaves the server
   /// running.
-  void await_startup(crow::SimpleApp &server_app) {
+  void await_startup(rest_app &server_app) {
     while (server_app.wait_for_server_start(std::chrono::milliseconds(50)) ==
                std::cv_status::timeout &&
            running) {
     }
+  }
+
+  /// Crow's stop() writes a plain flag its accept loop reads on the I/O thread. Its tick runs on that
+  /// thread, as its signal handler did, so stop() is called from there.
+  void stop_from_io_thread(rest_app &server_app) {
+    stop_requested = false;
+    server_app.tick(std::chrono::milliseconds(50), [this, &server_app] {
+      if (stop_requested.exchange(false)) {
+        server_app.stop();
+      }
+    });
   }
 
   /// Join the server thread and free the app of a run() that has returned
@@ -229,6 +247,12 @@ void rest_server::set_dicom_server(
   impl_->context->dicom_server = std::move(server);
 }
 
+void rest_server::set_dicom_server_v2(
+    std::shared_ptr<network::v2::dicom_server_v2> server) {
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  impl_->context->dicom_server_v2 = std::move(server);
+}
+
 void rest_server::set_oauth2_middleware(
     std::shared_ptr<auth::oauth2_middleware> middleware) {
   std::lock_guard<std::mutex> lock(impl_->mutex);
@@ -242,29 +266,13 @@ void rest_server::start() {
   }
   impl_->release_finished_run();
 
-  impl_->app = std::make_unique<crow::SimpleApp>();
+  impl_->app = std::make_unique<rest_app>();
   auto &app = *impl_->app;
+  app.get_middleware<rest_gate>().server = impl_->context;
+  impl_->stop_from_io_thread(app);
 
   // Register system endpoints
   endpoints::register_system_endpoints_impl(app, impl_->context);
-
-  // Add CORS preflight handler
-  if (impl_->config.enable_cors) {
-    CROW_ROUTE(app, "/api/<path>")
-        .methods(crow::HTTPMethod::OPTIONS)(
-            [this](const crow::request & /*req*/,
-                   const std::string & /*path*/) {
-              crow::response res(204);
-              res.add_header("Access-Control-Allow-Origin",
-                             impl_->config.cors_allowed_origins);
-              res.add_header("Access-Control-Allow-Methods",
-                             "GET, POST, PUT, DELETE, OPTIONS");
-              res.add_header("Access-Control-Allow-Headers",
-                             "Content-Type, Authorization");
-              res.add_header("Access-Control-Max-Age", "86400");
-              return res;
-            });
-  }
 
   app.bindaddr(impl_->config.bind_address)
       .port(impl_->config.port)
@@ -292,8 +300,13 @@ void rest_server::start_async() {
 
   // Create the app on this thread, before the server thread exists, so
   // stop() never reads impl_->app while another thread assigns it
-  impl_->app = std::make_unique<crow::SimpleApp>();
+  impl_->app = std::make_unique<rest_app>();
   auto &app = *impl_->app;
+  app.get_middleware<rest_gate>().server = impl_->context;
+  // By default Crow takes SIGINT and SIGTERM for itself and stops only itself, so a process hosting
+  // this server would never hear them. Here the host owns its signals and calls stop().
+  app.signal_clear();
+  impl_->stop_from_io_thread(app);
 
   // Register endpoints. These three check OAuth 2.0 tokens on every route.
   endpoints::register_dicomweb_endpoints_impl(app, impl_->context);
@@ -321,24 +334,6 @@ void rest_server::start_async() {
 #ifdef PACS_WITH_DATABASE_SYSTEM
     endpoints::register_metrics_endpoints_impl(app, impl_->context);
 #endif
-  }
-
-  // Add CORS preflight handler
-  if (impl_->config.enable_cors && impl_->config.enable_rest_api) {
-    CROW_ROUTE(app, "/api/<path>")
-        .methods(crow::HTTPMethod::OPTIONS)(
-            [this](const crow::request & /*req*/,
-                   const std::string & /*path*/) {
-              crow::response res(204);
-              res.add_header("Access-Control-Allow-Origin",
-                             impl_->config.cors_allowed_origins);
-              res.add_header("Access-Control-Allow-Methods",
-                             "GET, POST, PUT, DELETE, OPTIONS");
-              res.add_header("Access-Control-Allow-Headers",
-                             "Content-Type, Authorization");
-              res.add_header("Access-Control-Max-Age", "86400");
-              return res;
-            });
   }
 
   app.bindaddr(impl_->config.bind_address)
@@ -374,7 +369,15 @@ void rest_server::stop() {
   }
 
   impl_->await_startup(*impl_->app);
-  impl_->app->stop();
+  impl_->stop_requested = true;
+  {
+    std::unique_lock<std::mutex> lock(impl_->run_mutex);
+    if (!impl_->run_cv.wait_for(lock, std::chrono::seconds(10), [this] { return !impl_->running; })) {
+      // The tick never ran: stop it from here, as before.
+      lock.unlock();
+      impl_->app->stop();
+    }
+  }
 
   if (impl_->server_thread.joinable()) {
     impl_->server_thread.join();

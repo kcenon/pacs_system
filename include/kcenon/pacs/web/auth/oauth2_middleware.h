@@ -57,6 +57,17 @@ constexpr std::string_view write = "dicomweb.write";
 constexpr std::string_view delete_resource = "dicomweb.delete";
 }  // namespace dicomweb_scopes
 
+/**
+ * @brief OAuth 2.0 scopes for the REST API under /api/v1
+ *
+ * write includes reading. admin covers settings, accounts, the audit trail and deleting a study.
+ */
+namespace rest_scopes {
+constexpr std::string_view read = "pacs.read";
+constexpr std::string_view write = "pacs.write";
+constexpr std::string_view admin = "pacs.admin";
+}  // namespace rest_scopes
+
 // =============================================================================
 // Authentication Result
 // =============================================================================

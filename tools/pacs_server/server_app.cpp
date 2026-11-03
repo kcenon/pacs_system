@@ -14,6 +14,9 @@
 #include "kcenon/pacs/storage/instance_archive.h"
 
 #ifdef PACS_SERVER_WITH_HTTP
+#ifdef PACS_WITH_MONITORING
+#include "kcenon/pacs/monitoring/health_checker.h"
+#endif
 #include "kcenon/pacs/web/auth/jwks_provider.h"
 #include "kcenon/pacs/web/auth/oauth2_middleware.h"
 #include "kcenon/pacs/web/rest_config.h"
@@ -300,7 +303,7 @@ bool pacs_server_app::setup_server() {
         server_config.accept_unknown_calling_ae = false;
     }
 
-    server_ = std::make_unique<network::v2::dicom_server_v2>(server_config);
+    server_ = std::make_shared<network::v2::dicom_server_v2>(server_config);
 
     // Register Verification SCP
     server_->register_service(std::make_shared<services::verification_scp>());
@@ -317,13 +320,27 @@ bool pacs_server_app::setup_server() {
     // Register Query SCP
     auto query_scp = std::make_shared<services::query_scp>();
     query_scp->set_find_handler(
-        [this](const services::find_request& request) { return services::find_in_index(*database_, request); });
+        [this](const services::find_request& request) {
+            auto outcome = services::find_in_index(*database_, request);
+            record_audit(storage::audit_event_type::c_find, outcome.failure == services::qr_failure::none,
+                         request.calling_ae, request.called_ae, request.keys.get_string(core::tags::patient_id),
+                         request.keys.get_string(core::tags::study_instance_uid),
+                         std::to_string(outcome.matches.size()) + " matches");
+            return outcome;
+        });
     server_->register_service(query_scp);
 
     // Register Retrieve SCP
     auto retrieve_scp = std::make_shared<services::retrieve_scp>();
     retrieve_scp->set_retrieve_selector(
-        [this](const services::retrieve_request& request) { return services::select_from_index(*database_, request); });
+        [this](const services::retrieve_request& request) {
+            auto selection = services::select_from_index(*database_, request);
+            record_audit(storage::audit_event_type::data_export, selection.failure == services::qr_failure::none,
+                         {}, config_.server.ae_title, request.keys.get_string(core::tags::patient_id),
+                         request.keys.get_string(core::tags::study_instance_uid),
+                         std::to_string(selection.files.size()) + " objects selected for retrieve");
+            return selection;
+        });
     retrieve_scp->set_destination_resolver(
         [this](const std::string& ae_title) -> std::optional<std::pair<std::string, uint16_t>> {
             for (const auto& destination : config_.move_destinations) {
@@ -402,11 +419,13 @@ bool pacs_server_app::setup_server() {
     server_->register_service(print_scp);
 
     // Set up callbacks
-    server_->on_association_established([](const std::string& /* session_id */,
+    server_->on_association_established([this](const std::string& /* session_id */,
                                           const std::string& calling_ae,
                                           const std::string& called_ae) {
         std::cout << log_prefix() << "Association established: "
                   << calling_ae << " -> " << called_ae << "\n";
+        record_audit(storage::audit_event_type::association_established, true, calling_ae, called_ae, {}, {},
+                     "Association accepted");
     });
 
     server_->on_association_closed([](const std::string& session_id, bool graceful) {
@@ -425,8 +444,8 @@ bool pacs_server_app::setup_server() {
 bool pacs_server_app::setup_http() {
     const bool wants_tokens = !config_.oauth2_issuer.empty() || !config_.oauth2_audience.empty() || !config_.oauth2_jwks_file.empty();
     if (config_.http_port == 0) {
-        if (wants_tokens) {
-            std::cerr << log_prefix() << "Error: OAuth 2.0 settings mean nothing without --http-port\n";
+        if (wants_tokens || config_.http_rest_api) {
+            std::cerr << log_prefix() << "Error: OAuth 2.0 and REST API settings mean nothing without --http-port\n";
             return false;
         }
         return true;
@@ -436,17 +455,29 @@ bool pacs_server_app::setup_http() {
         std::cerr << log_prefix() << "Error: --oauth2-issuer, --oauth2-audience and --oauth2-jwks are needed together\n";
         return false;
     }
+    // Without tokens the gate lets everything through, and these routes hold patient data and settings.
+    if (config_.http_rest_api && !wants_tokens) {
+        std::cerr << log_prefix() << "Error: --http-rest-api needs --oauth2-issuer, --oauth2-audience and --oauth2-jwks\n";
+        return false;
+    }
 #ifdef PACS_SERVER_WITH_HTTP
     web::rest_server_config http_config;
     http_config.bind_address = config_.http_bind;
     http_config.port = config_.http_port;
     http_config.max_body_size = config_.http_max_body_bytes;
-    // DICOMweb only: most of the REST API checks no credentials, and no web page may read this by default.
-    http_config.enable_rest_api = false;
+    http_config.enable_rest_api = config_.http_rest_api;
+    // No web page may read this unless told which one.
     http_config.cors_allowed_origins = config_.http_cors_origin;
     http_server_ = std::make_unique<web::rest_server>(http_config);
     http_server_->set_database(database_);
     http_server_->set_file_storage(file_storage_);
+    http_server_->set_dicom_server_v2(server_);
+#ifdef PACS_WITH_MONITORING
+    auto health = std::make_shared<monitoring::health_checker>();
+    health->set_database(database_.get());
+    health->set_storage(file_storage_.get());
+    http_server_->set_health_checker(health);
+#endif
 
     if (!config_.oauth2_issuer.empty()) {
         std::ifstream file(config_.oauth2_jwks_file);
@@ -481,6 +512,24 @@ bool pacs_server_app::setup_http() {
 // Service Handlers
 // =============================================================================
 
+void pacs_server_app::record_audit(storage::audit_event_type type, bool succeeded, std::string_view source_ae,
+                                   std::string_view target_ae, std::string patient_id, std::string study_uid,
+                                   std::string message) {
+    storage::audit_record record;
+    record.event_type = storage::to_string(type);
+    record.outcome = storage::to_string(succeeded ? storage::audit_outcome::success : storage::audit_outcome::failure);
+    record.timestamp = std::chrono::system_clock::now();
+    record.source_ae = source_ae;
+    record.target_ae = target_ae;
+    record.patient_id = std::move(patient_id);
+    record.study_uid = std::move(study_uid);
+    record.message = std::move(message);
+    auto added = database_->add_audit_log(record);
+    if (added.is_err()) {
+        std::cerr << log_prefix() << "Cannot write to the audit trail: " << added.error().message << "\n";
+    }
+}
+
 services::storage_status pacs_server_app::handle_store(
     const core::dicom_dataset& dataset,
     const std::string& calling_ae,
@@ -493,6 +542,11 @@ services::storage_status pacs_server_app::handle_store(
 
     (void)sop_class_uid;
     auto archived = storage::archive_instance(*file_storage_, *database_, dataset, syntax);
+    const bool kept = archived.status == storage::archive_status::stored ||
+                      archived.status == storage::archive_status::duplicate_ignored;
+    record_audit(storage::audit_event_type::c_store, kept, calling_ae, config_.server.ae_title,
+                 dataset.get_string(core::tags::patient_id), dataset.get_string(core::tags::study_instance_uid),
+                 kept ? "Stored " + sop_instance_uid : archived.message);
     switch (archived.status) {
         case storage::archive_status::stored:
         case storage::archive_status::duplicate_ignored:

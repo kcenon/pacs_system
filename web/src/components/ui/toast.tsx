@@ -1,30 +1,7 @@
 import * as React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export interface Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  variant?: 'default' | 'success' | 'destructive';
-  duration?: number;
-}
-
-interface ToastContextValue {
-  toasts: Toast[];
-  addToast: (toast: Omit<Toast, 'id'>) => void;
-  removeToast: (id: string) => void;
-}
-
-const ToastContext = React.createContext<ToastContextValue | undefined>(undefined);
-
-export function useToast() {
-  const context = React.useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-}
+import { ToastContext, useToast, type Toast } from './use-toast';
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
@@ -94,6 +71,7 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
 
   return (
     <div
+      role={variant === 'destructive' ? 'alert' : 'status'}
       className={cn(
         'pointer-events-auto w-80 rounded-lg p-4 shadow-lg transition-all',
         'animate-in slide-in-from-right-full',
@@ -120,4 +98,3 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
   );
 }
 
-export { ToastContext };

@@ -176,6 +176,7 @@ class DicomWebCross(Validation):
         self.images = self.work/'objects'
         self.images.mkdir()
         self.sequence = 0
+        self.stops = []
         self.uid_base = f'2.25.1321{int(time.time())}'
         self.sets = {}
         self.tokens = None
@@ -244,9 +245,11 @@ class DicomWebCross(Validation):
         directory.mkdir(exist_ok=True)
         args = [self.bin/'pacs_server', '--port', dimse, '--ae-title', PACS_AE, '--storage-dir', directory/'archive', '--db-path', directory/'index.db',
                 '--http-port', http, '--peer', f'{MOVE_AE}:127.0.0.1:{MOVE_PORT}', *extra]
-        with self.server(args, dimse, log_name=f'server-{name}'):
+        with self.server(args, dimse, log_name=f'server-{name}') as process:
             self.wait_http(http)
             yield Target('pacs', http, dimse, PACS_AE, '/dicomweb', directory, True)
+        # server() kills a server that ignores SIGTERM. Until #1322 pacs_server with --http-port always did, unseen.
+        self.stops.append((f'server-{name}', process.returncode))
 
     @contextmanager
     def orthanc(self):
@@ -2068,6 +2071,12 @@ class DicomWebCross(Validation):
     def archive_case(self, target):
         return f'{self.archive_exact(target)} files, each named by exactly one row'
 
+    def stopped_cleanly(self):
+        unclean = [f'{name} exited {code}' for name, code in self.stops if code != 0]
+        require(self.stops, 'no pacs_server was stopped')
+        require(not unclean, 'not stopped by SIGTERM alone: '+', '.join(unclean))
+        return f'all {len(self.stops)} pacs_server processes exited 0 on SIGTERM'
+
     def requirement_results(self):
         status = {row['id']: row['status'] for row in self.results}
         results = {}
@@ -2092,6 +2101,7 @@ class DicomWebCross(Validation):
         self.limit_group()
         self.restart_group()
         self.auth_group()
+        self.case('web.pacs.stops-on-sigterm', self.stopped_cleanly)
         counts = {status: sum(1 for row in self.results if row['status'] == status) for status in ('passed', 'failed', 'blocked')}
         (self.output/'dicomweb-summary.json').write_text(json.dumps(dict(
             counts=counts, requirement_results=self.requirement_results(), reference_differences=REFERENCE_DIFFERENCES, reference_leniency=REFERENCE_LENIENCY,

@@ -27,6 +27,7 @@
 #include "kcenon/pacs/services/ups/ups_index.h"
 #include "kcenon/pacs/services/verification_scp.h"
 #include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/storage/audit_record.h"
 #include "kcenon/pacs/storage/file_storage.h"
 #include "kcenon/pacs/storage/index_database.h"
 #ifdef PACS_SERVER_WITH_HTTP
@@ -36,6 +37,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace kcenon::pacs::example {
 
@@ -222,6 +224,11 @@ private:
         const std::string& sop_instance_uid,
         const encoding::transfer_syntax& syntax);
 
+    /// Add a row to the audit trail. A failed write to the trail is reported and does not fail the operation.
+    void record_audit(storage::audit_event_type type, bool succeeded, std::string_view source_ae,
+                      std::string_view target_ae, std::string patient_id, std::string study_uid,
+                      std::string message);
+
     /// Handle worklist query
     std::vector<core::dicom_dataset> handle_worklist_query(
         const core::dicom_dataset& query_keys,
@@ -245,7 +252,7 @@ private:
     pacs_server_config config_;
 
     /// DICOM server
-    std::unique_ptr<network::v2::dicom_server_v2> server_;
+    std::shared_ptr<network::v2::dicom_server_v2> server_;
 
     /// File storage
     std::shared_ptr<storage::file_storage> file_storage_;

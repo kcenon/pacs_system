@@ -18,6 +18,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -609,7 +611,7 @@ std::string single_rule_test_to_json(bool matched,
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_routing_endpoints_impl(crow::SimpleApp& app,
+void register_routing_endpoints_impl(rest_app& app,
                                      std::shared_ptr<rest_server_context> ctx) {
     // GET /api/v1/routing/rules - List routing rules (paginated)
     CROW_ROUTE(app, "/api/v1/routing/rules")

@@ -1007,7 +1007,8 @@ Full PACS server example with configuration.
 | `--http-port PORT` | REST and DICOMweb port (default: off) |
 | `--http-bind ADDRESS` | Address the HTTP API listens on (default `127.0.0.1`) |
 | `--http-max-body-mb N` | Largest HTTP request body in MiB (default 512); more is answered with 413 |
-| `--http-cors-origin ORIGIN` | Origin named in `Access-Control-Allow-Origin` on responses (default: none). A CORS preflight is not answered, so only requests that need none can use it |
+| `--http-cors-origin ORIGIN` | Origin named in `Access-Control-Allow-Origin` on responses and CORS preflight answers (default: none) |
+| `--http-rest-api` | Also serve the REST API under `/api` for the web app; needs the three OAuth options |
 | `--oauth2-issuer URL` | Require OAuth 2.0 bearer tokens from this issuer on DICOMweb |
 | `--oauth2-audience ID` | Audience those tokens must name |
 | `--oauth2-jwks PATH` | JWKS file holding the keys that sign them |
@@ -1016,8 +1017,9 @@ It provides Verification, Storage, Query/Retrieve, Worklist, MPPS, Storage Commi
 Procedure Step. Commitment reports and UPS events to a named peer go on associations it opens.
 
 With `--http-port` it also serves DICOMweb under `/dicomweb` and WADO-URI under `/wado`, on the same database and storage
-as the DICOM services, so an object stored over either protocol is found over both. It does not serve the REST API under
-`/api`, most of which checks no credentials. The three OAuth options go together:
+as the DICOM services, so an object stored over either protocol is found over both. With `--http-rest-api` it also serves
+the REST API under `/api`, which the web app uses: every request there needs a token whose scope allows it (`pacs.read`,
+`pacs.write` or `pacs.admin`), so the option is refused without the OAuth options. The three OAuth options go together:
 the server refuses to start with only some of them, and refuses to start if the port cannot be opened. Without them
 DICOMweb answers everyone who can reach the port, which is why the default address is loopback and a warning is printed.
 

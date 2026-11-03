@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -21,6 +23,7 @@
 #endif
 
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/web/endpoints/association_endpoints.h"
 #include "kcenon/pacs/web/endpoints/system_endpoints.h"
@@ -43,11 +46,27 @@ void add_cors_headers(crow::response &res, const rest_server_context &ctx) {
   }
 }
 
+template <typename Server>
+std::string active_associations_json(const Server &server) {
+  const auto stats = server.get_statistics();
+  std::ostringstream oss;
+  oss << R"({"active_count":)" << server.active_associations()
+      << R"(,"total_associations":)" << stats.total_associations
+      << R"(,"rejected_associations":)" << stats.rejected_associations
+      << R"(,"messages_processed":)" << stats.messages_processed
+      << R"(,"bytes_received":)" << stats.bytes_received
+      << R"(,"bytes_sent":)" << stats.bytes_sent
+      << R"(,"uptime_seconds":)" << stats.uptime().count()
+      << R"(,"server_running":)" << (server.is_running() ? "true" : "false")
+      << '}';
+  return oss.str();
+}
+
 }  // namespace
 
 // Internal implementation function called from rest_server.cpp
 void register_association_endpoints_impl(
-    crow::SimpleApp &app,
+    rest_app &app,
     std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/associations/active - List active DICOM associations
   CROW_ROUTE(app, "/api/v1/associations/active")
@@ -56,31 +75,19 @@ void register_association_endpoints_impl(
         res.add_header("Content-Type", "application/json");
         add_cors_headers(res, *ctx);
 
-        if (!ctx->dicom_server) {
-            res.code = 503;
-            res.body = make_error_json("SERVICE_UNAVAILABLE",
-                                       "DICOM server not configured");
+        if (ctx->dicom_server_v2) {
+            res.code = 200;
+            res.body = active_associations_json(*ctx->dicom_server_v2);
             return res;
         }
-
-        auto stats = ctx->dicom_server->get_statistics();
-        auto active_count = ctx->dicom_server->active_associations();
-        auto uptime_sec = stats.uptime().count();
-
-        std::ostringstream oss;
-        oss << R"({"active_count":)" << active_count
-            << R"(,"total_associations":)" << stats.total_associations
-            << R"(,"rejected_associations":)" << stats.rejected_associations
-            << R"(,"messages_processed":)" << stats.messages_processed
-            << R"(,"bytes_received":)" << stats.bytes_received
-            << R"(,"bytes_sent":)" << stats.bytes_sent
-            << R"(,"uptime_seconds":)" << uptime_sec
-            << R"(,"server_running":)"
-            << (ctx->dicom_server->is_running() ? "true" : "false")
-            << '}';
-
-        res.code = 200;
-        res.body = oss.str();
+        if (ctx->dicom_server) {
+            res.code = 200;
+            res.body = active_associations_json(*ctx->dicom_server);
+            return res;
+        }
+        res.code = 503;
+        res.body = make_error_json("SERVICE_UNAVAILABLE",
+                                   "DICOM server not configured");
         return res;
       });
 

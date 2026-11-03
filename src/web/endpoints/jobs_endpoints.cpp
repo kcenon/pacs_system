@@ -18,6 +18,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -441,7 +443,7 @@ std::vector<std::string> get_json_string_array(const std::string& body,
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_jobs_endpoints_impl(crow::SimpleApp& app,
+void register_jobs_endpoints_impl(rest_app& app,
                                    std::shared_ptr<rest_server_context> ctx) {
     // GET /api/v1/jobs - List jobs (paginated with filters)
     CROW_ROUTE(app, "/api/v1/jobs")

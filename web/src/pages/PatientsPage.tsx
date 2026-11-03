@@ -27,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ApiErrorNotice } from '@/components/ui/api-error';
 import { apiClient } from '@/api/client';
 import { formatDate, formatTime, formatBytes, cn } from '@/lib/utils';
 import type { Patient, Study, Series, Instance, PaginatedResponse } from '@/types/api';
@@ -236,12 +237,12 @@ function PatientBrowser({
   });
 
   // Fetch studies for patient
-  const { data: studiesData, isLoading: studiesLoading } = useQuery({
+  const { data: studiesData, isLoading: studiesLoading, error: studiesError } = useQuery({
     queryKey: ['patient-studies', patient.patient_id],
     queryFn: () => apiClient.getPatientStudies(patient.patient_id),
   });
 
-  const studies: Study[] = studiesData?.data || [];
+  const studies: Study[] = useMemo(() => studiesData?.data || [], [studiesData]);
 
   // Extract available modalities from studies
   const availableModalities = useMemo(() => {
@@ -273,7 +274,7 @@ function PatientBrowser({
   }, [studies, studyFilters]);
 
   // Fetch series for selected study
-  const { data: seriesData } = useQuery({
+  const { data: seriesData, error: seriesError } = useQuery({
     queryKey: ['study-series', selectedStudy?.study_instance_uid],
     queryFn: () =>
       selectedStudy ? apiClient.getStudySeries(selectedStudy.study_instance_uid) : null,
@@ -283,7 +284,7 @@ function PatientBrowser({
   const seriesList: Series[] = seriesData?.data || [];
 
   // Fetch instances for selected series
-  const { data: instancesData } = useQuery({
+  const { data: instancesData, error: instancesError } = useQuery({
     queryKey: ['series-instances', selectedSeries?.series_instance_uid],
     queryFn: () =>
       selectedSeries
@@ -430,8 +431,12 @@ function PatientBrowser({
             </CardDescription>
           </CardHeader>
           <CardContent className="max-h-[500px] overflow-y-auto">
+            {seriesError && <ApiErrorNotice error={seriesError} what="the series" />}
+            {instancesError && <ApiErrorNotice error={instancesError} what="the instances" />}
             {studiesLoading ? (
               <div className="py-8 text-center text-muted-foreground">Loading studies...</div>
+            ) : studiesError ? (
+              <ApiErrorNotice error={studiesError} what="the studies" />
             ) : filteredStudies.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
                 No studies found for this patient.
@@ -604,7 +609,8 @@ export function PatientsPage() {
     queryKey: ['patients', debouncedSearch, page],
     queryFn: () =>
       apiClient.getPatients({
-        patient_name: debouncedSearch || undefined,
+        // The server matches a name exactly unless it ends in a wildcard, so typing finds names that start so.
+        patient_name: debouncedSearch ? `${debouncedSearch.replace(/\*+$/, '')}*` : undefined,
         limit: pageSize,
         offset: page * pageSize,
       }),
@@ -658,9 +664,7 @@ export function PatientsPage() {
           {isLoading ? (
             <div className="py-8 text-center text-muted-foreground">Loading patients...</div>
           ) : error ? (
-            <div className="py-8 text-center text-destructive">
-              Error loading patients. Make sure the API server is running.
-            </div>
+            <ApiErrorNotice error={error} what="patients" />
           ) : patients.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">No patients found.</div>
           ) : (

@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev libssl-dev libfmt-dev libjpeg62-turbo-dev libopenjp2-7-dev \
     libcharls-dev libpugixml-dev libcurl4-openssl-dev libasio-dev libicu-dev \
     libpng-dev zlib1g-dev lsof \
-    libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless orthanc orthanc-dicomweb && rm -rf /var/lib/apt/lists/*
+    libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless orthanc orthanc-dicomweb nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
 COPY pacs_system/.github/actions/checkout-kcenon-deps/action.yml /workspace/pacs_system/.github/actions/checkout-kcenon-deps/action.yml
 COPY harness/bootstrap.py /tmp/bootstrap.py
 RUN python3 /tmp/bootstrap.py
@@ -30,6 +31,10 @@ COPY harness /workspace/pacs_system/validation/dcmtk
 COPY peers /workspace/pacs_system/validation/peers
 RUN python3 /workspace/pacs_system/validation/peers/dimse-n/install.py /opt/pacs-peers
 COPY driver.py /workspace/pacs_system/scripts/run_dcmtk_validation.py
+# Browser flows: packages exactly as web/package-lock.json has them, and the Chromium build that
+# version of Playwright names, with the system libraries it needs.
+RUN cd /workspace/pacs_system/web && npm ci --no-audit --no-fund \
+    && npx playwright install --with-deps --only-shell chromium
 RUN python3 -m unittest discover -s /workspace/pacs_system/validation/dcmtk/tests -p '*test*.py' -v
 WORKDIR /workspace/build
 ENTRYPOINT ["python3", "/workspace/pacs_system/validation/dcmtk/run.py"]

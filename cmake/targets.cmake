@@ -871,6 +871,7 @@ endif()
 if(TARGET Crow::Crow)
     add_library(pacs_web
         src/web/rest_server.cpp
+        src/web/rest_gate.cpp
         src/web/thumbnail_service.cpp
         src/web/metadata_service.cpp
         src/web/endpoints/system_endpoints.cpp
@@ -905,6 +906,7 @@ if(TARGET Crow::Crow)
         )
     endif()
 
+    target_compile_definitions(pacs_web PRIVATE PACS_SYSTEM_VERSION="${PROJECT_VERSION}")
     target_include_directories(pacs_web
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

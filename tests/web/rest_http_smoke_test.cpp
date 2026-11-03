@@ -99,9 +99,9 @@ TEST_CASE("rest_server serves HTTP over the pinned Crow and ASIO", "[web][http][
     const auto preflight = request(config.port, "OPTIONS", "/api/v1/system/config");
     INFO(preflight);
     CHECK(preflight.starts_with("HTTP/1.1 204 "));
-    // Crow's automatic OPTIONS response bypasses the application's wildcard
-    // CORS handler in both 1.3.1 and 1.3.2. Preflight CORS coverage belongs to
-    // the DICOMweb HTTP acceptance work (#1321); this checks method transport.
+    // Crow answers OPTIONS itself, before any route; rest_gate adds the CORS headers to that answer.
+    CHECK(preflight.find("Access-Control-Allow-Origin: *") != std::string::npos);
+    CHECK(preflight.find("Access-Control-Allow-Headers: Accept, Authorization, Content-Type") != std::string::npos);
 
     server.stop();
     CHECK_FALSE(server.is_running());

@@ -132,6 +132,9 @@ struct pacs_server_config {
     std::size_t http_max_body_bytes{512 * 1024 * 1024};
     std::string http_cors_origin;
 
+    /// Also serve the REST API under /api. It holds patient data and settings, so it needs OAuth 2.0.
+    bool http_rest_api{false};
+
     /// With an issuer set, every DICOMweb request must carry a token signed by a key in this JWKS file.
     std::string oauth2_issuer;
     std::string oauth2_audience;

@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -404,7 +406,7 @@ void verify_instances_async(
 }  // namespace
 
 void register_storage_commitment_endpoints_impl(
-    crow::SimpleApp& app,
+    rest_app& app,
     std::shared_ptr<rest_server_context> ctx) {
 
     // Shared transaction store for all requests

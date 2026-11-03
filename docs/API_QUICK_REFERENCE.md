@@ -230,8 +230,8 @@ server.register_service(qr);
 
 ## DICOMweb Endpoints
 
-When built with `PACS_WITH_REST_API=ON` and started with `--http-port`, pacs_server exposes these under `/dicomweb`,
-and not the REST API under `/api`:
+When built with `PACS_WITH_REST_API=ON` and started with `--http-port`, pacs_server exposes these under `/dicomweb`.
+The REST API under `/api` is served only with `--http-rest-api`, which needs OAuth 2.0 tokens:
 
 | Endpoint | Method | Description |
 |---|---|---|

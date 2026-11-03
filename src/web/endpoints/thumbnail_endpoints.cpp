@@ -15,6 +15,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -110,7 +112,7 @@ std::shared_ptr<thumbnail_service> g_thumbnail_service;
 }  // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_thumbnail_endpoints_impl(crow::SimpleApp& app,
+void register_thumbnail_endpoints_impl(rest_app& app,
                                         std::shared_ptr<rest_server_context> ctx) {
     // Initialize thumbnail service if database is available
     if (ctx->database != nullptr && g_thumbnail_service == nullptr) {

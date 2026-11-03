@@ -16,6 +16,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -298,7 +300,7 @@ crow::response handle_dicom_json_response(
 }  // anonymous namespace
 
 void register_wado_uri_endpoints_impl(
-    crow::SimpleApp& app,
+    rest_app& app,
     std::shared_ptr<rest_server_context> ctx) {
 
     // GET /wado?requestType=WADO&studyUID=...&seriesUID=...&objectUID=...

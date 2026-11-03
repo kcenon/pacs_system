@@ -498,6 +498,12 @@ python3 validation/dcmtk/tests/dicomweb_probe.py --output /tmp/dicomweb --build-
 
 `--no-reference` skips Orthanc for diagnosis. Without it PACS cases are only counted after the reference qualified them.
 
+### Browser flows against the REST API (#1322)
+
+`component.browser` runs `validation/browser/browser_probe.py`: the built web app in Chromium against `pacs_server --http-rest-api`,
+with tokens signed by openssl, data stored over C-STORE and STOW-RS, and each page checked against values declared before it opens,
+against the REST API asked directly, and for the worklist against DCMTK `findscu`. `validation/browser/README.md` lists the cases.
+
 ### Nested worklists and normalized request identity (#1316)
 
 `mwl.sequence` compares all six scheduled-step fields for the three pinned MWL

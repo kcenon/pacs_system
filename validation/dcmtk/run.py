@@ -56,7 +56,7 @@ class Validation:
         self.fixture_sets = {}
         self.private = Path(tempfile.mkdtemp(prefix='pacs-validation-private-'))
 
-    def command(self, args, timeout=30, allowed=(0,), env=None):
+    def command(self, args, timeout=30, allowed=(0,), env=None, cwd=None):
         args = [str(x) for x in args]
         event = dict(case_id=self.current, command=args, timeout_seconds=timeout,
                      expected_exit_codes=list(allowed), returncode=None, outcome='spawn_error')
@@ -65,7 +65,7 @@ class Validation:
             log.flush()
             try:
                 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                     start_new_session=True, env=env)
+                                     start_new_session=True, env=env, cwd=cwd)
                 try:
                     stdout, stderr = p.communicate(timeout=timeout)
                     rc = p.returncode
@@ -687,7 +687,7 @@ class Validation:
                 errors.append(f'{binary}: discovery failed: {exc}')
                 all_tests[binary] = []
         for spec in self.manifest['components']:
-            if spec.get('kind') in ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb'):
+            if spec.get('kind') in ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser'):
                 continue
             try:
                 if spec.get('kind') == 'ctest':
@@ -769,7 +769,21 @@ class Validation:
                     detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
                            'see dicomweb/dicomweb-summary.json')
 
+    def browser_flows(self, spec):
+        """Report the browser job's own results; a nonzero exit only means some cases failed."""
+        directory = self.output/'browser'
+        self.command(['python3', HERE.parent/'browser/browser_probe.py', '--output', directory,
+                      '--build-dir', self.args.build_dir, '--source-revision', self.args.source_revision,
+                      '--source-digest', self.args.source_digest],
+                     timeout=spec['timeout_seconds'], allowed=(0, 1))
+        counts = json.loads((directory/'browser-summary.json').read_text())['counts']
+        return dict(tests=sum(counts.values()), failed=counts['failed']+counts['blocked'], skipped=0,
+                    detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
+                           'see browser/browser-summary.json')
+
     def component(self, spec):
+        if spec.get('kind') == 'browser':
+            return self.browser_flows(spec)
         if spec.get('kind') == 'corpus':
             return self.corpus_matrix(spec)
         if spec.get('kind') == 'qr-matrix':

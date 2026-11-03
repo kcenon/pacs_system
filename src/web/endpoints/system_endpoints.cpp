@@ -14,7 +14,10 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 #include "kcenon/pacs/security/access_control_manager.h"
+#include "kcenon/pacs/web/auth/oauth2_middleware.h"
 #include "kcenon/pacs/security/user.h"
 #include "kcenon/pacs/web/endpoints/system_endpoints.h"
 #include "kcenon/pacs/web/rest_config.h"
@@ -65,6 +68,11 @@ std::string config_to_json(const rest_server_config &config) {
 bool check_permission(const std::shared_ptr<rest_server_context> &ctx,
                       const crow::request &req, crow::response &res,
                       security::ResourceType resource, uint32_t action) {
+  // rest_gate has checked the token and its scopes. X-User-ID is only what the client says.
+  if (ctx->oauth2 && ctx->oauth2->enabled()) {
+    return true;
+  }
+
   if (!ctx->security_manager) {
     // Fail open or closed? Closed is safer, but for dev maybe open if not
     // configured? Let's fail closed.
@@ -103,7 +111,7 @@ bool check_permission(const std::shared_ptr<rest_server_context> &ctx,
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_system_endpoints_impl(crow::SimpleApp &app,
+void register_system_endpoints_impl(rest_app &app,
                                     std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/system/status - System health status
   CROW_ROUTE(app, "/api/v1/system/status")
@@ -121,7 +129,7 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
         crow::json::wvalue status_json;
         status_json["status"] = "unknown";                        // Default
         status_json["message"] = "Health checker not configured"; // Default
-        status_json["version"] = "1.0.0";                         // Default
+        status_json["version"] = PACS_SYSTEM_VERSION;             // Default
 
 #ifdef PACS_WITH_MONITORING
         if (ctx->health_checker) {
@@ -129,15 +137,14 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
           // to_json is a free function in kcenon::pacs::monitoring namespace
           status_json = crow::json::load(
               monitoring::to_json(status)); // Parse existing JSON into wvalue
-          status_json["version"] = "1.0.0"; // Add version
+          status_json["version"] = PACS_SYSTEM_VERSION; // Add version
         } else {
           status_json["status"] = "unknown";
           status_json["message"] = "Health checker not configured";
         }
-#else
-        // Basic status without monitoring module
-        res.code = 200;
 #endif
+        res.body = status_json.dump();
+        res.code = 200;
         return res;
       });
 
@@ -188,33 +195,15 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
 
   // PUT /api/v1/system/config - Update configuration
   CROW_ROUTE(app, "/api/v1/system/config")
-      .methods(crow::HTTPMethod::PUT)([ctx](const crow::request &req) {
+      .methods(crow::HTTPMethod::PUT)([ctx](const crow::request & /*req*/) {
         crow::response res;
         res.add_header("Content-Type", "application/json");
         add_cors_headers(res, *ctx);
 
-        // Validate content type
-        auto content_type = req.get_header_value("Content-Type");
-        if (content_type.find("application/json") == std::string::npos) {
-          res.body = make_error_json("INVALID_CONTENT_TYPE",
-                                     "Content-Type must be application/json");
-          res.code = 415;
-          return res;
-        }
-
-        // Validate body is not empty
-        if (req.body.empty()) {
-          res.body = make_error_json("EMPTY_BODY", "Request body is required");
-          res.code = 400;
-          return res;
-        }
-
-        // Note: Full configuration update would require parsing JSON and
-        // updating the config. For now, we return a placeholder success
-        // response. Actual implementation would need a callback or direct
-        // config reference.
-        res.body = make_success_json("Configuration update acknowledged");
-        res.code = 200;
+        // This route used to answer success and change nothing.
+        res.body = make_error_json("NOT_IMPLEMENTED",
+                                   "Settings are read when the server starts and cannot be changed here");
+        res.code = 501;
         return res;
       });
 
@@ -224,8 +213,8 @@ void register_system_endpoints_impl(crow::SimpleApp &app,
     res.add_header("Content-Type", "application/json");
     add_cors_headers(res, *ctx);
 
-    res.body =
-        R"({"api_version":"v1","pacs_version":"1.2.0","crow_version":"1.2.0"})";
+    res.body = std::string(R"({"api_version":"v1","pacs_version":")") + PACS_SYSTEM_VERSION +
+               R"(","crow_version":")" + crow::VERSION + R"("})";
     res.code = 200;
     return res;
   });

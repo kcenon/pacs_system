@@ -183,10 +183,10 @@ function WorklistFormContent({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">
+          <label className="text-sm font-medium" htmlFor="worklist-step_id">
             Step ID <span className="text-destructive">*</span>
           </label>
-          <Input
+          <Input id="worklist-step_id"
             value={formData.step_id}
             onChange={(e) => handleChange('step_id', e.target.value)}
             placeholder="SPS-..."
@@ -196,10 +196,10 @@ function WorklistFormContent({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">
+          <label className="text-sm font-medium" htmlFor="worklist-modality">
             Modality <span className="text-destructive">*</span>
           </label>
-          <Select
+          <Select id="worklist-modality"
             value={formData.modality}
             onChange={(e) => handleChange('modality', e.target.value)}
             options={MODALITY_OPTIONS}
@@ -211,10 +211,10 @@ function WorklistFormContent({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">
+          <label className="text-sm font-medium" htmlFor="worklist-scheduled_datetime">
             Scheduled Date/Time <span className="text-destructive">*</span>
           </label>
-          <Input
+          <Input id="worklist-scheduled_datetime"
             type="datetime-local"
             value={formData.scheduled_datetime}
             onChange={(e) => handleChange('scheduled_datetime', e.target.value)}
@@ -225,8 +225,8 @@ function WorklistFormContent({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Accession Number</label>
-          <Input
+          <label className="text-sm font-medium" htmlFor="worklist-accession_no">Accession Number</label>
+          <Input id="worklist-accession_no"
             value={formData.accession_no}
             onChange={(e) => handleChange('accession_no', e.target.value)}
             placeholder="e.g., ACC001"
@@ -238,10 +238,10 @@ function WorklistFormContent({
         <h4 className="text-sm font-semibold mb-3">Patient Information</h4>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label className="text-sm font-medium" htmlFor="worklist-patient_id">
               Patient ID <span className="text-destructive">*</span>
             </label>
-            <Input
+            <Input id="worklist-patient_id"
               value={formData.patient_id}
               onChange={(e) => handleChange('patient_id', e.target.value)}
               placeholder="e.g., PAT001"
@@ -252,8 +252,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Patient Name</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-patient_name">Patient Name</label>
+            <Input id="worklist-patient_name"
               value={formData.patient_name}
               onChange={(e) => handleChange('patient_name', e.target.value)}
               placeholder="e.g., Doe^John"
@@ -263,8 +263,8 @@ function WorklistFormContent({
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Birth Date</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-birth_date">Birth Date</label>
+            <Input id="worklist-birth_date"
               type="date"
               value={formData.birth_date}
               onChange={(e) => handleChange('birth_date', e.target.value)}
@@ -272,8 +272,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Sex</label>
-            <Select
+            <label className="text-sm font-medium" htmlFor="worklist-sex">Sex</label>
+            <Select id="worklist-sex"
               value={formData.sex}
               onChange={(e) => handleChange('sex', e.target.value)}
               options={SEX_OPTIONS}
@@ -287,8 +287,8 @@ function WorklistFormContent({
         <h4 className="text-sm font-semibold mb-3">Procedure Details</h4>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Procedure Description</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-procedure_desc">Procedure Description</label>
+            <Input id="worklist-procedure_desc"
               value={formData.procedure_desc}
               onChange={(e) => handleChange('procedure_desc', e.target.value)}
               placeholder="e.g., Chest X-Ray"
@@ -296,8 +296,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Protocol Code</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-protocol_code">Protocol Code</label>
+            <Input id="worklist-protocol_code"
               value={formData.protocol_code}
               onChange={(e) => handleChange('protocol_code', e.target.value)}
               placeholder="e.g., CHEST_PA"
@@ -307,8 +307,8 @@ function WorklistFormContent({
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Requested Procedure ID</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-requested_proc_id">Requested Procedure ID</label>
+            <Input id="worklist-requested_proc_id"
               value={formData.requested_proc_id}
               onChange={(e) => handleChange('requested_proc_id', e.target.value)}
               placeholder="e.g., REQ001"
@@ -316,8 +316,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Study Instance UID</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-study_uid">Study Instance UID</label>
+            <Input id="worklist-study_uid"
               value={formData.study_uid}
               onChange={(e) => handleChange('study_uid', e.target.value)}
               placeholder="Auto-generated"
@@ -331,8 +331,8 @@ function WorklistFormContent({
         <h4 className="text-sm font-semibold mb-3">Station & Physician</h4>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Station AE Title</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-station_ae">Station AE Title</label>
+            <Input id="worklist-station_ae"
               value={formData.station_ae}
               onChange={(e) => handleChange('station_ae', e.target.value)}
               placeholder="e.g., CT_SCANNER_1"
@@ -340,8 +340,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Station Name</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-station_name">Station Name</label>
+            <Input id="worklist-station_name"
               value={formData.station_name}
               onChange={(e) => handleChange('station_name', e.target.value)}
               placeholder="e.g., CT Room 1"
@@ -351,8 +351,8 @@ function WorklistFormContent({
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Referring Physician</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-referring_phys">Referring Physician</label>
+            <Input id="worklist-referring_phys"
               value={formData.referring_phys}
               onChange={(e) => handleChange('referring_phys', e.target.value)}
               placeholder="e.g., Dr. Smith"
@@ -360,8 +360,8 @@ function WorklistFormContent({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Referring Physician ID</label>
-            <Input
+            <label className="text-sm font-medium" htmlFor="worklist-referring_phys_id">Referring Physician ID</label>
+            <Input id="worklist-referring_phys_id"
               value={formData.referring_phys_id}
               onChange={(e) => handleChange('referring_phys_id', e.target.value)}
               placeholder="e.g., PHY001"

@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 #include "kcenon/pacs/storage/index_database.h"
 #include "kcenon/pacs/storage/instance_record.h"
 #include "kcenon/pacs/storage/series_record.h"
@@ -97,7 +99,7 @@ std::string instances_to_json(const std::vector<storage::instance_record> &insta
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_series_endpoints_impl(crow::SimpleApp &app,
+void register_series_endpoints_impl(rest_app &app,
                                     std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/series/:uid - Get series details
   CROW_ROUTE(app, "/api/v1/series/<string>")

@@ -45,6 +45,10 @@ namespace kcenon::pacs::network {
 class dicom_server;
 } // namespace kcenon::pacs::network
 
+namespace kcenon::pacs::network::v2 {
+class dicom_server_v2;
+} // namespace kcenon::pacs::network::v2
+
 namespace kcenon::pacs::client {
 class remote_node_manager;
 class job_manager;
@@ -95,6 +99,9 @@ struct rest_server_context {
 
   /// OAuth 2.0 middleware for DICOMweb endpoint authorization
   std::shared_ptr<auth::oauth2_middleware> oauth2;
+
+  /// DICOM server for live association statistics, when it is the v2 server
+  std::shared_ptr<network::v2::dicom_server_v2> dicom_server_v2;
 };
 
 namespace endpoints {
