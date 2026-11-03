@@ -15,6 +15,12 @@ PROBE_KINDS = ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'brows
                'reliability')
 
 
+def tracks_cases(spec):
+    """Whether the inventory assigns and checks this component's individual tests: every component that is not a
+    probe, and a probe that declares the Catch2 binary and filter it runs itself."""
+    return spec.get('kind') not in PROBE_KINDS or 'binary' in spec
+
+
 def identity(kind, binary, name):
     return '/'.join(quote(value, safe='') for value in (kind, binary, name))
 
@@ -105,7 +111,7 @@ def ctest_results(path):
 def build_inventory(manifest, ctest, catch_all, selections, configuration):
     """Selections are produced by each runner itself, never by emulating filters."""
     records, aliases, jobs, errors = {}, {}, {}, []
-    components = {spec['id']: spec for spec in manifest['components'] if spec.get('kind') not in PROBE_KINDS}
+    components = {spec['id']: spec for spec in manifest['components'] if tracks_cases(spec)}
     owners = {job: [feature['id'] for feature in manifest['features'] if job in feature['components']]
               for job in components}
     for binary, tests in catch_all.items():

@@ -20,8 +20,8 @@ import uuid
 import pydicom
 from report import digest, junit_counts, passed, validate_manifest, write_junit
 from deferrals import audit_deferrals
-from inventory import (PROBE_KINDS, attach_results, build_inventory, catch_listing, catch_results,
-                       ctest_results, evaluate_inventory)
+from inventory import (attach_results, build_inventory, catch_listing, catch_results,
+                       ctest_results, evaluate_inventory, tracks_cases)
 from support import declared_support
 
 HERE = Path(__file__).resolve().parent
@@ -687,7 +687,7 @@ class Validation:
                 errors.append(f'{binary}: discovery failed: {exc}')
                 all_tests[binary] = []
         for spec in self.manifest['components']:
-            if spec.get('kind') in PROBE_KINDS:
+            if not tracks_cases(spec):
                 continue
             try:
                 if spec.get('kind') == 'ctest':
@@ -797,7 +797,16 @@ class Validation:
         if spec.get('kind') == 'workflow':
             return self.probe_matrix(spec, HERE/'tests/workflow_probe.py', 'workflow')
         if spec.get('kind') == 'ai-contract':
-            return self.probe_matrix(spec, HERE/'tests/ai_probe.py', 'ai')
+            counts = self.probe_matrix(spec, HERE/'tests/ai_probe.py', 'ai')
+            # The probe runs the hidden ai_tests [ai-contract] cases against the service it starts. Report each
+            # one, so the inventory sees them executed rather than unassigned.
+            try:
+                require(self.test_inventory is not None, 'individual discovery did not complete')
+                counts['case_results'] = attach_results(self.test_inventory, spec['id'],
+                                                        catch_results(self.output/'ai/ai-contract.xml'))
+            except Exception as exc:
+                counts['detail'] += f'; no individual results from ai/ai-contract.xml: {exc}'
+            return counts
         if spec.get('kind') == 'reliability':
             return self.probe_matrix(spec, HERE.parent/'reliability/fault_probe.py', 'reliability')
         if spec.get('kind') == 'browser':

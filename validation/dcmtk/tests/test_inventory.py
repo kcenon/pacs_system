@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT/'validation/dcmtk'))
 from inventory import (attach_results, build_inventory, catch_listing, catch_results,
-                       ctest_results, evaluate_inventory)
+                       ctest_results, evaluate_inventory, tracks_cases)
 from support import declared_support
 
 
@@ -39,6 +39,27 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(evaluation['discovered'],2)
         self.assertEqual(len(evaluation['unassigned']),1)
         self.assertEqual(inv['cases'][1]['assignment_status'],'unverified')
+
+    def test_probe_that_declares_its_catch_cases_must_report_each(self):
+        self.assertFalse(tracks_cases(dict(id='component.flow',kind='workflow')))
+        hidden = test_record('contract',['.','ai-contract'])
+        manifest = dict(components=[dict(id='component.example',binary='example',args=[]),
+                                    dict(id='component.probe',kind='ai-contract',binary='example',
+                                         args=['[ai-contract]'])],
+                        features=[dict(id='feature',components=['component.example','component.probe'])])
+        tests = [test_record('one'),hidden]
+        registered = dict(tests=[dict(name=t['name'],command=['/build/example',t['name']]) for t in tests])
+        inv = build_inventory(manifest,registered,{'example':tests},
+                              {'component.example':[tests[0]],'component.probe':[hidden]},{'os':'test'})
+        self.assertEqual(inv['cases'][1]['jobs'],['component.probe'])
+        plain = attach_results(inv,'component.example',[dict(name='one',tags=[],status='passed')])
+        without = evaluate_inventory(inv,{'component.example':plain})
+        self.assertEqual(without['status'],'failed')
+        self.assertIn('component.probe: missing individual execution results',without['errors'])
+        ran = attach_results(inv,'component.probe',[dict(name='contract',tags=['.','ai-contract'],status='passed')])
+        evaluation = evaluate_inventory(inv,{'component.example':plain,'component.probe':ran})
+        self.assertEqual(evaluation['status'],'passed')
+        self.assertEqual(evaluation['executed'],2)
 
     def test_exact_case_set_passes(self):
         inv = example_inventory()

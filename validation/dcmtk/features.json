@@ -221,7 +221,8 @@
     {
       "id": "component.ai_contract",
       "kind": "ai-contract",
-      "args": [],
+      "binary": "ai_tests",
+      "args": ["[ai-contract]"],
       "timeout_seconds": 600
     },
     {
