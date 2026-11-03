@@ -25,7 +25,8 @@ RUN cmake -S /workspace/build/_deps/openjph-src -B /workspace/ojph-tools -G Ninj
     -DOJPH_BUILD_EXECUTABLES=ON -DOJPH_ENABLE_TIFF_SUPPORT=OFF -DBUILD_SHARED_LIBS=OFF \
     && cmake --build /workspace/ojph-tools --parallel ${BUILD_JOBS} \
     && install -m 755 /workspace/ojph-tools/src/apps/ojph_compress/ojph_compress /usr/local/bin/ojph_compress
-# Keep report/probe edits independent of the expensive C++ build layer.
+# Keep report/probe edits independent of the expensive C++ build layer. The other validation
+# folders are part of the source snapshot above: CMake builds validation/security/security_probe.cpp.
 COPY harness /workspace/pacs_system/validation/dcmtk
 # DIMSE-N peers, each verified by its digest: dcm4che needs the JRE above.
 COPY peers /workspace/pacs_system/validation/peers

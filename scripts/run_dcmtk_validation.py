@@ -174,7 +174,11 @@ class Driver:
                 shutil.copytree(context/'pacs_system/validation/dcmtk',context/'harness')
                 shutil.copytree(context/'pacs_system/validation/peers',context/'peers')
                 shutil.copy2(context/'pacs_system/scripts/run_dcmtk_validation.py',context/'driver.py')
-                (context/'.dockerignore').write_text('pacs_system/validation/\npacs_system/scripts/run_dcmtk_validation.py\n')
+                # Only what the Dockerfile copies after the C++ build stays out of the snapshot: CMake
+                # builds validation/security/security_probe.cpp, and run.py runs the security, browser
+                # and reliability probes from the image.
+                (context/'.dockerignore').write_text('pacs_system/validation/dcmtk/\npacs_system/validation/peers/\n'
+                                                     'pacs_system/scripts/run_dcmtk_validation.py\n')
                 self.command(['git','init',str(peer_source)],'checkout.log')
                 self.command(['git','-C',str(peer_source),'fetch','--depth','1',self.lock['repository'],self.lock['revision']],'checkout.log')
                 self.command(['git','-C',str(peer_source),'checkout','--detach','FETCH_HEAD'],'checkout.log')
