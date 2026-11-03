@@ -144,8 +144,8 @@ python3 validation/dcmtk/tests/qr_protocol_probe.py --binary build/bin/qr_scp --
 - actual failed/missing/skipped test evidence;
 - blocked scenarios whose prerequisite failed (zero tests, never a pass);
 - feature groups with passing implemented tests;
-- missing independent coverage, such as S3/Azure providers, AI service, XDS registry,
-  browser workflows and cross-protocol DICOMweb flows.
+- missing independent coverage, such as S3/Azure providers, an actual AI inference
+  provider and an XDS registry.
 
 `features.json` maps **20 feature groups** to executable evidence and lists these
 remaining coverage requirements. They deliberately prevent an overall `passed`
@@ -503,6 +503,34 @@ python3 validation/dcmtk/tests/dicomweb_probe.py --output /tmp/dicomweb --build-
 `component.browser` runs `validation/browser/browser_probe.py`: the built web app in Chromium against `pacs_server --http-rest-api`,
 with tokens signed by openssl, data stored over C-STORE and STOW-RS, and each page checked against values declared before it opens,
 against the REST API asked directly, and for the worklist against DCMTK `findscu`. `validation/browser/README.md` lists the cases.
+
+### Jobs, routing, sync and prefetch between two archives (#1323)
+
+`component.workflow` runs `tests/workflow_probe.py`: `pacs_server --http-rest-api` with two Orthanc servers it knows only as
+remote nodes. Orthanc A holds what `pacs_server` retrieves, synchronizes and prefetches; Orthanc B receives what it stores and
+forwards. Each case compares SOP Instance UID to pixel digest manifests, declared before any job ran, with what each side holds
+(Orthanc's REST API, `pacs_server`'s WADO-URI and QIDO-RS), and reads job states from the REST API: retrieve, and a repeated
+retrieve whose duplicates are refused, audited and counted; store, and store again with nothing new at B; a missing object; an
+unknown node; a retry after B was down; cancel and pause in the middle of a transfer; CT forwarded by a rule while MR is not;
+sync and prefetch with and without the studies already held; and a graceful stop and a forced kill in the middle of a store
+job, which the next run finishes. The C-STORE counters of `GET /api/v1/system/metrics`, the totals of
+`GET /api/v1/system/status` and the audit trail are compared with the same events, and the reported storage use with the file system.
+
+### AI service contract (#1323)
+
+`component.ai_contract` runs `tests/ai_probe.py`. It starts `validation/peers/ai/ai_contract_service.py`, an inference service
+that shares no code with PACS, and runs the hidden `[ai-contract]` cases of `ai_tests` against it: completion with an SR and a
+SEG tied to the archived source, a failure, a timeout followed by a cancel, a result about a study the archive does not hold,
+and a request without the token. A case counts only together with what the service recorded that it received and wrote.
+`ai.actual-provider` is reported blocked: no provider is declared and none is reachable here, and the contract service does
+not stand in for one. Run either directly; Orthanc, DCMTK `storescu` and pydicom must be installed:
+
+```sh
+python3 validation/dcmtk/tests/workflow_probe.py --output /tmp/workflow --build-dir build \
+  --source-revision "$(git rev-parse HEAD)" --source-digest "$(git rev-parse HEAD^{tree})"
+python3 validation/dcmtk/tests/ai_probe.py --output /tmp/ai --build-dir build \
+  --source-revision "$(git rev-parse HEAD)" --source-digest "$(git rev-parse HEAD^{tree})"
+```
 
 ### Nested worklists and normalized request identity (#1316)
 

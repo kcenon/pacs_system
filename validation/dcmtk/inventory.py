@@ -10,6 +10,9 @@ import re
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
+# Components that report their own cases from a probe of their own, not individual Catch2/CTest tests.
+PROBE_KINDS = ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser', 'workflow', 'ai-contract')
+
 
 def identity(kind, binary, name):
     return '/'.join(quote(value, safe='') for value in (kind, binary, name))
@@ -101,8 +104,7 @@ def ctest_results(path):
 def build_inventory(manifest, ctest, catch_all, selections, configuration):
     """Selections are produced by each runner itself, never by emulating filters."""
     records, aliases, jobs, errors = {}, {}, {}, []
-    components = {spec['id']: spec for spec in manifest['components']
-                  if spec.get('kind') not in ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser')}
+    components = {spec['id']: spec for spec in manifest['components'] if spec.get('kind') not in PROBE_KINDS}
     owners = {job: [feature['id'] for feature in manifest['features'] if job in feature['components']]
               for job in components}
     for binary, tests in catch_all.items():

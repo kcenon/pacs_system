@@ -9,7 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'validation/dcmtk'))
 from report import evaluate, junit_counts, validate_manifest, write_junit
-from inventory import attach_results, build_inventory
+from inventory import PROBE_KINDS, attach_results, build_inventory
 
 
 class GateTests(unittest.TestCase):
@@ -26,7 +26,7 @@ class GateTests(unittest.TestCase):
         # Synthetic, fully executed inventory for the report-contract tests.
         all_tests, selections, registered = {}, {}, []
         for spec in self.manifest['components']:
-            if spec.get('kind') in ('discovery','corpus','qr-matrix','dimse-n','dicomweb', 'browser'):
+            if spec.get('kind') in PROBE_KINDS:
                 continue
             record = dict(name=spec['id'],tags=[],source='synthetic',line='1')
             selections[spec['id']] = [record]

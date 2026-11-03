@@ -194,6 +194,18 @@
       "timeout_seconds": 1800
     },
     {
+      "id": "component.workflow",
+      "kind": "workflow",
+      "args": [],
+      "timeout_seconds": 1200
+    },
+    {
+      "id": "component.ai_contract",
+      "kind": "ai-contract",
+      "args": [],
+      "timeout_seconds": 600
+    },
+    {
       "id": "component.discovery",
       "kind": "discovery",
       "args": [],
@@ -578,22 +590,31 @@
       "id": "workflow",
       "components": [
         "component.client_tests",
-        "component.workflow_tests"
+        "component.workflow_tests",
+        "component.workflow"
       ],
       "interop": [],
       "gaps": [
-        "Routing/prefetch/sync/jobs against both external PACS nodes, including retries and restart."
+        "Delayed routing is not implemented: a rule action with delay_minutes starts its forward job at once.",
+        "Retrieval by C-GET stores nothing in this archive, so sync and prefetch use C-MOVE only and a node without C-MOVE fails them.",
+        "sync_manager and prefetch_manager now start the jobs they create, but pacs_server hosts neither and no case runs them; the sync and prefetch cases here are job_manager's own job types.",
+        "pacs_server answers a SOP Instance it holds with 0x0111 (duplicate policy reject, not settable on its command line); Orthanc counts that as a completed sub-operation, so a repeated retrieve completes while nothing is stored. The refusals show only in the audit trail and the metrics."
       ],
       "known_issues": []
     },
     {
       "id": "ai",
       "components": [
-        "component.ai_tests"
+        "component.ai_tests",
+        "component.ai_contract"
       ],
       "interop": [],
       "gaps": [
-        "Independent inference-service request/result roundtrip and failure handling."
+        "No inference provider is declared and none is reachable here: ai.actual-provider is blocked, and the contract service does not close it.",
+        "Completion by callback: the connector sends callback_url, but nothing in PACS receives the call; completion is learned by polling.",
+        "The result handler checks only that the source study is archived; series and instance references in SR evidence and SEG Referenced Series are not checked, and get_cad_findings and get_segment_info return nothing.",
+        "Result records and source links live in memory: a restarted program no longer knows which result belongs to which source.",
+        "pacs_server hosts neither the connector nor the result handler, so results reach its archive only through a program built on pacs_ai."
       ],
       "known_issues": []
     },
@@ -615,11 +636,14 @@
       "components": [
         "component.monitoring_tests",
         "component.di_tests",
-        "component.pacs_integration_tests"
+        "component.pacs_integration_tests",
+        "component.workflow"
       ],
       "interop": [],
       "gaps": [
-        "Metrics/readiness/audit under external transfer, induced failure and shutdown."
+        "DI replacement is not exercised: no case swaps a logger, a storage or another service while the server runs.",
+        "An externally received audit trail (an ATNA syslog receiver) belongs to #1325; the trail checked here is pacs_server's own table.",
+        "GET /api/v1/system/metrics counts C-STORE, C-FIND and associations; C-ECHO, C-MOVE and C-GET as an SCP and the normalized services are not counted."
       ],
       "known_issues": []
     },
@@ -630,7 +654,7 @@
       ],
       "interop": [],
       "gaps": [
-        "No page shows transfer jobs: pacs_server has no job manager, and job_manager simulates C-STORE jobs (#1323).",
+        "No page shows transfer jobs, remote nodes or routing rules; the REST API serves them since #1323.",
         "Signing in means pasting a token from the identity provider; no OpenID Connect redirect flow, so an identity provider was never part of a run.",
         "One browser, Chromium headless shell; no Firefox or WebKit, no accessibility audit beyond the labels the tests use.",
         "Configuration is read-only: the server reads its settings at start and has no way to change them while running."
@@ -1220,7 +1244,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.workflow.negative",
@@ -1240,7 +1264,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.ai.positive",
@@ -1260,7 +1284,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.ai.negative",
@@ -1280,7 +1304,7 @@
       "prerequisites": [
         "feature-specific peer/build prerequisites"
       ],
-      "assignment_status": "unverified"
+      "assignment_status": "assigned"
     },
     {
       "case_id": "requirement.ihe.positive",
@@ -1550,6 +1574,24 @@
         "web": [
           "Most REST API routes under /api check no credentials, and OAuth 2.0 tokens do not cover them, so pacs_server does not serve them. Owned by the browser flows of #1322.",
           "CORS preflight gets no Access-Control headers: Crow answers OPTIONS itself, so the routes meant to answer it never run, and a browser can only make requests that need no preflight. Owned by #1322."
+        ]
+      }
+    },
+    {
+      "issue": 1323,
+      "change": "component.workflow runs pacs_server with its REST API against two independent Orthanc servers: retrieve, store, routing, sync and prefetch jobs, duplicates, retry after an outage, cancel, pause, a graceful stop and a forced kill in the middle of a job, each checked against exact SOP Instance UID to pixel digest manifests at both ends, the audit trail and the DIMSE counters. component.ai_contract runs the AI connector and result handler against an inference service in another process and checks what that service received and wrote.",
+      "previous_gaps": {
+        "workflow": [
+          "Routing/prefetch/sync/jobs against both external PACS nodes, including retries and restart."
+        ],
+        "ai": [
+          "Independent inference-service request/result roundtrip and failure handling."
+        ],
+        "monitoring_di": [
+          "Metrics/readiness/audit under external transfer, induced failure and shutdown."
+        ],
+        "frontend": [
+          "No page shows transfer jobs: pacs_server has no job manager, and job_manager simulates C-STORE jobs (#1323)."
         ]
       }
     }

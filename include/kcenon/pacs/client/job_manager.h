@@ -24,7 +24,10 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <filesystem>
+#include <functional>
 #include <future>
+#include <optional>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -230,6 +233,34 @@ public:
      */
     [[nodiscard]] auto start_job(std::string_view job_id) -> kcenon::pacs::VoidResult;
 
+    /// Finds the stored file of one SOP Instance UID, or nothing when there is none.
+    using instance_locator = std::function<std::optional<std::filesystem::path>(std::string_view)>;
+
+    /**
+     * @brief Set where store jobs read the objects they send
+     *
+     * A store job sends the file this returns for each SOP Instance UID, in that file's transfer syntax.
+     * Without a locator a store job fails rather than report objects as sent: it used to report every
+     * object as stored without sending any (#1323). Set it before jobs run.
+     *
+     * @param locator Function returning the file of one SOP Instance UID
+     */
+    void set_instance_locator(instance_locator locator);
+
+    /// Whether this archive holds a study, by Study Instance UID.
+    using study_presence = std::function<bool(std::string_view)>;
+
+    /**
+     * @brief Set how sync and prefetch jobs learn what this archive already holds
+     *
+     * Sync and prefetch jobs query their node, then move by C-MOVE each study it holds and this
+     * says the archive does not. Without it they fail: they used to report completion after the
+     * query alone, without retrieving anything (#1323). Set it before jobs run.
+     *
+     * @param presence Function telling whether a study is held here
+     */
+    void set_study_presence(study_presence presence);
+
     /**
      * @brief Pause a running or queued job
      *
@@ -259,7 +290,9 @@ public:
     /**
      * @brief Retry a failed job
      *
-     * Resets a failed job and queues it for re-execution.
+     * Resets a failed job and queues it for re-execution. A job's state survives a restart: pending
+     * jobs wait for start_job(), queued and paused jobs return to the queue, and a job a stop
+     * interrupted while running runs again.
      *
      * @param job_id The job ID to retry
      * @return VoidResult indicating success or error

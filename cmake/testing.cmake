@@ -346,6 +346,7 @@ if(PACS_BUILD_TESTS)
     #           Issue #205 - AI service connector for inference requests)
     if(TARGET pacs_ai)
         add_executable(ai_tests
+            tests/ai/ai_contract_test.cpp
             tests/ai/ai_result_handler_test.cpp
             tests/ai/ai_service_connector_test.cpp
             tests/ai/aira_assessment_test.cpp
@@ -555,6 +556,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_client AND TARGET pacs_storage)
         add_executable(client_tests
             tests/client/job_manager_test.cpp
+            tests/client/job_contract_test.cpp
             tests/client/routing_manager_test.cpp
             tests/client/prefetch_manager_test.cpp
             tests/client/sync_manager_test.cpp

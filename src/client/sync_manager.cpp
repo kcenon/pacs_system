@@ -161,6 +161,18 @@ struct sync_manager::impl {
         #endif
     }
 
+    /// A retrieve job for one study, started: a created job only waits for a start.
+    bool start_retrieve(std::string_view node_id, const std::string& study_uid) {
+        auto job_id = job_mgr->create_retrieve_job(node_id, study_uid, std::nullopt, job_priority::normal);
+        return !job_id.empty() && job_mgr->start_job(job_id).is_ok();
+    }
+
+    /// The node a sync configuration pulls from; empty when the configuration is gone.
+    std::string source_node_of(std::string_view config_id) const {
+        const auto cfg = get_config_from_cache(config_id);
+        return cfg ? cfg->source_node_id : std::string{};
+    }
+
     std::optional<sync_config> get_config_from_cache(std::string_view config_id) const {
         std::shared_lock lock(configs_mutex);
         auto it = std::find_if(configs.begin(), configs.end(),
@@ -373,10 +385,7 @@ struct sync_manager::impl {
                 if (conflict.conflict_type == sync_conflict_type::missing_local) {
                     // Create retrieve job
                     if (job_mgr && node.supports_query_retrieve()) {
-                        auto job_id = job_mgr->create_retrieve_job(
-                            cfg.source_node_id, conflict.study_uid, std::nullopt,
-                            job_priority::normal);
-                        if (!job_id.empty()) {
+                        if (start_retrieve(cfg.source_node_id, conflict.study_uid)) {
                             result.studies_synced++;
                             notify_progress(cfg.config_id, result.studies_synced,
                                           result.studies_checked);
@@ -578,13 +587,9 @@ struct sync_manager::impl {
         switch (resolution) {
             case conflict_resolution::prefer_remote:
                 // Create retrieve job
-                if (job_mgr) {
-                    auto job_id = job_mgr->create_retrieve_job(
-                        conflict.config_id, conflict.study_uid, std::nullopt,
-                        job_priority::normal);
-                    if (!job_id.empty()) {
-                        result.studies_synced++;
-                    }
+                // From the configuration's source node: the configuration ID names no node.
+                if (job_mgr && start_retrieve(source_node_of(conflict.config_id), conflict.study_uid)) {
+                    result.studies_synced++;
                 }
                 break;
 
@@ -596,13 +601,8 @@ struct sync_manager::impl {
             case conflict_resolution::prefer_newer:
                 // Compare timestamps and choose
                 if (conflict.remote_modified > conflict.local_modified) {
-                    if (job_mgr) {
-                        auto job_id = job_mgr->create_retrieve_job(
-                            conflict.config_id, conflict.study_uid, std::nullopt,
-                            job_priority::normal);
-                        if (!job_id.empty()) {
-                            result.studies_synced++;
-                        }
+                    if (job_mgr && start_retrieve(source_node_of(conflict.config_id), conflict.study_uid)) {
+                        result.studies_synced++;
                     }
                 } else {
                     result.studies_skipped++;

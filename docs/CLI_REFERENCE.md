@@ -1019,7 +1019,9 @@ Procedure Step. Commitment reports and UPS events to a named peer go on associat
 With `--http-port` it also serves DICOMweb under `/dicomweb` and WADO-URI under `/wado`, on the same database and storage
 as the DICOM services, so an object stored over either protocol is found over both. With `--http-rest-api` it also serves
 the REST API under `/api`, which the web app uses: every request there needs a token whose scope allows it (`pacs.read`,
-`pacs.write` or `pacs.admin`), so the option is refused without the OAuth options. The three OAuth options go together:
+`pacs.write` or `pacs.admin`), so the option is refused without the OAuth options. It then also manages remote nodes,
+transfer jobs and routing rules in its index database: store jobs send from its archive, sync and prefetch jobs retrieve
+what it does not hold, and a rule forwards each object it stores that matches. The three OAuth options go together:
 the server refuses to start with only some of them, and refuses to start if the port cannot be opened. Without them
 DICOMweb answers everyone who can reach the port, which is why the default address is loopback and a warning is printed.
 

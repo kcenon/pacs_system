@@ -516,11 +516,14 @@ auto routing_repository::reset_statistics(std::string_view rule_id)
     }
 
     auto builder = query_builder();
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them reset only the last column.
     builder.update(table_name())
-        .set("triggered_count", static_cast<int64_t>(0))
-        .set("success_count", static_cast<int64_t>(0))
-        .set("failure_count", static_cast<int64_t>(0))
-        .set("last_triggered", std::string{})
+        .set(std::map<std::string, database_value>{
+            {"triggered_count", static_cast<int64_t>(0)},
+            {"success_count", static_cast<int64_t>(0)},
+            {"failure_count", static_cast<int64_t>(0)},
+            {"last_triggered", std::string{}}})
         .where("rule_id", "=", std::string(rule_id));
 
     auto result = storage_session().execute(builder.build());

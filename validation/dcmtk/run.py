@@ -20,7 +20,7 @@ import uuid
 import pydicom
 from report import digest, junit_counts, passed, validate_manifest, write_junit
 from deferrals import audit_deferrals
-from inventory import (attach_results, build_inventory, catch_listing, catch_results,
+from inventory import (PROBE_KINDS, attach_results, build_inventory, catch_listing, catch_results,
                        ctest_results, evaluate_inventory)
 from support import declared_support
 
@@ -687,7 +687,7 @@ class Validation:
                 errors.append(f'{binary}: discovery failed: {exc}')
                 all_tests[binary] = []
         for spec in self.manifest['components']:
-            if spec.get('kind') in ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb', 'browser'):
+            if spec.get('kind') in PROBE_KINDS:
                 continue
             try:
                 if spec.get('kind') == 'ctest':
@@ -781,7 +781,23 @@ class Validation:
                     detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
                            'see browser/browser-summary.json')
 
+    def probe_matrix(self, spec, script, name):
+        """Report a probe's own results from <name>/<name>-summary.json; a nonzero exit only means some cases failed."""
+        directory = self.output/name
+        self.command(['python3', script, '--output', directory,
+                      '--build-dir', self.args.build_dir, '--source-revision', self.args.source_revision,
+                      '--source-digest', self.args.source_digest],
+                     timeout=spec['timeout_seconds'], allowed=(0, 1))
+        counts = json.loads((directory/f'{name}-summary.json').read_text())['counts']
+        return dict(tests=sum(counts.values()), failed=counts['failed']+counts['blocked'], skipped=0,
+                    detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
+                           f'see {name}/{name}-summary.json')
+
     def component(self, spec):
+        if spec.get('kind') == 'workflow':
+            return self.probe_matrix(spec, HERE/'tests/workflow_probe.py', 'workflow')
+        if spec.get('kind') == 'ai-contract':
+            return self.probe_matrix(spec, HERE/'tests/ai_probe.py', 'ai')
         if spec.get('kind') == 'browser':
             return self.browser_flows(spec)
         if spec.get('kind') == 'corpus':

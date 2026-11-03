@@ -784,7 +784,7 @@ RESTful endpoints for system health, metrics, and configuration.
 | GET | `/api/v1/system/health` | Health check endpoint |
 | GET | `/api/v1/system/info` | System information |
 | GET | `/api/v1/system/config` | Current configuration |
-| GET | `/api/v1/system/metrics` | Performance metrics |
+| GET | `/api/v1/system/metrics` | DIMSE counters as `pacs_metrics::to_json()` gives them; `pacs_server` counts C-STORE, C-FIND and associations |
 | GET | `/api/v1/system/storage` | Storage statistics |
 
 #### 3.11.3 Response Examples
@@ -957,11 +957,18 @@ Comprehensive job management REST API supporting CRUD operations, job lifecycle 
 
 | Type | Description | Parameters |
 |------|-------------|------------|
-| `retrieve` | C-MOVE/C-GET operation | `study_uid`, `node_id` |
-| `store` | C-STORE operation | `study_uid`, `destination_node_id` |
-| `query` | C-FIND operation | `query_level`, `filters`, `node_id` |
-| `sync` | Synchronization | `sync_config_id` |
-| `prefetch` | Prior study prefetch | `patient_id`, `modality` |
+| `retrieve` | C-MOVE (C-GET for a node without C-MOVE) of a study or series | `source_node_id`, `study_uid`, `series_uid` (optional) |
+| `store` | C-STORE of archived objects, each in its file's Transfer Syntax | `destination_node_id`, `instance_uids` |
+| `query` | C-FIND | `node_id`, `query_level` (default `STUDY`), `patient_id`, `patient_name` |
+| `sync` | C-FIND, then C-MOVE of each study the node holds and the archive does not | `source_node_id`, `patient_id` (optional) |
+| `prefetch` | The same for one patient's studies | `source_node_id`, `patient_id` |
+
+A job is created `pending` and runs after `POST .../start`, which queues it. `POST .../retry` resets a failed job and
+queues it again. The job JSON lists a store job's `instance_uids`; its `progress` counts objects for store jobs, the
+source's sub-operations for retrieve jobs, and studies for sync and prefetch jobs, where `skipped_items` are studies
+the archive already held. Jobs live in the index database and keep their state across a restart: pending jobs still
+wait for a start, queued and paused jobs return to the queue, and a job that was running when the server stopped runs
+again. A stop ends a running store, sync or prefetch job at the next object or study and leaves it queued.
 
 #### 3.14.4 Dependencies
 

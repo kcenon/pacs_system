@@ -28,6 +28,7 @@
 #include "kcenon/pacs/client/remote_node_manager.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/services/query_scu.h"
 #include "kcenon/pacs/web/endpoints/remote_nodes_endpoints.h"
@@ -139,70 +140,55 @@ std::string nodes_to_json(const std::vector<client::remote_node>& nodes,
 /**
  * @brief Parse node from JSON body
  */
+/// Whether parsed JSON is an object. A failed parse throws on t(), so validity is tested first.
+bool is_object(const crow::json::rvalue &json) {
+    return json && json.t() == crow::json::type::Object;
+}
+
+/// A string member of a JSON object; absent or of another type reads as empty.
+std::string string_member(const crow::json::rvalue &object, const std::string &key) {
+    if (!is_object(object) || !object.has(key) ||
+        object[key].t() != crow::json::type::String) {
+        return "";
+    }
+    return std::string(object[key].s());
+}
+
+std::optional<int64_t> int_member(const crow::json::rvalue &object, const std::string &key) {
+    if (!is_object(object) || !object.has(key) ||
+        object[key].t() != crow::json::type::Number) {
+        return std::nullopt;
+    }
+    return object[key].i();
+}
+
+bool bool_member(const crow::json::rvalue &object, const std::string &key, bool default_val) {
+    if (!is_object(object) || !object.has(key)) {
+        return default_val;
+    }
+    const auto type = object[key].t();
+    if (type == crow::json::type::True) {
+        return true;
+    }
+    if (type == crow::json::type::False) {
+        return false;
+    }
+    return default_val;
+}
+
 std::optional<client::remote_node> parse_node_from_json(const std::string& body,
                                                          std::string& error_message) {
     client::remote_node node;
 
-    // Simple JSON parsing (in production, use a proper JSON library)
-    auto get_string_value = [&body](const std::string& key) -> std::string {
-        std::string search = "\"" + key + "\":\"";
-        auto pos = body.find(search);
-        if (pos == std::string::npos) {
-            return "";
-        }
-        pos += search.length();
-        auto end_pos = body.find('"', pos);
-        if (end_pos == std::string::npos) {
-            return "";
-        }
-        return body.substr(pos, end_pos - pos);
-    };
-
-    auto get_int_value = [&body](const std::string& key) -> std::optional<int64_t> {
-        std::string search = "\"" + key + "\":";
-        auto pos = body.find(search);
-        if (pos == std::string::npos) {
-            return std::nullopt;
-        }
-        pos += search.length();
-        // Skip whitespace
-        while (pos < body.length() && (body[pos] == ' ' || body[pos] == '\t')) {
-            ++pos;
-        }
-        if (pos >= body.length()) {
-            return std::nullopt;
-        }
-        try {
-            size_t idx = 0;
-            auto val = std::stoll(body.substr(pos), &idx);
-            return val;
-        } catch (...) {
-            return std::nullopt;
-        }
-    };
-
-    auto get_bool_value = [&body](const std::string& key,
-                                   bool default_val) -> bool {
-        std::string search = "\"" + key + "\":";
-        auto pos = body.find(search);
-        if (pos == std::string::npos) {
-            return default_val;
-        }
-        pos += search.length();
-        // Skip whitespace
-        while (pos < body.length() && (body[pos] == ' ' || body[pos] == '\t')) {
-            ++pos;
-        }
-        if (pos >= body.length()) {
-            return default_val;
-        }
-        if (body.substr(pos, 4) == "true") {
-            return true;
-        }
-        if (body.substr(pos, 5) == "false") {
-            return false;
-        }
-        return default_val;
+    const auto json = crow::json::load(body);
+    if (!json || json.t() != crow::json::type::Object) {
+        error_message = "the body is not a JSON object";
+        return std::nullopt;
+    }
+    auto get_string_value = [&json](const std::string& key) { return string_member(json, key); };
+    auto get_int_value = [&json](const std::string& key) { return int_member(json, key); };
+    auto get_bool_value = [&json](const std::string& key, bool default_val) {
+        return bool_member(json, key, default_val);
     };
 
     // Required fields
@@ -623,15 +609,8 @@ void register_remote_nodes_endpoints_impl(rest_app& app,
                 }
 
                 // Parse query parameters from request body
-                auto get_str = [&req](const std::string& key) -> std::string {
-                    std::string search = "\"" + key + "\":\"";
-                    auto pos = req.body.find(search);
-                    if (pos == std::string::npos) return "";
-                    pos += search.length();
-                    auto end_pos = req.body.find('"', pos);
-                    if (end_pos == std::string::npos) return "";
-                    return req.body.substr(pos, end_pos - pos);
-                };
+                const auto body = crow::json::load(req.body);
+                auto get_str = [&body](const std::string& key) { return string_member(body, key); };
 
                 auto level = get_str("level");
                 if (level.empty()) level = "STUDY";
@@ -640,6 +619,8 @@ void register_remote_nodes_endpoints_impl(rest_app& app,
                 std::string calling_ae = "PACS_SCU";
                 if (ctx->dicom_server) {
                     calling_ae = ctx->dicom_server->config().ae_title;
+                } else if (ctx->dicom_server_v2) {
+                    calling_ae = ctx->dicom_server_v2->config().ae_title;
                 }
 
                 // Build association config for C-FIND
@@ -809,15 +790,8 @@ void register_remote_nodes_endpoints_impl(rest_app& app,
                 }
 
                 // Parse retrieve parameters from request body
-                auto get_str = [&req](const std::string& key) -> std::string {
-                    std::string search = "\"" + key + "\":\"";
-                    auto pos = req.body.find(search);
-                    if (pos == std::string::npos) return "";
-                    pos += search.length();
-                    auto end_pos = req.body.find('"', pos);
-                    if (end_pos == std::string::npos) return "";
-                    return req.body.substr(pos, end_pos - pos);
-                };
+                const auto body = crow::json::load(req.body);
+                auto get_str = [&body](const std::string& key) { return string_member(body, key); };
 
                 auto study_uid = get_str("study_uid");
                 if (study_uid.empty()) {

@@ -156,10 +156,8 @@ void register_system_endpoints_impl(rest_app &app,
 
 #ifdef PACS_WITH_MONITORING
     if (ctx->metrics) {
-      // pacs_metrics provides individual counters, build simple JSON
-      std::ostringstream oss;
-      oss << R"({"message":"Metrics available via pacs_metrics API"})";
-      res.body = oss.str();
+      // The counters themselves; this used to answer only that metrics existed somewhere (#1323).
+      res.body = ctx->metrics->to_json();
       res.code = 200;
     } else {
       res.body =

@@ -32,6 +32,16 @@
 #include "kcenon/pacs/storage/index_database.h"
 #ifdef PACS_SERVER_WITH_HTTP
 #include "kcenon/pacs/web/rest_server.h"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/remote_node_manager.h"
+#include "kcenon/pacs/client/routing_manager.h"
+#endif
+#ifdef PACS_WITH_MONITORING
+#include "kcenon/pacs/monitoring/pacs_metrics.h"
+
+namespace kcenon::pacs::monitoring {
+class health_checker;
+}
 #endif
 
 #include <atomic>
@@ -224,10 +234,18 @@ private:
         const std::string& sop_instance_uid,
         const encoding::transfer_syntax& syntax);
 
+#ifdef PACS_SERVER_WITH_HTTP
+    /// Remote nodes, jobs and routing for the REST API; store jobs read this server's archive.
+    void setup_jobs();
+#endif
+
     /// Add a row to the audit trail. A failed write to the trail is reported and does not fail the operation.
     void record_audit(storage::audit_event_type type, bool succeeded, std::string_view source_ae,
                       std::string_view target_ae, std::string patient_id, std::string study_uid,
                       std::string message);
+
+    /// Give the health checker the association counters and the archive totals it reports.
+    void report_health();
 
     /// Handle worklist query
     std::vector<core::dicom_dataset> handle_worklist_query(
@@ -260,6 +278,17 @@ private:
     /// Index database
     std::shared_ptr<storage::index_database> database_;
 
+    /// Storage SCP, kept so routing can follow what it stores
+    std::shared_ptr<services::storage_scp> storage_scp_;
+
+#ifdef PACS_WITH_MONITORING
+    /// The DIMSE work this server did, as GET /api/v1/system/metrics reports it
+    std::shared_ptr<monitoring::pacs_metrics> metrics_{std::make_shared<monitoring::pacs_metrics>()};
+
+    /// What GET /api/v1/system/status reports; it knows only the counters this server gives it
+    std::shared_ptr<monitoring::health_checker> health_;
+#endif
+
     /// Sends N-EVENT-REPORTs on associations this server opens
     std::shared_ptr<services::event_sender> events_;
 
@@ -269,6 +298,11 @@ private:
 #ifdef PACS_SERVER_WITH_HTTP
     /// REST and DICOMweb, on the same database and storage as the DICOM services
     std::unique_ptr<web::rest_server> http_server_;
+
+    /// Remote nodes, jobs and routing rules, managed through the REST API
+    std::shared_ptr<client::remote_node_manager> node_manager_;
+    std::shared_ptr<client::job_manager> job_manager_;
+    std::shared_ptr<client::routing_manager> routing_manager_;
 #endif
 
     /// Shutdown flag

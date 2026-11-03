@@ -293,6 +293,15 @@ std::string job_to_json(const client::job_record& job) {
         oss << R"(,"series_uid":")" << json_escape(*job.series_uid) << '"';
     }
 
+    // The objects a store job sends, so its progress can be checked against the destination.
+    if (!job.instance_uids.empty()) {
+        oss << R"(,"instance_uids":[)";
+        for (size_t i = 0; i < job.instance_uids.size(); ++i) {
+            oss << (i == 0 ? "" : ",") << '"' << json_escape(job.instance_uids[i]) << '"';
+        }
+        oss << ']';
+    }
+
     // Progress
     oss << R"(,"progress":)" << progress_to_json(job.progress);
 
@@ -395,17 +404,13 @@ std::pair<size_t, size_t> parse_pagination(const crow::request& req) {
  * @brief Helper for simple JSON string value extraction
  */
 std::string get_json_string_value(const std::string& body, const std::string& key) {
-    std::string search = "\"" + key + "\":\"";
-    auto pos = body.find(search);
-    if (pos == std::string::npos) {
+    // A JSON parser: searching for "key":" missed members written with a space, as most clients write them.
+    const auto json = crow::json::load(body);
+    if (!json || json.t() != crow::json::type::Object || !json.has(key) ||
+        json[key].t() != crow::json::type::String) {
         return "";
     }
-    pos += search.length();
-    auto end_pos = body.find('"', pos);
-    if (end_pos == std::string::npos) {
-        return "";
-    }
-    return body.substr(pos, end_pos - pos);
+    return std::string(json[key].s());
 }
 
 /**
@@ -414,29 +419,16 @@ std::string get_json_string_value(const std::string& body, const std::string& ke
 std::vector<std::string> get_json_string_array(const std::string& body,
                                                 const std::string& key) {
     std::vector<std::string> result;
-    std::string search = "\"" + key + "\":[";
-    auto pos = body.find(search);
-    if (pos == std::string::npos) {
+    const auto json = crow::json::load(body);
+    if (!json || json.t() != crow::json::type::Object || !json.has(key) ||
+        json[key].t() != crow::json::type::List) {
         return result;
     }
-    pos += search.length();
-    auto end_pos = body.find(']', pos);
-    if (end_pos == std::string::npos) {
-        return result;
+    for (const auto& item : json[key]) {
+        if (item.t() == crow::json::type::String) {
+            result.emplace_back(item.s());
+        }
     }
-
-    std::string array_content = body.substr(pos, end_pos - pos);
-
-    size_t start = 0;
-    while (start < array_content.length()) {
-        auto quote_start = array_content.find('"', start);
-        if (quote_start == std::string::npos) break;
-        auto quote_end = array_content.find('"', quote_start + 1);
-        if (quote_end == std::string::npos) break;
-        result.push_back(array_content.substr(quote_start + 1, quote_end - quote_start - 1));
-        start = quote_end + 1;
-    }
-
     return result;
 }
 

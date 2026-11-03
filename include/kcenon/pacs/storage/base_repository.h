@@ -227,7 +227,8 @@ public:
      *
      * If the entity has a valid primary key (has_pk() returns true), performs
      * an UPDATE. Otherwise, performs an INSERT and returns the new primary
-     * key.
+     * key. A non-integral key is a natural key the entity carries before it
+     * is stored, so an entity whose key is not stored yet is inserted.
      *
      * @param entity Entity to save
      * @return Result containing the primary key (existing or new)

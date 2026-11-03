@@ -17,6 +17,9 @@
 #ifdef PACS_WITH_MONITORING
 #include "kcenon/pacs/monitoring/health_checker.h"
 #endif
+#include "kcenon/pacs/storage/job_repository.h"
+#include "kcenon/pacs/storage/node_repository.h"
+#include "kcenon/pacs/storage/routing_repository.h"
 #include "kcenon/pacs/web/auth/jwks_provider.h"
 #include "kcenon/pacs/web/auth/oauth2_middleware.h"
 #include "kcenon/pacs/web/rest_config.h"
@@ -32,6 +35,13 @@
 namespace kcenon::pacs::example {
 
 namespace {
+
+#ifdef PACS_WITH_MONITORING
+/// Time since `started`, as the metrics count it.
+std::chrono::microseconds elapsed_since(std::chrono::steady_clock::time_point started) {
+    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started);
+}
+#endif
 
 /// Convert string to naming scheme
 storage::naming_scheme parse_naming_scheme(const std::string& scheme) {
@@ -161,6 +171,15 @@ void pacs_server_app::stop() {
 #ifdef PACS_SERVER_WITH_HTTP
     if (http_server_) {
         http_server_->stop();
+    }
+    if (routing_manager_) {
+        routing_manager_->detach_from_storage_scp();
+    }
+    if (job_manager_) {
+        job_manager_->stop_workers();
+    }
+    if (node_manager_) {
+        node_manager_->stop_health_check();
     }
 #endif
     if (server_ && server_->is_running()) {
@@ -316,12 +335,18 @@ bool pacs_server_app::setup_server() {
                                 context.sop_instance_uid, context.transfer_syntax);
         });
     server_->register_service(storage_scp);
+    storage_scp_ = storage_scp;
 
     // Register Query SCP
     auto query_scp = std::make_shared<services::query_scp>();
     query_scp->set_find_handler(
         [this](const services::find_request& request) {
+            [[maybe_unused]] const auto started = std::chrono::steady_clock::now();
             auto outcome = services::find_in_index(*database_, request);
+#ifdef PACS_WITH_MONITORING
+            metrics_->record_query(outcome.failure == services::qr_failure::none, elapsed_since(started),
+                                   static_cast<std::uint32_t>(outcome.matches.size()));
+#endif
             record_audit(storage::audit_event_type::c_find, outcome.failure == services::qr_failure::none,
                          request.calling_ae, request.called_ae, request.keys.get_string(core::tags::patient_id),
                          request.keys.get_string(core::tags::study_instance_uid),
@@ -426,11 +451,23 @@ bool pacs_server_app::setup_server() {
                   << calling_ae << " -> " << called_ae << "\n";
         record_audit(storage::audit_event_type::association_established, true, calling_ae, called_ae, {}, {},
                      "Association accepted");
+#ifdef PACS_WITH_MONITORING
+        metrics_->record_association_established();
+#endif
+        report_health();
     });
 
-    server_->on_association_closed([](const std::string& session_id, bool graceful) {
+    server_->on_association_closed([this](const std::string& session_id, bool graceful) {
         std::cout << log_prefix() << "Association closed: "
                   << session_id << (graceful ? " (released)" : " (aborted)") << "\n";
+#ifdef PACS_WITH_MONITORING
+        if (graceful) {
+            metrics_->record_association_released();
+        } else {
+            metrics_->record_association_aborted();
+        }
+#endif
+        report_health();
     });
 
     server_->on_error([](const std::string& error) {
@@ -472,11 +509,17 @@ bool pacs_server_app::setup_http() {
     http_server_->set_database(database_);
     http_server_->set_file_storage(file_storage_);
     http_server_->set_dicom_server_v2(server_);
+    if (config_.http_rest_api) {
+        setup_jobs();
+    }
 #ifdef PACS_WITH_MONITORING
     auto health = std::make_shared<monitoring::health_checker>();
     health->set_database(database_.get());
     health->set_storage(file_storage_.get());
     http_server_->set_health_checker(health);
+    http_server_->set_metrics_provider(metrics_);
+    health_ = health;
+    report_health();
 #endif
 
     if (!config_.oauth2_issuer.empty()) {
@@ -508,6 +551,48 @@ bool pacs_server_app::setup_http() {
 #endif
 }
 
+#ifdef PACS_SERVER_WITH_HTTP
+void pacs_server_app::setup_jobs() {
+    // Nodes, jobs and rules live in the index database, so jobs keep their state across a restart.
+#ifdef PACS_WITH_DATABASE_SYSTEM
+    auto handle = database_->db_adapter();
+#else
+    auto handle = database_->native_handle();
+#endif
+    auto nodes = std::make_shared<storage::node_repository>(handle);
+    auto jobs = std::make_shared<storage::job_repository>(handle);
+    auto rules = std::make_shared<storage::routing_repository>(handle);
+
+    client::node_manager_config node_config;
+    node_config.local_ae_title = config_.server.ae_title;
+    node_manager_ = std::make_shared<client::remote_node_manager>(nodes, node_config);
+
+    client::job_manager_config job_config;
+    job_config.local_ae_title = config_.server.ae_title;
+    job_config.worker_count = 2;
+    job_manager_ = std::make_shared<client::job_manager>(job_config, jobs, node_manager_);
+    job_manager_->set_instance_locator([database = database_](std::string_view sop_instance_uid)
+                                           -> std::optional<std::filesystem::path> {
+        auto found = database->get_file_path(sop_instance_uid);
+        if (found.is_err() || !found.value()) {
+            return std::nullopt;
+        }
+        return std::filesystem::path(*found.value());
+    });
+    job_manager_->set_study_presence([database = database_](std::string_view study_instance_uid) {
+        return database->find_study(study_instance_uid).has_value();
+    });
+    job_manager_->start_workers();
+
+    routing_manager_ = std::make_shared<client::routing_manager>(rules, job_manager_);
+    routing_manager_->attach_to_storage_scp(*storage_scp_);
+
+    http_server_->set_node_manager(node_manager_);
+    http_server_->set_job_manager(job_manager_);
+    http_server_->set_routing_manager(routing_manager_);
+}
+#endif
+
 // =============================================================================
 // Service Handlers
 // =============================================================================
@@ -530,6 +615,29 @@ void pacs_server_app::record_audit(storage::audit_event_type type, bool succeede
     }
 }
 
+void pacs_server_app::report_health() {
+#ifdef PACS_WITH_MONITORING
+    if (!health_) {
+        return;
+    }
+    const auto& associations = metrics_->associations();
+    health_->update_association_metrics(
+        associations.current_active.load(std::memory_order_relaxed),
+        static_cast<std::uint32_t>(config_.server.max_associations),
+        associations.total_established.load(std::memory_order_relaxed),
+        associations.total_rejected.load(std::memory_order_relaxed) +
+            associations.total_aborted.load(std::memory_order_relaxed));
+    // Archive totals once per association rather than per object: they are COUNT queries.
+    const auto& stores = metrics_->get_counter(monitoring::dimse_operation::c_store);
+    if (auto totals = database_->get_storage_stats(); totals.is_ok()) {
+        health_->update_storage_metrics(totals.value().total_instances, totals.value().total_studies,
+                                        totals.value().total_series,
+                                        stores.success_count.load(std::memory_order_relaxed),
+                                        stores.failure_count.load(std::memory_order_relaxed));
+    }
+#endif
+}
+
 services::storage_status pacs_server_app::handle_store(
     const core::dicom_dataset& dataset,
     const std::string& calling_ae,
@@ -541,9 +649,17 @@ services::storage_status pacs_server_app::handle_store(
               << ": " << sop_instance_uid << "\n";
 
     (void)sop_class_uid;
+    [[maybe_unused]] const auto started = std::chrono::steady_clock::now();
     auto archived = storage::archive_instance(*file_storage_, *database_, dataset, syntax);
     const bool kept = archived.status == storage::archive_status::stored ||
                       archived.status == storage::archive_status::duplicate_ignored;
+#ifdef PACS_WITH_MONITORING
+    // Bytes, and so an image stored, only for an object written now; an ignored duplicate wrote nothing.
+    std::error_code size_error;
+    const std::uintmax_t written = archived.status == storage::archive_status::stored
+        ? std::filesystem::file_size(archived.file_path, size_error) : 0;
+    metrics_->record_store(kept, elapsed_since(started), size_error ? 0 : written);
+#endif
     record_audit(storage::audit_event_type::c_store, kept, calling_ae, config_.server.ae_title,
                  dataset.get_string(core::tags::patient_id), dataset.get_string(core::tags::study_instance_uid),
                  kept ? "Stored " + sop_instance_uid : archived.message);
