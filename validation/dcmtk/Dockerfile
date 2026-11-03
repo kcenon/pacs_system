@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev zlib1g-dev lsof \
     libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless orthanc orthanc-dicomweb nodejs npm \
     && rm -rf /var/lib/apt/lists/*
-COPY pacs_system/.github/actions/checkout-kcenon-deps/action.yml /workspace/pacs_system/.github/actions/checkout-kcenon-deps/action.yml
+COPY pacs_system/.github/actions/checkout-kcenon-deps /workspace/pacs_system/.github/actions/checkout-kcenon-deps
 COPY harness/bootstrap.py /tmp/bootstrap.py
 RUN python3 /tmp/bootstrap.py
 COPY pacs_system /workspace/pacs_system

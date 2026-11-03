@@ -36,11 +36,13 @@ category: "PROJ"
 | SOUP-003 | [thread_system](https://github.com/kcenon/thread_system) | kcenon | `6dd5c9e8` | BSD-3-Clause | Thread pool, async task scheduling | B | Original integrated commit (`db8d36f1`) unrecoverable (orphaned by upstream history rewrite); re-pinned to v1.0.0 tag — see [PR-001](compliance/problem-resolution/PR-001-soup-dangling-sha.md). Re-V&V required before release. |
 | SOUP-004 | [logger_system](https://github.com/kcenon/logger_system) | kcenon | `f119ecd6` | BSD-3-Clause | Structured logging infrastructure | A | None |
 | SOUP-005 | [monitoring_system](https://github.com/kcenon/monitoring_system) | kcenon | `da708abb` | BSD-3-Clause | Performance metrics collection | A | None |
-| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | Overlapping socket writes under backpressure; see [below](#network_system-overlapping-writes-1319) |
+| SOUP-006 | [network_system](https://github.com/kcenon/network_system) | kcenon | `093691d9` with PACS patch 0001 | BSD-3-Clause | TCP/UDP socket abstraction for DICOM PDU | B | Overlapping socket writes under backpressure: patched here for `tcp_socket`, which PACS uses; `secure_tcp_socket` is unpatched and unused by PACS. See [below](#network_system-overlapping-writes-1319) |
 | SOUP-007 | [database_system](https://github.com/kcenon/database_system) | kcenon | `593a18a7` | BSD-3-Clause | SQL query builder, database abstraction | B | None |
 
 > **Note**: kcenon libraries are pinned by commit SHA (no release tags available).
 > CI clones are managed by `.github/actions/checkout-kcenon-deps/action.yml`.
+> Patches under `.github/actions/checkout-kcenon-deps/patches/<repository>/` apply to those clones;
+> each one is described below with the condition that removes it.
 > The root [dependency-manifest.json](../dependency-manifest.json) is the canonical provenance input for internal SHAs, FetchContent fallbacks, native/system resolution, and frontend lockfiles.
 
 ### Third-Party C++ Libraries
@@ -132,19 +134,36 @@ start `asio::async_write` for every call. Asio requires that no other write star
 operation completes. When a write completes only in part, because the peer reads slowly and the
 socket buffers are full, the next send runs inside it and the byte stream is interleaved.
 `i_session` reports neither completion nor pending bytes, so PACS cannot serialize its writes
-without changing that library. The TLS path has the same code and was not measured.
+without changing that library. `secure_tcp_socket` has the same code; PACS does not use it, because
+its DICOM TLS server (`src/network/detail/tls_server.cpp`) queues its own writes.
 
-**Effect on PACS.** C-FIND streams responses without acknowledgements, so a slow reader breaks
-PDU framing. Against a slowed DCMTK `findscu`, four of four runs ended in `Find Failed` after
-15,924 to 41,682 of 60,000 matches, and one of them stored one damaged response first. A retrieve
-sends each object as one write and waits for its acknowledgement, so objects do not overlap each
-other. `qr.protocol.find-scp.slow-reader-keeps-pdu-framing` reproduces the failure and fails on
-this pin. It stays failing until the pin moves.
+**Effect on PACS of the pin as published.** C-FIND streams responses without acknowledgements, so a
+slow reader breaks PDU framing. Against a slowed DCMTK `findscu`, four of four runs ended in
+`Find Failed` after 15,924 to 41,682 of 60,000 matches, and one of them stored one damaged response
+first. A retrieve sends each object as one write and waits for its acknowledgement, so objects do
+not overlap each other. `qr.protocol.find-scp.slow-reader-keeps-pdu-framing` reproduces the failure.
 
-**Status.** Not reported upstream and not patched here. As checked on 2026-11-01, upstream `main`
-has the same code and no matching issue. In a local experiment, a write queue in `tcp_socket` made
-that case pass three of three runs and the slowed `findscu` receive all 60,000 matches exactly in
-two of two runs. That patch is not part of any delivered build.
+**Status: patched here, not reported upstream.** As checked on 2026-11-01, upstream `main` has the
+same code and no matching issue.
+
+- The patch, `.github/actions/checkout-kcenon-deps/patches/network_system/0001-serialize-tcp-socket-writes.patch`,
+  queues sends on the socket's executor and starts the next `asio::async_write` only when the
+  previous one completes; an error completes every queued send with that error. It changes both
+  copies of `tcp_socket.h`, because translation units include either one. The queue has no lock:
+  each network_system server and client runs its `io_context` on one thread.
+- The checkout action applies it after cloning the pin, for every CI job and the release build, and
+  fails when it no longer applies. `validation/dcmtk/bootstrap.py` does the same for the validation
+  image and records it in `dependency-patches.json`. `dependency-manifest.json` lists it under
+  network_system.
+- Verified locally before adoption: on the pin the slow-reader case failed three of three runs;
+  with the patch it passed three of three, all 31 protocol cases passed, and the slowed `findscu`
+  received all 60,000 matches exactly in two of two runs.
+- Not covered: a build that resolves network_system from the vcpkg registry port
+  (`kcenon-network-system`), which includes consumers of the `kcenon-pacs-system` port, and a local
+  build against an unpatched `../network_system`. Both keep the defect.
+- Remove the patch when the pin moves to a network_system revision that serializes these writes.
+  The checkout fails while the patch no longer applies, and the slow-reader case checks the
+  replacement.
 
 ---
 

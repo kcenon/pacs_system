@@ -288,7 +288,8 @@ def large_result_is_complete(server):
 
 def slow_reader_keeps_framing(server):
     # A reader slower than the SCP fills the socket buffers, so a write can complete only in part. On
-    # network_system 093691d9 the next write then starts inside it, and this case fails (docs/SOUP.md).
+    # network_system 093691d9 as published the next write then starts inside it, and this case fails;
+    # the patch the checkout action carries queues the writes (docs/SOUP.md).
     peer = Peer(server.port, ((1, FIND_PATIENT, (LE,)),), receive_buffer=65536)
     peer.find(patient_keys('BULK*'), sop_class=FIND_PATIENT)
     stream, elapsed = capture_stream(peer, 4096, 0.002)

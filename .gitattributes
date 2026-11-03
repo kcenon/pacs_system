@@ -1,2 +1,5 @@
 # Private key files: binary, no diff
 *.key binary -diff
+
+# Carried dependency patches must keep LF: git apply compares them with LF blobs.
+*.patch text eol=lf

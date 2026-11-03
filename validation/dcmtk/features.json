@@ -437,7 +437,7 @@
         "diagnostic.scp.ready"
       ],
       "gaps": [
-        "Large C-FIND results to a slow reader: network_system 093691d9 overlaps socket writes under backpressure, which breaks PDU framing (SOUP-006). qr.protocol.find-scp.slow-reader-keeps-pdu-framing fails until the pin moves."
+        "Large C-FIND results to a slow reader hold only with the write-queue patch the pinned network_system checkout carries (SOUP-006). A build that resolves network_system from the vcpkg registry port has neither that patch nor this evidence."
       ],
       "known_issues": [
         "https://github.com/kcenon/pacs_system/issues/1303"
@@ -1632,6 +1632,15 @@
       "previous_gaps": {
         "reliability": [
           "Long-duration soak, sanitizer/fuzz campaigns and loss-of-power recovery are separate required evidence."
+        ]
+      }
+    },
+    {
+      "issue": 1319,
+      "change": "The checkout action and the validation bootstrap apply .github/actions/checkout-kcenon-deps/patches/network_system/0001-serialize-tcp-socket-writes.patch to the pinned network_system, which queues socket writes. qr.protocol.find-scp.slow-reader-keeps-pdu-framing now runs against a library that starts one write at a time.",
+      "previous_gaps": {
+        "query": [
+          "Large C-FIND results to a slow reader: network_system 093691d9 overlaps socket writes under backpressure, which breaks PDU framing (SOUP-006). qr.protocol.find-scp.slow-reader-keeps-pdu-framing fails until the pin moves."
         ]
       }
     }

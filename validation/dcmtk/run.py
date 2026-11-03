@@ -850,9 +850,9 @@ class Validation:
         return counts
 
     def run(self):
-        pins = Path('/workspace/dependency-pins.json')
-        if pins.exists():
-            shutil.copy2(pins,self.output/'dependency-pins.json')
+        for provenance in ('dependency-pins.json', 'dependency-patches.json'):
+            if (Path('/workspace')/provenance).exists():
+                shutil.copy2(Path('/workspace')/provenance, self.output/provenance)
         self.save()
         self.case('peer.preflight',self.preflight,phase='peer_preparation',chain='reference')
         self.case('peer.tls',self.peer_tls,phase='peer_preparation',chain='reference')

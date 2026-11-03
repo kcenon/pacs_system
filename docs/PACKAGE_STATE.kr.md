@@ -176,6 +176,7 @@ CI용으로 고정된 의존성 SHA의 제약은 다음과 같습니다(고정�
 | 의존성 | 고정 SHA의 제약 | 처리 | 상위 저장소 수정 |
 |--------|-----------------|------|------------------|
 | network_system `093691d9` | `messaging_session.h` 등 설치된 공개 헤더가 설치되지 않는 `src/internal/` 헤더를 포함 | 스크립트가 `kcenon-network-system` 레지스트리 포트와 같은 방식으로 `src/internal/` 헤더를 `<prefix>/include/internal/`에, `network-core/include/`를 `<prefix>/include/`에 복사하며, 설치된 헤더가 더 이상 필요로 하지 않으면 이 단계를 건너뜀 | [network_system#945](https://github.com/kcenon/network_system/pull/945), [#949](https://github.com/kcenon/network_system/pull/949), [#1177](https://github.com/kcenon/network_system/pull/1177) |
+| network_system `093691d9` | `tcp_socket`이 앞선 소켓 쓰기의 완료를 기다리지 않고 다음 쓰기를 시작하므로, 느리게 읽는 수신 측에 PDU가 섞여 전달됨(`docs/SOUP.md`의 SOUP-006) | 체크아웃 액션이 고정 클론에 `patches/network_system/0001-serialize-tcp-socket-writes.patch`를 적용하므로 CI, 소스 설치 검사, 릴리스는 쓰기를 대기열로 처리하는 빌드를 사용함. `kcenon-network-system` 레지스트리 포트에는 이 패치가 없음 | 보고하지 않음 |
 | database_system `593a18a7` | `integrated_database`를 빌드하지만 설치도 export도 하지 않음 | pacs_system은 `database_system::integrated_database`가 없는 database_system 패키지를 무시하고(구성 경고) vcpkg 경로와 마찬가지로 database_system 통합 없이 빌드 | [database_system#611](https://github.com/kcenon/database_system/pull/611) |
 
 **형제 디렉터리 빌드는 설치 경로가 아닙니다.** CI는 의존성을 pacs_system 옆에 체크아웃하고 하위

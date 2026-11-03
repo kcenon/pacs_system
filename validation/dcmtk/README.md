@@ -127,9 +127,12 @@ that a final response carries a Failed SOP Instance UID List but not its content
 `qr-summary.json` maps each declared SOP class, role and condition to the cases behind
 it. A requirement with no case reads `unexecuted`, never passed.
 
-`qr.protocol.find-scp.slow-reader-keeps-pdu-framing` fails on network_system `093691d9`, whose
-socket writes overlap under backpressure (SOUP-006 in `docs/SOUP.md`). It is a real defect, not a
-flaky test, so the case stays in the gate and `component.qr` stays failed until the pin moves.
+`qr.protocol.find-scp.slow-reader-keeps-pdu-framing` fails on network_system `093691d9` as
+published, whose socket writes overlap under backpressure (SOUP-006 in `docs/SOUP.md`). The
+image's bootstrap applies the write-queue patch that the checkout action carries for that pin, as
+CI does, and records it in `dependency-patches.json` beside `dependency-pins.json`. A local build
+against an unpatched `../network_system` fails this case for the same real defect; apply
+`.github/actions/checkout-kcenon-deps/patches/network_system/*.patch` there with `git apply`.
 
 ```bash
 python3 validation/dcmtk/tests/qr_matrix_probe.py --output /tmp/qr --build-dir build \

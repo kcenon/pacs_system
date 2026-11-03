@@ -3,6 +3,8 @@
 #
 # To update versions: change the SHA values below and verify CI passes.
 # All SHAs should match entries in docs/SOUP.md
+# patches/<repository>/*.patch apply to that clone in name order; docs/SOUP.md
+# records each one and when it can be removed.
 
 name: 'Checkout kcenon Dependencies'
 description: 'Clone kcenon ecosystem libraries at pinned commit SHAs for IEC 62304 SOUP traceability'
@@ -33,11 +35,20 @@ runs:
         DATABASE_SYSTEM_SHA: '593a18a7158d5707b8f589c0dae75d6b2ddad931'
       run: |
         clone_pinned() {
-          local name=$1 sha=$2
+          local name=$1 sha=$2 patch
           echo "Cloning kcenon/$name at $sha"
           git init "$name"
           git -C "$name" fetch --depth 1 "https://github.com/kcenon/$name.git" "$sha"
           git -C "$name" checkout FETCH_HEAD
+          # Patches PACS carries until a pin contains the fix (docs/SOUP.md). They apply to the
+          # index, so the checkout's line endings do not matter, and one that no longer applies
+          # fails this step.
+          for patch in "$GITHUB_ACTION_PATH/patches/$name"/*.patch; do
+            [ -e "$patch" ] || continue
+            echo "Applying $(basename "$patch") to $name"
+            git -C "$name" apply --cached "$patch"
+            git -C "$name" checkout -- .
+          done
         }
 
         clone_pinned common_system    "$COMMON_SYSTEM_SHA"
@@ -66,6 +77,17 @@ runs:
           git init $Name
           git -C $Name fetch --depth 1 "https://github.com/kcenon/$Name.git" $Sha
           git -C $Name checkout FETCH_HEAD
+          # Same patches as the Unix step. A native command's exit code does not stop pwsh.
+          $patchDir = Join-Path $env:GITHUB_ACTION_PATH "patches/$Name"
+          if (Test-Path $patchDir) {
+            Get-ChildItem -Path $patchDir -Filter *.patch | Sort-Object Name | ForEach-Object {
+              Write-Host "Applying $($_.Name) to $Name"
+              git -C $Name apply --cached $_.FullName
+              if ($LASTEXITCODE -ne 0) { throw "$($_.Name) does not apply to $Name at $Sha" }
+              git -C $Name checkout -- .
+              if ($LASTEXITCODE -ne 0) { throw "Checkout after $($_.Name) failed in $Name" }
+            }
+          }
         }
 
         Clone-Pinned "common_system"     $env:COMMON_SYSTEM_SHA
