@@ -167,6 +167,15 @@ _XA_EXPOSURE_CONFLICT = [
 ]
 IOD_VALIDATOR_CONFLICTS = {'opt': _CONCATENATION_CONFLICT, 'oct-bscan': _CONCATENATION_CONFLICT,
                            'enhanced-xa': _XA_EXPOSURE_CONFLICT}
+# dciodvfy stops on an assertion for wider pixels, before it reports any attribute.
+IOD_VALIDATOR_MAX_BITS = 16
+
+
+def iod_validator_lines(returncode, output):
+    """The report of one dciodvfy run. A run that died said nothing about the object, so it is no verdict."""
+    if returncode < 0:
+        raise ValueError(f'dciodvfy died on signal {-returncode}: {output[-240:]}')
+    return output.splitlines()
 
 # Predeclared before any run: an output outside its bound fails, nothing is tuned.
 #   max_abs_error  largest per-sample difference against the source

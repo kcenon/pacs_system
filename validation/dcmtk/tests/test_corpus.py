@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT/'validation/dcmtk'))
 from corpus import (BIG_ENDIAN, CODEC_FORMATS, COMPRESSED_SYNTAXES, DEFLATED, IOD_VALIDATOR_CONFLICTS, LOSSY_BOUNDS,
                     NATIVE_SYNTAXES, PIXEL_FORMATS, STORAGE_SOPS, SYNTAX_BY_UID, UNSUPPORTED_SYNTAXES, codec_cases,
-                    codec_valid, requirement_cases, requirement_matches, wire_cases, wire_valid)
+                    codec_valid, iod_validator_lines, requirement_cases, requirement_matches, wire_cases, wire_valid)
 from support import declared_support
 
 STORAGE_PREFIX = '1.2.840.10008.5.1.4.1.1.'
@@ -119,6 +119,13 @@ class CorpusEnumeration(unittest.TestCase):
         self.assertLessEqual(set(IOD_VALIDATOR_CONFLICTS), families)
         for rows in IOD_VALIDATOR_CONFLICTS.values():
             self.assertTrue(all(text and reason for text, reason in rows))
+
+    def test_a_validator_that_died_gives_no_verdict(self):
+        report = "dciodvfy: attrothr.cc:46: Assertion `bitsallocated <= bytesinword*8u' failed."
+        with self.assertRaisesRegex(ValueError, 'signal 6'):
+            iod_validator_lines(-6, report)
+        self.assertEqual(iod_validator_lines(0, ''), [])
+        self.assertEqual(iod_validator_lines(1, 'RTDose\nError - missing\n'), ['RTDose', 'Error - missing'])
 
 
 if __name__ == '__main__':

@@ -26,9 +26,9 @@ from pydicom.uid import ImplicitVRLittleEndian
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 warnings.filterwarnings('ignore', category=UserWarning)
 from corpus import (BIG_ENDIAN, CODEC_FORMATS, CODEC_FRAMES, COMPRESSED_SYNTAXES, DECODER_AGREEMENT, DEFLATED,
-                    EXPLICIT, IMPLICIT, IOD_VALIDATOR_CONFLICTS, LOSSY_BOUNDS, LOSSY_QUALITY, NATIVE_SYNTAXES,
-                    PIXEL_FORMATS, STORAGE_SOPS, SYNTAX_BY_UID, UNSUPPORTED_SYNTAXES, codec_valid, requirement_cases,
-                    requirement_matches, wire_valid)
+                    EXPLICIT, IMPLICIT, IOD_VALIDATOR_CONFLICTS, IOD_VALIDATOR_MAX_BITS, LOSSY_BOUNDS, LOSSY_QUALITY,
+                    NATIVE_SYNTAXES, PIXEL_FORMATS, STORAGE_SOPS, SYNTAX_BY_UID, UNSUPPORTED_SYNTAXES, codec_valid,
+                    iod_validator_lines, requirement_cases, requirement_matches, wire_valid)
 from corpus_codecs import (ALLOWED_COLOR, OPENJPEG_SYNTAXES, Codecs, encapsulated, native_values, require_exact,
                            require_lossy_bound, save_any, source_values, stored_values, to_rgb)
 from corpus_fixtures import build_fixture, code, item, sequence
@@ -156,9 +156,11 @@ class Corpus(Validation):
         ds = build_fixture(sop, self.index_uid, index)
         path = directory/f'{index:03d}-{sop.family}.dcm'
         ds.save_as(path, write_like_original=False)
-        done = subprocess.run(['dciodvfy', '-new', str(path)], capture_output=True, text=True, errors='replace')
-        lines = (done.stdout+done.stderr).splitlines()
-        (directory/f'{path.stem}.dciodvfy.txt').write_text('\n'.join(lines)+'\n')
+        narrowed = 'PixelData' in ds and ds.BitsAllocated > IOD_VALIDATOR_MAX_BITS
+        checked = self.narrow_copy(ds, path) if narrowed else path
+        done = subprocess.run(['dciodvfy', '-new', str(checked)], capture_output=True, text=True, errors='replace')
+        (directory/f'{path.stem}.dciodvfy.txt').write_text(done.stdout+done.stderr)
+        lines = iod_validator_lines(done.returncode, done.stdout+done.stderr)
         errors = [line for line in lines if line.startswith('Error')]
         unknown = any('Information Object Not found' in line for line in errors)
         conflicts = [line for line in errors if any(text in line for text, _ in IOD_VALIDATOR_CONFLICTS.get(sop.family, []))]
@@ -167,10 +169,22 @@ class Corpus(Validation):
         self.fixture_meta.append(dict(sop=sop.uid, name=sop.name, family=sop.family, file=path.name,
                                       sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                                       iod_validator='no table in dciodvfy' if unknown else 'dciodvfy',
+                                      iod_validator_input=checked.name if narrowed else 'the fixture itself',
                                       validator_conflicts=conflicts, errors=remaining))
         require(not remaining, f'dciodvfy: {len(remaining)} error(s), first: {remaining[0][:150]}' if remaining else '')
         return ('no independent IOD table for this class' if unknown else
-                f'dciodvfy clean with {len(conflicts)} recorded validator conflict(s)')
+                f'dciodvfy clean{" on a 16-bit copy" if narrowed else ""} with {len(conflicts)} recorded validator conflict(s)')
+
+    def narrow_copy(self, ds, path):
+        """The same attributes with pixels dciodvfy can read. The corpus pixel oracles still check the real ones."""
+        folder = self.output/'iod-copies'
+        folder.mkdir(exist_ok=True)
+        narrow = copy.deepcopy(ds)
+        narrow.BitsAllocated, narrow.BitsStored, narrow.HighBit = IOD_VALIDATOR_MAX_BITS, IOD_VALIDATOR_MAX_BITS, IOD_VALIDATOR_MAX_BITS-1
+        narrow.PixelData = bytes(len(ds.PixelData)*IOD_VALIDATOR_MAX_BITS//ds.BitsAllocated)
+        target = folder/path.name
+        narrow.save_as(target, write_like_original=False)
+        return target
 
     # Wire ---------------------------------------------------------------------------------
 

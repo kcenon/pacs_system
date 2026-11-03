@@ -436,7 +436,6 @@ def build_rt_dose(ds, sop, uids):
     ds.OperatorsName = ''
     frame_of_reference(ds, uids)
     image_plane(ds)
-    del ds.SliceThickness
     ds.DoseUnits, ds.DoseType, ds.DoseSummationType = 'GY', 'PHYSICAL', 'PLAN'
     ds.DoseGridScaling = '0.0001'
     ds.GridFrameOffsetVector = ['0', '1', '2']
