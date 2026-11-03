@@ -304,6 +304,7 @@ if(PACS_BUILD_TESTS)
         add_executable(storage_tests
             tests/storage/storage_interface_test.cpp
             tests/storage/file_storage_test.cpp
+            tests/storage/instance_archive_test.cpp
             tests/storage/s3_storage_test.cpp
             tests/storage/azure_blob_storage_test.cpp
             tests/storage/hsm_storage_test.cpp
@@ -403,6 +404,7 @@ if(PACS_BUILD_TESTS)
             tests/web/patient_study_endpoints_test.cpp
             tests/web/worklist_audit_endpoints_test.cpp
             tests/web/dicomweb_endpoints_test.cpp
+            tests/web/dicomweb_contract_test.cpp
             tests/web/jobs_endpoints_test.cpp
             tests/web/thumbnail_service_test.cpp
             tests/web/metadata_service_test.cpp
@@ -415,6 +417,7 @@ if(PACS_BUILD_TESTS)
             tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp
             tests/web/auth/oauth2_middleware_test.cpp
+            tests/web/auth/jwks_provider_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE

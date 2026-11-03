@@ -30,6 +30,13 @@ Options:
   --event-retry-delay <s> Seconds between those attempts (default: 5)
   --print-spool <path>    Print job directory (default: <storage-dir>.print-spool)
   --ups-dir <path>        UPS instance directory (default: <storage-dir>.ups)
+  --http-port <port>      REST and DICOMweb port (default: off)
+  --http-bind <address>   Address the HTTP API listens on (default: 127.0.0.1)
+  --http-max-body-mb <n>  Largest HTTP request body in MiB (default: 512)
+  --http-cors-origin <o>  Origin named in Access-Control-Allow-Origin (default: none)
+  --oauth2-issuer <url>   Require OAuth 2.0 bearer tokens from this issuer on DICOMweb
+  --oauth2-audience <id>  Audience those tokens must name
+  --oauth2-jwks <path>    JWKS file holding the keys that sign them
   --help, -h              Show this help message
 
 Supported DICOM Services:
@@ -189,6 +196,51 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
             } catch (const std::exception&) {
                 std::cerr << "Error: Invalid value for " << arg << "\n";
                 return std::nullopt;
+            }
+            continue;
+        }
+
+        if (arg == "--http-port" || arg == "--http-max-body-mb") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            try {
+                const int value = std::stoi(argv[++i]);
+                if (arg == "--http-port") {
+                    if (value < 1 || value > 65535) {
+                        throw std::out_of_range("port");
+                    }
+                    config.http_port = static_cast<uint16_t>(value);
+                } else {
+                    if (value < 1 || value > 65536) {
+                        throw std::out_of_range("size");
+                    }
+                    config.http_max_body_bytes = static_cast<std::size_t>(value) * 1024 * 1024;
+                }
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid value for " << arg << "\n";
+                return std::nullopt;
+            }
+            continue;
+        }
+
+        if (arg == "--http-bind" || arg == "--http-cors-origin" || arg == "--oauth2-issuer" || arg == "--oauth2-audience" || arg == "--oauth2-jwks") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            const std::string value = argv[++i];
+            if (arg == "--http-bind") {
+                config.http_bind = value;
+            } else if (arg == "--http-cors-origin") {
+                config.http_cors_origin = value;
+            } else if (arg == "--oauth2-issuer") {
+                config.oauth2_issuer = value;
+            } else if (arg == "--oauth2-audience") {
+                config.oauth2_audience = value;
+            } else {
+                config.oauth2_jwks_file = value;
             }
             continue;
         }

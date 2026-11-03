@@ -21,15 +21,20 @@
 #endif
 
 #include "kcenon/pacs/core/dicom_dataset.h"
+#include "kcenon/pacs/core/dicom_dictionary.h"
 #include "kcenon/pacs/core/dicom_element.h"
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/utf8_text.h"
+#include "kcenon/pacs/encoding/compression/codec_factory.h"
 #include "kcenon/pacs/encoding/compression/htj2k_codec.h"
 #include "kcenon/pacs/encoding/compression/jpeg_baseline_codec.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/encoding/vr_type.h"
 #include "kcenon/pacs/storage/file_storage.h"
+#include "kcenon/pacs/services/qr_index.h"
 #include "kcenon/pacs/storage/index_database.h"
+#include "kcenon/pacs/storage/instance_archive.h"
 #include "kcenon/pacs/storage/instance_record.h"
 #include "kcenon/pacs/storage/patient_record.h"
 #include "kcenon/pacs/storage/series_record.h"
@@ -41,13 +46,22 @@
 #include "kcenon/pacs/web/rest_types.h"
 
 #include <algorithm>
+#include <array>
+#include <charconv>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <limits>
+#include <numeric>
+#include <optional>
 #include <random>
 #include <sstream>
+#include <system_error>
+#include <type_traits>
 
 namespace kcenon::pacs::web::dicomweb {
 
@@ -149,10 +163,19 @@ auto parse_accept_header(std::string_view accept_header)
         }
 
         info.media_type = trim(params[0]);
+        std::transform(info.media_type.begin(), info.media_type.end(), info.media_type.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
         for (size_t i = 1; i < params.size(); ++i) {
             auto param = trim(params[i]);
-            if (param.starts_with("q=")) {
+            if (param.starts_with("type=")) {
+                info.type = param.substr(5);
+                if (info.type.size() >= 2 && info.type.front() == '"' && info.type.back() == '"') {
+                    info.type = info.type.substr(1, info.type.size() - 2);
+                }
+                std::transform(info.type.begin(), info.type.end(), info.type.begin(),
+                               [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            } else if (param.starts_with("q=")) {
                 try {
                     info.quality = std::stof(param.substr(2));
                 } catch (...) {
@@ -172,8 +195,8 @@ auto parse_accept_header(std::string_view accept_header)
         result.push_back(std::move(info));
     }
 
-    // Sort by quality (descending)
-    std::sort(result.begin(), result.end(),
+    // Sort by quality (descending), keeping the client's order among equals
+    std::stable_sort(result.begin(), result.end(),
               [](const accept_info& a, const accept_info& b) {
                   return a.quality > b.quality;
               });
@@ -197,6 +220,182 @@ auto is_acceptable(const std::vector<accept_info>& accept_infos,
         }
     }
     return false;
+}
+
+// ============================================================================
+// Media Type Selection
+// ============================================================================
+
+namespace {
+
+/// Compressed Bulk Data media types and the Transfer Syntaxes each carries (PS3.18 8.7.3.3.2).
+constexpr std::array<std::pair<std::string_view, std::string_view>, 14> compressed_media_types{{
+    {"image/jpeg", "1.2.840.10008.1.2.4.50"},
+    {"image/jpeg", "1.2.840.10008.1.2.4.51"},
+    {"image/jpeg", "1.2.840.10008.1.2.4.57"},
+    {"image/jpeg", "1.2.840.10008.1.2.4.70"},
+    {"image/jls", "1.2.840.10008.1.2.4.80"},
+    {"image/jls", "1.2.840.10008.1.2.4.81"},
+    {"image/jp2", "1.2.840.10008.1.2.4.90"},
+    {"image/jp2", "1.2.840.10008.1.2.4.91"},
+    {"image/jphc", "1.2.840.10008.1.2.4.201"},
+    {"image/jphc", "1.2.840.10008.1.2.4.202"},
+    {"image/jphc", "1.2.840.10008.1.2.4.203"},
+    {"image/jxl", "1.2.840.10008.1.2.4.110"},
+    {"image/jxl", "1.2.840.10008.1.2.4.112"},
+    {"image/dicom-rle", "1.2.840.10008.1.2.5"},
+}};
+
+[[nodiscard]] bool is_any(std::string_view media) {
+    return media == "*/*";
+}
+
+[[nodiscard]] bool is_multipart_of(const accept_info& info, std::string_view part_type) {
+    if (info.media_type != "multipart/related" && info.media_type != "multipart/*") {
+        return false;
+    }
+    return info.type == part_type;
+}
+
+[[nodiscard]] bool is_untyped_multipart(const accept_info& info) {
+    return (info.media_type == "multipart/related" || info.media_type == "multipart/*") && info.type.empty();
+}
+
+/// A rendered type by the family it belongs to; image/ types with a Transfer Syntax are Bulk Data instead.
+[[nodiscard]] bool is_rendered_family(const accept_info& info) {
+    return (info.media_type.starts_with("image/") || info.media_type.starts_with("video/")) && info.transfer_syntax.empty();
+}
+
+[[nodiscard]] bool is_dicom_family(const accept_info& info) {
+    const std::string_view named = info.media_type == "multipart/related" && !info.type.empty() ? std::string_view(info.type)
+                                                                                                 : std::string_view(info.media_type);
+    return named.starts_with("application/dicom") || named == "application/octet-stream";
+}
+
+[[nodiscard]] media_choice accepted(std::string_view media, bool multipart, const accept_info& info) {
+    media_choice choice;
+    choice.status = 200;
+    choice.media = std::string(media);
+    choice.multipart = multipart;
+    choice.transfer_syntax = info.transfer_syntax;
+    return choice;
+}
+
+/// The media type a compressed frame goes out as, when the Accept entry allows it for what is held.
+[[nodiscard]] std::optional<std::string_view> compressed_type_for(std::string_view asked, std::string_view syntax_asked,
+                                                                  std::string_view held) {
+    if (!syntax_asked.empty() && syntax_asked != "*" && syntax_asked != held) {
+        return std::nullopt;
+    }
+    for (const auto& [media, syntax] : compressed_media_types) {
+        if (syntax == held && (asked == media || asked == "image/*")) {
+            return media;
+        }
+    }
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<media_choice> pixel_choice(const accept_info& info, std::size_t items, std::string_view held) {
+    const bool octet_syntax = info.transfer_syntax.empty() || info.transfer_syntax == "*" ||
+                              info.transfer_syntax == encoding::transfer_syntax::explicit_vr_little_endian.uid();
+    if (octet_syntax && (is_any(info.media_type) || is_untyped_multipart(info) || is_multipart_of(info, media_type::octet_stream))) {
+        return accepted(media_type::octet_stream, true, info);
+    }
+    if (octet_syntax && items == 1 && (info.media_type == media_type::octet_stream || info.media_type == "application/*")) {
+        return accepted(media_type::octet_stream, false, info);
+    }
+    if (info.media_type == "multipart/related" || info.media_type == "multipart/*") {
+        if (const auto media = compressed_type_for(info.type, info.transfer_syntax, held)) {
+            return accepted(*media, true, info);
+        }
+    } else if (items == 1) {
+        if (const auto media = compressed_type_for(info.media_type, info.transfer_syntax, held)) {
+            return accepted(*media, false, info);
+        }
+    }
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<media_choice> entry_choice(const accept_info& info, wado_resource resource, std::size_t items,
+                                                       std::string_view held) {
+    switch (resource) {
+        case wado_resource::instance:
+            if (info.media_type == media_type::dicom || info.media_type == "application/*") {
+                return accepted(media_type::dicom, false, info);
+            }
+            [[fallthrough]];
+        case wado_resource::collection:
+            if (is_any(info.media_type) || is_untyped_multipart(info) || is_multipart_of(info, media_type::dicom) ||
+                is_multipart_of(info, "application/*")) {
+                return accepted(media_type::dicom, true, info);
+            }
+            if (is_multipart_of(info, media_type::octet_stream)) {
+                return accepted(media_type::octet_stream, true, info);
+            }
+            return std::nullopt;
+        case wado_resource::metadata:
+        case wado_resource::search:
+        case wado_resource::store_response:
+            if (is_any(info.media_type) || info.media_type == "application/*" || info.media_type == media_type::dicom_json) {
+                return accepted(media_type::dicom_json, false, info);
+            }
+            if (resource == wado_resource::store_response && info.media_type == media_type::dicom_xml) {
+                return accepted(media_type::dicom_xml, false, info);
+            }
+            if (resource != wado_resource::store_response && is_multipart_of(info, media_type::dicom_xml)) {
+                return accepted(media_type::dicom_xml, true, info);
+            }
+            return std::nullopt;
+        case wado_resource::frames:
+            return pixel_choice(info, items, held);
+        case wado_resource::bulk_data:
+            return pixel_choice(info, 1, {});
+        case wado_resource::rendered:
+            if (is_any(info.media_type) || info.media_type == "image/*" || info.media_type == media_type::jpeg) {
+                return accepted(media_type::jpeg, false, info);
+            }
+            if (info.media_type == media_type::png || info.media_type == media_type::jphc) {
+                return accepted(info.media_type, false, info);
+            }
+            return std::nullopt;
+    }
+    return std::nullopt;
+}
+
+}  // namespace
+
+auto choose_media_type(std::string_view accept_header, wado_resource resource, std::size_t items, std::string_view held_syntax)
+    -> media_choice {
+    media_choice choice;
+    if (trim(accept_header).empty()) {
+        choice.status = 406;
+        choice.detail = "A request without an Accept header is not acceptable (PS3.18 8.7.5)";
+        return choice;
+    }
+    const auto entries = parse_accept_header(accept_header);
+    const bool dicom = std::any_of(entries.begin(), entries.end(), is_dicom_family);
+    const bool rendered = std::any_of(entries.begin(), entries.end(), is_rendered_family);
+    if (dicom && rendered) {
+        choice.status = 400;
+        choice.detail = "Acceptable media types shall not mix DICOM and rendered types (PS3.18 8.7.5)";
+        return choice;
+    }
+    for (const auto& entry : entries) {
+        if (entry.quality <= 0.0f) {
+            continue;  // q=0 says "not this one" (RFC 9110 12.4.2)
+        }
+        if (!entry.transfer_syntax.empty() && entry.transfer_syntax != "*" && !storage::is_valid_uid(entry.transfer_syntax)) {
+            choice.status = 400;
+            choice.detail = "Not a Transfer Syntax UID: "+entry.transfer_syntax;
+            return choice;
+        }
+        if (auto selected = entry_choice(entry, resource, items, held_syntax)) {
+            return *selected;
+        }
+    }
+    choice.status = 406;
+    choice.detail = "None of the acceptable media types can represent this resource";
+    return choice;
 }
 
 // ============================================================================
@@ -256,7 +455,7 @@ auto multipart_builder::build() const -> std::string {
 auto multipart_builder::content_type_header() const -> std::string {
     std::ostringstream oss;
     oss << "multipart/related; type=\"" << default_content_type_
-        << "\"; boundary=" << boundary_;
+        << "\"; boundary=\"" << boundary_ << "\"";
     return oss.str();
 }
 
@@ -280,11 +479,10 @@ auto multipart_builder::generate_boundary() -> std::string {
                          .count();
 
     std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 999999);
+    std::mt19937_64 gen((static_cast<uint64_t>(rd()) << 32) | rd());
 
     std::ostringstream oss;
-    oss << "----=_Part_" << timestamp << "_" << dis(gen);
+    oss << "----=_Part_" << timestamp << "_" << std::hex << gen() << gen();
     return oss.str();
 }
 
@@ -439,73 +637,81 @@ auto multipart_parser::parse(std::string_view content_type,
 
     // Extract boundary from Content-Type
     auto boundary_opt = extract_boundary(content_type);
-    if (!boundary_opt) {
+    if (!boundary_opt || boundary_opt->empty()) {
         result.error = parse_error{
             "INVALID_BOUNDARY",
             "Missing or invalid boundary in Content-Type header"};
         return result;
     }
 
-    const std::string& boundary = *boundary_opt;
-    std::string delimiter = "--" + boundary;
-    std::string end_delimiter = "--" + boundary + "--";
+    // RFC 2046 5.1.1: a delimiter is a whole line. Pixel data may hold the boundary's bytes
+    // anywhere else, and a part is only over when the next delimiter line is found.
+    const std::string delimiter = "--" + *boundary_opt;
+    const auto delimiter_at = [&](std::size_t from) -> std::size_t {
+        for (auto at = body.find(delimiter, from); at != std::string_view::npos; at = body.find(delimiter, at + 1)) {
+            const bool starts_line = at == 0 || (at >= 2 && body.substr(at - 2, 2) == "\r\n");
+            const auto after = at + delimiter.size();
+            const auto rest = body.substr(after);
+            const auto padding_end = rest.find_first_not_of(" \t");
+            const auto tail = padding_end == std::string_view::npos ? std::string_view{} : rest.substr(padding_end);
+            const bool ends_line = rest.starts_with("--") || tail.starts_with("\r\n");
+            if (starts_line && ends_line) {
+                return at;
+            }
+        }
+        return std::string_view::npos;
+    };
 
-    // Find first boundary
-    auto pos = body.find(delimiter);
-    if (pos == std::string_view::npos) {
+    auto at = delimiter_at(0);
+    if (at == std::string_view::npos) {
         result.error = parse_error{
             "NO_PARTS",
             "No parts found in multipart body"};
         return result;
     }
 
-    // Skip to after first boundary and CRLF
-    pos += delimiter.size();
-    if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
-        pos += 2;
-    }
-
-    // Parse each part
-    while (pos < body.size()) {
-        // Check for end delimiter
-        if (body.substr(pos).starts_with("--")) {
-            break; // End of multipart
-        }
-
-        // Find next boundary
-        auto next_boundary = body.find(delimiter, pos);
-        if (next_boundary == std::string_view::npos) {
-            // No more parts
+    for (;;) {
+        const auto after = at + delimiter.size();
+        if (body.substr(after).starts_with("--")) {
             break;
         }
-
-        // Extract part content (excluding trailing CRLF before boundary)
-        auto part_content = body.substr(pos, next_boundary - pos);
-        if (part_content.size() >= 2 &&
-            part_content.substr(part_content.size() - 2) == "\r\n") {
-            part_content = part_content.substr(0, part_content.size() - 2);
+        const auto line_end = body.find("\r\n", after);
+        const auto next = delimiter_at(line_end + 2);
+        if (next == std::string_view::npos) {
+            result.parts.clear();
+            result.error = parse_error{
+                "TRUNCATED",
+                "The multipart body ends without its closing delimiter"};
+            return result;
         }
 
-        // Split part into headers and body
-        auto header_end = part_content.find("\r\n\r\n");
-        if (header_end == std::string_view::npos) {
-            // Malformed part - skip
-            pos = next_boundary + delimiter.size();
-            if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
-                pos += 2;
+        // The CRLF before the delimiter belongs to the delimiter
+        auto section = body.substr(line_end + 2, next - (line_end + 2));
+        if (section.size() >= 2 && section.substr(section.size() - 2) == "\r\n") {
+            section = section.substr(0, section.size() - 2);
+        } else if (next == line_end + 2) {
+            section = {};
+        }
+
+        std::string_view header_section;
+        std::string_view body_section;
+        if (section.starts_with("\r\n")) {
+            body_section = section.substr(2);
+        } else {
+            const auto header_end = section.find("\r\n\r\n");
+            if (header_end == std::string_view::npos) {
+                result.parts.clear();
+                result.error = parse_error{
+                    "MALFORMED_PART",
+                    "A part has no blank line between its headers and its body"};
+                return result;
             }
-            continue;
+            header_section = section.substr(0, header_end);
+            body_section = section.substr(header_end + 4);
         }
 
-        auto header_section = part_content.substr(0, header_end);
-        auto body_section = part_content.substr(header_end + 4);
-
-        // Parse headers
-        auto headers = parse_part_headers(header_section);
-
-        // Create multipart_part
         multipart_part part;
-        for (const auto& [name, value] : headers) {
+        for (const auto& [name, value] : parse_part_headers(header_section)) {
             if (name == "content-type") {
                 part.content_type = value;
             } else if (name == "content-location") {
@@ -520,19 +726,12 @@ auto multipart_parser::parse(std::string_view content_type,
             part.content_type = std::string(media_type::dicom);
         }
 
-        // Copy body data
         part.data.assign(
             reinterpret_cast<const uint8_t*>(body_section.data()),
             reinterpret_cast<const uint8_t*>(body_section.data() +
                                              body_section.size()));
-
         result.parts.push_back(std::move(part));
-
-        // Move to next part
-        pos = next_boundary + delimiter.size();
-        if (pos < body.size() && body.substr(pos, 2) == "\r\n") {
-            pos += 2;
-        }
+        at = next;
     }
 
     if (result.parts.empty()) {
@@ -581,6 +780,15 @@ auto validate_instance(
             "Series Instance UID (0020,000E) is required");
     }
 
+    // These values name files and appear in URLs: they are only ever digits and dots (PS3.5 9.1).
+    for (const auto* uid : {sop_class, sop_instance, study_uid, series_uid}) {
+        if (!storage::is_valid_uid(uid->as_string().unwrap_or(""))) {
+            return validation_result::error(
+                "INVALID_UID",
+                "Not a valid UID: " + uid->as_string().unwrap_or(""));
+        }
+    }
+
     // Validate study UID matches target if specified
     if (target_study_uid.has_value()) {
         auto instance_study_uid = study_uid->as_string().unwrap_or("");
@@ -598,6 +806,74 @@ auto validate_instance(
 // STOW-RS Response Building
 // ============================================================================
 
+namespace {
+
+/// PS3.18 I.2.2: what each kind of refusal is called in Failure Reason (0008,1197).
+[[nodiscard]] uint16_t failure_reason_of(const store_instance_result& inst) {
+    constexpr uint16_t processing_failure = 0x0110;
+    constexpr uint16_t duplicate_sop_instance = 0x0111;
+    constexpr uint16_t out_of_resources = 0xA700;
+    constexpr uint16_t does_not_match_sop_class = 0xA900;
+    constexpr uint16_t cannot_understand = 0xC000;
+    if (!inst.error_code) {
+        return processing_failure;
+    }
+    const std::string_view code = *inst.error_code;
+    if (code == "DUPLICATE") {
+        return duplicate_sop_instance;
+    }
+    if (code == "STORAGE_ERROR") {
+        return out_of_resources;
+    }
+    if (code == "INVALID_DATA" || code == "UNSUPPORTED_PART") {
+        return cannot_understand;
+    }
+    if (code.starts_with("MISSING_") || code == "INVALID_UID" || code == "STUDY_UID_MISMATCH") {
+        return does_not_match_sop_class;
+    }
+    return processing_failure;
+}
+
+void write_uid_json(std::ostringstream& oss, std::string_view tag, const std::string& uid) {
+    oss << "\"" << tag << "\":{\"vr\":\"UI\",\"Value\":[\"" << json_escape(uid) << "\"]},";
+}
+
+/// The attributes of the Store Instances Response Module (PS3.18 Annex I), as a dataset.
+[[nodiscard]] core::dicom_dataset store_response_dataset(const store_response& response, std::string_view base_url) {
+    const auto referenced = [](const store_instance_result& inst) {
+        core::dicom_dataset item;
+        if (!inst.sop_class_uid.empty()) {
+            item.set_string(core::tags::referenced_sop_class_uid, encoding::vr_type::UI, inst.sop_class_uid);
+        }
+        if (!inst.sop_instance_uid.empty()) {
+            item.set_string(core::tags::referenced_sop_instance_uid, encoding::vr_type::UI, inst.sop_instance_uid);
+        }
+        return item;
+    };
+    core::dicom_dataset dataset;
+    if (!response.referenced_instances.empty()) {
+        core::dicom_element sequence(core::dicom_tag{0x0008, 0x1199}, encoding::vr_type::SQ);
+        for (const auto& inst : response.referenced_instances) {
+            auto item = referenced(inst);
+            item.set_string(core::dicom_tag{0x0008, 0x1190}, encoding::vr_type::UR, std::string(base_url)+inst.retrieve_url);
+            sequence.sequence_items().push_back(std::move(item));
+        }
+        dataset.insert(std::move(sequence));
+    }
+    if (!response.failed_instances.empty()) {
+        core::dicom_element sequence(core::dicom_tag{0x0008, 0x1198}, encoding::vr_type::SQ);
+        for (const auto& inst : response.failed_instances) {
+            auto item = referenced(inst);
+            item.set_numeric<uint16_t>(core::dicom_tag{0x0008, 0x1197}, encoding::vr_type::US, failure_reason_of(inst));
+            sequence.sequence_items().push_back(std::move(item));
+        }
+        dataset.insert(std::move(sequence));
+    }
+    return dataset;
+}
+
+}  // namespace
+
 auto build_store_response_json(
     const store_response& response,
     std::string_view base_url) -> std::string {
@@ -613,15 +889,11 @@ auto build_store_response_json(
             first = false;
 
             oss << "{";
-            // Referenced SOP Class UID (0008,1150)
-            oss << "\"00081150\":{\"vr\":\"UI\",\"Value\":[\""
-                << inst.sop_class_uid << "\"]},";
-            // Referenced SOP Instance UID (0008,1155)
-            oss << "\"00081155\":{\"vr\":\"UI\",\"Value\":[\""
-                << inst.sop_instance_uid << "\"]},";
+            write_uid_json(oss, "00081150", inst.sop_class_uid);
+            write_uid_json(oss, "00081155", inst.sop_instance_uid);
             // Retrieve URL (0008,1190)
             oss << "\"00081190\":{\"vr\":\"UR\",\"Value\":[\""
-                << base_url << inst.retrieve_url << "\"]}";
+                << json_escape(std::string(base_url) + inst.retrieve_url) << "\"]}";
             oss << "}";
         }
         oss << "]}";
@@ -639,25 +911,16 @@ auto build_store_response_json(
             first = false;
 
             oss << "{";
-            // Referenced SOP Class UID (0008,1150)
+            // An object that could not be read has no UIDs to name.
             if (!inst.sop_class_uid.empty()) {
-                oss << "\"00081150\":{\"vr\":\"UI\",\"Value\":[\""
-                    << inst.sop_class_uid << "\"]},";
+                write_uid_json(oss, "00081150", inst.sop_class_uid);
             }
-            // Referenced SOP Instance UID (0008,1155)
             if (!inst.sop_instance_uid.empty()) {
-                oss << "\"00081155\":{\"vr\":\"UI\",\"Value\":[\""
-                    << inst.sop_instance_uid << "\"]},";
+                write_uid_json(oss, "00081155", inst.sop_instance_uid);
             }
             // Failure Reason (0008,1197)
-            uint16_t failure_reason = 272; // Processing failure
-            if (inst.error_code && *inst.error_code == "DUPLICATE") {
-                failure_reason = 273; // Duplicate SOP Instance
-            } else if (inst.error_code && *inst.error_code == "INVALID_DATA") {
-                failure_reason = 272; // Processing failure
-            }
             oss << "\"00081197\":{\"vr\":\"US\",\"Value\":["
-                << failure_reason << "]}";
+                << failure_reason_of(inst) << "]}";
             oss << "}";
         }
         oss << "]}";
@@ -667,83 +930,402 @@ auto build_store_response_json(
     return oss.str();
 }
 
+auto build_store_response_xml(
+    const store_response& response,
+    std::string_view base_url) -> std::string {
+    return dataset_to_native_xml(store_response_dataset(response, base_url));
+}
+
+namespace {
+
+constexpr std::string_view base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+[[nodiscard]] std::string base64_encode(std::span<const uint8_t> data) {
+    std::string out;
+    out.reserve((data.size() + 2) / 3 * 4);
+    for (std::size_t i = 0; i < data.size(); i += 3) {
+        const uint32_t a = data[i];
+        const uint32_t b = i + 1 < data.size() ? data[i + 1] : 0;
+        const uint32_t c = i + 2 < data.size() ? data[i + 2] : 0;
+        const uint32_t triple = (a << 16) | (b << 8) | c;
+        out += base64_alphabet[(triple >> 18) & 63];
+        out += base64_alphabet[(triple >> 12) & 63];
+        out += i + 1 < data.size() ? base64_alphabet[(triple >> 6) & 63] : '=';
+        out += i + 2 < data.size() ? base64_alphabet[triple & 63] : '=';
+    }
+    return out;
+}
+
+[[nodiscard]] std::string tag_text(uint32_t tag) {
+    std::ostringstream oss;
+    oss << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << tag;
+    return oss.str();
+}
+
+/// VRs whose values are held in binary form and go out as base64 or a Bulk Data URI (PS3.18 Table F.2.3-1).
+[[nodiscard]] bool holds_binary_values(encoding::vr_type vr) {
+    using vr_type = encoding::vr_type;
+    return vr == vr_type::OB || vr == vr_type::OD || vr == vr_type::OF || vr == vr_type::OL || vr == vr_type::OV ||
+           vr == vr_type::OW || vr == vr_type::UN;
+}
+
+/// LT, ST, UT and UR hold one value, and a backslash in them is just a character (PS3.5 6.2).
+[[nodiscard]] bool is_single_valued_text(encoding::vr_type vr) {
+    using vr_type = encoding::vr_type;
+    return vr == vr_type::LT || vr == vr_type::ST || vr == vr_type::UT || vr == vr_type::UR;
+}
+
+[[nodiscard]] std::vector<std::string> values_of(const core::dicom_element& element) {
+    auto text = element.as_string();
+    if (text.is_err() || text.value().empty()) {
+        return {};
+    }
+    if (is_single_valued_text(element.vr())) {
+        return {text.value()};
+    }
+    return split(text.value(), '\\');
+}
+
+/// A DS value as a JSON number: "+1.50", "1." and ".5" are DICOM but not JSON. Empty when it is neither.
+[[nodiscard]] std::string json_number(std::string_view text) {
+    const auto value = trim(text);
+    if (value.empty()) {
+        return {};
+    }
+    char* end = nullptr;
+    const double parsed = std::strtod(value.c_str(), &end);
+    if (end == value.c_str() || *end != '\0' || !std::isfinite(parsed)) {
+        return {};
+    }
+    std::array<char, 40> digits{};
+    const auto written = std::to_chars(digits.data(), digits.data() + digits.size(), parsed);
+    return std::string(digits.data(), written.ptr);
+}
+
+template <typename T>
+void write_numbers(std::ostringstream& oss, const core::dicom_element& element) {
+    auto values = element.as_numeric_list<T>();
+    if (values.is_err() || values.value().empty()) {
+        return;
+    }
+    oss << ",\"Value\":[";
+    bool first = true;
+    for (const auto value : values.value()) {
+        if (!first) oss << ",";
+        first = false;
+        if constexpr (std::is_floating_point_v<T>) {
+            if (std::isfinite(value)) {
+                std::array<char, 40> digits{};
+                const auto written = std::to_chars(digits.data(), digits.data() + digits.size(), value);
+                oss << std::string_view(digits.data(), static_cast<std::size_t>(written.ptr - digits.data()));
+            } else {
+                // JSON has no number for these (PS3.18 F.2.3).
+                oss << (std::isnan(value) ? "\"NaN\"" : value > 0 ? "\"Infinity\"" : "\"-Infinity\"");
+            }
+        } else if constexpr (sizeof(T) == 8) {
+            // Beyond 2^53 a JSON reader cannot keep the value as a number (PS3.18 Table F.2.3-1 note).
+            const bool exact = value <= static_cast<T>(9007199254740991LL) &&
+                               (std::is_unsigned_v<T> || value >= static_cast<T>(-9007199254740991LL));
+            if (exact) {
+                oss << value;
+            } else {
+                oss << "\"" << value << "\"";
+            }
+        } else {
+            oss << +value;
+        }
+    }
+    oss << "]";
+}
+
+[[nodiscard]] std::vector<std::string> attribute_tags_of(const core::dicom_element& element) {
+    std::vector<std::string> tags;
+    const auto data = element.raw_data();
+    for (std::size_t i = 0; i + 4 <= data.size(); i += 4) {
+        const uint32_t group = static_cast<uint32_t>(data[i]) | (static_cast<uint32_t>(data[i + 1]) << 8);
+        const uint32_t member = static_cast<uint32_t>(data[i + 2]) | (static_cast<uint32_t>(data[i + 3]) << 8);
+        tags.push_back(tag_text((group << 16) | member));
+    }
+    return tags;
+}
+
+/// One PN value's component groups: Alphabetic, Ideographic and Phonetic, by the = between them.
+[[nodiscard]] std::array<std::string, 3> name_groups(const std::string& value) {
+    std::array<std::string, 3> groups;
+    std::size_t index = 0;
+    for (const auto& group : split(value, '=')) {
+        if (index < groups.size()) {
+            groups[index++] = group;
+        }
+    }
+    return groups;
+}
+
+void write_element_json(std::ostringstream& oss, const core::dicom_element& element, uint32_t tag, bool include_bulk_data,
+                        std::string_view bulk_data_uri_prefix);
+
+void write_dataset_json(std::ostringstream& oss, const core::dicom_dataset& dataset, bool include_bulk_data,
+                        std::string_view bulk_data_uri_prefix) {
+    oss << "{";
+    bool first = true;
+    for (const auto& [tag_key, element] : dataset) {
+        // Group lengths are not attributes (PS3.5 7.2), and file meta belongs to a file.
+        if (tag_key.element() == 0x0000 || tag_key.group() == 0x0002) {
+            continue;
+        }
+        if (!first) {
+            oss << ",";
+        }
+        first = false;
+        write_element_json(oss, element, tag_key.combined(), include_bulk_data, bulk_data_uri_prefix);
+    }
+    oss << "}";
+}
+
+void write_element_json(std::ostringstream& oss, const core::dicom_element& element, uint32_t tag, bool include_bulk_data,
+                        std::string_view bulk_data_uri_prefix) {
+    using vr_type = encoding::vr_type;
+    const auto vr = element.vr();
+    oss << "\"" << tag_text(tag) << "\":{\"vr\":\"" << encoding::to_string(vr) << "\"";
+
+    if (element.is_sequence()) {
+        if (!element.sequence_items().empty()) {
+            oss << ",\"Value\":[";
+            bool first = true;
+            for (const auto& item : element.sequence_items()) {
+                if (!first) oss << ",";
+                first = false;
+                // The Bulk Data route names top level attributes, so anything nested goes inline or is lost.
+                write_dataset_json(oss, item, true, {});
+            }
+            oss << "]";
+        }
+    } else if (is_bulk_data_tag(tag) && !include_bulk_data) {
+        if (!bulk_data_uri_prefix.empty()) {
+            oss << ",\"BulkDataURI\":\"" << json_escape(std::string(bulk_data_uri_prefix)) << tag_text(tag) << "\"";
+        }
+    } else if (holds_binary_values(vr)) {
+        if (!element.raw_data().empty()) {
+            oss << ",\"InlineBinary\":\"" << base64_encode(element.raw_data()) << "\"";
+        }
+    } else {
+        switch (vr) {
+            case vr_type::US: write_numbers<uint16_t>(oss, element); break;
+            case vr_type::SS: write_numbers<int16_t>(oss, element); break;
+            case vr_type::UL: write_numbers<uint32_t>(oss, element); break;
+            case vr_type::SL: write_numbers<int32_t>(oss, element); break;
+            case vr_type::UV: write_numbers<uint64_t>(oss, element); break;
+            case vr_type::SV: write_numbers<int64_t>(oss, element); break;
+            case vr_type::FL: write_numbers<float>(oss, element); break;
+            case vr_type::FD: write_numbers<double>(oss, element); break;
+            default: {
+                const auto values = vr == vr_type::AT ? attribute_tags_of(element) : values_of(element);
+                if (values.empty()) {
+                    break;
+                }
+                oss << ",\"Value\":[";
+                bool first = true;
+                for (const auto& value : values) {
+                    if (!first) oss << ",";
+                    first = false;
+                    if (vr == vr_type::PN) {
+                        const auto groups = name_groups(value);
+                        oss << "{";
+                        bool first_group = true;
+                        for (std::size_t g = 0; g < groups.size(); ++g) {
+                            if (groups[g].empty()) {
+                                continue;
+                            }
+                            static constexpr std::array<std::string_view, 3> names{"Alphabetic", "Ideographic", "Phonetic"};
+                            if (!first_group) oss << ",";
+                            first_group = false;
+                            oss << "\"" << names[g] << "\":\"" << json_escape(groups[g]) << "\"";
+                        }
+                        oss << "}";
+                    } else if (vr == vr_type::DS || vr == vr_type::IS) {
+                        // A number that is not one still has to survive as text (PS3.18 Table F.2.3-1 note).
+                        const auto number = json_number(value);
+                        if (number.empty()) {
+                            oss << (trim(value).empty() ? std::string("null") : "\"" + json_escape(value) + "\"");
+                        } else {
+                            oss << number;
+                        }
+                    } else {
+                        oss << "\"" << json_escape(value) << "\"";
+                    }
+                }
+                oss << "]";
+            }
+        }
+    }
+    oss << "}";
+}
+
+[[nodiscard]] std::string xml_escape(std::string_view text) {
+    std::string out;
+    out.reserve(text.size());
+    for (const char c : text) {
+        switch (c) {
+            case '&': out += "&amp;"; break;
+            case '<': out += "&lt;"; break;
+            case '>': out += "&gt;"; break;
+            case '"': out += "&quot;"; break;
+            case '\'': out += "&apos;"; break;
+            default: out += c;
+        }
+    }
+    return out;
+}
+
+void write_dataset_xml(std::ostringstream& oss, const core::dicom_dataset& dataset, bool include_bulk_data,
+                       std::string_view bulk_data_uri_prefix);
+
+void write_name_xml(std::ostringstream& oss, const std::string& value) {
+    static constexpr std::array<std::string_view, 3> groups{"Alphabetic", "Ideographic", "Phonetic"};
+    static constexpr std::array<std::string_view, 5> parts{"FamilyName", "GivenName", "MiddleName", "NamePrefix", "NameSuffix"};
+    const auto values = name_groups(value);
+    for (std::size_t g = 0; g < values.size(); ++g) {
+        if (values[g].empty()) {
+            continue;
+        }
+        oss << "<" << groups[g] << ">";
+        std::size_t index = 0;
+        for (const auto& component : split(values[g], '^')) {
+            if (index < parts.size() && !component.empty()) {
+                oss << "<" << parts[index] << ">" << xml_escape(component) << "</" << parts[index] << ">";
+            }
+            ++index;
+        }
+        oss << "</" << groups[g] << ">";
+    }
+}
+
+template <typename T>
+void write_numbers_xml(std::ostringstream& oss, const core::dicom_element& element) {
+    auto values = element.as_numeric_list<T>();
+    if (values.is_err()) {
+        return;
+    }
+    std::size_t number = 0;
+    for (const auto value : values.value()) {
+        oss << "<Value number=\"" << ++number << "\">" << +value << "</Value>";
+    }
+}
+
+void write_element_xml(std::ostringstream& oss, const core::dicom_element& element, uint32_t tag, bool include_bulk_data,
+                       std::string_view bulk_data_uri_prefix) {
+    using vr_type = encoding::vr_type;
+    const auto vr = element.vr();
+    oss << "<DicomAttribute tag=\"" << tag_text(tag) << "\" vr=\"" << encoding::to_string(vr) << "\"";
+    if (const auto info = core::dicom_dictionary::instance().find(core::dicom_tag{tag})) {
+        oss << " keyword=\"" << info->keyword << "\"";
+    }
+    oss << ">";
+    if (element.is_sequence()) {
+        std::size_t number = 0;
+        for (const auto& item : element.sequence_items()) {
+            oss << "<Item number=\"" << ++number << "\">";
+            write_dataset_xml(oss, item, true, {});
+            oss << "</Item>";
+        }
+    } else if (is_bulk_data_tag(tag) && !include_bulk_data) {
+        if (!bulk_data_uri_prefix.empty()) {
+            oss << "<BulkData uri=\"" << xml_escape(bulk_data_uri_prefix) << tag_text(tag) << "\"/>";
+        }
+    } else if (holds_binary_values(vr)) {
+        if (!element.raw_data().empty()) {
+            oss << "<InlineBinary>" << base64_encode(element.raw_data()) << "</InlineBinary>";
+        }
+    } else {
+        switch (vr) {
+            case vr_type::US: write_numbers_xml<uint16_t>(oss, element); break;
+            case vr_type::SS: write_numbers_xml<int16_t>(oss, element); break;
+            case vr_type::UL: write_numbers_xml<uint32_t>(oss, element); break;
+            case vr_type::SL: write_numbers_xml<int32_t>(oss, element); break;
+            case vr_type::UV: write_numbers_xml<uint64_t>(oss, element); break;
+            case vr_type::SV: write_numbers_xml<int64_t>(oss, element); break;
+            case vr_type::FL: write_numbers_xml<float>(oss, element); break;
+            case vr_type::FD: write_numbers_xml<double>(oss, element); break;
+            default: {
+                const auto values = vr == vr_type::AT ? attribute_tags_of(element) : values_of(element);
+                std::size_t number = 0;
+                for (const auto& value : values) {
+                    if (vr == vr_type::PN) {
+                        oss << "<PersonName number=\"" << ++number << "\">";
+                        write_name_xml(oss, value);
+                        oss << "</PersonName>";
+                    } else {
+                        oss << "<Value number=\"" << ++number << "\">" << xml_escape(value) << "</Value>";
+                    }
+                }
+            }
+        }
+    }
+    oss << "</DicomAttribute>";
+}
+
+void write_dataset_xml(std::ostringstream& oss, const core::dicom_dataset& dataset, bool include_bulk_data,
+                       std::string_view bulk_data_uri_prefix) {
+    for (const auto& [tag_key, element] : dataset) {
+        if (tag_key.element() == 0x0000 || tag_key.group() == 0x0002) {
+            continue;
+        }
+        write_element_xml(oss, element, tag_key.combined(), include_bulk_data, bulk_data_uri_prefix);
+    }
+}
+
+}  // namespace
+
+namespace {
+
+/// Bytes an object's character set does not explain, as U+FFFD: one bad name must not make a whole response unreadable.
+[[nodiscard]] std::string valid_utf8(std::string text) {
+    std::string repaired;
+    bool any_bad = false;
+    for (std::size_t i = 0; i < text.size();) {
+        const auto lead = static_cast<unsigned char>(text[i]);
+        const std::size_t length = lead < 0x80 ? 1 : (lead >= 0xC2 && lead <= 0xDF) ? 2 : (lead & 0xF0) == 0xE0 ? 3 : (lead >= 0xF0 && lead <= 0xF4) ? 4 : 0;
+        bool good = length != 0 && i + length <= text.size();
+        for (std::size_t j = 1; good && j < length; ++j) {
+            good = (static_cast<unsigned char>(text[i + j]) & 0xC0) == 0x80;
+        }
+        if (good && length >= 3) {
+            const auto second = static_cast<unsigned char>(text[i + 1]);
+            good = !(lead == 0xE0 && second < 0xA0) && !(lead == 0xED && second > 0x9F) && !(lead == 0xF0 && second < 0x90) && !(lead == 0xF4 && second > 0x8F);
+        }
+        if (good) {
+            repaired.append(text, i, length);
+            i += length;
+        } else {
+            any_bad = true;
+            repaired += "\xEF\xBF\xBD";
+            ++i;
+        }
+    }
+    return any_bad ? repaired : text;
+}
+
+}  // namespace
+
 auto dataset_to_dicom_json(
     const core::dicom_dataset& dataset,
     bool include_bulk_data,
     std::string_view bulk_data_uri_prefix) -> std::string {
     std::ostringstream oss;
-    oss << "{";
+    write_dataset_json(oss, core::utf8_text_copy(dataset), include_bulk_data, bulk_data_uri_prefix);
+    return valid_utf8(oss.str());
+}
 
-    bool first = true;
-    // Iterate using begin()/end() - dataset is iterable as map<dicom_tag, dicom_element>
-    for (const auto& [tag_key, elem] : dataset) {
-        if (!first) {
-            oss << ",";
-        }
-        first = false;
-
-        // Format tag as 8-digit hex
-        uint32_t tag = tag_key.combined();
-        oss << "\"";
-        oss << std::hex << std::setfill('0') << std::setw(8) << tag;
-        oss << std::dec << "\":{";
-
-        // Add VR
-        std::string vr_str = vr_enum_to_string(elem.vr());
-        oss << "\"vr\":\"" << vr_str << "\"";
-
-        // Check if bulk data
-        if (is_bulk_data_tag(tag) && !include_bulk_data) {
-            if (!bulk_data_uri_prefix.empty()) {
-                oss << ",\"BulkDataURI\":\"" << bulk_data_uri_prefix
-                    << std::hex << std::setfill('0') << std::setw(8) << tag
-                    << std::dec << "\"";
-            }
-        } else {
-            // Add Value based on VR type
-            auto value_str = elem.as_string().unwrap_or("");
-            if (!value_str.empty()) {
-                oss << ",\"Value\":[";
-
-                // Handle different VR types
-                using vr_type = kcenon::pacs::encoding::vr_type;
-                switch (elem.vr()) {
-                case vr_type::PN:
-                    // Person Name - object with Alphabetic component
-                    oss << "{\"Alphabetic\":\"" << json_escape(value_str) << "\"}";
-                    break;
-
-                case vr_type::IS:
-                case vr_type::SL:
-                case vr_type::SS:
-                case vr_type::UL:
-                case vr_type::US:
-                    // Integer types - output as number
-                    oss << value_str;
-                    break;
-
-                case vr_type::DS:
-                case vr_type::FL:
-                case vr_type::FD:
-                    // Decimal types - output as number
-                    oss << value_str;
-                    break;
-
-                default:
-                    // String types
-                    oss << "\"" << json_escape(value_str) << "\"";
-                    break;
-                }
-
-                oss << "]";
-            }
-        }
-
-        oss << "}";
-    }
-
-    oss << "}";
-    return oss.str();
+auto dataset_to_native_xml(
+    const core::dicom_dataset& dataset,
+    bool include_bulk_data,
+    std::string_view bulk_data_uri_prefix) -> std::string {
+    std::ostringstream oss;
+    oss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        << "<NativeDicomModel xmlns=\"http://dicom.nema.org/PS3.19/models/NativeDICOM\">";
+    write_dataset_xml(oss, core::utf8_text_copy(dataset), include_bulk_data, bulk_data_uri_prefix);
+    oss << "</NativeDicomModel>\n";
+    return valid_utf8(oss.str());
 }
 
 // ============================================================================
@@ -950,16 +1532,12 @@ std::string url_decode(std::string_view str) {
     result.reserve(str.size());
 
     for (size_t i = 0; i < str.size(); ++i) {
-        if (str[i] == '%' && i + 2 < str.size()) {
+        if (str[i] == '%' && i + 2 < str.size() && std::isxdigit(static_cast<unsigned char>(str[i + 1])) != 0 &&
+            std::isxdigit(static_cast<unsigned char>(str[i + 2])) != 0) {
             int value = 0;
-            std::string hex_str(str.substr(i + 1, 2));
-            try {
-                value = std::stoi(hex_str, nullptr, 16);
-                result += static_cast<char>(value);
-                i += 2;
-            } catch (...) {
-                result += str[i];
-            }
+            (void)std::from_chars(str.data() + i + 1, str.data() + i + 3, value, 16);
+            result += static_cast<char>(value);
+            i += 2;
         } else if (str[i] == '+') {
             result += ' ';
         } else {
@@ -980,10 +1558,12 @@ std::vector<std::pair<std::string, std::string>> parse_query_string(
         return result;
     }
 
-    // Remove leading '?' if present
+    // Callers pass a whole URL or only its query; what precedes '?' is not a parameter.
     std::string_view qs = query_string;
-    if (!qs.empty() && qs[0] == '?') {
-        qs = qs.substr(1);
+    if (const auto question = qs.find('?'); question != std::string_view::npos) {
+        qs = qs.substr(question + 1);
+    } else if (!qs.empty() && qs[0] == '/') {
+        return result;
     }
 
     auto params = split(qs, '&');
@@ -1115,6 +1695,108 @@ auto parse_instance_query_params(const std::string& url_params) -> storage::inst
 }
 
 // ============================================================================
+// QIDO-RS Parameters as PS3.18 8.3.4 Defines Them
+// ============================================================================
+
+namespace {
+
+[[nodiscard]] std::optional<std::size_t> unsigned_value(std::string_view text) {
+    std::size_t value = 0;
+    const auto* end = text.data() + text.size();
+    const auto parsed = std::from_chars(text.data(), end, value);
+    if (text.empty() || parsed.ec != std::errc{} || parsed.ptr != end) {
+        return std::nullopt;
+    }
+    return value;
+}
+
+/// An Attribute by its Keyword or eight hexadecimal digits (8.3.4.1).
+[[nodiscard]] std::optional<std::pair<core::dicom_tag, encoding::vr_type>> attribute_named(std::string_view name) {
+    const auto& dictionary = core::dicom_dictionary::instance();
+    if (const auto info = dictionary.find_by_keyword(name)) {
+        return std::make_pair(info->tag, static_cast<encoding::vr_type>(info->vr));
+    }
+    if (name.size() == 8 && std::all_of(name.begin(), name.end(), [](unsigned char c) { return std::isxdigit(c) != 0; })) {
+        uint32_t combined = 0;
+        (void)std::from_chars(name.data(), name.data() + name.size(), combined, 16);
+        const core::dicom_tag tag{combined};
+        const auto info = dictionary.find(tag);
+        return std::make_pair(tag, info ? static_cast<encoding::vr_type>(info->vr) : encoding::vr_type::UN);
+    }
+    return std::nullopt;
+}
+
+[[nodiscard]] std::optional<bool> boolean_value(std::string_view text) {
+    if (text == "true") {
+        return true;
+    }
+    if (text == "false") {
+        return false;
+    }
+    return std::nullopt;
+}
+
+}  // namespace
+
+auto parse_search_parameters(std::string_view url) -> search_parameters {
+    search_parameters parsed;
+    std::vector<uint32_t> seen;
+    const auto refuse = [&parsed](std::string reason) {
+        parsed.error = std::move(reason);
+        return parsed;
+    };
+    for (const auto& [name, value] : parse_query_string(std::string(url))) {
+        if (name == "limit" || name == "offset") {
+            const auto number = unsigned_value(value);
+            if (!number) {
+                return refuse(name + " is not an unsigned integer: " + value);
+            }
+            (name == "limit" ? parsed.limit : parsed.offset) = *number;
+        } else if (name == "fuzzymatching" || name == "emptyvaluematching" || name == "multiplevaluematching") {
+            const auto flag = boolean_value(value);
+            if (!flag) {
+                return refuse(name + " is neither true nor false: " + value);
+            }
+            if (*flag) {
+                parsed.unsupported_flags.push_back(name);
+            }
+        } else if (name == "includefield") {
+            for (const auto& field : split(value, ',')) {
+                if (field == "all") {
+                    parsed.include_all = true;
+                } else if (const auto attribute = attribute_named(field)) {
+                    parsed.include_fields.push_back(attribute->first);
+                } else {
+                    return refuse("includefield names no attribute: " + field);
+                }
+            }
+        } else if (name == "accept" || name == "charset") {
+            continue;  // 8.3.3: they select a representation, not results
+        } else if (name.find('.') != std::string::npos) {
+            // A key inside a sequence is valid syntax; the index holds no sequences to match it against.
+            parsed.keys_not_used.push_back(name);
+        } else {
+            const auto attribute = attribute_named(name);
+            if (!attribute) {
+                return refuse("Not a DICOM Keyword or Tag: " + name);
+            }
+            const auto combined = attribute->first.combined();
+            if (std::find(seen.begin(), seen.end(), combined) != seen.end()) {
+                return refuse("An attribute shall not be repeated (8.3.4.1): " + name);
+            }
+            seen.push_back(combined);
+            auto text = value;
+            // Only UIDs may be listed with commas (8.3.4.1); C-FIND lists them with backslashes.
+            if (attribute->second == encoding::vr_type::UI) {
+                std::replace(text.begin(), text.end(), ',', '\\');
+            }
+            parsed.keys.push_back({attribute->first, attribute->second, std::move(text), name});
+        }
+    }
+    return parsed;
+}
+
+// ============================================================================
 // Frame Retrieval
 // ============================================================================
 
@@ -1195,6 +1877,285 @@ auto extract_frame(
 }
 
 // ============================================================================
+// Frame Lists
+// ============================================================================
+
+auto parse_frame_list(std::string_view frame_list) -> std::optional<std::vector<uint32_t>> {
+    // Bounds what a range can ask for before anything knows how many frames there are.
+    constexpr std::size_t most_frames = 1U << 20;
+    std::vector<uint32_t> frames;
+    const auto add = [&frames](uint32_t frame) {
+        // PS3.18 10.1: "a comma-separated list of Frame numbers, in ascending order".
+        if (frame == 0 || (!frames.empty() && frame <= frames.back()) || frames.size() >= most_frames) {
+            return false;
+        }
+        frames.push_back(frame);
+        return true;
+    };
+    const auto number = [](std::string_view text) -> std::optional<uint32_t> {
+        uint32_t value = 0;
+        const auto* end = text.data() + text.size();
+        const auto parsed = std::from_chars(text.data(), end, value);
+        if (text.empty() || parsed.ec != std::errc{} || parsed.ptr != end) {
+            return std::nullopt;
+        }
+        return value;
+    };
+    for (const auto& item : split(frame_list, ',')) {
+        const auto dash = item.find('-');
+        if (dash == std::string::npos) {
+            const auto frame = number(item);
+            if (!frame || !add(*frame)) {
+                return std::nullopt;
+            }
+            continue;
+        }
+        const auto first = number(std::string_view(item).substr(0, dash));
+        const auto last = number(std::string_view(item).substr(dash + 1));
+        if (!first || !last || *last < *first || *last - *first >= most_frames) {
+            return std::nullopt;
+        }
+        for (uint32_t frame = *first; ; ++frame) {
+            if (!add(frame)) {
+                return std::nullopt;
+            }
+            if (frame == *last) {
+                break;
+            }
+        }
+    }
+    return frames;
+}
+
+// ============================================================================
+// Pixel Access
+// ============================================================================
+
+namespace {
+
+namespace compression = encoding::compression;
+
+constexpr core::dicom_tag number_of_frames_tag{0x0028, 0x0008};
+constexpr core::dicom_tag planar_configuration_tag{0x0028, 0x0006};
+
+/// What the image attributes say about the pixels of one frame.
+struct frame_layout {
+    uint16_t rows{0};
+    uint16_t columns{0};
+    uint16_t bits_allocated{8};
+    uint16_t bits_stored{8};
+    uint16_t high_bit{7};
+    uint16_t samples{1};
+    uint16_t planar{0};
+    uint16_t pixel_representation{0};
+    uint32_t frames{1};
+    compression::photometric_interpretation photometric{compression::photometric_interpretation::monochrome2};
+
+    [[nodiscard]] std::size_t frame_bytes() const {
+        return static_cast<std::size_t>(rows) * columns * samples * (bits_allocated / 8);
+    }
+};
+
+[[nodiscard]] std::optional<frame_layout> layout_of(const core::dicom_dataset& dataset) {
+    if (!dataset.contains(core::tags::pixel_data)) {
+        return std::nullopt;
+    }
+    const auto rows = dataset.get_numeric<uint16_t>(core::tags::rows);
+    const auto columns = dataset.get_numeric<uint16_t>(core::tags::columns);
+    if (!rows || !columns || *rows == 0 || *columns == 0) {
+        return std::nullopt;
+    }
+    frame_layout layout;
+    layout.rows = *rows;
+    layout.columns = *columns;
+    layout.bits_allocated = dataset.get_numeric<uint16_t>(core::tags::bits_allocated).value_or(8);
+    layout.bits_stored = dataset.get_numeric<uint16_t>(core::tags::bits_stored).value_or(layout.bits_allocated);
+    layout.high_bit = dataset.get_numeric<uint16_t>(core::tags::high_bit).value_or(static_cast<uint16_t>(layout.bits_stored - 1));
+    layout.samples = dataset.get_numeric<uint16_t>(core::tags::samples_per_pixel).value_or(1);
+    layout.planar = dataset.get_numeric<uint16_t>(planar_configuration_tag).value_or(0);
+    layout.pixel_representation = dataset.get_numeric<uint16_t>(core::tags::pixel_representation).value_or(0);
+    layout.photometric = compression::parse_photometric_interpretation(dataset.get_string(core::tags::photometric_interpretation));
+    const auto frames = dataset.get_string(number_of_frames_tag);
+    if (!frames.empty()) {
+        const auto text = trim(frames);
+        uint32_t count = 0;
+        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), count);
+        if (parsed.ec != std::errc{} || count == 0) {
+            return std::nullopt;
+        }
+        layout.frames = count;
+    }
+    return layout;
+}
+
+/// The frames asked for as they are held: native bytes, or one encoded frame without fragment delimiters.
+[[nodiscard]] kcenon::pacs::Result<std::vector<std::vector<uint8_t>>> held_frames(const core::dicom_file& file, const frame_layout& layout,
+                                                                                 const std::vector<uint32_t>& numbers) {
+    using frame_list = std::vector<std::vector<uint8_t>>;
+    const auto* pixel = file.dataset().get(core::tags::pixel_data);
+    if (pixel == nullptr) {
+        return kcenon::pacs::pacs_error<frame_list>(kcenon::pacs::error_codes::invalid_sequence, "The object has no Pixel Data");
+    }
+    frame_list selected;
+    if (file.transfer_syntax().is_encapsulated()) {
+        auto all = core::dicom_file::encapsulated_frames(pixel->raw_data(), layout.frames);
+        if (all.is_err()) {
+            return all.error();
+        }
+        for (const auto number : numbers) {
+            selected.push_back(std::move(all.value()[number - 1]));
+        }
+        return selected;
+    }
+    if (layout.bits_allocated % 8 != 0) {
+        return kcenon::pacs::pacs_error<frame_list>(kcenon::pacs::error_codes::invalid_sequence,
+                                                    "Frames that are not byte aligned cannot be separated");
+    }
+    const auto data = pixel->raw_data();
+    const auto size = layout.frame_bytes();
+    for (const auto number : numbers) {
+        const auto frame = extract_frame(data, number, size);
+        if (frame.empty()) {
+            return kcenon::pacs::pacs_error<frame_list>(kcenon::pacs::error_codes::data_size_mismatch,
+                                                        "Pixel Data is too short for frame " + std::to_string(number));
+        }
+        selected.push_back(frame);
+    }
+    return selected;
+}
+
+[[nodiscard]] compression::image_params params_of(const frame_layout& layout) {
+    compression::image_params params;
+    params.width = layout.columns;
+    params.height = layout.rows;
+    params.bits_allocated = layout.bits_allocated;
+    params.bits_stored = layout.bits_stored;
+    params.high_bit = layout.high_bit;
+    params.samples_per_pixel = layout.samples;
+    params.planar_configuration = layout.planar;
+    params.pixel_representation = layout.pixel_representation;
+    params.photometric = layout.photometric;
+    params.number_of_frames = 1;
+    return params;
+}
+
+/// The frames asked for as native pixels; `layout` then describes what the codec produced.
+[[nodiscard]] kcenon::pacs::Result<std::vector<std::vector<uint8_t>>> native_frames(const core::dicom_file& file, frame_layout& layout,
+                                                                                   const std::vector<uint32_t>& numbers) {
+    using frame_list = std::vector<std::vector<uint8_t>>;
+    auto held = held_frames(file, layout, numbers);
+    if (held.is_err() || !file.transfer_syntax().is_encapsulated()) {
+        return held;
+    }
+    const auto codec = compression::codec_factory::create(file.transfer_syntax().uid());
+    if (!codec) {
+        return kcenon::pacs::pacs_error<frame_list>(kcenon::pacs::error_codes::unsupported_transfer_syntax,
+                                                    "No codec for " + std::string(file.transfer_syntax().uid()));
+    }
+    frame_list decoded;
+    for (const auto& frame : held.value()) {
+        auto result = codec->decode(frame, params_of(layout));
+        if (result.is_err()) {
+            return result.error();
+        }
+        layout.photometric = result.value().output_params.photometric;
+        layout.planar = result.value().output_params.planar_configuration;
+        decoded.push_back(std::move(result.value().data));
+    }
+    return decoded;
+}
+
+[[nodiscard]] std::vector<uint32_t> every_frame(const frame_layout& layout) {
+    std::vector<uint32_t> numbers(layout.frames);
+    std::iota(numbers.begin(), numbers.end(), 1U);
+    return numbers;
+}
+
+// ============================================================================
+// PNG (RFC 2083), written without a compressor
+// ============================================================================
+
+[[nodiscard]] uint32_t crc32_of(std::span<const uint8_t> data, uint32_t crc = 0xFFFFFFFFU) {
+    for (const auto byte : data) {
+        crc ^= byte;
+        for (int bit = 0; bit < 8; ++bit) {
+            crc = (crc >> 1) ^ (0xEDB88320U & (0U - (crc & 1U)));
+        }
+    }
+    return crc;
+}
+
+void append_be32(std::vector<uint8_t>& out, uint32_t value) {
+    out.push_back(static_cast<uint8_t>(value >> 24));
+    out.push_back(static_cast<uint8_t>(value >> 16));
+    out.push_back(static_cast<uint8_t>(value >> 8));
+    out.push_back(static_cast<uint8_t>(value));
+}
+
+void append_chunk(std::vector<uint8_t>& out, std::string_view kind, std::span<const uint8_t> data) {
+    append_be32(out, static_cast<uint32_t>(data.size()));
+    const auto start = out.size();
+    out.insert(out.end(), kind.begin(), kind.end());
+    out.insert(out.end(), data.begin(), data.end());
+    append_be32(out, ~crc32_of(std::span<const uint8_t>(out.data() + start, out.size() - start)));
+}
+
+}  // namespace
+
+auto encode_png(std::span<const uint8_t> pixels, uint32_t width, uint32_t height, uint16_t channels) -> std::vector<uint8_t> {
+    const std::size_t stride = static_cast<std::size_t>(width) * channels;
+    if (channels != 1 && channels != 3) {
+        return {};
+    }
+    if (width == 0 || height == 0 || pixels.size() != stride * height) {
+        return {};
+    }
+
+    // Each row starts with filter type 0, and the zlib stream holds stored deflate blocks.
+    std::vector<uint8_t> raw;
+    raw.reserve((stride + 1) * height);
+    for (uint32_t row = 0; row < height; ++row) {
+        raw.push_back(0);
+        const auto line = pixels.subspan(row * stride, stride);
+        raw.insert(raw.end(), line.begin(), line.end());
+    }
+    std::vector<uint8_t> compressed{0x78, 0x01};
+    constexpr std::size_t largest_block = 65535;
+    for (std::size_t offset = 0; offset < raw.size();) {
+        const auto size = std::min(largest_block, raw.size() - offset);
+        compressed.push_back(offset + size == raw.size() ? 1 : 0);
+        compressed.push_back(static_cast<uint8_t>(size));
+        compressed.push_back(static_cast<uint8_t>(size >> 8));
+        compressed.push_back(static_cast<uint8_t>(~size));
+        compressed.push_back(static_cast<uint8_t>((~size) >> 8));
+        compressed.insert(compressed.end(), raw.begin() + static_cast<std::ptrdiff_t>(offset),
+                          raw.begin() + static_cast<std::ptrdiff_t>(offset + size));
+        offset += size;
+    }
+    uint32_t adler_a = 1;
+    uint32_t adler_b = 0;
+    for (const auto byte : raw) {
+        adler_a = (adler_a + byte) % 65521;
+        adler_b = (adler_b + adler_a) % 65521;
+    }
+    append_be32(compressed, (adler_b << 16) | adler_a);
+
+    std::vector<uint8_t> out{0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
+    std::vector<uint8_t> header;
+    append_be32(header, width);
+    append_be32(header, height);
+    header.push_back(8);
+    header.push_back(channels == 1 ? 0 : 2);
+    header.push_back(0);
+    header.push_back(0);
+    header.push_back(0);
+    append_chunk(out, "IHDR", header);
+    append_chunk(out, "IDAT", compressed);
+    append_chunk(out, "IEND", {});
+    return out;
+}
+
+// ============================================================================
 // Rendered Images
 // ============================================================================
 
@@ -1221,6 +2182,22 @@ auto parse_rendered_params(
                 params.quality = std::stoi(value);
                 params.quality = std::clamp(params.quality, 1, 100);
             } catch (...) {}
+        } else if (key == "window") {
+            // PS3.18 8.3.5.1.4: center, width and function, with the widths PS3.3 C.11.2.1.2 allows each function.
+            const auto parts = split(value, ',');
+            char* center_end = nullptr;
+            char* width_end = nullptr;
+            const double center = parts.size() == 3 ? std::strtod(parts[0].c_str(), &center_end) : 0.0;
+            const double width = parts.size() == 3 ? std::strtod(parts[1].c_str(), &width_end) : 0.0;
+            const bool known = parts.size() == 3 && (parts[2] == "linear" || parts[2] == "linear-exact" || parts[2] == "sigmoid");
+            if (!known || center_end == parts[0].c_str() || *center_end != '\0' ||
+                width_end == parts[1].c_str() || *width_end != '\0' || width < (parts[2] == "linear" ? 1.0 : std::numeric_limits<double>::min())) {
+                params.invalid_parameter = "window shall be center,width,function with a function of linear, linear-exact or sigmoid and a width it allows: " + value;
+            } else {
+                params.window_center = center;
+                params.window_width = width;
+                params.window_function = parts[2];
+            }
         } else if (key == "windowcenter" || key == "window-center") {
             try {
                 params.window_center = std::stod(value);
@@ -1230,7 +2207,10 @@ auto parse_rendered_params(
                 params.window_width = std::stod(value);
             } catch (...) {}
         } else if (key == "viewport") {
-            // Format: WxH or W,H
+            // Format: WxH or W,H. Cropping (PS3.18 8.3.5.1.3 with six values) is refused rather than ignored.
+            if (std::count(value.begin(), value.end(), ',') > 1) {
+                params.invalid_parameter = "viewport with a source rectangle is not supported: " + value;
+            }
             auto sep = value.find_first_of("x,");
             if (sep != std::string::npos) {
                 try {
@@ -1261,6 +2241,160 @@ auto parse_rendered_params(
     return params;
 }
 
+namespace {
+
+/// PS3.3 C.11.2.1.3 and C.11.2.1.3.2, onto 0 to 255.
+[[nodiscard]] uint8_t windowed_by(std::string_view function, double value, double center, double width) {
+    if (function == "sigmoid") {
+        return static_cast<uint8_t>(std::clamp(std::lround(255.0 / (1.0 + std::exp(-4.0 * (value - center) / width))), 0L, 255L));
+    }
+    if (value <= center - width / 2.0) {
+        return 0;
+    }
+    if (value > center + width / 2.0) {
+        return 255;
+    }
+    return static_cast<uint8_t>(std::clamp(std::lround(((value - center) / width + 0.5) * 255.0), 0L, 255L));
+}
+
+/// PS3.3 C.11.2.1.2, the linear function, onto 0 to 255.
+[[nodiscard]] uint8_t windowed(double value, double center, double width) {
+    if (width <= 1.0) {
+        return value <= center - 0.5 ? 0 : 255;
+    }
+    const double half = (width - 1.0) / 2.0;
+    if (value <= center - 0.5 - half) {
+        return 0;
+    }
+    if (value > center - 0.5 + half) {
+        return 255;
+    }
+    const double scaled = ((value - (center - 0.5)) / (width - 1.0) + 0.5) * 255.0;
+    return static_cast<uint8_t>(std::clamp(std::lround(scaled), 0L, 255L));
+}
+
+/// One sample as a number: High Bit places it in its container and Pixel Representation gives its sign.
+[[nodiscard]] double stored_value(std::span<const uint8_t> frame, std::size_t index, const frame_layout& layout) {
+    uint32_t container = 0;
+    if (layout.bits_allocated == 8) {
+        container = frame[index];
+    } else {
+        container = static_cast<uint32_t>(frame[index * 2]) | (static_cast<uint32_t>(frame[index * 2 + 1]) << 8);
+    }
+    const int shift = layout.high_bit + 1 - layout.bits_stored;
+    const uint32_t mask = layout.bits_stored >= 32 ? 0xFFFFFFFFU : (1U << layout.bits_stored) - 1U;
+    uint32_t raw = (container >> (shift > 0 ? shift : 0)) & mask;
+    if (layout.pixel_representation == 1 && layout.bits_stored < 32 && (raw & (1U << (layout.bits_stored - 1))) != 0) {
+        return static_cast<double>(static_cast<int64_t>(raw) - (int64_t{1} << layout.bits_stored));
+    }
+    return static_cast<double>(raw);
+}
+
+[[nodiscard]] std::optional<double> first_number(const core::dicom_dataset& dataset, core::dicom_tag tag) {
+    const auto values = split(dataset.get_string(tag), '\\');
+    if (values.empty() || trim(values[0]).empty()) {
+        return std::nullopt;
+    }
+    const auto text = trim(values[0]);
+    char* end = nullptr;
+    const double parsed = std::strtod(text.c_str(), &end);
+    return end != text.c_str() && *end == '\0' ? std::optional<double>{parsed} : std::nullopt;
+}
+
+/// A grayscale frame on 8 bits: Modality LUT, then the asked or stored window, or else the frame's own range.
+[[nodiscard]] std::vector<uint8_t> render_gray(std::span<const uint8_t> frame, const frame_layout& layout,
+                                               const core::dicom_dataset& dataset, const rendered_params& params) {
+    const std::size_t count = static_cast<std::size_t>(layout.rows) * layout.columns;
+    const double slope = first_number(dataset, core::tags::rescale_slope).value_or(1.0);
+    const double intercept = first_number(dataset, core::tags::rescale_intercept).value_or(0.0);
+    std::vector<double> values(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        values[i] = stored_value(frame, i, layout) * slope + intercept;
+    }
+    auto center = params.window_center ? params.window_center : first_number(dataset, core::tags::window_center);
+    auto width = params.window_width ? params.window_width : first_number(dataset, core::tags::window_width);
+    if (!center || !width || *width < 1.0) {
+        const auto [lowest, highest] = std::minmax_element(values.begin(), values.end());
+        width = std::max(*highest - *lowest + 1.0, 2.0);
+        center = (*highest + *lowest + 1.0) / 2.0;
+    }
+    std::vector<uint8_t> output(count);
+    const bool inverted = layout.photometric == compression::photometric_interpretation::monochrome1;
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto level = params.window_function == "linear" ? windowed(values[i], *center, *width)
+                                                              : windowed_by(params.window_function, values[i], *center, *width);
+        output[i] = inverted ? static_cast<uint8_t>(255 - level) : level;
+    }
+    return output;
+}
+
+/// An image scaled to fit the viewport, keeping its proportions, by repeating or dropping pixels.
+struct scaled_image {
+    std::vector<uint8_t> samples;
+    uint32_t width;
+    uint32_t height;
+};
+
+[[nodiscard]] scaled_image fit_viewport(std::vector<uint8_t> samples, uint32_t width, uint32_t height, uint16_t channels,
+                                        uint16_t viewport_width, uint16_t viewport_height) {
+    if (viewport_width == 0 && viewport_height == 0) {
+        return {std::move(samples), width, height};
+    }
+    const double across = viewport_width != 0 ? static_cast<double>(viewport_width) / width : static_cast<double>(viewport_height) / height;
+    const double down = viewport_height != 0 ? static_cast<double>(viewport_height) / height : across;
+    const double scale = std::min(across, down);
+    const auto out_width = std::max<uint32_t>(1, static_cast<uint32_t>(std::lround(width * scale)));
+    const auto out_height = std::max<uint32_t>(1, static_cast<uint32_t>(std::lround(height * scale)));
+    std::vector<uint8_t> scaled(static_cast<std::size_t>(out_width) * out_height * channels);
+    for (uint32_t row = 0; row < out_height; ++row) {
+        const uint32_t from_row = std::min(height - 1, static_cast<uint32_t>(row / scale));
+        for (uint32_t column = 0; column < out_width; ++column) {
+            const uint32_t from_column = std::min(width - 1, static_cast<uint32_t>(column / scale));
+            for (uint16_t channel = 0; channel < channels; ++channel) {
+                scaled[(static_cast<std::size_t>(row) * out_width + column) * channels + channel] =
+                    samples[(static_cast<std::size_t>(from_row) * width + from_column) * channels + channel];
+            }
+        }
+    }
+    return {std::move(scaled), out_width, out_height};
+}
+
+/// A color frame as interleaved 8 bit RGB. Empty when the photometric interpretation is not one of these.
+[[nodiscard]] std::vector<uint8_t> render_color(std::span<const uint8_t> frame, const frame_layout& layout) {
+    const std::size_t count = static_cast<std::size_t>(layout.rows) * layout.columns;
+    std::vector<uint8_t> output(count * 3);
+    const auto sample = [&](std::size_t pixel, std::size_t channel) -> uint8_t {
+        const std::size_t index = layout.planar == 1 ? channel * count + pixel : pixel * 3 + channel;
+        if (layout.bits_allocated == 8) {
+            return frame[index];
+        }
+        const auto wide = static_cast<uint32_t>(frame[index * 2]) | (static_cast<uint32_t>(frame[index * 2 + 1]) << 8);
+        return static_cast<uint8_t>(wide >> (layout.bits_stored > 8 ? layout.bits_stored - 8 : 0));
+    };
+    const bool ybr = layout.photometric == compression::photometric_interpretation::ycbcr_full;
+    if (!ybr && layout.photometric != compression::photometric_interpretation::rgb) {
+        return {};
+    }
+    const auto to_byte = [](double value) { return static_cast<uint8_t>(std::clamp(std::lround(value), 0L, 255L)); };
+    for (std::size_t pixel = 0; pixel < count; ++pixel) {
+        const auto first = sample(pixel, 0);
+        const auto second = sample(pixel, 1);
+        const auto third = sample(pixel, 2);
+        if (ybr) {
+            output[pixel * 3] = to_byte(first + 1.402 * (third - 128.0));
+            output[pixel * 3 + 1] = to_byte(first - 0.344136 * (second - 128.0) - 0.714136 * (third - 128.0));
+            output[pixel * 3 + 2] = to_byte(first + 1.772 * (second - 128.0));
+        } else {
+            output[pixel * 3] = first;
+            output[pixel * 3 + 1] = second;
+            output[pixel * 3 + 2] = third;
+        }
+    }
+    return output;
+}
+
+}  // namespace
+
 auto apply_window_level(
     std::span<const uint8_t> pixel_data,
     uint16_t width,
@@ -1273,10 +2407,6 @@ auto apply_window_level(
     double rescale_intercept) -> std::vector<uint8_t> {
 
     std::vector<uint8_t> output(static_cast<size_t>(width) * height);
-
-    // Calculate window boundaries
-    double window_min = window_center - window_width / 2.0;
-    double window_max = window_center + window_width / 2.0;
 
     size_t pixel_count = static_cast<size_t>(width) * height;
     bool is_16bit = (bits_stored > 8);
@@ -1312,18 +2442,7 @@ auto apply_window_level(
             }
         }
 
-        // Apply window/level
-        uint8_t output_value;
-        if (value <= window_min) {
-            output_value = 0;
-        } else if (value >= window_max) {
-            output_value = 255;
-        } else {
-            output_value = static_cast<uint8_t>(
-                (value - window_min) / window_width * 255.0);
-        }
-
-        output[i] = output_value;
+        output[i] = windowed(value, window_center, window_width);
     }
 
     return output;
@@ -1332,6 +2451,10 @@ auto apply_window_level(
 auto render_dicom_image(
     std::string_view file_path,
     const rendered_params& params) -> rendered_result {
+
+    if (!params.invalid_parameter.empty()) {
+        return rendered_result::error(params.invalid_parameter);
+    }
 
     // Load DICOM file
     std::ifstream file(std::string(file_path), std::ios::binary);
@@ -1352,126 +2475,62 @@ auto render_dicom_image(
     }
 
     const auto& dataset = dicom_result.value().dataset();
-
-    // Get image parameters
-    auto rows_elem = dataset.get(core::tags::rows);
-    auto cols_elem = dataset.get(core::tags::columns);
-    auto bits_stored_elem = dataset.get(core::tags::bits_stored);
-    auto bits_allocated_elem = dataset.get(core::tags::bits_allocated);
-    auto pixel_rep_elem = dataset.get(core::tags::pixel_representation);
-    auto samples_elem = dataset.get(core::tags::samples_per_pixel);
-    auto pixel_data_elem = dataset.get(core::tags::pixel_data);
-
-    if (!rows_elem || !cols_elem || !pixel_data_elem) {
+    auto layout = layout_of(dataset);
+    if (!layout) {
         return rendered_result::error("Missing required image attributes");
     }
-
-    uint16_t rows = rows_elem->as_numeric<uint16_t>().unwrap_or(0);
-    uint16_t cols = cols_elem->as_numeric<uint16_t>().unwrap_or(0);
-    uint16_t bits_stored = bits_stored_elem ?
-        bits_stored_elem->as_numeric<uint16_t>().unwrap_or(8) : 8;
-    uint16_t bits_allocated = bits_allocated_elem ?
-        bits_allocated_elem->as_numeric<uint16_t>().unwrap_or(8) : 8;
-    uint16_t pixel_rep = pixel_rep_elem ?
-        pixel_rep_elem->as_numeric<uint16_t>().unwrap_or(0) : 0;
-    uint16_t samples_per_pixel = samples_elem ?
-        samples_elem->as_numeric<uint16_t>().unwrap_or(1) : 1;
-
-    bool is_signed = (pixel_rep == 1);
-
-    // Get window/level from DICOM or use provided parameters
-    double window_center = 128.0;
-    double window_width = 256.0;
-
-    if (params.window_center.has_value()) {
-        window_center = *params.window_center;
-    } else if (auto wc = dataset.get(core::tags::window_center)) {
-        try {
-            auto values_result = wc->as_string_list();
-            if (values_result.is_ok() && !values_result.value().empty()) {
-                window_center = std::stod(values_result.value()[0]);
-            }
-        } catch (...) {}
+    if (params.frame == 0 || params.frame > layout->frames) {
+        return rendered_result::not_found("Requested frame does not exist");
     }
 
-    if (params.window_width.has_value()) {
-        window_width = *params.window_width;
-    } else if (auto ww = dataset.get(core::tags::window_width)) {
-        try {
-            auto values_result = ww->as_string_list();
-            if (values_result.is_ok() && !values_result.value().empty()) {
-                window_width = std::stod(values_result.value()[0]);
-            }
-        } catch (...) {}
+    if ((layout->bits_allocated != 8 && layout->bits_allocated != 16) || layout->bits_stored == 0 || layout->bits_stored > layout->bits_allocated) {
+        return rendered_result::error("Cannot render " + std::to_string(layout->bits_allocated) + " bits allocated");
     }
 
-    // Get rescale parameters
-    double rescale_slope = 1.0;
-    double rescale_intercept = 0.0;
-
-    if (auto rs = dataset.get(core::tags::rescale_slope)) {
-        try {
-            rescale_slope = std::stod(rs->as_string().unwrap_or("1.0"));
-        } catch (...) {}
+    auto frames = native_frames(dicom_result.value(), *layout, {params.frame});
+    if (frames.is_err()) {
+        return rendered_result::error("Cannot read the frame: " + frames.error().message);
     }
-    if (auto ri = dataset.get(core::tags::rescale_intercept)) {
-        try {
-            rescale_intercept = std::stod(ri->as_string().unwrap_or("0.0"));
-        } catch (...) {}
+    const auto& frame = frames.value().front();
+    // What a codec returned or a file held decides how far the renderers read, not what the header says.
+    if (frame.size() < layout->frame_bytes()) {
+        return rendered_result::error("The frame is shorter than its image attributes say");
     }
 
-    // Get pixel data
-    auto pixel_data = pixel_data_elem->raw_data();
-
-    // Calculate frame size for multi-frame images
-    size_t frame_size = static_cast<size_t>(rows) * cols * samples_per_pixel *
-                        ((bits_allocated + 7) / 8);
-
-    // Extract specific frame if multi-frame
-    std::span<const uint8_t> frame_data = pixel_data;
-    if (params.frame > 1) {
-        auto extracted = extract_frame(pixel_data, params.frame, frame_size);
-        if (extracted.empty()) {
-            return rendered_result::error("Requested frame does not exist");
-        }
-        // For simplicity, we'll just use first frame for now
-        // Full implementation would handle multi-frame properly
-    }
-
-    // Apply window/level for grayscale images
+    // Window applied to grayscale; color goes out as it is
+    const uint16_t channels = layout->samples == 1 ? 1 : 3;
     std::vector<uint8_t> output_pixels;
-    if (samples_per_pixel == 1) {
-        output_pixels = apply_window_level(
-            frame_data, cols, rows, bits_stored, is_signed,
-            window_center, window_width, rescale_slope, rescale_intercept);
-    } else {
-        // For color images, just use raw data (convert to 8-bit if needed)
-        output_pixels.resize(static_cast<size_t>(rows) * cols * samples_per_pixel);
-        if (bits_allocated == 8) {
-            std::copy(frame_data.begin(),
-                      frame_data.begin() + (std::min)(frame_data.size(),
-                                                     output_pixels.size()),
-                      output_pixels.begin());
-        } else {
-            // Convert 16-bit to 8-bit
-            for (size_t i = 0; i < output_pixels.size() && i * 2 + 1 < frame_data.size(); ++i) {
-                uint16_t val = static_cast<uint16_t>(
-                    frame_data[i * 2] | (frame_data[i * 2 + 1] << 8));
-                output_pixels[i] = static_cast<uint8_t>(val >> (bits_stored - 8));
-            }
+    if (layout->samples == 1) {
+        if (layout->photometric != compression::photometric_interpretation::monochrome1 &&
+            layout->photometric != compression::photometric_interpretation::monochrome2) {
+            return rendered_result::error("Cannot render this photometric interpretation");
         }
+        output_pixels = render_gray(frame, *layout, dataset, params);
+    } else if (layout->samples == 3) {
+        output_pixels = render_color(frame, *layout);
+        if (output_pixels.empty()) {
+            return rendered_result::error("Cannot render this photometric interpretation");
+        }
+    } else {
+        return rendered_result::error("Cannot render this number of samples per pixel");
     }
+
+    constexpr uint64_t largest_viewport_area = 1ULL << 26;
+    if (static_cast<uint64_t>(params.viewport_width) * params.viewport_height > largest_viewport_area) {
+        return rendered_result::error("The viewport is larger than this server renders");
+    }
+    auto image = fit_viewport(std::move(output_pixels), layout->columns, layout->rows, channels, params.viewport_width, params.viewport_height);
 
     // Encode to requested format
     encoding::compression::image_params img_params;
-    img_params.width = cols;
-    img_params.height = rows;
+    img_params.width = static_cast<uint16_t>(image.width);
+    img_params.height = static_cast<uint16_t>(image.height);
     img_params.bits_allocated = 8;
     img_params.bits_stored = 8;
     img_params.high_bit = 7;
-    img_params.samples_per_pixel = samples_per_pixel;
+    img_params.samples_per_pixel = channels;
     img_params.photometric =
-        (samples_per_pixel == 1) ?
+        (channels == 1) ?
         encoding::compression::photometric_interpretation::monochrome2 :
         encoding::compression::photometric_interpretation::rgb;
 
@@ -1479,7 +2538,7 @@ auto render_dicom_image(
         encoding::compression::htj2k_codec codec(
             /*lossless=*/false, /*use_rpcl=*/false);
 
-        auto result = codec.encode(output_pixels, img_params);
+        auto result = codec.encode(image.samples, img_params);
         if (result.is_err()) {
             return rendered_result::error("HTJ2K encoding failed: " +
                                           result.error().message);
@@ -1492,17 +2551,15 @@ auto render_dicom_image(
         encoding::compression::compression_options opts;
         opts.quality = params.quality;
 
-        auto result = codec.encode(output_pixels, img_params, opts);
+        auto result = codec.encode(image.samples, img_params, opts);
         if (result.is_err()) {
             return rendered_result::error("JPEG encoding failed: " +
                                           result.error().message);
         }
 
         return rendered_result::ok(std::move(result.value().data), media_type::jpeg);
-    } else {
-        // PNG encoding - not implemented yet
-        return rendered_result::error("PNG encoding not yet implemented");
     }
+    return rendered_result::ok(encode_png(image.samples, image.width, image.height, channels), media_type::png);
 }
 
 } // namespace kcenon::pacs::web::dicomweb
@@ -1511,11 +2568,22 @@ namespace kcenon::pacs::web::endpoints {
 
 namespace {
 
+namespace tags = core::tags;
+using encoding::vr_type;
+
+const std::vector<std::string> read_scope{"dicomweb.read"};
+const std::vector<std::string> search_scopes{"dicomweb.read", "dicomweb.search"};
+const std::vector<std::string> write_scope{"dicomweb.write"};
+
+/// What a search returns when it asks for no limit, and the most one response holds (PS3.18 8.3.4.4).
+constexpr std::size_t default_search_limit = 100;
+constexpr std::size_t largest_search_page = 1000;
+
 /**
- * @brief Authenticate DICOMweb request using OAuth 2.0 or legacy X-User-ID
+ * @brief Authenticate a DICOMweb request with OAuth 2.0
  *
- * When OAuth 2.0 is enabled, validates the Bearer token and checks the
- * required scope. Falls back to legacy authentication when disabled.
+ * With OAuth 2.0 enabled, validates the Bearer token and checks the required scope.
+ * Without it, DICOMweb answers everyone who can reach the port.
  */
 bool check_dicomweb_auth(const std::shared_ptr<rest_server_context>& ctx,
                           const crow::request& req,
@@ -1531,8 +2599,6 @@ bool check_dicomweb_auth(const std::shared_ptr<rest_server_context>& ctx,
         }
         return true;
     }
-
-    // Legacy X-User-ID fallback (no scope checking)
     return true;
 }
 
@@ -1566,1588 +2632,1063 @@ std::vector<uint8_t> read_file_bytes(const std::filesystem::path& path) {
     return buffer;
 }
 
-/**
- * @brief Build retrieval response for multiple DICOM files
- */
-crow::response build_multipart_dicom_response(
-    const std::vector<std::string>& file_paths,
-    const rest_server_context& ctx,
-    std::string_view base_uri = "") {
+[[nodiscard]] crow::response failure(crow::response res, int status, std::string_view code, std::string_view message) {
+    res.code = status;
+    res.set_header("Content-Type", "application/json");
+    res.body = make_error_json(code, message);
+    return res;
+}
 
+[[nodiscard]] crow::response refusal(crow::response res, const dicomweb::media_choice& choice) {
+    return failure(std::move(res), choice.status, choice.status == 400 ? "BAD_ACCEPT" : "NOT_ACCEPTABLE", choice.detail);
+}
+
+/// Every DICOMweb route starts here, so none can be reached without its scope.
+template <typename Handler>
+[[nodiscard]] crow::response guarded(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req,
+                                     const std::vector<std::string>& scopes, Handler&& handler) {
     crow::response res;
-    add_cors_headers(res, ctx);
+    add_cors_headers(res, *ctx);
+    if (!check_dicomweb_auth(ctx, req, res, scopes)) {
+        return res;
+    }
+    if (!ctx->database) {
+        return failure(std::move(res), 503, "DATABASE_UNAVAILABLE", "Database not configured");
+    }
+    return handler(std::move(res));
+}
 
-    if (file_paths.empty()) {
-        res.code = 404;
-        res.add_header("Content-Type", "application/json");
-        res.body = make_error_json("NOT_FOUND", "No instances found");
+/// The Accept Query Parameter stands in for the header when present (PS3.18 8.3.3.1).
+[[nodiscard]] std::string acceptable_types(const crow::request& req) {
+    if (const char* value = req.url_params.get("accept")) {
+        return value;
+    }
+    return req.get_header_value("Accept");
+}
+
+/// The scheme and authority this request came in on, for URLs in responses. Anything else in Host is left out.
+[[nodiscard]] std::string base_url(const crow::request& req, const rest_server_context& ctx) {
+    const auto host = req.get_header_value("Host");
+    const auto allowed = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:[]";
+    if (host.empty() || host.find_first_not_of(allowed) != std::string::npos) {
+        return {};
+    }
+    return std::string(ctx.config && ctx.config->enable_tls ? "https://" : "http://") + host;
+}
+
+[[nodiscard]] std::string instance_path(std::string_view study, std::string_view series, std::string_view sop) {
+    return "/dicomweb/studies/" + std::string(study) + "/series/" + std::string(series) + "/instances/" + std::string(sop);
+}
+
+/// A series that is where the URL says it is.
+[[nodiscard]] std::optional<storage::series_record> series_under(const storage::index_database& database, const std::string& study_uid,
+                                                                 const std::string& series_uid) {
+    const auto study = database.find_study(study_uid);
+    auto series = database.find_series(series_uid);
+    if (!study || !series || series->study_pk != study->pk) {
+        return std::nullopt;
+    }
+    return series;
+}
+
+/// An instance that is where the URL says it is.
+[[nodiscard]] std::optional<storage::instance_record> instance_under(const storage::index_database& database, const std::string& study_uid,
+                                                                     const std::string& series_uid, const std::string& sop_uid) {
+    const auto series = series_under(database, study_uid, series_uid);
+    auto instance = database.find_instance(sop_uid);
+    if (!series || !instance || instance->series_pk != series->pk) {
+        return std::nullopt;
+    }
+    return instance;
+}
+
+/// One object for a response, or the status that replaces the whole response.
+struct object_bytes {
+    int status{200};
+    std::string message;
+    std::vector<uint8_t> data;
+    std::string syntax;
+};
+
+[[nodiscard]] object_bytes refused_object(int status, std::string message) {
+    object_bytes refused;
+    refused.status = status;
+    refused.message = std::move(message);
+    return refused;
+}
+
+/**
+ * @brief The object in the Transfer Syntax the request selects (PS3.18 8.7.3)
+ *
+ * No parameter means Explicit VR Little Endian unless only lossy pixels are held; "*" means as held;
+ * Implicit VR and Big Endian are never returned. There is no encoder here for other syntaxes.
+ */
+[[nodiscard]] object_bytes object_in_syntax(const std::string& path, std::string_view wanted) {
+    const auto& explicit_le = encoding::transfer_syntax::explicit_vr_little_endian;
+    auto bytes = read_file_bytes(path);
+    if (bytes.empty()) {
+        return refused_object(500, "An indexed object cannot be read");
+    }
+    auto file = core::dicom_file::from_bytes(std::span<const uint8_t>(bytes.data(), bytes.size()));
+    if (file.is_err()) {
+        return refused_object(500, "An indexed object cannot be parsed");
+    }
+    const auto held = file.value().transfer_syntax();
+    const bool never_returned = held == encoding::transfer_syntax::implicit_vr_little_endian ||
+                                held == encoding::transfer_syntax::explicit_vr_big_endian;
+
+    bool keep_as_held = false;
+    if (wanted.empty()) {
+        const auto codec = held.is_encapsulated() ? encoding::compression::codec_factory::create(held.uid()) : nullptr;
+        keep_as_held = held == explicit_le || (held.is_encapsulated() && (!codec || codec->is_lossy()));
+    } else if (wanted == "*") {
+        keep_as_held = !never_returned;
+    } else if (wanted == held.uid() && !never_returned) {
+        keep_as_held = true;
+    } else if (wanted != explicit_le.uid()) {
+        return refused_object(406, "Transfer Syntax " + std::string(wanted) + " is not held and cannot be produced");
+    }
+    if (keep_as_held) {
+        object_bytes kept;
+        kept.data = std::move(bytes);
+        kept.syntax = std::string(held.uid());
+        return kept;
+    }
+
+    auto dataset = file.value().dataset();
+    if (held.is_encapsulated()) {
+        auto layout = dicomweb::layout_of(dataset);
+        if (!layout) {
+            return refused_object(500, "Encapsulated pixel data without image attributes");
+        }
+        auto frames = dicomweb::native_frames(file.value(), *layout, dicomweb::every_frame(*layout));
+        if (frames.is_err()) {
+            return refused_object(406, "Cannot decode to Explicit VR Little Endian: " + frames.error().message);
+        }
+        std::vector<uint8_t> pixels;
+        for (const auto& frame : frames.value()) {
+            pixels.insert(pixels.end(), frame.begin(), frame.end());
+        }
+        dataset.insert(core::dicom_element(tags::pixel_data, layout->bits_allocated > 8 ? vr_type::OW : vr_type::OB, pixels));
+        dataset.set_string(tags::photometric_interpretation, vr_type::CS, encoding::compression::to_string(layout->photometric));
+        if (layout->samples > 1) {
+            dataset.set_numeric<uint16_t>(dicomweb::planar_configuration_tag, vr_type::US, layout->planar);
+        }
+    }
+    auto encoded = core::dicom_file::create(std::move(dataset), explicit_le).to_bytes();
+    if (encoded.empty()) {
+        return refused_object(500, "The object cannot be encoded in Explicit VR Little Endian");
+    }
+    object_bytes converted;
+    converted.data = std::move(encoded);
+    converted.syntax = std::string(explicit_le.uid());
+    return converted;
+}
+
+/// The Pixel Data of one object as Bulk Data: native, whatever is held, or refused with a status.
+[[nodiscard]] object_bytes native_pixels_of(const std::string& path) {
+    auto bytes = read_file_bytes(path);
+    if (bytes.empty()) {
+        return refused_object(500, "An indexed object cannot be read");
+    }
+    auto file = core::dicom_file::from_bytes(std::span<const uint8_t>(bytes.data(), bytes.size()));
+    if (file.is_err()) {
+        return refused_object(500, "An indexed object cannot be parsed");
+    }
+    auto layout = dicomweb::layout_of(file.value().dataset());
+    if (!layout) {
+        return refused_object(404, "The object has no pixels");
+    }
+    auto frames = dicomweb::native_frames(file.value(), *layout, dicomweb::every_frame(*layout));
+    if (frames.is_err()) {
+        return refused_object(406, frames.error().message);
+    }
+    object_bytes pixels;
+    for (const auto& frame : frames.value()) {
+        pixels.data.insert(pixels.data.end(), frame.begin(), frame.end());
+    }
+    return pixels;
+}
+
+/// Bulk Data resources are where metadata sends a reader for what it leaves out; one URL per instance.
+[[nodiscard]] std::string bulk_prefix_of(const core::dicom_dataset& dataset, const std::string& base) {
+    return base + instance_path(dataset.get_string(tags::study_instance_uid), dataset.get_string(tags::series_instance_uid),
+                                 dataset.get_string(tags::sop_instance_uid)) + "/bulkdata/";
+}
+
+/// Everything a retrieve of these files holds, or the status of the failure. 200 means all of it (PS3.18 10.4.3.1).
+[[nodiscard]] crow::response instances_response(crow::response res, const std::vector<std::string>& files, const dicomweb::media_choice& choice,
+                                                const std::string& base) {
+    if (files.empty()) {
+        return failure(std::move(res), 404, "NOT_FOUND", "No instances found");
+    }
+    if (choice.media == dicomweb::media_type::octet_stream) {
+        dicomweb::multipart_builder builder(dicomweb::media_type::octet_stream);
+        for (const auto& path : files) {
+            auto pixels = native_pixels_of(path);
+            if (pixels.status == 404) {
+                continue;
+            }
+            if (pixels.status != 200) {
+                return failure(std::move(res), pixels.status, "RETRIEVE_FAILED", pixels.message);
+            }
+            const auto parsed = core::dicom_file::open(path);
+            if (parsed.is_err()) {
+                return failure(std::move(res), 500, "RETRIEVE_FAILED", "An indexed object cannot be parsed");
+            }
+            builder.add_part_with_location(std::move(pixels.data), bulk_prefix_of(parsed.value().dataset(), base) + "7FE00010");
+        }
+        if (builder.empty()) {
+            return failure(std::move(res), 404, "NOT_FOUND", "These instances hold no Bulk Data");
+        }
+        res.code = 200;
+        res.set_header("Content-Type", builder.content_type_header());
+        res.body = builder.build();
         return res;
     }
 
-    // Single file - return directly
-    if (file_paths.size() == 1) {
-        auto data = read_file_bytes(file_paths[0]);
-        if (data.empty()) {
-            res.code = 500;
-            res.add_header("Content-Type", "application/json");
-            res.body = make_error_json("READ_ERROR", "Failed to read DICOM file");
+    dicomweb::multipart_builder builder(dicomweb::media_type::dicom);
+    for (const auto& path : files) {
+        auto object = object_in_syntax(path, choice.transfer_syntax);
+        if (object.status != 200) {
+            return failure(std::move(res), object.status, "RETRIEVE_FAILED", object.message);
+        }
+        if (!choice.multipart) {
+            res.code = 200;
+            res.set_header("Content-Type", std::string(dicomweb::media_type::dicom) + "; transfer-syntax=" + object.syntax);
+            res.body.assign(reinterpret_cast<const char*>(object.data.data()), object.data.size());
             return res;
         }
-
-        res.code = 200;
-        res.add_header("Content-Type", std::string(dicomweb::media_type::dicom));
-        res.body = std::string(reinterpret_cast<char*>(data.data()), data.size());
-        return res;
+        const auto part_type = std::string(dicomweb::media_type::dicom) + "; transfer-syntax=" + object.syntax;
+        builder.add_part(std::move(object.data), std::string_view(part_type));
     }
-
-    // Multiple files - use multipart response
-    dicomweb::multipart_builder builder(dicomweb::media_type::dicom);
-
-    for (size_t i = 0; i < file_paths.size(); ++i) {
-        auto data = read_file_bytes(file_paths[i]);
-        if (data.empty()) {
-            continue; // Skip files that can't be read
-        }
-
-        if (base_uri.empty()) {
-            builder.add_part(std::move(data));
-        } else {
-            std::ostringstream location;
-            location << base_uri << "/" << i;
-            builder.add_part_with_location(std::move(data), location.str());
-        }
-    }
-
-    if (builder.empty()) {
-        res.code = 500;
-        res.add_header("Content-Type", "application/json");
-        res.body = make_error_json("READ_ERROR", "Failed to read DICOM files");
-        return res;
-    }
-
     res.code = 200;
-    res.add_header("Content-Type", builder.content_type_header());
+    res.set_header("Content-Type", builder.content_type_header());
     res.body = builder.build();
     return res;
 }
 
-/**
- * @brief Build metadata response (DicomJSON)
- */
-crow::response build_metadata_response(
-    const std::vector<std::string>& file_paths,
-    const rest_server_context& ctx,
-    std::string_view bulk_data_uri_prefix = "") {
-
-    crow::response res;
-    add_cors_headers(res, ctx);
-    res.add_header("Content-Type", std::string(dicomweb::media_type::dicom_json));
-
-    if (file_paths.empty()) {
-        res.code = 404;
-        res.body = make_error_json("NOT_FOUND", "No instances found");
-        return res;
+/// The metadata of these files, as one JSON array or one XML part each (PS3.18 10.4.3.3.2).
+[[nodiscard]] crow::response metadata_response(crow::response res, const std::vector<std::string>& files, const dicomweb::media_choice& choice,
+                                               const std::string& base) {
+    if (files.empty()) {
+        return failure(std::move(res), 404, "NOT_FOUND", "No instances found");
     }
-
-    std::ostringstream oss;
-    oss << "[";
-
+    std::string json = "[";
+    dicomweb::multipart_builder xml(dicomweb::media_type::dicom_xml);
     bool first = true;
-    for (const auto& path : file_paths) {
-        auto result = core::dicom_file::open(path);
-        if (result.is_err()) {
-            continue;
+    for (const auto& path : files) {
+        auto file = core::dicom_file::open(path);
+        if (file.is_err()) {
+            return failure(std::move(res), 500, "RETRIEVE_FAILED", "An indexed object cannot be read");
         }
-
-        if (!first) {
-            oss << ",";
+        const auto& dataset = file.value().dataset();
+        const auto prefix = bulk_prefix_of(dataset, base);
+        if (choice.multipart) {
+            const auto text = dicomweb::dataset_to_native_xml(dataset, false, prefix);
+            xml.add_part(std::vector<uint8_t>(text.begin(), text.end()));
+        } else {
+            if (!first) {
+                json += ",";
+            }
+            first = false;
+            json += dicomweb::dataset_to_dicom_json(dataset, false, prefix);
         }
-        first = false;
-
-        oss << dicomweb::dataset_to_dicom_json(
-            result.value().dataset(), false, bulk_data_uri_prefix);
     }
-
-    oss << "]";
-
     res.code = 200;
-    res.body = oss.str();
+    if (choice.multipart) {
+        res.set_header("Content-Type", xml.content_type_header());
+        res.body = xml.build();
+    } else {
+        res.set_header("Content-Type", std::string(dicomweb::media_type::dicom_json));
+        res.body = json + "]";
+    }
     return res;
 }
 
-/**
- * @brief Store a DICOM instance via file_storage and index in database
- *
- * Performs the full storage pipeline:
- * 1. Write instance to filesystem via file_storage
- * 2. Upsert patient, study, series, and instance records in index_database
- *
- * @param ctx Server context containing file_storage and database
- * @param dataset DICOM dataset to store
- * @param result[out] Store result, populated on failure
- * @return true on success, false on failure (result is populated with error)
- */
-bool store_instance_to_storage(
-    const std::shared_ptr<rest_server_context>& ctx,
-    const core::dicom_dataset& dataset,
-    dicomweb::store_instance_result& result) {
-
-    auto sop_uid = dataset.get_string(core::tags::sop_instance_uid);
-
-    // Step 1: Store to filesystem
-    auto store_result = ctx->file_storage->store(dataset);
-    if (store_result.is_err()) {
-        result.success = false;
-        result.error_code = "STORAGE_ERROR";
-        result.error_message = store_result.error().message;
-        return false;
+/// The frame list of a path, checked before anything is looked up.
+[[nodiscard]] std::optional<std::vector<uint32_t>> requested_frames(const std::string& frame_list) {
+    auto frames = dicomweb::parse_frame_list(frame_list);
+    if (!frames || frames->empty()) {
+        return std::nullopt;
     }
-
-    // Step 2: Get stored file path and size
-    auto file_path = ctx->file_storage->get_file_path(sop_uid);
-    std::error_code ec;
-    auto file_size = static_cast<int64_t>(
-        std::filesystem::file_size(file_path, ec));
-    if (ec) {
-        file_size = 0;
-    }
-
-    // Step 3: Upsert patient record
-    auto patient_id = dataset.get_string(core::tags::patient_id);
-    auto patient_name = dataset.get_string(core::tags::patient_name);
-    auto birth_date = dataset.get_string(core::tags::patient_birth_date);
-    auto sex = dataset.get_string(core::tags::patient_sex);
-
-    auto patient_pk_result = ctx->database->upsert_patient(
-        patient_id, patient_name, birth_date, sex);
-    if (!patient_pk_result.is_ok()) {
-        (void)ctx->file_storage->remove(sop_uid);
-        result.success = false;
-        result.error_code = "DATABASE_ERROR";
-        result.error_message = "Failed to upsert patient record";
-        return false;
-    }
-
-    // Step 4: Upsert study record
-    auto study_uid = dataset.get_string(core::tags::study_instance_uid);
-    auto study_id = dataset.get_string(core::tags::study_id);
-    auto study_date = dataset.get_string(core::tags::study_date);
-    auto study_time = dataset.get_string(core::tags::study_time);
-    auto accession = dataset.get_string(core::tags::accession_number);
-    auto referring = dataset.get_string(core::tags::referring_physician_name);
-    auto study_desc = dataset.get_string(core::tags::study_description);
-
-    auto study_pk_result = ctx->database->upsert_study(
-        patient_pk_result.value(), study_uid, study_id, study_date,
-        study_time, accession, referring, study_desc);
-    if (!study_pk_result.is_ok()) {
-        (void)ctx->file_storage->remove(sop_uid);
-        result.success = false;
-        result.error_code = "DATABASE_ERROR";
-        result.error_message = "Failed to upsert study record";
-        return false;
-    }
-
-    // Step 5: Upsert series record
-    auto series_uid = dataset.get_string(core::tags::series_instance_uid);
-    auto modality_str = dataset.get_string(core::tags::modality);
-    auto series_number = dataset.get_numeric<int>(core::tags::series_number);
-    auto series_desc = dataset.get_string(core::tags::series_description);
-    auto station = dataset.get_string(core::tags::station_name);
-
-    auto series_pk_result = ctx->database->upsert_series(
-        study_pk_result.value(), series_uid, modality_str, series_number,
-        series_desc, "", station);
-    if (!series_pk_result.is_ok()) {
-        (void)ctx->file_storage->remove(sop_uid);
-        result.success = false;
-        result.error_code = "DATABASE_ERROR";
-        result.error_message = "Failed to upsert series record";
-        return false;
-    }
-
-    // Step 6: Upsert instance record
-    auto sop_class_uid = dataset.get_string(core::tags::sop_class_uid);
-    auto transfer_syntax = std::string(
-        encoding::transfer_syntax::explicit_vr_little_endian.uid());
-    auto instance_number = dataset.get_numeric<int>(
-        core::tags::instance_number);
-
-    auto instance_pk_result = ctx->database->upsert_instance(
-        series_pk_result.value(), sop_uid, sop_class_uid,
-        file_path.string(), file_size, transfer_syntax, instance_number);
-    if (!instance_pk_result.is_ok()) {
-        (void)ctx->file_storage->remove(sop_uid);
-        result.success = false;
-        result.error_code = "DATABASE_ERROR";
-        result.error_message = "Failed to upsert instance record";
-        return false;
-    }
-
-    return true;
+    return frames;
 }
 
-} // anonymous namespace
+// ---- STOW-RS -----------------------------------------------------------------------------------------
+
+[[nodiscard]] std::string lowercase(std::string text) {
+    std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return text;
+}
+
+[[nodiscard]] std::string media_type_of(const std::string& content_type) {
+    const auto end = content_type.find(';');
+    auto main = content_type.substr(0, end);
+    const auto first = main.find_first_not_of(" \t");
+    const auto last = main.find_last_not_of(" \t");
+    return first == std::string::npos ? std::string{} : lowercase(main.substr(first, last - first + 1));
+}
+
+void store_part(const std::shared_ptr<rest_server_context>& ctx, const dicomweb::multipart_part& part,
+                const std::optional<std::string>& target_study, dicomweb::store_response& response) {
+    dicomweb::store_instance_result result;
+    const auto failed = [&](std::string code, std::string message) {
+        result.success = false;
+        result.error_code = std::move(code);
+        result.error_message = std::move(message);
+        response.failed_instances.push_back(std::move(result));
+    };
+
+    // A part nobody can store is a failure to report, or the sender would count it as kept.
+    if (media_type_of(part.content_type) != dicomweb::media_type::dicom) {
+        failed("UNSUPPORTED_PART", "Only application/dicom parts are stored");
+        return;
+    }
+    auto file = core::dicom_file::from_bytes(std::span<const uint8_t>(part.data.data(), part.data.size()));
+    if (file.is_err()) {
+        failed("INVALID_DATA", "Failed to parse DICOM data");
+        return;
+    }
+    const auto& dataset = file.value().dataset();
+    result.sop_class_uid = dataset.get_string(tags::sop_class_uid);
+    result.sop_instance_uid = dataset.get_string(tags::sop_instance_uid);
+
+    const auto validation = target_study ? dicomweb::validate_instance(dataset, std::string_view(*target_study))
+                                         : dicomweb::validate_instance(dataset);
+    if (!validation) {
+        failed(validation.error_code, validation.error_message);
+        return;
+    }
+
+    const auto archived = storage::archive_instance(*ctx->file_storage, *ctx->database, dataset, file.value().transfer_syntax());
+    switch (archived.status) {
+        case storage::archive_status::stored:
+        case storage::archive_status::duplicate_ignored:
+            break;
+        case storage::archive_status::duplicate_refused:
+            failed("DUPLICATE", archived.message);
+            return;
+        case storage::archive_status::rejected:
+            failed("MISSING_ATTRIBUTE", archived.message);
+            return;
+        case storage::archive_status::failed:
+            failed("STORAGE_ERROR", archived.message);
+            return;
+    }
+    result.success = true;
+    result.retrieve_url = instance_path(dataset.get_string(tags::study_instance_uid), dataset.get_string(tags::series_instance_uid),
+                                        result.sop_instance_uid);
+    response.referenced_instances.push_back(std::move(result));
+}
+
+/// Both Store routes: PS3.18 Table 10.5.3-1.
+[[nodiscard]] crow::response store_instances(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req,
+                                             const std::optional<std::string>& target_study) {
+    return guarded(ctx, req, write_scope, [&](crow::response res) {
+        if (!ctx->file_storage) {
+            return failure(std::move(res), 503, "SERVICE_UNAVAILABLE", "File storage not configured");
+        }
+        if (ctx->config && req.body.size() > ctx->config->max_body_size) {
+            return failure(std::move(res), 413, "PAYLOAD_TOO_LARGE",
+                           "The request exceeds the configured limit of " + std::to_string(ctx->config->max_body_size) + " bytes");
+        }
+        const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::store_response);
+        if (!choice.ok()) {
+            return refusal(std::move(res), choice);
+        }
+        const auto content_type = req.get_header_value("Content-Type");
+        const auto declared_type = dicomweb::multipart_parser::extract_type(content_type);
+        if (media_type_of(content_type) != dicomweb::media_type::multipart_related ||
+            (declared_type && lowercase(*declared_type) != dicomweb::media_type::dicom)) {
+            return failure(std::move(res), 415, "UNSUPPORTED_MEDIA_TYPE",
+                           "Content-Type must be multipart/related with parts of type application/dicom");
+        }
+        const auto parsed = dicomweb::multipart_parser::parse(content_type, req.body);
+        if (!parsed) {
+            return failure(std::move(res), 400, parsed.error->code, parsed.error->message);
+        }
+
+        dicomweb::store_response response;
+        for (const auto& part : parsed.parts) {
+            store_part(ctx, part, target_study, response);
+        }
+
+        const auto base = base_url(req, *ctx);
+        res.code = response.all_failed() ? 409 : response.partial_success() ? 202 : 200;
+        res.set_header("Content-Type", choice.media);
+        res.body = choice.media == dicomweb::media_type::dicom_xml ? dicomweb::build_store_response_xml(response, base)
+                                                                   : dicomweb::build_store_response_json(response, base);
+        return res;
+    });
+}
+
+// ---- QIDO-RS -----------------------------------------------------------------------------------------
+
+/// Which of the routes of PS3.18 Table 10.6.1-1 was asked, and so what each row carries (10.6.3.3).
+struct search_route {
+    services::query_level level;
+    std::optional<std::string> study_uid;
+    std::optional<std::string> series_uid;
+};
+
+struct search_match {
+    std::string study_uid;
+    std::string series_uid;
+    std::string sop_uid;
+};
+
+[[nodiscard]] bool is_key_of(const std::vector<core::dicom_tag>& keys, core::dicom_tag tag) {
+    return std::find(keys.begin(), keys.end(), tag) != keys.end();
+}
+
+// The keys the index can match, by level: what qr_index answers for Study Root.
+const std::vector<core::dicom_tag> study_level_keys{
+    tags::patient_id, tags::patient_name, tags::patient_birth_date, tags::patient_sex, tags::study_instance_uid, tags::study_date,
+    tags::study_time, tags::accession_number, tags::study_id, tags::referring_physician_name, tags::study_description, tags::modalities_in_study};
+const std::vector<core::dicom_tag> series_level_keys{tags::series_instance_uid, tags::modality, tags::series_number, tags::series_description};
+const std::vector<core::dicom_tag> image_level_keys{tags::sop_instance_uid, tags::instance_number, tags::sop_class_uid};
+
+class index_search {
+public:
+    index_search(storage::index_database& database, const dicomweb::search_parameters& parameters, const search_route& route)
+        : database_(database), route_(route) {
+        const auto start = [](core::dicom_dataset& keys) { keys.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 192"); };
+        start(study_);
+        start(series_);
+        start(image_);
+        study_.set_string(tags::study_instance_uid, vr_type::UI, route.study_uid.value_or(""));
+        series_.set_string(tags::series_instance_uid, vr_type::UI, route.series_uid.value_or(""));
+        image_.set_string(tags::sop_instance_uid, vr_type::UI, "");
+        for (const auto& key : parameters.keys) {
+            auto* level_keys = is_key_of(study_level_keys, key.tag) ? &study_
+                             : is_key_of(series_level_keys, key.tag) && route.level != services::query_level::study ? &series_
+                             : is_key_of(image_level_keys, key.tag) && route.level == services::query_level::image ? &image_ : nullptr;
+            if (level_keys == nullptr) {
+                not_used_.push_back(key.name);
+                continue;
+            }
+            // The path names the resource; a key cannot move the search elsewhere.
+            if ((key.tag == tags::study_instance_uid && route.study_uid) || (key.tag == tags::series_instance_uid && route.series_uid)) {
+                if (key.value != (key.tag == tags::study_instance_uid ? *route.study_uid : *route.series_uid)) {
+                    contradicted_ = true;
+                }
+                continue;
+            }
+            level_keys->set_string(key.tag, key.vr, key.value);
+        }
+    }
+
+    [[nodiscard]] const std::vector<std::string>& keys_not_used() const noexcept { return not_used_; }
+
+    /// Hierarchical Search Method (8.3.4.1.1): the same evaluation C-FIND uses, one level at a time.
+    [[nodiscard]] std::optional<std::vector<search_match>> run() const {
+        std::vector<search_match> matches;
+        if (contradicted_) {
+            return matches;
+        }
+        const auto studies = find(services::query_level::study, study_);
+        if (!studies) {
+            return std::nullopt;
+        }
+        for (const auto& study : *studies) {
+            const auto study_uid = study.get_string(tags::study_instance_uid);
+            if (route_.level == services::query_level::study) {
+                matches.push_back({study_uid, {}, {}});
+                continue;
+            }
+            auto series_keys = series_;
+            series_keys.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+            const auto series = find(services::query_level::series, series_keys);
+            if (!series) {
+                return std::nullopt;
+            }
+            for (const auto& one_series : *series) {
+                const auto series_uid = one_series.get_string(tags::series_instance_uid);
+                if (route_.level == services::query_level::series) {
+                    matches.push_back({study_uid, series_uid, {}});
+                    continue;
+                }
+                auto image_keys = image_;
+                image_keys.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+                image_keys.set_string(tags::series_instance_uid, vr_type::UI, series_uid);
+                const auto images = find(services::query_level::image, image_keys);
+                if (!images) {
+                    return std::nullopt;
+                }
+                for (const auto& image : *images) {
+                    matches.push_back({study_uid, series_uid, image.get_string(tags::sop_instance_uid)});
+                }
+            }
+        }
+        return matches;
+    }
+
+private:
+    [[nodiscard]] std::optional<std::vector<core::dicom_dataset>> find(services::query_level level, const core::dicom_dataset& keys) const {
+        const services::find_request request{services::qr_model::study_root, level, keys, {}, {}};
+        auto outcome = services::find_in_index(database_, request);
+        if (outcome.failure != services::qr_failure::none) {
+            return std::nullopt;
+        }
+        return std::move(outcome.matches);
+    }
+
+    storage::index_database& database_;
+    const search_route& route_;
+    core::dicom_dataset study_;
+    core::dicom_dataset series_;
+    core::dicom_dataset image_;
+    std::vector<std::string> not_used_;
+    bool contradicted_{false};
+};
+
+void set_number(core::dicom_dataset& row, core::dicom_tag tag, vr_type vr, std::optional<int> value) {
+    row.set_string(tag, vr, value ? std::to_string(*value) : std::string{});
+}
+
+/// Table 10.6.3-3
+void add_study_attributes(core::dicom_dataset& row, const storage::study_record& study, const std::optional<storage::patient_record>& patient) {
+    row.set_string(tags::study_instance_uid, vr_type::UI, study.study_uid);
+    row.set_string(tags::study_date, vr_type::DA, study.study_date);
+    row.set_string(tags::study_time, vr_type::TM, study.study_time);
+    row.set_string(tags::accession_number, vr_type::SH, study.accession_number);
+    row.set_string(tags::modalities_in_study, vr_type::CS, study.modalities_in_study);
+    row.set_string(tags::referring_physician_name, vr_type::PN, study.referring_physician);
+    row.set_string(tags::study_description, vr_type::LO, study.study_description);
+    row.set_string(tags::study_id, vr_type::SH, study.study_id);
+    row.set_string(tags::patient_name, vr_type::PN, patient ? patient->patient_name : std::string{});
+    row.set_string(tags::patient_id, vr_type::LO, patient ? patient->patient_id : std::string{});
+    row.set_string(tags::patient_birth_date, vr_type::DA, patient ? patient->birth_date : std::string{});
+    row.set_string(tags::patient_sex, vr_type::CS, patient ? patient->sex : std::string{});
+    set_number(row, tags::number_of_study_related_series, vr_type::IS, study.num_series);
+    set_number(row, tags::number_of_study_related_instances, vr_type::IS, study.num_instances);
+}
+
+/// Table 10.6.3-4
+void add_series_attributes(core::dicom_dataset& row, const storage::series_record& series) {
+    row.set_string(tags::series_instance_uid, vr_type::UI, series.series_uid);
+    row.set_string(tags::modality, vr_type::CS, series.modality);
+    row.set_string(tags::series_description, vr_type::LO, series.series_description);
+    set_number(row, tags::series_number, vr_type::IS, series.series_number);
+    set_number(row, tags::number_of_series_related_instances, vr_type::IS, series.num_instances);
+}
+
+/// Table 10.6.3-5
+void add_instance_attributes(core::dicom_dataset& row, const storage::instance_record& instance) {
+    row.set_string(tags::sop_class_uid, vr_type::UI, instance.sop_class_uid);
+    row.set_string(tags::sop_instance_uid, vr_type::UI, instance.sop_uid);
+    set_number(row, tags::instance_number, vr_type::IS, instance.instance_number);
+    if (instance.rows) {
+        row.set_numeric<uint16_t>(tags::rows, vr_type::US, static_cast<uint16_t>(*instance.rows));
+    }
+    if (instance.columns) {
+        row.set_numeric<uint16_t>(tags::columns, vr_type::US, static_cast<uint16_t>(*instance.columns));
+    }
+    if (instance.bits_allocated) {
+        row.set_numeric<uint16_t>(tags::bits_allocated, vr_type::US, static_cast<uint16_t>(*instance.bits_allocated));
+    }
+    if (instance.number_of_frames) {
+        set_number(row, dicomweb::number_of_frames_tag, vr_type::IS, instance.number_of_frames);
+    }
+}
+
+/// The attributes a response carries beyond the table, from the object they came from (8.3.4.3).
+void add_included_fields(core::dicom_dataset& row, const dicomweb::search_parameters& parameters, const search_match& match,
+                         const storage::index_database& database) {
+    if (parameters.include_fields.empty() && !(parameters.include_all && !match.sop_uid.empty())) {
+        return;
+    }
+    std::string path;
+    if (!match.sop_uid.empty()) {
+        if (auto file = database.get_file_path(match.sop_uid); file.is_ok() && file.value()) {
+            path = *file.value();
+        }
+    } else {
+        auto files = match.series_uid.empty() ? database.get_study_files(match.study_uid) : database.get_series_files(match.series_uid);
+        if (files.is_ok() && !files.value().empty()) {
+            path = files.value().front();
+        }
+    }
+    if (path.empty()) {
+        return;
+    }
+    auto file = core::dicom_file::open(path);
+    if (file.is_err()) {
+        return;
+    }
+    const auto text = core::utf8_text_copy(file.value().dataset());
+    if (parameters.include_all && !match.sop_uid.empty()) {
+        for (const auto& [tag, element] : text) {
+            if (!row.contains(tag) && !dicomweb::is_bulk_data_tag(tag.combined()) && tag.group() != 0x0002) {
+                row.insert(element);
+            }
+        }
+    }
+    for (const auto tag : parameters.include_fields) {
+        if (const auto* element = text.get(tag); element != nullptr && !row.contains(tag)) {
+            row.insert(*element);
+        }
+    }
+}
+
+[[nodiscard]] crow::response search_response(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req, const search_route& route) {
+    return guarded(ctx, req, search_scopes, [&](crow::response res) {
+        const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::search);
+        if (!choice.ok()) {
+            return refusal(std::move(res), choice);
+        }
+        const auto parameters = dicomweb::parse_search_parameters(req.raw_url);
+        if (parameters.error) {
+            return failure(std::move(res), 400, "BAD_QUERY", *parameters.error);
+        }
+        if (route.study_uid && !ctx->database->find_study(*route.study_uid)) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Study not found");
+        }
+        if (route.series_uid && !series_under(*ctx->database, *route.study_uid, *route.series_uid)) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Series not found");
+        }
+
+        const index_search search(*ctx->database, parameters, route);
+        const auto matches = search.run();
+        if (!matches) {
+            return failure(std::move(res), 500, "QUERY_ERROR", "The index could not answer");
+        }
+
+        // 8.3.4.4: min(max(0, matches - offset), the largest page, limit).
+        const auto offset = parameters.offset.value_or(0);
+        const auto limit = std::min(parameters.limit.value_or(default_search_limit), largest_search_page);
+        const auto first = std::min(offset, matches->size());
+        const auto count = std::min(matches->size() - first, limit);
+        const auto remaining = matches->size() - first - count;
+
+        const auto base = base_url(req, *ctx);
+        const bool with_study = !route.study_uid;
+        const bool with_series = !route.series_uid && route.level == services::query_level::image;
+        std::string json = "[";
+        dicomweb::multipart_builder xml(dicomweb::media_type::dicom_xml);
+        for (std::size_t index = first; index < first + count; ++index) {
+            const auto& match = (*matches)[index];
+            core::dicom_dataset row;
+            if (route.level == services::query_level::study || with_study) {
+                const auto study = ctx->database->find_study(match.study_uid);
+                if (!study) {
+                    return failure(std::move(res), 500, "QUERY_ERROR", "A match has no study row");
+                }
+                add_study_attributes(row, *study, ctx->database->find_patient_by_pk(study->patient_pk));
+            }
+            std::string url = base + "/dicomweb/studies/" + match.study_uid;
+            if (route.level == services::query_level::series || with_series) {
+                const auto series = ctx->database->find_series(match.series_uid);
+                if (!series) {
+                    return failure(std::move(res), 500, "QUERY_ERROR", "A match has no series row");
+                }
+                add_series_attributes(row, *series);
+            }
+            if (!match.series_uid.empty()) {
+                url += "/series/" + match.series_uid;
+            }
+            if (route.level == services::query_level::image) {
+                const auto instance = ctx->database->find_instance(match.sop_uid);
+                if (!instance) {
+                    return failure(std::move(res), 500, "QUERY_ERROR", "A match has no instance row");
+                }
+                add_instance_attributes(row, *instance);
+                url += "/instances/" + match.sop_uid;
+            }
+            row.set_string(core::dicom_tag{0x0008, 0x1190}, vr_type::UR, url);
+            add_included_fields(row, parameters, match, *ctx->database);
+            if (choice.multipart) {
+                const auto text = dicomweb::dataset_to_native_xml(row);
+                xml.add_part(std::vector<uint8_t>(text.begin(), text.end()));
+            } else {
+                if (index != first) {
+                    json += ",";
+                }
+                json += dicomweb::dataset_to_dicom_json(row);
+            }
+        }
+
+        const auto service = base + "/dicomweb";
+        for (const auto& flag : parameters.unsupported_flags) {
+            res.add_header("Warning", "299 " + service + ": The " + flag + " parameter is not supported. Only literal matching has been performed.");
+        }
+        auto not_used = search.keys_not_used();
+        not_used.insert(not_used.end(), parameters.keys_not_used.begin(), parameters.keys_not_used.end());
+        if (!not_used.empty()) {
+            std::string names;
+            for (const auto& name : not_used) {
+                names += (names.empty() ? "" : ",") + name;
+            }
+            res.add_header("Warning", "299 " + service + ": The following attributes were not used for matching: " + names);
+        }
+        if (remaining > 0) {
+            res.add_header("Warning", "299 " + service + ": There are " + std::to_string(remaining) + " additional results that can be requested");
+        }
+
+        res.code = 200;
+        if (choice.multipart) {
+            res.set_header("Content-Type", xml.content_type_header());
+            res.body = xml.empty() ? "--" + std::string(xml.boundary()) + "--\r\n" : xml.build();
+        } else {
+            res.set_header("Content-Type", std::string(dicomweb::media_type::dicom_json));
+            res.body = json + "]";
+        }
+        return res;
+    });
+}
+
+// ---- Pixel routes ------------------------------------------------------------------------------------
+
+[[nodiscard]] crow::response frames_response(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req, const std::string& study_uid,
+                                             const std::string& series_uid, const std::string& sop_uid, const std::string& frame_list) {
+    return guarded(ctx, req, read_scope, [&](crow::response res) {
+        const auto numbers = requested_frames(frame_list);
+        if (!numbers) {
+            return failure(std::move(res), 400, "INVALID_FRAME_LIST", "Frames are positive numbers in ascending order, each once");
+        }
+        const auto instance = instance_under(*ctx->database, study_uid, series_uid, sop_uid);
+        if (!instance) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Instance not found");
+        }
+        auto bytes = read_file_bytes(instance->file_path);
+        if (bytes.empty()) {
+            return failure(std::move(res), 500, "READ_ERROR", "An indexed object cannot be read");
+        }
+        auto file = core::dicom_file::from_bytes(std::span<const uint8_t>(bytes.data(), bytes.size()));
+        if (file.is_err()) {
+            return failure(std::move(res), 500, "PARSE_ERROR", "An indexed object cannot be parsed");
+        }
+        auto layout = dicomweb::layout_of(file.value().dataset());
+        if (!layout) {
+            return failure(std::move(res), 404, "NOT_FOUND", "The instance has no frames");
+        }
+        if (numbers->back() > layout->frames) {
+            return failure(std::move(res), 404, "NOT_FOUND", "The instance has " + std::to_string(layout->frames) + " frames");
+        }
+        const auto held = file.value().transfer_syntax();
+        const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::frames, numbers->size(), held.uid());
+        if (!choice.ok()) {
+            return refusal(std::move(res), choice);
+        }
+        const bool as_held = choice.media != dicomweb::media_type::octet_stream;
+        auto frames = as_held ? dicomweb::held_frames(file.value(), *layout, *numbers)
+                              : dicomweb::native_frames(file.value(), *layout, *numbers);
+        if (frames.is_err()) {
+            return failure(std::move(res), as_held ? 500 : 406, "FRAME_ERROR", frames.error().message);
+        }
+        const auto part_type = choice.media + "; transfer-syntax=" +
+                               (as_held ? std::string(held.uid()) : std::string(encoding::transfer_syntax::explicit_vr_little_endian.uid()));
+        if (!choice.multipart) {
+            res.code = 200;
+            res.set_header("Content-Type", part_type);
+            res.body.assign(reinterpret_cast<const char*>(frames.value().front().data()), frames.value().front().size());
+            return res;
+        }
+        const auto base = base_url(req, *ctx);
+        dicomweb::multipart_builder builder(choice.media);
+        for (std::size_t index = 0; index < numbers->size(); ++index) {
+            builder.add_part_with_location(std::move(frames.value()[index]),
+                                           base + instance_path(study_uid, series_uid, sop_uid) + "/frames/" + std::to_string((*numbers)[index]),
+                                           std::string_view(part_type));
+        }
+        res.code = 200;
+        res.set_header("Content-Type", builder.content_type_header());
+        res.body = builder.build();
+        return res;
+    });
+}
+
+[[nodiscard]] crow::response rendered_response(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req, const std::string& study_uid,
+                                               const std::string& series_uid, const std::string& sop_uid, std::optional<uint32_t> frame) {
+    return guarded(ctx, req, read_scope, [&](crow::response res) {
+        const auto instance = instance_under(*ctx->database, study_uid, series_uid, sop_uid);
+        if (!instance) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Instance not found");
+        }
+        const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::rendered);
+        if (!choice.ok()) {
+            return refusal(std::move(res), choice);
+        }
+        auto params = dicomweb::parse_rendered_params(req.raw_url, choice.media);
+        if (frame) {
+            params.frame = *frame;
+        }
+        auto result = dicomweb::render_dicom_image(instance->file_path, params);
+        if (!result.success) {
+            return failure(std::move(res), result.status == 0 ? 400 : result.status, "RENDER_ERROR", result.error_message);
+        }
+        res.code = 200;
+        res.set_header("Content-Type", result.content_type);
+        res.body.assign(reinterpret_cast<const char*>(result.data.data()), result.data.size());
+        return res;
+    });
+}
+
+[[nodiscard]] crow::response bulk_response(const std::shared_ptr<rest_server_context>& ctx, const crow::request& req, const std::string& study_uid,
+                                           const std::string& series_uid, const std::string& sop_uid, const std::string& tag_text) {
+    return guarded(ctx, req, read_scope, [&](crow::response res) {
+        const auto instance = instance_under(*ctx->database, study_uid, series_uid, sop_uid);
+        if (!instance) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Instance not found");
+        }
+        uint32_t combined = 0;
+        const auto parsed = std::from_chars(tag_text.data(), tag_text.data() + tag_text.size(), combined, 16);
+        if (tag_text.size() != 8 || parsed.ec != std::errc{} || parsed.ptr != tag_text.data() + tag_text.size()) {
+            return failure(std::move(res), 404, "NOT_FOUND", "Not a Bulk Data URI of this server");
+        }
+        const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::bulk_data);
+        if (!choice.ok()) {
+            return refusal(std::move(res), choice);
+        }
+        std::vector<uint8_t> data;
+        if (combined == tags::pixel_data.combined()) {
+            auto pixels = native_pixels_of(instance->file_path);
+            if (pixels.status != 200) {
+                return failure(std::move(res), pixels.status, "BULK_DATA_ERROR", pixels.message);
+            }
+            data = std::move(pixels.data);
+        } else {
+            auto file = core::dicom_file::open(instance->file_path);
+            if (file.is_err()) {
+                return failure(std::move(res), 500, "READ_ERROR", "An indexed object cannot be read");
+            }
+            const auto* element = file.value().dataset().get(core::dicom_tag{combined});
+            if (element == nullptr || !dicomweb::is_bulk_data_tag(combined)) {
+                return failure(std::move(res), 404, "NOT_FOUND", "This instance has no such Bulk Data");
+            }
+            const auto raw = element->raw_data();
+            data.assign(raw.begin(), raw.end());
+        }
+        if (!choice.multipart) {
+            res.code = 200;
+            res.set_header("Content-Type", std::string(dicomweb::media_type::octet_stream));
+            res.body.assign(reinterpret_cast<const char*>(data.data()), data.size());
+            return res;
+        }
+        dicomweb::multipart_builder builder(dicomweb::media_type::octet_stream);
+        builder.add_part_with_location(std::move(data), base_url(req, *ctx) + instance_path(study_uid, series_uid, sop_uid) + "/bulkdata/" + tag_text);
+        res.code = 200;
+        res.set_header("Content-Type", builder.content_type_header());
+        res.body = builder.build();
+        return res;
+    });
+}
+
+}  // namespace
 
 void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
                                       std::shared_ptr<rest_server_context> ctx) {
     // ========================================================================
-    // Study Retrieval
+    // WADO-RS: Instance and Metadata Resources
     // ========================================================================
 
-    // GET /dicomweb/studies/{studyUID} - Retrieve entire study
+    // GET /dicomweb/studies/{study}
     CROW_ROUTE(app, "/dicomweb/studies/<string>")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req, const std::string& study_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                // OAuth 2.0 / legacy auth check
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Check Accept header
-                auto accept = req.get_header_value("Accept");
-                auto accept_infos = dicomweb::parse_accept_header(accept);
-
-                // Check if metadata is requested
-                if (dicomweb::is_acceptable(accept_infos,
-                                            dicomweb::media_type::dicom_json)) {
-                    auto files_result = ctx->database->get_study_files(study_uid);
-                    if (!files_result.is_ok()) {
-                        res.code = 500;
-                        res.add_header("Content-Type", "application/json");
-                        res.body = make_error_json("QUERY_ERROR",
-                                                   files_result.error().message);
-                        return res;
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::collection);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
                     }
-                    std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                           "/bulkdata/";
-                    return build_metadata_response(files_result.value(), *ctx, bulk_uri);
-                }
-
-                // Return DICOM instances
-                auto files_result = ctx->database->get_study_files(study_uid);
-                if (!files_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               files_result.error().message);
-                    return res;
-                }
-                std::string base_uri = "/dicomweb/studies/" + study_uid;
-                return build_multipart_dicom_response(files_result.value(), *ctx, base_uri);
+                    auto files = ctx->database->get_study_files(study_uid);
+                    if (files.is_err()) {
+                        return failure(std::move(res), 500, "QUERY_ERROR", files.error().message);
+                    }
+                    return instances_response(std::move(res), files.value(), choice, base_url(req, *ctx));
+                });
             });
 
-    // GET /dicomweb/studies/{studyUID}/metadata - Study metadata
+    // GET /dicomweb/studies/{study}/metadata
     CROW_ROUTE(app, "/dicomweb/studies/<string>/metadata")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req, const std::string& study_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                // OAuth 2.0 / legacy auth check
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                auto files_result = ctx->database->get_study_files(study_uid);
-                if (!files_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               files_result.error().message);
-                    return res;
-                }
-                std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                       "/bulkdata/";
-                return build_metadata_response(files_result.value(), *ctx, bulk_uri);
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::metadata);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
+                    }
+                    auto files = ctx->database->get_study_files(study_uid);
+                    if (files.is_err()) {
+                        return failure(std::move(res), 500, "QUERY_ERROR", files.error().message);
+                    }
+                    return metadata_response(std::move(res), files.value(), choice, base_url(req, *ctx));
+                });
             });
 
-    // ========================================================================
-    // Series Retrieval
-    // ========================================================================
-
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID} - Retrieve series
+    // GET /dicomweb/studies/{study}/series/{series}
     CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Verify study exists
-                auto study = ctx->database->find_study(study_uid);
-                if (!study) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Study not found");
-                    return res;
-                }
-
-                // Check Accept header
-                auto accept = req.get_header_value("Accept");
-                auto accept_infos = dicomweb::parse_accept_header(accept);
-
-                // Check if metadata is requested
-                if (dicomweb::is_acceptable(accept_infos,
-                                            dicomweb::media_type::dicom_json)) {
-                    auto files_result = ctx->database->get_series_files(series_uid);
-                    if (!files_result.is_ok()) {
-                        res.code = 500;
-                        res.add_header("Content-Type", "application/json");
-                        res.body = make_error_json("QUERY_ERROR",
-                                                   files_result.error().message);
-                        return res;
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid) {
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    if (!series_under(*ctx->database, study_uid, series_uid)) {
+                        return failure(std::move(res), 404, "NOT_FOUND", "Series not found");
                     }
-                    std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                           "/series/" + series_uid + "/bulkdata/";
-                    return build_metadata_response(files_result.value(), *ctx, bulk_uri);
-                }
-
-                auto files_result = ctx->database->get_series_files(series_uid);
-                if (!files_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               files_result.error().message);
-                    return res;
-                }
-                std::string base_uri = "/dicomweb/studies/" + study_uid +
-                                       "/series/" + series_uid;
-                return build_multipart_dicom_response(files_result.value(), *ctx, base_uri);
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::collection);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
+                    }
+                    auto files = ctx->database->get_series_files(series_uid);
+                    if (files.is_err()) {
+                        return failure(std::move(res), 500, "QUERY_ERROR", files.error().message);
+                    }
+                    return instances_response(std::move(res), files.value(), choice, base_url(req, *ctx));
+                });
             });
 
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/metadata
+    // GET /dicomweb/studies/{study}/series/{series}/metadata
     CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/metadata")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& /*req*/,
-                  const std::string& study_uid,
-                  const std::string& series_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid) {
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    if (!series_under(*ctx->database, study_uid, series_uid)) {
+                        return failure(std::move(res), 404, "NOT_FOUND", "Series not found");
+                    }
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::metadata);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
+                    }
+                    auto files = ctx->database->get_series_files(series_uid);
+                    if (files.is_err()) {
+                        return failure(std::move(res), 500, "QUERY_ERROR", files.error().message);
+                    }
+                    return metadata_response(std::move(res), files.value(), choice, base_url(req, *ctx));
+                });
+            });
 
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid) {
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    const auto instance = instance_under(*ctx->database, study_uid, series_uid, sop_uid);
+                    if (!instance) {
+                        return failure(std::move(res), 404, "NOT_FOUND", "Instance not found");
+                    }
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::instance);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
+                    }
+                    return instances_response(std::move(res), {instance->file_path}, choice, base_url(req, *ctx));
+                });
+            });
 
-                auto files_result = ctx->database->get_series_files(series_uid);
-                if (!files_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               files_result.error().message);
-                    return res;
-                }
-                std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                       "/series/" + series_uid + "/bulkdata/";
-                return build_metadata_response(files_result.value(), *ctx, bulk_uri);
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}/metadata
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>/metadata")
+        .methods(crow::HTTPMethod::GET)(
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid) {
+                return guarded(ctx, req, read_scope, [&](crow::response res) {
+                    const auto instance = instance_under(*ctx->database, study_uid, series_uid, sop_uid);
+                    if (!instance) {
+                        return failure(std::move(res), 404, "NOT_FOUND", "Instance not found");
+                    }
+                    const auto choice = dicomweb::choose_media_type(acceptable_types(req), dicomweb::wado_resource::metadata);
+                    if (!choice.ok()) {
+                        return refusal(std::move(res), choice);
+                    }
+                    return metadata_response(std::move(res), {instance->file_path}, choice, base_url(req, *ctx));
+                });
             });
 
     // ========================================================================
-    // Instance Retrieval
+    // WADO-RS: Bulk Data, Frames and Rendered Resources
     // ========================================================================
 
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}
-    CROW_ROUTE(app,
-               "/dicomweb/studies/<string>/series/<string>/instances/<string>")
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}/bulkdata/{tag}
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>/bulkdata/<string>")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid,
-                  const std::string& sop_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                auto file_path_result = ctx->database->get_file_path(sop_uid);
-                if (!file_path_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               file_path_result.error().message);
-                    return res;
-                }
-                const auto& file_path = file_path_result.value();
-                if (!file_path) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Instance not found");
-                    return res;
-                }
-
-                // Check Accept header
-                auto accept = req.get_header_value("Accept");
-                auto accept_infos = dicomweb::parse_accept_header(accept);
-
-                // Check if metadata is requested
-                if (dicomweb::is_acceptable(accept_infos,
-                                            dicomweb::media_type::dicom_json)) {
-                    std::vector<std::string> files = {*file_path};
-                    std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                           "/series/" + series_uid +
-                                           "/instances/" + sop_uid + "/bulkdata/";
-                    return build_metadata_response(files, *ctx, bulk_uri);
-                }
-
-                // Return DICOM instance
-                auto data = read_file_bytes(*file_path);
-                if (data.empty()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("READ_ERROR",
-                                               "Failed to read DICOM file");
-                    return res;
-                }
-
-                res.code = 200;
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom));
-                res.body = std::string(reinterpret_cast<char*>(data.data()),
-                                       data.size());
-                return res;
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid,
+                  const std::string& tag_text) {
+                return bulk_response(ctx, req, study_uid, series_uid, sop_uid, tag_text);
             });
 
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/metadata
-    CROW_ROUTE(app,
-               "/dicomweb/studies/<string>/series/<string>/instances/<string>/metadata")
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}/frames/{frames}
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& /*req*/,
-                  const std::string& study_uid,
-                  const std::string& series_uid,
-                  const std::string& sop_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                auto file_path_result = ctx->database->get_file_path(sop_uid);
-                if (!file_path_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               file_path_result.error().message);
-                    return res;
-                }
-                const auto& file_path = file_path_result.value();
-                if (!file_path) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Instance not found");
-                    return res;
-                }
-
-                std::vector<std::string> files = {*file_path};
-                std::string bulk_uri = "/dicomweb/studies/" + study_uid +
-                                       "/series/" + series_uid +
-                                       "/instances/" + sop_uid + "/bulkdata/";
-                return build_metadata_response(files, *ctx, bulk_uri);
-            });
-
-    // ========================================================================
-    // Frame Retrieval (WADO-RS)
-    // ========================================================================
-
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/frames/{frameNumbers}
-    CROW_ROUTE(app,
-               "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>")
-        .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid,
-                  const std::string& sop_uid,
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid,
                   const std::string& frame_list) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                auto file_path_result = ctx->database->get_file_path(sop_uid);
-                if (!file_path_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               file_path_result.error().message);
-                    return res;
-                }
-                const auto& file_path = file_path_result.value();
-                if (!file_path) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Instance not found");
-                    return res;
-                }
-
-                // Parse frame numbers
-                auto frames = dicomweb::parse_frame_numbers(frame_list);
-                if (frames.empty()) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("INVALID_FRAME_LIST",
-                                               "No valid frame numbers specified");
-                    return res;
-                }
-
-                // Load DICOM file
-                auto data = read_file_bytes(*file_path);
-                if (data.empty()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("READ_ERROR",
-                                               "Failed to read DICOM file");
-                    return res;
-                }
-
-                auto dicom_result = core::dicom_file::from_bytes(
-                    std::span<const uint8_t>(data.data(), data.size()));
-                if (dicom_result.is_err()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("PARSE_ERROR",
-                                               "Failed to parse DICOM file");
-                    return res;
-                }
-
-                const auto& dataset = dicom_result.value().dataset();
-
-                // Get image parameters
-                auto rows_elem = dataset.get(core::tags::rows);
-                auto cols_elem = dataset.get(core::tags::columns);
-                auto bits_alloc_elem = dataset.get(core::tags::bits_allocated);
-                auto samples_elem = dataset.get(core::tags::samples_per_pixel);
-                // Number of Frames (0028,0008)
-                constexpr core::dicom_tag number_of_frames_tag{0x0028, 0x0008};
-                auto num_frames_elem = dataset.get(number_of_frames_tag);
-                auto pixel_data_elem = dataset.get(core::tags::pixel_data);
-
-                if (!rows_elem || !cols_elem || !pixel_data_elem) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_IMAGE",
-                                               "Instance does not contain image data");
-                    return res;
-                }
-
-                uint16_t rows = rows_elem->as_numeric<uint16_t>().unwrap_or(0);
-                uint16_t cols = cols_elem->as_numeric<uint16_t>().unwrap_or(0);
-                uint16_t bits_allocated = bits_alloc_elem ?
-                    bits_alloc_elem->as_numeric<uint16_t>().unwrap_or(16) : 16;
-                uint16_t samples_per_pixel = samples_elem ?
-                    samples_elem->as_numeric<uint16_t>().unwrap_or(1) : 1;
-                uint32_t num_frames = 1;
-                if (num_frames_elem) {
-                    try {
-                        num_frames = std::stoul(num_frames_elem->as_string().unwrap_or("1"));
-                    } catch (...) {}
-                }
-
-                // Calculate frame size
-                size_t frame_size = static_cast<size_t>(rows) * cols *
-                                    samples_per_pixel * ((bits_allocated + 7) / 8);
-
-                auto pixel_data = pixel_data_elem->raw_data();
-
-                // Check Accept header
-                auto accept = req.get_header_value("Accept");
-
-                // Build multipart response for multiple frames
-                dicomweb::multipart_builder builder(
-                    dicomweb::media_type::octet_stream);
-
-                for (uint32_t frame_num : frames) {
-                    if (frame_num > num_frames) {
-                        // Skip invalid frame numbers
-                        continue;
-                    }
-
-                    auto frame_data = dicomweb::extract_frame(
-                        pixel_data, frame_num, frame_size);
-
-                    if (!frame_data.empty()) {
-                        std::string location = "/dicomweb/studies/" + study_uid +
-                                               "/series/" + series_uid +
-                                               "/instances/" + sop_uid +
-                                               "/frames/" + std::to_string(frame_num);
-                        builder.add_part_with_location(std::move(frame_data), location);
-                    }
-                }
-
-                if (builder.empty()) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND",
-                                               "No valid frames found");
-                    return res;
-                }
-
-                // Return single part or multipart
-                if (builder.size() == 1) {
-                    // Single frame - return directly
-                    auto body = builder.build();
-                    res.code = 200;
-                    res.add_header("Content-Type",
-                                   std::string(dicomweb::media_type::octet_stream));
-                    // Extract just the data part from multipart
-                    auto frame_data = dicomweb::extract_frame(
-                        pixel_data, frames[0], frame_size);
-                    res.body = std::string(
-                        reinterpret_cast<char*>(frame_data.data()),
-                        frame_data.size());
-                } else {
-                    // Multiple frames - return multipart
-                    res.code = 200;
-                    res.add_header("Content-Type", builder.content_type_header());
-                    res.body = builder.build();
-                }
-
-                return res;
+                return frames_response(ctx, req, study_uid, series_uid, sop_uid, frame_list);
             });
 
-    // ========================================================================
-    // Rendered Images (WADO-RS)
-    // ========================================================================
-
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/rendered
-    CROW_ROUTE(app,
-               "/dicomweb/studies/<string>/series/<string>/instances/<string>/rendered")
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}/rendered
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>/rendered")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid,
-                  const std::string& sop_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                auto file_path_result = ctx->database->get_file_path(sop_uid);
-                if (!file_path_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               file_path_result.error().message);
-                    return res;
-                }
-                const auto& file_path = file_path_result.value();
-                if (!file_path) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Instance not found");
-                    return res;
-                }
-
-                // Parse rendering parameters
-                auto accept = req.get_header_value("Accept");
-                auto params = dicomweb::parse_rendered_params(req.raw_url, accept);
-
-                // Render image
-                auto result = dicomweb::render_dicom_image(*file_path, params);
-
-                if (!result.success) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("RENDER_ERROR", result.error_message);
-                    return res;
-                }
-
-                res.code = 200;
-                res.add_header("Content-Type", result.content_type);
-                res.body = std::string(
-                    reinterpret_cast<char*>(result.data.data()),
-                    result.data.size());
-                return res;
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid) {
+                return rendered_response(ctx, req, study_uid, series_uid, sop_uid, std::nullopt);
             });
 
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances/{sopUID}/frames/{frameNumber}/rendered
-    CROW_ROUTE(app,
-               "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>/rendered")
+    // GET /dicomweb/studies/{study}/series/{series}/instances/{instance}/frames/{frame}/rendered
+    CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances/<string>/frames/<string>/rendered")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid,
-                  const std::string& sop_uid,
-                  const std::string& frame_str) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid, const std::string& sop_uid,
+                  const std::string& frame_text) {
+                const auto numbers = requested_frames(frame_text);
+                if (!numbers || numbers->size() != 1) {
+                    // Auth first, as everywhere: a refusal here says nothing to someone without a token.
+                    return guarded(ctx, req, read_scope, [](crow::response res) {
+                        return failure(std::move(res), 400, "INVALID_FRAME", "A rendered frame is one positive frame number");
+                    });
                 }
-
-                auto file_path_result = ctx->database->get_file_path(sop_uid);
-                if (!file_path_result.is_ok()) {
-                    res.code = 500;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("QUERY_ERROR",
-                                               file_path_result.error().message);
-                    return res;
-                }
-                const auto& file_path = file_path_result.value();
-                if (!file_path) {
-                    res.code = 404;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("NOT_FOUND", "Instance not found");
-                    return res;
-                }
-
-                // Parse frame number
-                uint32_t frame_num = 1;
-                try {
-                    frame_num = std::stoul(frame_str);
-                    if (frame_num == 0) frame_num = 1;
-                } catch (...) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("INVALID_FRAME",
-                                               "Invalid frame number");
-                    return res;
-                }
-
-                // Parse rendering parameters and set frame
-                auto accept = req.get_header_value("Accept");
-                auto params = dicomweb::parse_rendered_params(req.raw_url, accept);
-                params.frame = frame_num;
-
-                // Render image
-                auto result = dicomweb::render_dicom_image(*file_path, params);
-
-                if (!result.success) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("RENDER_ERROR", result.error_message);
-                    return res;
-                }
-
-                res.code = 200;
-                res.add_header("Content-Type", result.content_type);
-                res.body = std::string(
-                    reinterpret_cast<char*>(result.data.data()),
-                    result.data.size());
-                return res;
+                return rendered_response(ctx, req, study_uid, series_uid, sop_uid, numbers->front());
             });
 
     // ========================================================================
-    // STOW-RS (Store Over the Web)
+    // STOW-RS
     // ========================================================================
 
-    // POST /dicomweb/studies - Store instances (new study)
+    // POST /dicomweb/studies
     CROW_ROUTE(app, "/dicomweb/studies")
         .methods(crow::HTTPMethod::POST)(
             [ctx](const crow::request& req) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                // OAuth 2.0 / legacy auth check (write scope)
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.write"})) {
-                    return res;
-                }
-
-                if (!ctx->database || !ctx->file_storage) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("SERVICE_UNAVAILABLE",
-                                               !ctx->database
-                                                   ? "Database not configured"
-                                                   : "File storage not configured");
-                    return res;
-                }
-
-                // Parse Content-Type header
-                auto content_type = req.get_header_value("Content-Type");
-                if (content_type.empty() ||
-                    content_type.find("multipart/related") == std::string::npos) {
-                    res.code = 415; // Unsupported Media Type
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        "UNSUPPORTED_MEDIA_TYPE",
-                        "Content-Type must be multipart/related");
-                    return res;
-                }
-
-                // Parse multipart body
-                auto parse_result = dicomweb::multipart_parser::parse(
-                    content_type, req.body);
-
-                if (!parse_result) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        parse_result.error->code,
-                        parse_result.error->message);
-                    return res;
-                }
-
-                if (parse_result.parts.empty()) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        "NO_INSTANCES",
-                        "No DICOM instances in request body");
-                    return res;
-                }
-
-                // Process each part
-                dicomweb::store_response store_response;
-
-                for (const auto& part : parse_result.parts) {
-                    dicomweb::store_instance_result result;
-
-                    // Only process application/dicom parts
-                    if (part.content_type.find("application/dicom") ==
-                        std::string::npos) {
-                        continue;
-                    }
-
-                    // Parse DICOM from memory
-                    auto dicom_result = core::dicom_file::from_bytes(
-                        std::span<const uint8_t>(part.data.data(), part.data.size()));
-
-                    if (dicom_result.is_err()) {
-                        result.success = false;
-                        result.error_code = "INVALID_DATA";
-                        result.error_message = "Failed to parse DICOM data";
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    const auto& dataset = dicom_result.value().dataset();
-
-                    // Validate instance
-                    auto validation = dicomweb::validate_instance(dataset);
-                    if (!validation) {
-                        result.success = false;
-                        result.error_code = validation.error_code;
-                        result.error_message = validation.error_message;
-
-                        // Try to extract UIDs for error reporting
-                        if (auto elem = dataset.get(core::tags::sop_class_uid)) {
-                            result.sop_class_uid = elem->as_string().unwrap_or("");
-                        }
-                        if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
-                            result.sop_instance_uid = elem->as_string().unwrap_or("");
-                        }
-
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    // Extract UIDs
-                    auto sop_class_elem = dataset.get(core::tags::sop_class_uid);
-                    auto sop_instance_elem = dataset.get(core::tags::sop_instance_uid);
-                    auto study_uid_elem = dataset.get(core::tags::study_instance_uid);
-                    auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
-
-                    result.sop_class_uid = sop_class_elem->as_string().unwrap_or("");
-                    result.sop_instance_uid = sop_instance_elem->as_string().unwrap_or("");
-
-                    std::string study_uid = study_uid_elem->as_string().unwrap_or("");
-                    std::string series_uid = series_uid_elem->as_string().unwrap_or("");
-
-                    // Check for duplicate
-                    auto existing_result = ctx->database->get_file_path(
-                        result.sop_instance_uid);
-                    if (existing_result.is_ok() && existing_result.value()) {
-                        result.success = false;
-                        result.error_code = "DUPLICATE";
-                        result.error_message = "Instance already exists";
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    // Store instance via file_storage and index in database
-                    if (!store_instance_to_storage(ctx, dataset, result)) {
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    result.success = true;
-                    result.retrieve_url = "/dicomweb/studies/" + study_uid +
-                                          "/series/" + series_uid +
-                                          "/instances/" + result.sop_instance_uid;
-                    store_response.referenced_instances.push_back(
-                        std::move(result));
-                }
-
-                // Build response
-                std::string base_url;  // Empty base URL, client should use relative URLs
-
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                if (store_response.all_failed()) {
-                    res.code = 409; // Conflict
-                } else if (store_response.partial_success()) {
-                    res.code = 202; // Accepted with warnings
-                } else {
-                    res.code = 200; // OK
-                }
-
-                res.body = dicomweb::build_store_response_json(
-                    store_response, base_url);
-                return res;
+                return store_instances(ctx, req, std::nullopt);
             });
 
-    // POST /dicomweb/studies/{studyUID} - Store instances to existing study
+    // POST /dicomweb/studies/{study}
     CROW_ROUTE(app, "/dicomweb/studies/<string>")
         .methods(crow::HTTPMethod::POST)(
             [ctx](const crow::request& req, const std::string& target_study_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-
-                // OAuth 2.0 / legacy auth check (write scope)
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.write"})) {
-                    return res;
-                }
-
-                if (!ctx->database || !ctx->file_storage) {
-                    res.code = 503;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json("SERVICE_UNAVAILABLE",
-                                               !ctx->database
-                                                   ? "Database not configured"
-                                                   : "File storage not configured");
-                    return res;
-                }
-
-                // Parse Content-Type header
-                auto content_type = req.get_header_value("Content-Type");
-                if (content_type.empty() ||
-                    content_type.find("multipart/related") == std::string::npos) {
-                    res.code = 415;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        "UNSUPPORTED_MEDIA_TYPE",
-                        "Content-Type must be multipart/related");
-                    return res;
-                }
-
-                // Parse multipart body
-                auto parse_result = dicomweb::multipart_parser::parse(
-                    content_type, req.body);
-
-                if (!parse_result) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        parse_result.error->code,
-                        parse_result.error->message);
-                    return res;
-                }
-
-                if (parse_result.parts.empty()) {
-                    res.code = 400;
-                    res.add_header("Content-Type", "application/json");
-                    res.body = make_error_json(
-                        "NO_INSTANCES",
-                        "No DICOM instances in request body");
-                    return res;
-                }
-
-                // Process each part
-                dicomweb::store_response store_response;
-
-                for (const auto& part : parse_result.parts) {
-                    dicomweb::store_instance_result result;
-
-                    // Only process application/dicom parts
-                    if (part.content_type.find("application/dicom") ==
-                        std::string::npos) {
-                        continue;
-                    }
-
-                    // Parse DICOM from memory
-                    auto dicom_result = core::dicom_file::from_bytes(
-                        std::span<const uint8_t>(part.data.data(), part.data.size()));
-
-                    if (dicom_result.is_err()) {
-                        result.success = false;
-                        result.error_code = "INVALID_DATA";
-                        result.error_message = "Failed to parse DICOM data";
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    const auto& dataset = dicom_result.value().dataset();
-
-                    // Validate instance with target study UID check
-                    auto validation = dicomweb::validate_instance(
-                        dataset, target_study_uid);
-                    if (!validation) {
-                        result.success = false;
-                        result.error_code = validation.error_code;
-                        result.error_message = validation.error_message;
-
-                        if (auto elem = dataset.get(core::tags::sop_class_uid)) {
-                            result.sop_class_uid = elem->as_string().unwrap_or("");
-                        }
-                        if (auto elem = dataset.get(core::tags::sop_instance_uid)) {
-                            result.sop_instance_uid = elem->as_string().unwrap_or("");
-                        }
-
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    // Extract UIDs
-                    auto sop_class_elem = dataset.get(core::tags::sop_class_uid);
-                    auto sop_instance_elem = dataset.get(core::tags::sop_instance_uid);
-                    auto series_uid_elem = dataset.get(core::tags::series_instance_uid);
-
-                    result.sop_class_uid = sop_class_elem->as_string().unwrap_or("");
-                    result.sop_instance_uid = sop_instance_elem->as_string().unwrap_or("");
-                    std::string series_uid = series_uid_elem->as_string().unwrap_or("");
-
-                    // Check for duplicate
-                    auto existing_result = ctx->database->get_file_path(
-                        result.sop_instance_uid);
-                    if (existing_result.is_ok() && existing_result.value()) {
-                        result.success = false;
-                        result.error_code = "DUPLICATE";
-                        result.error_message = "Instance already exists";
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    // Store instance via file_storage and index in database
-                    if (!store_instance_to_storage(ctx, dataset, result)) {
-                        store_response.failed_instances.push_back(
-                            std::move(result));
-                        continue;
-                    }
-
-                    result.success = true;
-                    result.retrieve_url = "/dicomweb/studies/" + target_study_uid +
-                                          "/series/" + series_uid +
-                                          "/instances/" + result.sop_instance_uid;
-                    store_response.referenced_instances.push_back(
-                        std::move(result));
-                }
-
-                // Build response
-                std::string base_url;  // Empty base URL, client should use relative URLs
-
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                if (store_response.all_failed()) {
-                    res.code = 409; // Conflict
-                } else if (store_response.partial_success()) {
-                    res.code = 202; // Accepted with warnings
-                } else {
-                    res.code = 200; // OK
-                }
-
-                res.body = dicomweb::build_store_response_json(
-                    store_response, base_url);
-                return res;
+                return store_instances(ctx, req, target_study_uid);
             });
 
     // ========================================================================
-    // QIDO-RS (Query based on ID for DICOM Objects)
+    // QIDO-RS
     // ========================================================================
 
-    // GET /dicomweb/studies - Search for studies
     CROW_ROUTE(app, "/dicomweb/studies")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                // OAuth 2.0 / legacy auth check (read or search scope)
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read", "dicomweb.search"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Parse query parameters
-                auto query = dicomweb::parse_study_query_params(req.raw_url);
-
-                // Set default limit if not specified (prevent unlimited queries)
-                if (query.limit == 0) {
-                    query.limit = 100;
-                }
-
-                // Execute search
-                auto studies_result = ctx->database->search_studies(query);
-                if (!studies_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               studies_result.error().message);
-                    return res;
-                }
-
-                // Build response
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                for (const auto& study : studies_result.value()) {
-                    if (!first) oss << ",";
-                    first = false;
-
-                    // Get patient info for this study
-                    std::string patient_id;
-                    std::string patient_name;
-                    if (auto patient = ctx->database->find_patient_by_pk(study.patient_pk)) {
-                        patient_id = patient->patient_id;
-                        patient_name = patient->patient_name;
-                    }
-
-                    oss << dicomweb::study_record_to_dicom_json(
-                        study, patient_id, patient_name);
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+                return search_response(ctx, req, {services::query_level::study, std::nullopt, std::nullopt});
             });
 
-    // GET /dicomweb/series - Search for all series
     CROW_ROUTE(app, "/dicomweb/series")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Parse query parameters
-                auto query = dicomweb::parse_series_query_params(req.raw_url);
-
-                // Set default limit if not specified
-                if (query.limit == 0) {
-                    query.limit = 100;
-                }
-
-                // Execute search
-                auto series_list_result = ctx->database->search_series(query);
-                if (!series_list_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               series_list_result.error().message);
-                    return res;
-                }
-
-                // Build response
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                for (const auto& series : series_list_result.value()) {
-                    if (!first) oss << ",";
-                    first = false;
-
-                    // Get study UID for this series
-                    std::string study_uid;
-                    if (auto study = ctx->database->find_study_by_pk(series.study_pk)) {
-                        study_uid = study->study_uid;
-                    }
-
-                    oss << dicomweb::series_record_to_dicom_json(series, study_uid);
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+                return search_response(ctx, req, {services::query_level::series, std::nullopt, std::nullopt});
             });
 
-    // GET /dicomweb/instances - Search for all instances
     CROW_ROUTE(app, "/dicomweb/instances")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Parse query parameters
-                auto query = dicomweb::parse_instance_query_params(req.raw_url);
-
-                // Set default limit if not specified
-                if (query.limit == 0) {
-                    query.limit = 100;
-                }
-
-                // Execute search
-                auto instances_result = ctx->database->search_instances(query);
-                if (!instances_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               instances_result.error().message);
-                    return res;
-                }
-
-                // Build response
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                for (const auto& instance : instances_result.value()) {
-                    if (!first) oss << ",";
-                    first = false;
-
-                    // Get series and study UIDs
-                    std::string series_uid;
-                    std::string study_uid;
-                    if (auto series = ctx->database->find_series_by_pk(instance.series_pk)) {
-                        series_uid = series->series_uid;
-                        if (auto study = ctx->database->find_study_by_pk(series->study_pk)) {
-                            study_uid = study->study_uid;
-                        }
-                    }
-
-                    oss << dicomweb::instance_record_to_dicom_json(
-                        instance, series_uid, study_uid);
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+                return search_response(ctx, req, {services::query_level::image, std::nullopt, std::nullopt});
             });
 
-    // GET /dicomweb/studies/{studyUID}/series - Search series in a study (QIDO-RS)
     CROW_ROUTE(app, "/dicomweb/studies/<string>/series")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req, const std::string& study_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                // OAuth 2.0 / legacy auth check
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read", "dicomweb.search"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Verify study exists
-                auto study = ctx->database->find_study(study_uid);
-                if (!study) {
-                    res.code = 404;
-                    res.body = make_error_json("NOT_FOUND", "Study not found");
-                    return res;
-                }
-
-                // Parse query parameters and add study filter
-                auto query = dicomweb::parse_series_query_params(req.raw_url);
-                query.study_uid = study_uid;
-
-                // Set default limit if not specified
-                if (query.limit == 0) {
-                    query.limit = 100;
-                }
-
-                // Execute search
-                auto series_list_result = ctx->database->search_series(query);
-                if (!series_list_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               series_list_result.error().message);
-                    return res;
-                }
-
-                // Build response
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                for (const auto& series : series_list_result.value()) {
-                    if (!first) oss << ",";
-                    first = false;
-
-                    oss << dicomweb::series_record_to_dicom_json(series, study_uid);
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+                return search_response(ctx, req, {services::query_level::series, study_uid, std::nullopt});
             });
 
-    // GET /dicomweb/studies/{studyUID}/instances - Search instances in a study (QIDO-RS)
     CROW_ROUTE(app, "/dicomweb/studies/<string>/instances")
         .methods(crow::HTTPMethod::GET)(
             [ctx](const crow::request& req, const std::string& study_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                // OAuth 2.0 / legacy auth check
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read", "dicomweb.search"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Verify study exists
-                auto study = ctx->database->find_study(study_uid);
-                if (!study) {
-                    res.code = 404;
-                    res.body = make_error_json("NOT_FOUND", "Study not found");
-                    return res;
-                }
-
-                // Get all series in this study and then instances
-                storage::series_query series_query;
-                series_query.study_uid = study_uid;
-                auto series_list_result = ctx->database->search_series(series_query);
-                if (!series_list_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               series_list_result.error().message);
-                    return res;
-                }
-
-                // Parse query parameters for additional filters
-                auto inst_query = dicomweb::parse_instance_query_params(req.raw_url);
-                if (inst_query.limit == 0) {
-                    inst_query.limit = 100;
-                }
-
-                // Collect instances from all series
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                size_t count = 0;
-                size_t skipped = 0;
-
-                for (const auto& series : series_list_result.value()) {
-                    if (count >= inst_query.limit) break;
-
-                    // Search instances in this series
-                    storage::instance_query query;
-                    query.series_uid = series.series_uid;
-                    if (inst_query.sop_uid.has_value()) {
-                        query.sop_uid = inst_query.sop_uid;
-                    }
-                    if (inst_query.sop_class_uid.has_value()) {
-                        query.sop_class_uid = inst_query.sop_class_uid;
-                    }
-                    if (inst_query.instance_number.has_value()) {
-                        query.instance_number = inst_query.instance_number;
-                    }
-                    query.limit = inst_query.limit - count;
-
-                    auto instances_result = ctx->database->search_instances(query);
-                    if (!instances_result.is_ok()) {
-                        continue;
-                    }
-                    for (const auto& instance : instances_result.value()) {
-                        // Handle offset
-                        if (skipped < inst_query.offset) {
-                            ++skipped;
-                            continue;
-                        }
-
-                        if (count >= inst_query.limit) break;
-
-                        if (!first) oss << ",";
-                        first = false;
-
-                        oss << dicomweb::instance_record_to_dicom_json(
-                            instance, series.series_uid, study_uid);
-                        ++count;
-                    }
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+                return search_response(ctx, req, {services::query_level::image, study_uid, std::nullopt});
             });
 
-    // GET /dicomweb/studies/{studyUID}/series/{seriesUID}/instances - Search instances in a series (QIDO-RS)
     CROW_ROUTE(app, "/dicomweb/studies/<string>/series/<string>/instances")
         .methods(crow::HTTPMethod::GET)(
-            [ctx](const crow::request& req,
-                  const std::string& study_uid,
-                  const std::string& series_uid) {
-                crow::response res;
-                add_cors_headers(res, *ctx);
-                res.add_header("Content-Type",
-                               std::string(dicomweb::media_type::dicom_json));
-
-                // OAuth 2.0 / legacy auth check
-                if (!check_dicomweb_auth(ctx, req, res,
-                        {"dicomweb.read", "dicomweb.search"})) {
-                    return res;
-                }
-
-                if (!ctx->database) {
-                    res.code = 503;
-                    res.body = make_error_json("DATABASE_UNAVAILABLE",
-                                               "Database not configured");
-                    return res;
-                }
-
-                // Verify study exists
-                auto study = ctx->database->find_study(study_uid);
-                if (!study) {
-                    res.code = 404;
-                    res.body = make_error_json("NOT_FOUND", "Study not found");
-                    return res;
-                }
-
-                // Verify series exists
-                auto series = ctx->database->find_series(series_uid);
-                if (!series) {
-                    res.code = 404;
-                    res.body = make_error_json("NOT_FOUND", "Series not found");
-                    return res;
-                }
-
-                // Parse query parameters and add series filter
-                auto query = dicomweb::parse_instance_query_params(req.raw_url);
-                query.series_uid = series_uid;
-
-                // Set default limit if not specified
-                if (query.limit == 0) {
-                    query.limit = 100;
-                }
-
-                // Execute search
-                auto instances_result = ctx->database->search_instances(query);
-                if (!instances_result.is_ok()) {
-                    res.code = 500;
-                    res.body = make_error_json("QUERY_ERROR",
-                                               instances_result.error().message);
-                    return res;
-                }
-
-                // Build response
-                std::ostringstream oss;
-                oss << "[";
-
-                bool first = true;
-                for (const auto& instance : instances_result.value()) {
-                    if (!first) oss << ",";
-                    first = false;
-
-                    oss << dicomweb::instance_record_to_dicom_json(
-                        instance, series_uid, study_uid);
-                }
-
-                oss << "]";
-
-                res.code = 200;
-                res.body = oss.str();
-                return res;
+            [ctx](const crow::request& req, const std::string& study_uid, const std::string& series_uid) {
+                return search_response(ctx, req, {services::query_level::image, study_uid, series_uid});
             });
 
     // ========================================================================
@@ -3158,10 +3699,7 @@ void register_dicomweb_endpoints_impl(crow::SimpleApp& app,
         .methods(crow::HTTPMethod::OPTIONS)(
             [ctx](const crow::request& /*req*/, const std::string& /*path*/) {
                 crow::response res(204);
-                if (ctx->config) {
-                    res.add_header("Access-Control-Allow-Origin",
-                                   ctx->config->cors_allowed_origins);
-                }
+                add_cors_headers(res, *ctx);
                 res.add_header("Access-Control-Allow-Methods",
                                "GET, POST, OPTIONS");
                 res.add_header("Access-Control-Allow-Headers",

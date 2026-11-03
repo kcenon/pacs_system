@@ -26,6 +26,7 @@
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/evp.h>
+#include <openssl/param_build.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #endif
@@ -64,6 +65,17 @@ struct pkey_ctx_deleter {
 };
 using pkey_ctx_ptr = std::unique_ptr<EVP_PKEY_CTX, pkey_ctx_deleter>;
 
+/// RAII wrappers for an OpenSSL parameter builder and what it builds
+struct param_bld_deleter {
+    void operator()(OSSL_PARAM_BLD* builder) const { OSSL_PARAM_BLD_free(builder); }
+};
+using param_bld_ptr = std::unique_ptr<OSSL_PARAM_BLD, param_bld_deleter>;
+
+struct param_deleter {
+    void operator()(OSSL_PARAM* params) const { OSSL_PARAM_free(params); }
+};
+using param_ptr = std::unique_ptr<OSSL_PARAM, param_deleter>;
+
 /// Convert decoded bytes to BIGNUM
 bn_ptr bytes_to_bn(const std::string& bytes) {
     return bn_ptr(BN_bin2bn(
@@ -101,17 +113,19 @@ std::string rsa_jwk_to_pem(const std::string& n_b64, const std::string& e_b64) {
 
     if (EVP_PKEY_fromdata_init(ctx.get()) != 1) return {};
 
-    OSSL_PARAM params[3];
-    params[0] = OSSL_PARAM_construct_BN("n",
-        const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(n_bytes->data())),
-        n_bytes->size());
-    params[1] = OSSL_PARAM_construct_BN("e",
-        const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(e_bytes->data())),
-        e_bytes->size());
-    params[2] = OSSL_PARAM_construct_end();
+    // OSSL_PARAM takes integers in native byte order and a JWK holds them big endian,
+    // so the BIGNUMs go through a builder that converts them.
+    param_bld_ptr builder(OSSL_PARAM_BLD_new());
+    if (!builder ||
+        OSSL_PARAM_BLD_push_BN(builder.get(), "n", n.get()) != 1 ||
+        OSSL_PARAM_BLD_push_BN(builder.get(), "e", e.get()) != 1) {
+        return {};
+    }
+    param_ptr params(OSSL_PARAM_BLD_to_param(builder.get()));
+    if (!params) return {};
 
     EVP_PKEY* pkey = nullptr;
-    if (EVP_PKEY_fromdata(ctx.get(), &pkey, EVP_PKEY_PUBLIC_KEY, params) != 1) {
+    if (EVP_PKEY_fromdata(ctx.get(), &pkey, EVP_PKEY_PUBLIC_KEY, params.get()) != 1) {
         return {};
     }
     pkey_ptr key(pkey);

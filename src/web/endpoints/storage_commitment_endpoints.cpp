@@ -432,6 +432,12 @@ void register_storage_commitment_endpoints_impl(
                     return res;
                 }
 
+                if (ctx->config && req.body.size() > ctx->config->max_body_size) {
+                    res.code = 413;
+                    res.body = make_error_json("PAYLOAD_TOO_LARGE", "The request exceeds the configured limit");
+                    return res;
+                }
+
                 auto parsed = storage_commitment::parse_commitment_request(
                     req.body);
 
@@ -484,6 +490,12 @@ void register_storage_commitment_endpoints_impl(
                     res.body = make_error_json(
                         "DATABASE_UNAVAILABLE",
                         "Storage service is not available");
+                    return res;
+                }
+
+                if (ctx->config && req.body.size() > ctx->config->max_body_size) {
+                    res.code = 413;
+                    res.body = make_error_json("PAYLOAD_TOO_LARGE", "The request exceeds the configured limit");
                     return res;
                 }
 

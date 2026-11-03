@@ -29,6 +29,9 @@
 #include "kcenon/pacs/services/worklist_scp.h"
 #include "kcenon/pacs/storage/file_storage.h"
 #include "kcenon/pacs/storage/index_database.h"
+#ifdef PACS_SERVER_WITH_HTTP
+#include "kcenon/pacs/web/rest_server.h"
+#endif
 
 #include <atomic>
 #include <memory>
@@ -193,6 +196,9 @@ private:
     /// Set up DICOM server
     [[nodiscard]] bool setup_server();
 
+    /// Set up the HTTP API, when a port is configured
+    [[nodiscard]] bool setup_http();
+
     // =========================================================================
     // Service Handlers
     // =========================================================================
@@ -242,16 +248,21 @@ private:
     std::unique_ptr<network::v2::dicom_server_v2> server_;
 
     /// File storage
-    std::unique_ptr<storage::file_storage> file_storage_;
+    std::shared_ptr<storage::file_storage> file_storage_;
 
     /// Index database
-    std::unique_ptr<storage::index_database> database_;
+    std::shared_ptr<storage::index_database> database_;
 
     /// Sends N-EVENT-REPORTs on associations this server opens
     std::shared_ptr<services::event_sender> events_;
 
     /// UPS workitems; declared after the database and the sender it uses
     std::unique_ptr<services::ups_index> ups_index_;
+
+#ifdef PACS_SERVER_WITH_HTTP
+    /// REST and DICOMweb, on the same database and storage as the DICOM services
+    std::unique_ptr<web::rest_server> http_server_;
+#endif
 
     /// Shutdown flag
     std::atomic<bool> shutdown_requested_{false};

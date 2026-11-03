@@ -612,6 +612,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
         src/storage/storage_interface.cpp
         src/storage/file_storage.cpp
+        src/storage/instance_archive.cpp
         src/storage/s3_storage.cpp
         src/storage/azure_blob_storage.cpp
         src/storage/hsm_storage.cpp
@@ -910,7 +911,7 @@ if(TARGET Crow::Crow)
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(pacs_web
-        PUBLIC pacs_core pacs_storage pacs_client
+        PUBLIC pacs_core pacs_storage pacs_client pacs_services
     )
     pacs_link_external_dependency(
         pacs_web

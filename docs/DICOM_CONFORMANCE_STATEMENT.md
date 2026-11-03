@@ -57,6 +57,7 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-11-03 | 1.11.0 | Declare DICOMweb as measured against independent clients and a reference server: media types, Transfer Syntaxes and frames (Section 8.1), statuses and what both protocols refuse (Section 8.2), matching and the maximum per response (Section 8.3), and that with no OAuth 2.0 there is no authorization, rather than a fallback (Section 8.5). |
 | 2026-11-02 | 1.10.0 | Declare the normalized services as measured against independent peers: Worklist matching and return keys (Section 3.4), MPPS statuses (Section 3.5), commitment reports on a new association (Section 3.6), the Print contract and its spool (Section 3.7), and the UPS SOP Classes, which `pacs_server` now provides (Section 3.8). `pacs_server` also provides Storage Commitment and Print, which this statement already claimed for it. Implicit VR requests of these services are now readable: their attributes were missing from the data dictionary. |
 | 2026-11-01 | 1.9.0 | Declare the Query/Retrieve contract: keys, matching, responses, retrieve rules and association limits (Section 3.3). The retired Patient/Study Only model is SCP only. |
 | 2026-11-01 | 1.8.0 | Correct SOP Class UIDs and names against PS3.6: Legacy Converted Enhanced CT (`.2.2`), US Multi-frame (`.3.1`, retired `.3`), Label Map (`.66.7`) and Height Map (`.66.8`) Segmentation, Waveform Presentation State (`.9.100.1`), Waveform Annotation SR (`.88.77`), Wide Field Ophthalmic Photography (`.77.1.5.5`). Section 3.2 now lists every registered class, and `store_scp` and `pacs_server` accept exactly that list by default. |
@@ -1002,41 +1003,82 @@ original values and must be treated as sensitive data.
 
 ## 8. DICOMweb Support
 
-The implementation supports DICOMweb services as defined in PS3.18:
+The implementation plays the role of origin server, natively: `pacs_server --http-port` serves these resources under
+`/dicomweb` and WADO-URI under `/wado`, and not the REST API under `/api`, on the same database and storage as its DICOM services, so an
+object stored over either protocol is found, unchanged, over both. `validation/dcmtk/tests/dicomweb_probe.py` measures this with curl, dcm4che and DCMTK, after
+the same tables hold on another implementation.
+
+Every request needs an `Accept` header: without one the answer is 406 (PS3.18 8.7.5). DICOM and rendered types together
+are 400. A type that does not apply to the resource is passed over, in the client's order of preference.
 
 ### 8.1 WADO-RS (Web Access to DICOM Objects - RESTful)
 
-| Feature | Support |
-|---------|---------|
-| Retrieve Study | Yes |
-| Retrieve Series | Yes |
-| Retrieve Instance | Yes |
-| Retrieve Frames | Yes (frame number parsing: single, range, comma-separated) |
-| Retrieve Metadata (DicomJSON) | Yes |
-| Retrieve Rendered (JPEG/PNG) | Yes |
-| Window/Level transformation | Yes |
-| Multipart/related responses | Yes |
-| Bulk Data URI references | Yes |
+| Resource | Media types | Notes |
+|----------|-------------|-------|
+| Study, Series | `multipart/related; type="application/dicom"` (default) | Every object, each once, even when there is one. `application/dicom` alone is 406 |
+| Instance | The same (default), and `application/dicom` | |
+| Study, Series, Instance | `multipart/related; type="application/octet-stream"` | The Bulk Data of each instance, as Table 10.4.4-1 Note 2 defines |
+| Metadata | `application/dicom+json` (default), `multipart/related; type="application/dicom+xml"` | Every top level attribute. Pixel Data by Bulk Data URI, anything else binary inline, nested values inline |
+| Bulk Data | `multipart/related; type="application/octet-stream"` (default), `application/octet-stream` | At the URI the metadata gives, per instance. Pixel Data comes decoded |
+| Frames | `multipart/related; type="application/octet-stream"` (default); `application/octet-stream` for one frame | Decoded when the object is compressed; each part has its Content-Location |
+| Frames, as held | `multipart/related; type="image/jpeg"`, `"image/jls"`, `"image/jp2"`, `"image/jphc"`, `"image/jxl"`, `"image/dicom-rle"` | Only for the form the object is held in, with the fragment delimiters removed |
+| Rendered Instance, Rendered Frame | `image/jpeg` (default), `image/png`, `image/jphc` | |
+
+**Transfer Syntax.** With no `transfer-syntax` parameter, objects go out in Explicit VR Little Endian, decoded if need
+be, unless only lossy pixels are held, or no codec for them is built: those go out as held. `transfer-syntax=*` asks for what is held. Implicit
+VR and Big Endian objects are converted, since Web Services shall not use them. A Transfer Syntax that is neither what
+is held nor Explicit VR Little Endian is 406: there is no encoder here for the others.
+
+**All or nothing.** 200 means every representation of the resource (PS3.18 10.4.3.1). An indexed file that cannot be read fails
+the whole retrieve with 500. A resource named under the wrong study or series is 404, like one that does not exist.
+
+**Frames** are numbers in ascending order, each once, as PS3.18 10.1 defines them; `2-4` is taken for `2,3,4`. Anything else
+is 400, and a frame past the end fails the whole request with 404.
+
+**Rendering.** `window=center,width,function` takes `linear`, `linear-exact` or `sigmoid`, by PS3.3 C.11.2.1.2 and C.11.2.1.3. With none, the
+first stored window applies, or else the frame's own range. MONOCHROME1, MONOCHROME2, RGB and YBR_FULL are rendered, with
+compressed objects decoded first. `viewport=width,height` scales to fit and keeps the proportions. These are refused
+with 400: a viewport with a source rectangle, PALETTE COLOR, and uncompressed YBR_FULL_422.
 
 ### 8.2 STOW-RS (Store Over the Web)
 
-| Feature | Support |
-|---------|---------|
-| Store instances | Yes |
-| Multipart/related request parsing | Yes |
-| Instance validation | Yes |
-| Store response (DicomJSON) | Yes |
-| Partial success reporting | Yes |
+| Status | Meaning |
+|--------|---------|
+| 200 | Every part stored |
+| 202 | Some parts stored; the others are in Failed SOP Sequence with a Failure Reason |
+| 400 | No boundary, no parts, no closing delimiter, or a part without the blank line ending its headers |
+| 406 | The response cannot be given in an acceptable type, or there is no `Accept` header. Nothing is stored |
+| 409 | No part stored; each is in Failed SOP Sequence with a Failure Reason |
+| 413 | The request exceeds `max_body_size` (`--http-max-body-mb` for `pacs_server`). Nothing is stored |
+| 415 | Not `multipart/related` of `application/dicom` |
+
+The response is `application/dicom+json` or `application/dicom+xml`, with a Retrieve URL for each stored object. A part
+that is not `application/dicom` is listed as a failure rather than skipped. Failure Reason (0008,1197) is 0xC000 for what cannot be read or
+understood, 0xA900 for a missing or malformed identifying attribute or another study's object in a study's target resource,
+0x0111 for a duplicate and 0xA700 when it cannot be written.
+
+STOW-RS and C-STORE store through one function, `storage::archive_instance`, so both keep an object in the Transfer Syntax it came in,
+index it in UTF-8, apply the configured duplicate policy, and refuse the same things. An object is refused, with nothing written, when
+its Patient ID is empty, because no query could reach it, or when a UID is not digits and dots of at most 64 characters, because UIDs
+name files and appear in URLs. C-STORE answers those with A900H, and a duplicate with 0111H. If the index cannot
+take an object, its file is removed again and the sender is told. Metadata and Bulk Data parts are not supported: send Part 10 objects.
 
 ### 8.3 QIDO-RS (Query based on ID for DICOM Objects)
 
 | Feature | Support |
 |---------|---------|
-| Search for Studies | Yes |
-| Search for Series | Yes |
-| Search for Instances | Yes |
-| DicomJSON response format | Yes |
-| Query parameter parsing | Yes |
+| Search for Studies, Series and Instances, at the top level and within a study or series | Yes |
+| Media types | `application/dicom+json` (default), `multipart/related; type="application/dicom+xml"` |
+| Matching | The Hierarchical Search Method, by the same evaluation as C-FIND (Section 3.3): `*` and `?` are the only wildcards, date and time ranges, UID lists with commas |
+| Maximum matches | 100 per response unless `limit` asks otherwise, and at most 1000 in one response |
+| More results than returned | `Warning: 299 <service>: There are <n> additional results that can be requested` |
+| Fuzzy Matching, Empty Value Matching, Multiple Value Matching | Not supported: asking for them gets the Warning of PS3.18 8.3.4 and a literal search |
+| `includefield` | Any attribute of the first object of the result, by Keyword or Tag. `all` at the instance level means every attribute but Bulk Data, and adds nothing at the study and series levels |
+| Attributes the index does not hold | Not used for matching, and named in a Warning |
+
+A query parameter that is not a Keyword, a Tag or one of the above is 400, like a repeated attribute or a `limit` or `offset` that is not an
+unsigned integer. A search with no matches is 200 with an empty list. Under a study or series that does not exist it is 404. Identical
+requests return the same order while the archive does not change.
 
 ### 8.4 DICOMweb Storage Commitment (Supplement 234)
 
@@ -1061,26 +1103,34 @@ DICOMweb endpoints support OAuth 2.0 authorization per RFC 6749.
 |---------|---------|
 | JWT Bearer token validation | Yes |
 | JWKS (JSON Web Key Set) key retrieval | Yes |
-| Scope-based access control | Yes |
-| Token issuer validation | Yes |
-| Configurable required scopes per endpoint | Yes |
+| RS256 and ES256 signatures | Yes |
+| Token issuer, audience and validity period validation | Yes |
+| Scope-based access control | Yes, fixed per route |
 
-When OAuth 2.0 is enabled, all DICOMweb endpoints require a valid JWT Bearer
-token in the `Authorization` header. When disabled, the system falls back to
-X-User-ID header-based authentication for backward compatibility.
+When OAuth 2.0 is enabled, every DICOMweb route, including `/wado`, requires a valid JWT Bearer token: without one the
+answer is 401 with `WWW-Authenticate: Bearer`, and with the wrong scope it is 403.
+
+| Scope | Opens |
+|-------|-------|
+| `dicomweb.read` | Retrieve, metadata, Bulk Data, frames, rendered, WADO-URI, commitment status, and search |
+| `dicomweb.search` | Search only |
+| `dicomweb.write` | Store and commitment requests |
+
+**When it is not enabled, DICOMweb has no authorization at all**: everyone who can reach the port can read and store objects.
+`pacs_server` therefore listens on loopback unless told otherwise, says so when it starts, allows no web origin unless told one (and answers no CORS preflight, so a browser can only make requests that need none), and refuses
+to start with only some of its OAuth settings. These tokens protect DICOMweb and WADO-URI. Most of the REST API under `/api` checks no credentials at all, which is why `pacs_server` does not serve it; a host of `rest_server` that keeps it must protect it some other way. Keys come from a JWKS file. Fetching a JWKS from a URL needs an embedder to set a fetcher.
 
 ### 8.6 Supported Media Types
 
 | Media Type | Usage |
 |-----------|-------|
-| application/dicom | Native DICOM format |
-| application/dicom+json | DicomJSON metadata |
-| application/dicom+xml | DICOM XML metadata |
-| application/octet-stream | Raw binary data |
-| image/jpeg | Rendered images |
-| image/png | Rendered images |
-| image/jphc | HTJ2K compressed images |
-| multipart/related | Multi-part responses/requests |
+| application/dicom | One instance in a single part response |
+| application/dicom+json | Metadata, search results and the store response |
+| application/dicom+xml | The same in the Native DICOM Model; multipart for metadata and search |
+| application/octet-stream | Uncompressed Bulk Data and frames |
+| image/jpeg, image/png, image/jphc | Rendered images |
+| image/jpeg, image/jls, image/jp2, image/jphc, image/jxl, image/dicom-rle | Frames as held |
+| multipart/related | Multi-part responses and store requests |
 
 ---
 

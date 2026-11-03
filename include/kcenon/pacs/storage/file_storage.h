@@ -238,6 +238,13 @@ public:
         -> std::filesystem::path;
 
     /**
+     * @brief What this storage does with a SOP Instance it holds already
+     */
+    [[nodiscard]] auto duplicate_handling() const noexcept -> duplicate_policy {
+        return config_.duplicate;
+    }
+
+    /**
      * @brief Import DICOM files from a directory
      *
      * Recursively scans the source directory for DICOM files and imports them.

@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev libssl-dev libfmt-dev libjpeg62-turbo-dev libopenjp2-7-dev \
     libcharls-dev libpugixml-dev libcurl4-openssl-dev libasio-dev libicu-dev \
     libpng-dev zlib1g-dev lsof \
-    libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless && rm -rf /var/lib/apt/lists/*
+    libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless orthanc orthanc-dicomweb && rm -rf /var/lib/apt/lists/*
 COPY pacs_system/.github/actions/checkout-kcenon-deps/action.yml /workspace/pacs_system/.github/actions/checkout-kcenon-deps/action.yml
 COPY harness/bootstrap.py /tmp/bootstrap.py
 RUN python3 /tmp/bootstrap.py

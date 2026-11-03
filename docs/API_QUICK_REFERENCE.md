@@ -230,36 +230,42 @@ server.register_service(qr);
 
 ## DICOMweb Endpoints
 
-When built with `PACS_WITH_REST_API=ON`, pacs_server exposes:
+When built with `PACS_WITH_REST_API=ON` and started with `--http-port`, pacs_server exposes these under `/dicomweb`,
+and not the REST API under `/api`:
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/wado-rs/studies/{study}` | GET | Retrieve study instances |
-| `/wado-rs/studies/{study}/metadata` | GET | Study metadata (JSON) |
-| `/wado-rs/studies/{study}/series/{series}` | GET | Retrieve series |
-| `/wado-rs/studies/{study}/series/{series}/instances/{instance}` | GET | Single instance |
-| `/qido-rs/studies` | GET | Search studies |
-| `/qido-rs/studies/{study}/series` | GET | Search series |
-| `/qido-rs/studies/{study}/series/{series}/instances` | GET | Search instances |
-| `/stow-rs/studies` | POST | Store instances |
-| `/stow-rs/studies/{study}` | POST | Store into study |
+| `/studies/{study}` | GET | Retrieve study instances |
+| `/studies/{study}/metadata` | GET | Study metadata (JSON, or XML parts) |
+| `/studies/{study}/series/{series}` | GET | Retrieve series |
+| `/studies/{study}/series/{series}/instances/{instance}` | GET | Single instance |
+| `/studies/{study}/series/{series}/instances/{instance}/frames/{frames}` | GET | Frames |
+| `/studies/{study}/series/{series}/instances/{instance}/rendered` | GET | Rendered image |
+| `/studies/{study}/series/{series}/instances/{instance}/bulkdata/{tag}` | GET | Bulk Data |
+| `/studies`, `/series`, `/instances` | GET | Search |
+| `/studies/{study}/series`, `/studies/{study}/instances` | GET | Search within a study |
+| `/studies/{study}/series/{series}/instances` | GET | Search within a series |
+| `/studies` | POST | Store instances |
+| `/studies/{study}` | POST | Store into study |
 
-Query parameters follow DICOM keyword names:
-`PatientName`, `PatientID`, `StudyDate`, `Modality`, `AccessionNumber`, etc.
+Query parameters are DICOM keywords or tags: `PatientName`, `00100020`, `StudyDate`, `AccessionNumber`, etc.
+Every request needs an `Accept` header: PS3.18 8.7.5 answers 406 without one.
 
 ```bash
 # QIDO-RS: search
-curl "http://localhost:8080/qido-rs/studies?PatientName=Doe*&Modality=CT"
+curl -H "Accept: application/dicom+json" \
+     "http://localhost:8080/dicomweb/studies?PatientName=Doe*&StudyDate=20260101-20260131"
 
 # WADO-RS: retrieve metadata
 curl -H "Accept: application/dicom+json" \
-     "http://localhost:8080/wado-rs/studies/1.2.840.../metadata"
+     "http://localhost:8080/dicomweb/studies/1.2.840.../metadata"
 
 # STOW-RS: store
 curl -X POST \
-     -H "Content-Type: multipart/related; type=application/dicom" \
-     -F "file=@image.dcm;type=application/dicom" \
-     "http://localhost:8080/stow-rs/studies"
+     -H "Accept: application/dicom+json" \
+     -H "Content-Type: multipart/related; type=\"application/dicom\"; boundary=b" \
+     --data-binary @request-body \
+     "http://localhost:8080/dicomweb/studies"
 ```
 
 ---

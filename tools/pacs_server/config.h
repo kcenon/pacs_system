@@ -126,6 +126,17 @@ struct pacs_server_config {
     /// Where the UPS instances are kept.
     std::filesystem::path ups_directory;
 
+    /// HTTP API settings. Port 0 leaves the REST and DICOMweb API off.
+    uint16_t http_port{0};
+    std::string http_bind{"127.0.0.1"};
+    std::size_t http_max_body_bytes{512 * 1024 * 1024};
+    std::string http_cors_origin;
+
+    /// With an issuer set, every DICOMweb request must carry a token signed by a key in this JWKS file.
+    std::string oauth2_issuer;
+    std::string oauth2_audience;
+    std::filesystem::path oauth2_jwks_file;
+
     /**
      * @brief Parse configuration from command line arguments
      *

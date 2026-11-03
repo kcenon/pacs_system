@@ -11,6 +11,13 @@
 
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/services/storage_status.h"
+#include "kcenon/pacs/storage/instance_archive.h"
+
+#ifdef PACS_SERVER_WITH_HTTP
+#include "kcenon/pacs/web/auth/jwks_provider.h"
+#include "kcenon/pacs/web/auth/oauth2_middleware.h"
+#include "kcenon/pacs/web/rest_config.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -49,8 +56,15 @@ storage::duplicate_policy parse_duplicate_policy(const std::string& policy) {
 std::string log_prefix() {
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);
+    // Handlers log from several association threads; std::localtime shares one static buffer.
+    std::tm local{};
+#ifdef _WIN32
+    localtime_s(&local, &time_t);
+#else
+    localtime_r(&time_t, &local);
+#endif
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&time_t));
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &local);
     return std::string("[") + buf + "] ";
 }
 
@@ -90,6 +104,10 @@ bool pacs_server_app::initialize() {
         return false;
     }
 
+    if (!setup_http()) {
+        return false;
+    }
+
     initialized_ = true;
     std::cout << log_prefix() << "PACS Server initialized successfully\n";
     return true;
@@ -117,6 +135,18 @@ bool pacs_server_app::start() {
         ups_index_->report_restart();
     }
 
+#ifdef PACS_SERVER_WITH_HTTP
+    if (http_server_) {
+        http_server_->start_async();
+        if (!http_server_->is_running()) {
+            std::cerr << log_prefix() << "Error: The HTTP API cannot listen on " << config_.http_bind << ":" << config_.http_port << "\n";
+            stop();
+            return false;
+        }
+        std::cout << log_prefix() << "HTTP API listening on " << config_.http_bind << ":" << config_.http_port << "\n";
+    }
+#endif
+
     std::cout << log_prefix() << "PACS Server started successfully\n";
     std::cout << log_prefix() << "Listening on port " << config_.server.port << "...\n";
     std::cout << log_prefix() << "Press Ctrl+C to stop\n";
@@ -125,6 +155,11 @@ bool pacs_server_app::start() {
 }
 
 void pacs_server_app::stop() {
+#ifdef PACS_SERVER_WITH_HTTP
+    if (http_server_) {
+        http_server_->stop();
+    }
+#endif
     if (server_ && server_->is_running()) {
         std::cout << log_prefix() << "Stopping DICOM server...\n";
         server_->stop();
@@ -192,7 +227,7 @@ bool pacs_server_app::setup_storage() {
     storage_config.create_directories = true;
 
     try {
-        file_storage_ = std::make_unique<storage::file_storage>(storage_config);
+        file_storage_ = std::make_shared<storage::file_storage>(storage_config);
     } catch (const std::exception& e) {
         std::cerr << log_prefix() << "Error: Failed to create file storage: "
                   << e.what() << "\n";
@@ -387,6 +422,61 @@ bool pacs_server_app::setup_server() {
     return true;
 }
 
+bool pacs_server_app::setup_http() {
+    const bool wants_tokens = !config_.oauth2_issuer.empty() || !config_.oauth2_audience.empty() || !config_.oauth2_jwks_file.empty();
+    if (config_.http_port == 0) {
+        if (wants_tokens) {
+            std::cerr << log_prefix() << "Error: OAuth 2.0 settings mean nothing without --http-port\n";
+            return false;
+        }
+        return true;
+    }
+    // An issuer alone, a key alone or an audience alone would leave the API open while looking protected.
+    if (wants_tokens && (config_.oauth2_issuer.empty() || config_.oauth2_audience.empty() || config_.oauth2_jwks_file.empty())) {
+        std::cerr << log_prefix() << "Error: --oauth2-issuer, --oauth2-audience and --oauth2-jwks are needed together\n";
+        return false;
+    }
+#ifdef PACS_SERVER_WITH_HTTP
+    web::rest_server_config http_config;
+    http_config.bind_address = config_.http_bind;
+    http_config.port = config_.http_port;
+    http_config.max_body_size = config_.http_max_body_bytes;
+    // DICOMweb only: most of the REST API checks no credentials, and no web page may read this by default.
+    http_config.enable_rest_api = false;
+    http_config.cors_allowed_origins = config_.http_cors_origin;
+    http_server_ = std::make_unique<web::rest_server>(http_config);
+    http_server_->set_database(database_);
+    http_server_->set_file_storage(file_storage_);
+
+    if (!config_.oauth2_issuer.empty()) {
+        std::ifstream file(config_.oauth2_jwks_file);
+        std::ostringstream keys;
+        keys << file.rdbuf();
+        auto provider = std::make_shared<web::auth::jwks_provider>();
+        if (!file || !provider->load_from_json(keys.str())) {
+            std::cerr << log_prefix() << "Error: Cannot load a key from " << config_.oauth2_jwks_file << "\n";
+            return false;
+        }
+        web::auth::oauth2_config oauth;
+        oauth.enabled = true;
+        oauth.issuer = config_.oauth2_issuer;
+        oauth.audience = config_.oauth2_audience;
+        // This server has no user accounts: a token's scopes are all that decides.
+        oauth.allow_unknown_users = true;
+        auto middleware = std::make_shared<web::auth::oauth2_middleware>(oauth);
+        middleware->set_jwks_provider(provider);
+        http_server_->set_oauth2_middleware(middleware);
+    } else {
+        std::cout << log_prefix() << "Warning: DICOMweb has no authorization; anyone who reaches "
+                  << config_.http_bind << ":" << config_.http_port << " can read and store objects\n";
+    }
+    return true;
+#else
+    std::cerr << log_prefix() << "Error: --http-port needs a build with the REST API\n";
+    return false;
+#endif
+}
+
 // =============================================================================
 // Service Handlers
 // =============================================================================
@@ -401,129 +491,23 @@ services::storage_status pacs_server_app::handle_store(
     std::cout << log_prefix() << "C-STORE from " << calling_ae
               << ": " << sop_instance_uid << "\n";
 
-    // Store to filesystem
-    auto store_result = file_storage_->store(dataset, syntax);
-    if (store_result.is_err()) {
-        std::cerr << log_prefix() << "Storage error\n";
-        return services::storage_status::storage_error;
-    }
-
-    // Index in database. The index holds UTF-8, whatever character set each object uses.
-    const auto index_text = core::utf8_text_copy(dataset);
-    auto patient_id = index_text.get_string(core::tags::patient_id);
-    auto patient_name = index_text.get_string(core::tags::patient_name);
-    auto study_uid = index_text.get_string(core::tags::study_instance_uid);
-    auto series_uid = index_text.get_string(core::tags::series_instance_uid);
-
-    if (patient_id.empty()) {
-        std::cerr << log_prefix() << "Warning: Missing PatientID\n";
-        return services::storage_status::success;
-    }
-
-    // Upsert patient and get pk
-    auto birth_date = index_text.get_string(core::tags::patient_birth_date);
-    auto sex = index_text.get_string(core::tags::patient_sex);
-    auto patient_result = database_->upsert_patient(
-        patient_id,
-        patient_name,
-        birth_date,
-        sex
-    );
-    if (patient_result.is_err()) {
-        std::cerr << log_prefix() << "Database error (patient)\n";
-        return services::storage_status::success;
-    }
-    int64_t patient_pk = patient_result.value();
-
-    // Upsert study if we have study_uid
-    int64_t study_pk = 0;
-    if (!study_uid.empty()) {
-        auto study_date = index_text.get_string(core::tags::study_date);
-        auto study_time = index_text.get_string(core::tags::study_time);
-        auto accession = index_text.get_string(core::tags::accession_number);
-        auto study_desc = index_text.get_string(core::tags::study_description);
-        auto referring = index_text.get_string(core::tags::referring_physician_name);
-        auto study_id = index_text.get_string(core::tags::study_id);
-
-        auto study_result = database_->upsert_study(
-            patient_pk,
-            study_uid,
-            study_id,
-            study_date,
-            study_time,
-            accession,
-            referring,
-            study_desc
-        );
-        if (study_result.is_err()) {
-            std::cerr << log_prefix() << "Database error (study)\n";
+    (void)sop_class_uid;
+    auto archived = storage::archive_instance(*file_storage_, *database_, dataset, syntax);
+    switch (archived.status) {
+        case storage::archive_status::stored:
+        case storage::archive_status::duplicate_ignored:
             return services::storage_status::success;
-        }
-        study_pk = study_result.value();
+        case storage::archive_status::duplicate_refused:
+            std::cerr << log_prefix() << archived.message << "\n";
+            return services::storage_status::duplicate_sop_instance;
+        case storage::archive_status::rejected:
+            std::cerr << log_prefix() << "Refused: " << archived.message << "\n";
+            return services::storage_status::data_set_does_not_match_sop_class;
+        case storage::archive_status::failed:
+            break;
     }
-
-    // Upsert series if we have series_uid and study_pk
-    int64_t series_pk = 0;
-    if (!series_uid.empty() && study_pk > 0) {
-        auto modality = index_text.get_string(core::tags::modality);
-        auto series_number_str = index_text.get_string(core::tags::series_number);
-        auto series_desc = index_text.get_string(core::tags::series_description);
-
-        std::optional<int> series_number;
-        if (!series_number_str.empty()) {
-            try {
-                series_number = std::stoi(series_number_str);
-            } catch (...) {}
-        }
-
-        auto series_result = database_->upsert_series(
-            study_pk,
-            series_uid,
-            modality,
-            series_number,
-            series_desc,
-            "",  // body_part_examined
-            ""   // station_name
-        );
-        if (series_result.is_err()) {
-            std::cerr << log_prefix() << "Database error (series)\n";
-            return services::storage_status::success;
-        }
-        series_pk = series_result.value();
-    }
-
-    // Upsert instance if we have series_pk
-    if (series_pk > 0) {
-        auto instance_number_str = index_text.get_string(core::tags::instance_number);
-        auto file_path = file_storage_->get_file_path(sop_instance_uid);
-
-        int64_t file_size = 0;
-        if (std::filesystem::exists(file_path)) {
-            file_size = static_cast<int64_t>(std::filesystem::file_size(file_path));
-        }
-
-        std::optional<int> instance_number;
-        if (!instance_number_str.empty()) {
-            try {
-                instance_number = std::stoi(instance_number_str);
-            } catch (...) {}
-        }
-
-        auto instance_result = database_->upsert_instance(
-            series_pk,
-            sop_instance_uid,
-            sop_class_uid,
-            file_path.string(),
-            file_size,
-            "",  // transfer_syntax
-            instance_number
-        );
-        if (instance_result.is_err()) {
-            std::cerr << log_prefix() << "Database error (instance)\n";
-        }
-    }
-
-    return services::storage_status::success;
+    std::cerr << log_prefix() << "Storage error: " << archived.message << "\n";
+    return services::storage_status::storage_error;
 }
 
 namespace {

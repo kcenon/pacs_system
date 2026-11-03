@@ -295,34 +295,36 @@ void rest_server::start_async() {
   impl_->app = std::make_unique<crow::SimpleApp>();
   auto &app = *impl_->app;
 
-  // Register endpoints
-  endpoints::register_system_endpoints_impl(app, impl_->context);
-  endpoints::register_security_endpoints_impl(app, impl_->context);
-  endpoints::register_patient_endpoints_impl(app, impl_->context);
-  endpoints::register_study_endpoints_impl(app, impl_->context);
-  endpoints::register_series_endpoints_impl(app, impl_->context);
-  endpoints::register_worklist_endpoints_impl(app, impl_->context);
-  endpoints::register_audit_endpoints_impl(app, impl_->context);
-  endpoints::register_association_endpoints_impl(app, impl_->context);
+  // Register endpoints. These three check OAuth 2.0 tokens on every route.
   endpoints::register_dicomweb_endpoints_impl(app, impl_->context);
-  endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
-  endpoints::register_jobs_endpoints_impl(app, impl_->context);
-  endpoints::register_routing_endpoints_impl(app, impl_->context);
-  endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
-  endpoints::register_metadata_endpoints_impl(app, impl_->context);
-  endpoints::register_annotation_endpoints_impl(app, impl_->context);
-  endpoints::register_measurement_endpoints_impl(app, impl_->context);
-  endpoints::register_key_image_endpoints_impl(app, impl_->context);
-  endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
   endpoints::register_wado_uri_endpoints_impl(app, impl_->context);
   endpoints::register_storage_commitment_endpoints_impl(app, impl_->context);
 
+  if (impl_->config.enable_rest_api) {
+    endpoints::register_system_endpoints_impl(app, impl_->context);
+    endpoints::register_security_endpoints_impl(app, impl_->context);
+    endpoints::register_patient_endpoints_impl(app, impl_->context);
+    endpoints::register_study_endpoints_impl(app, impl_->context);
+    endpoints::register_series_endpoints_impl(app, impl_->context);
+    endpoints::register_worklist_endpoints_impl(app, impl_->context);
+    endpoints::register_audit_endpoints_impl(app, impl_->context);
+    endpoints::register_association_endpoints_impl(app, impl_->context);
+    endpoints::register_remote_nodes_endpoints_impl(app, impl_->context);
+    endpoints::register_jobs_endpoints_impl(app, impl_->context);
+    endpoints::register_routing_endpoints_impl(app, impl_->context);
+    endpoints::register_thumbnail_endpoints_impl(app, impl_->context);
+    endpoints::register_metadata_endpoints_impl(app, impl_->context);
+    endpoints::register_annotation_endpoints_impl(app, impl_->context);
+    endpoints::register_measurement_endpoints_impl(app, impl_->context);
+    endpoints::register_key_image_endpoints_impl(app, impl_->context);
+    endpoints::register_viewer_state_endpoints_impl(app, impl_->context);
 #ifdef PACS_WITH_DATABASE_SYSTEM
-  endpoints::register_metrics_endpoints_impl(app, impl_->context);
+    endpoints::register_metrics_endpoints_impl(app, impl_->context);
 #endif
+  }
 
   // Add CORS preflight handler
-  if (impl_->config.enable_cors) {
+  if (impl_->config.enable_cors && impl_->config.enable_rest_api) {
     CROW_ROUTE(app, "/api/<path>")
         .methods(crow::HTTPMethod::OPTIONS)(
             [this](const crow::request & /*req*/,

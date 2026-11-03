@@ -697,13 +697,15 @@ struct media_type {
 *   **Path**: `/studies/<studyUID>`
 *   **Description**: Retrieve all DICOM instances of a study.
 *   **Accept Headers**:
-    *   `application/dicom` (default)
-    *   `multipart/related; type="application/dicom"`
+    *   `multipart/related; type="application/dicom"` (default), with `transfer-syntax=*` for objects as held
+    *   `multipart/related; type="application/octet-stream"`: the Bulk Data of each instance
     *   `*/*`
 *   **Responses**:
-    *   `200 OK`: Multipart response with DICOM instances.
+    *   `200 OK`: Multipart response holding every instance, even when there is only one.
+    *   `400 Bad Request`: DICOM and rendered types mixed in `Accept`.
     *   `404 Not Found`: Study not found.
-    *   `406 Not Acceptable`: Requested media type not supported.
+    *   `406 Not Acceptable`: No `Accept` header, or nothing acceptable. `application/dicom` alone is only for an instance.
+    *   `500 Internal Server Error`: An indexed file cannot be read. No partial response is sent.
 
 ##### Retrieve Study Metadata
 *   **Method**: `GET`
@@ -748,13 +750,14 @@ struct media_type {
 *   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>`
 *   **Description**: Retrieve a single DICOM instance.
 *   **Accept Headers**:
-    *   `application/dicom` (default)
-    *   `multipart/related; type="application/dicom"`
+    *   `multipart/related; type="application/dicom"` (default)
+    *   `application/dicom`: a single part response
+    *   `multipart/related; type="application/octet-stream"`: the Bulk Data of the instance
     *   `*/*`
 *   **Responses**:
-    *   `200 OK`: Multipart response with single DICOM instance.
-    *   `404 Not Found`: Instance not found.
-    *   `406 Not Acceptable`: Requested media type not supported.
+    *   `200 OK`: The instance, in the media type chosen.
+    *   `404 Not Found`: No such instance under this study and series.
+    *   `406 Not Acceptable`: No `Accept` header, or nothing acceptable.
 
 ##### Retrieve Instance Metadata
 *   **Method**: `GET`
@@ -768,7 +771,7 @@ struct media_type {
         "00080016": { "vr": "UI", "Value": ["1.2.840.10008.5.1.4.1.1.2"] },
         "00080018": { "vr": "UI", "Value": ["1.2.840...instance"] },
         "00100010": { "vr": "PN", "Value": [{ "Alphabetic": "DOE^JOHN" }] },
-        "7FE00010": { "vr": "OW", "BulkDataURI": "/dicomweb/studies/.../bulkdata/..." }
+        "7FE00010": { "vr": "OW", "BulkDataURI": "http://host/dicomweb/studies/.../instances/.../bulkdata/7FE00010" }
       }
     ]
     ```
@@ -781,29 +784,30 @@ struct media_type {
 *   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/frames/<frameList>`
 *   **Description**: Retrieve specific frame(s) from a multi-frame DICOM instance.
 *   **Path Parameters**:
-    *   `frameList`: Comma-separated frame numbers or ranges (1-based). Examples:
+    *   `frameList`: Frame numbers (1-based) in ascending order, each once, or ranges. Examples:
         *   `1` - Single frame
         *   `1,3,5` - Multiple frames
         *   `1-5` - Frame range (1, 2, 3, 4, 5)
         *   `1,3-5,7` - Mixed notation
 *   **Accept Headers**:
-    *   `application/octet-stream` (default) - Raw pixel data
-    *   `multipart/related; type="application/octet-stream"` - Multiple frames
+    *   `multipart/related; type="application/octet-stream"` (default) - One part per frame, decoded when the object is compressed
+    *   `application/octet-stream` - A single part, for one frame only
+    *   `multipart/related; type="image/jls"`, `"image/dicom-rle"`, `"image/jpeg"`, ... - Frames as held, when held in that form
 *   **Responses**:
-    *   `200 OK`: Multipart response with frame pixel data.
-    *   `400 Bad Request`: Invalid frame list syntax.
-    *   `404 Not Found`: Instance not found or frame number out of range.
-    *   `406 Not Acceptable`: Requested media type not supported.
+    *   `200 OK`: Every frame asked for, in order. A frame that is not there fails the whole request.
+    *   `400 Bad Request`: Invalid, descending or repeated frame list.
+    *   `404 Not Found`: Instance not found, not under this study and series, or a frame number out of range.
+    *   `406 Not Acceptable`: No `Accept` header, or nothing acceptable.
 
 ##### Retrieve Rendered Image
 *   **Method**: `GET`
 *   **Path**: `/studies/<studyUID>/series/<seriesUID>/instances/<sopInstanceUID>/rendered`
 *   **Description**: Retrieve a rendered (consumer-ready) image from a DICOM instance.
 *   **Query Parameters**:
-    *   `window-center` (optional): VOI LUT window center value
-    *   `window-width` (optional): VOI LUT window width value
+    *   `window` (optional): `center,width,linear`, by the linear function of PS3.3 C.11.2.1.2
+    *   `window-center`, `window-width` (optional): The same as separate values
     *   `quality` (optional): JPEG quality (1-100, default 75)
-    *   `viewport` (optional): Output size as `width,height`
+    *   `viewport` (optional): `width,height`; the image is scaled to fit and keeps its proportions. A source rectangle is refused.
     *   `frame` (optional): Frame number for multi-frame images (1-based, default 1)
 *   **Accept Headers**:
     *   `image/jpeg` (default) - JPEG output

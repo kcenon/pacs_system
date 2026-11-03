@@ -24,6 +24,12 @@ target_link_libraries(pacs_server
         pacs_integration
 )
 
+# The HTTP API is optional: it needs Crow, as pacs_web does.
+if(TARGET pacs_web)
+    target_link_libraries(pacs_server PRIVATE pacs_web)
+    target_compile_definitions(pacs_server PRIVATE PACS_SERVER_WITH_HTTP=1)
+endif()
+
 # Set C++20 standard
 target_compile_features(pacs_server PRIVATE cxx_std_20)
 

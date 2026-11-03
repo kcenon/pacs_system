@@ -24,6 +24,13 @@
  *   --event-retry-delay <s> Seconds between those attempts
  *   --print-spool <path>    Print job directory
  *   --ups-dir <path>        UPS instance directory
+ *   --http-port <port>      REST and DICOMweb port (default: off)
+ *   --http-bind <address>   Address the HTTP API listens on
+ *   --http-max-body-mb <n>  Largest HTTP request body in MiB
+ *   --http-cors-origin <o>  Origin named in Access-Control-Allow-Origin
+ *   --oauth2-issuer <url>   Require OAuth 2.0 bearer tokens from this issuer on DICOMweb
+ *   --oauth2-audience <id>  Audience those tokens must name
+ *   --oauth2-jwks <path>    JWKS file holding the keys that sign them
  *   --help                  Show help message
  * @endcode
  */

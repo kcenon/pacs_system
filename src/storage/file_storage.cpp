@@ -95,6 +95,15 @@ auto file_storage::store(const core::dicom_dataset& dataset,
             "Missing required UID (Study, Series, or SOP Instance UID)",
             "file_storage");
     }
+    // sanitize_uid() keeps dots, so a UID of nothing but dots would name a directory above the archive.
+    for (const auto& uid : {study_uid, series_uid, sop_uid}) {
+        if (uid.find_first_not_of('.') == std::string::npos) {
+            return make_error<std::monostate>(
+                kMissingRequiredUid,
+                "A UID of only dots cannot name a file: " + uid,
+                "file_storage");
+        }
+    }
 
     // Build file path based on naming scheme
     std::filesystem::path file_path;
@@ -128,6 +137,7 @@ auto file_storage::store(const core::dicom_dataset& dataset,
     }
 
     // Handle duplicate checking
+    std::filesystem::path replaced_path;
     {
         std::shared_lock lock(mutex_);
         if (index_.contains(sop_uid)) {
@@ -140,7 +150,8 @@ auto file_storage::store(const core::dicom_dataset& dataset,
                 case duplicate_policy::ignore:
                     return ok();
                 case duplicate_policy::replace:
-                    // Continue to overwrite
+                    // Continue to overwrite. The new copy may belong to another study, and so another path.
+                    replaced_path = index_[sop_uid];
                     break;
             }
         }
@@ -189,6 +200,10 @@ auto file_storage::store(const core::dicom_dataset& dataset,
     {
         std::unique_lock lock(mutex_);
         index_[sop_uid] = file_path;
+    }
+
+    if (!replaced_path.empty() && replaced_path != file_path) {
+        std::filesystem::remove(replaced_path, ec);
     }
 
     return ok();

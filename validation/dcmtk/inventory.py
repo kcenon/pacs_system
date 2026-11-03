@@ -102,7 +102,7 @@ def build_inventory(manifest, ctest, catch_all, selections, configuration):
     """Selections are produced by each runner itself, never by emulating filters."""
     records, aliases, jobs, errors = {}, {}, {}, []
     components = {spec['id']: spec for spec in manifest['components']
-                  if spec.get('kind') not in ('discovery', 'corpus', 'qr-matrix', 'dimse-n')}
+                  if spec.get('kind') not in ('discovery', 'corpus', 'qr-matrix', 'dimse-n', 'dicomweb')}
     owners = {job: [feature['id'] for feature in manifest['features'] if job in feature['components']]
               for job in components}
     for binary, tests in catch_all.items():

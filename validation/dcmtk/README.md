@@ -476,6 +476,28 @@ python3 validation/dcmtk/tests/dimse_n_probe.py --output /tmp/dimse-n --build-di
 `--groups` narrows it to `mpps`, `mwl`, `stgcmt`, `ups`, `print` or `nget`, and `none` runs only the qualification.
 `validation/peers/dimse-n/compose.yaml` runs each as a Compose profile from the validation image.
 
+### DICOMweb and DIMSE on one archive (#1321)
+
+`component.dicomweb` runs `tests/dicomweb_probe.py` once, against `pacs_server --http-port`. Objects stored over one
+protocol are read over the other: STOW-RS is followed by C-FIND, C-GET and C-MOVE, and C-STORE by QIDO-RS, WADO-RS, WADO-URI,
+frames and rendering. Each read is compared with what was sent: UIDs, every attribute, native pixels and encoded frames, fragment counts,
+Transfer Syntaxes, index rows, and files, with the archive required to hold exactly one file per row. Expected responses are in
+`dicomweb_cross.py`, transcribed from PS3.18, and `tests/test_dicomweb_cross.py` holds them to the routes the source registers, so a route cannot
+arrive without its authorization row.
+
+The tables run first on Orthanc with its DICOMweb plugin, with no PACS process (`web.orthanc.*`). A PACS case whose reference case failed reports
+blocked. Where Orthanc differs from PS3.18 the row says why, in `REFERENCE_DIFFERENCES`, and a listed case that passes fails, so the list cannot go stale. `validation/peers/http/README.md`
+lists the peers. Every route is also run with twelve kinds of bad token and with every wrong scope, against tokens signed by openssl (`web.pacs.auth.*`).
+Run it directly with:
+
+```sh
+python3 validation/peers/dimse-n/install.py /opt/pacs-peers
+python3 validation/dcmtk/tests/dicomweb_probe.py --output /tmp/dicomweb --build-dir build \
+  --source-revision "$(git rev-parse HEAD)" --source-digest "$(git rev-parse HEAD^{tree})"
+```
+
+`--no-reference` skips Orthanc for diagnosis. Without it PACS cases are only counted after the reference qualified them.
+
 ### Nested worklists and normalized request identity (#1316)
 
 `mwl.sequence` compares all six scheduled-step fields for the three pinned MWL

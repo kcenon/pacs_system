@@ -49,6 +49,29 @@ std::string request(uint16_t port, const std::string& method,
 
 } // namespace
 
+TEST_CASE("rest_server can serve DICOMweb without the REST API", "[web][http][smoke]") {
+    asio::io_context io;
+    asio::ip::tcp::acceptor reservation(io, {asio::ip::make_address("127.0.0.1"), 0});
+    kcenon::pacs::web::rest_server_config config;
+    config.bind_address = "127.0.0.1";
+    config.port = reservation.local_endpoint().port();
+    config.concurrency = 2;
+    config.enable_rest_api = false;
+    reservation.close();
+
+    kcenon::pacs::web::rest_server server(config);
+    server.start_async();
+    REQUIRE(server.is_running());
+    const auto rest = request(config.port, "GET", "/api/v1/patients");
+    CHECK(rest.find("HTTP/1.1 404") == 0);
+    const auto system = request(config.port, "GET", "/api/v1/system/status");
+    CHECK(system.find("HTTP/1.1 404") == 0);
+    // No database was given, so the route exists and says so.
+    const auto dicomweb = request(config.port, "GET", "/dicomweb/studies");
+    CHECK(dicomweb.find("HTTP/1.1 503") == 0);
+    server.stop();
+}
+
 TEST_CASE("rest_server serves HTTP over the pinned Crow and ASIO", "[web][http][smoke]") {
     asio::io_context io;
     asio::ip::tcp::acceptor reservation(io, {asio::ip::make_address("127.0.0.1"), 0});
