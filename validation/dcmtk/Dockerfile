@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake ninja-build git ca-certificates python3 python3-pydicom python3-numpy \
     libsqlite3-dev libssl-dev libfmt-dev libjpeg62-turbo-dev libopenjp2-7-dev \
     libcharls-dev libpugixml-dev libcurl4-openssl-dev libasio-dev libicu-dev \
-    libpng-dev zlib1g-dev lsof \
+    libpng-dev zlib1g-dev lsof curl \
     libopenjp2-tools dicom3tools ffmpeg openjdk-21-jre-headless orthanc orthanc-dicomweb nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 COPY pacs_system/.github/actions/checkout-kcenon-deps /workspace/pacs_system/.github/actions/checkout-kcenon-deps
