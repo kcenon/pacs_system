@@ -228,7 +228,9 @@ def main():
     parser.add_argument('--profiles',nargs='+',choices=['uncompressed','jpeg-lossless','jpeg-ls-lossless','rle-lossless'],
                         help='Diagnostic subset; omitted profiles fail the complete gate')
     parser.add_argument('--jobs',type=int,default=2)
-    parser.add_argument('--timeout',type=int,default=2400,help='Seconds allowed for each validation container')
+    parser.add_argument('--timeout',type=int,default=10800,
+                        help='Seconds allowed for each validation container; uncompressed runs the 60-minute '
+                             'component.stability_slow besides every other component')
     parser.add_argument('--interop-only',action='store_true',help='Diagnostic subset; omitted components fail the gate')
     parser.add_argument('--runner-image',help='Reuse only an image whose provenance labels match this source')
     parser.add_argument('--keep',action='store_true',help='Keep this run\'s containers and synthetic volumes for debugging')

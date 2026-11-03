@@ -48,7 +48,9 @@ jobs:
     name: PACS functions against DCMTK Docker
     needs: gate-tests
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    # The image build plus the uncompressed profile, which includes the
+    # 60-minute component.stability_slow.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
       - name: Run components and four peer profiles sequentially
