@@ -258,18 +258,18 @@ or when the copy in `README.kr.md` differs.
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 291 files |
-| **Source Files** | 217 files |
-| **Header LOC** | ~78,700 lines |
-| **Source LOC** | ~114,800 lines |
-| **Example LOC** | ~4,100 lines |
-| **Test LOC** | ~89,600 lines |
-| **Total LOC** | ~287,300 lines |
-| **Test Files** | 191 files |
-| **Test Cases** | 2667+ tests |
+| **Header Files** | 307 files |
+| **Source Files** | 228 files |
+| **Header LOC** | ~81,200 lines |
+| **Source LOC** | ~126,700 lines |
+| **Example LOC** | ~4,200 lines |
+| **Test LOC** | ~98,700 lines |
+| **Total LOC** | ~310,700 lines |
+| **Test Files** | 216 files |
+| **Test Cases** | 2870+ tests |
 | **Example Programs** | 5 apps |
-| **Documentation** | 109 markdown files |
-| **CI/CD Workflows** | 24 workflows |
+| **Documentation** | 111 markdown files |
+| **CI/CD Workflows** | 26 workflows |
 | **Version** | 0.1.0 |
 
 <!-- STATS_END -->
