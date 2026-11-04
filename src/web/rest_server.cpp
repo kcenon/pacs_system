@@ -95,9 +95,11 @@ void register_wado_uri_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
 void register_storage_commitment_endpoints_impl(
     rest_app &app, std::shared_ptr<rest_server_context> ctx);
-#ifdef PACS_WITH_DATABASE_SYSTEM
+// Every build registers the security endpoints; the public header declares only the
+// crow::SimpleApp overload.
 void register_security_endpoints_impl(rest_app &app,
                                       std::shared_ptr<rest_server_context> ctx);
+#ifdef PACS_WITH_DATABASE_SYSTEM
 void register_metrics_endpoints_impl(rest_app &app,
                                      std::shared_ptr<rest_server_context> ctx);
 #endif
