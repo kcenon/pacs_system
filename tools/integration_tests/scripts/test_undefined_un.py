@@ -173,11 +173,13 @@ class UndefinedUN(unittest.TestCase):
 
     def test_defined_un_remains_opaque_in_both_byte_orders(self):
         for endian in ('<', '>'):
+            # File names carry the byte order as a word: upload-artifact refuses '<' and '>' in a path.
+            order = 'little' if endian == '<' else 'big'
             for flag in ('--explicit', '--explicit-be'):
                 with self.subTest(input=endian, output=flag):
-                    source = self.root/(endian+flag+'-source.dcm')
+                    source = self.root/(order+flag+'-source.dcm')
                     source.write_bytes(file_bytes(endian, defined=True))
-                    output = self.root/(endian+flag+'.dcm')
+                    output = self.root/(order+flag+'.dcm')
                     self.command([BINARY, source, output, flag])
                     self.inspect(output, defined=True)
 
