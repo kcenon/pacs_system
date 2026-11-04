@@ -87,7 +87,7 @@ jobs:
     # Cache vcpkg packages (Windows) - significant speedup
     - name: Cache vcpkg packages (Windows)
       if: runner.os == 'Windows'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           C:\vcpkg\installed
@@ -205,7 +205,7 @@ jobs:
     # Cache Homebrew packages (macOS) - significant speedup
     - name: Cache Homebrew packages (macOS)
       if: runner.os == 'macOS'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ~/Library/Caches/Homebrew
@@ -264,7 +264,7 @@ jobs:
     # Cache vcpkg packages (Windows) - significant speedup
     - name: Cache vcpkg packages (Windows)
       if: runner.os == 'Windows'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           C:\vcpkg\installed
@@ -589,7 +589,7 @@ jobs:
     # Cache vcpkg packages (Windows) - significant speedup
     - name: Cache vcpkg packages (Windows)
       if: runner.os == 'Windows'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           C:\vcpkg\installed
