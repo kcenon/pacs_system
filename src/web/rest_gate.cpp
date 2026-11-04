@@ -21,6 +21,12 @@
 #include <string_view>
 #include <vector>
 
+// Workaround for Windows: DELETE is defined as a macro in <winnt.h>
+// which conflicts with crow::HTTPMethod::DELETE
+#ifdef DELETE
+#undef DELETE
+#endif
+
 namespace kcenon::pacs::web {
 
 namespace {
