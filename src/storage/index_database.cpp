@@ -177,8 +177,12 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     effective_path = std::string(db_path);
 #endif
 
+    // Association threads share this connection. FULLMUTEX serializes it whatever the library's
+    // default: Apple's system SQLite is built multi-thread (THREADSAFE=2), where two threads on one
+    // connection crash, while Debian's is serialized.
     auto rc = sqlite3_open_v2(effective_path.c_str(), &db,
-                              SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+                              SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI |
+                                  SQLITE_OPEN_FULLMUTEX,
                               nullptr);
     if (rc != SQLITE_OK) {
         std::string error_msg =

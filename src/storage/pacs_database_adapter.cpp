@@ -473,9 +473,12 @@ auto pacs_database_adapter::connect() -> VoidResult {
         should_use_native_sqlite(impl_->connection_string)) {
         const auto target =
             extract_sqlite_connection_target(impl_->connection_string);
+        // Every thread of the program shares this connection. FULLMUTEX serializes it whatever the
+        // library's default: Apple's system SQLite is built multi-thread (THREADSAFE=2), where two
+        // threads on one connection crash, while Debian's is serialized.
         const auto rc = sqlite3_open_v2(
             target.c_str(), &impl_->native_sqlite_db,
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI | SQLITE_OPEN_FULLMUTEX,
             nullptr);
         if (rc != SQLITE_OK) {
             const auto message = sqlite_error_message(
