@@ -833,9 +833,8 @@ private:
 
     /// Incoming message queue for in-memory and asynchronous server dispatch (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;
-    using message_queue_type = kcenon::thread::detail::concurrent_queue<message_type>;
-    mutable std::unique_ptr<message_queue_type> incoming_queue_{
-        std::make_unique<message_queue_type>()};
+    struct message_queue;
+    mutable std::unique_ptr<message_queue> incoming_queue_;
 };
 
 }  // namespace kcenon::pacs::network

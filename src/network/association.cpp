@@ -171,6 +171,75 @@ struct association::peer_link {
         association_state::aborted, association_state::aborted};
 };
 
+/**
+ * @brief Messages handed to this association by its in-memory peer or by
+ * dicom_server_v2, waiting for receive_dimse().
+ *
+ * One mutex guards the items, so whatever the sender wrote into a message
+ * happens before the receiver that takes it reads it. thread_system's
+ * detail::concurrent_queue, used here before, links a node under one mutex
+ * and takes it under another (kcenon/thread_system#761): a receiver could
+ * read a message before the sender's writes reached it, and ThreadSanitizer
+ * reported it in dicom_server's message loop.
+ */
+struct association::message_queue {
+    /// Add @p item and wake one waiter; dropped once shut down
+    void enqueue(message_type item) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if (shut_down_) {
+                return;
+            }
+            items_.push_back(std::move(item));
+        }
+        ready_.notify_one();
+    }
+
+    /// The oldest item, or std::nullopt when there is none
+    [[nodiscard]] std::optional<message_type> try_dequeue() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return pop_locked();
+    }
+
+    /// The oldest item, waiting up to @p timeout for one; once shut down,
+    /// what is left is still returned, without waiting
+    [[nodiscard]] std::optional<message_type> wait_dequeue(duration timeout) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        ready_.wait_for(lock, timeout, [this] { return !items_.empty() || shut_down_; });
+        return pop_locked();
+    }
+
+    /// Wake every waiter; one that finds nothing to take waits on
+    void notify_all() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        ready_.notify_all();
+    }
+
+    /// Refuse further items and wake every waiter
+    void shutdown() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            shut_down_ = true;
+        }
+        ready_.notify_all();
+    }
+
+private:
+    [[nodiscard]] std::optional<message_type> pop_locked() {
+        if (items_.empty()) {
+            return std::nullopt;
+        }
+        std::optional<message_type> item{std::move(items_.front())};
+        items_.pop_front();
+        return item;
+    }
+
+    std::mutex mutex_;
+    std::condition_variable ready_;
+    std::deque<message_type> items_;
+    bool shut_down_{false};
+};
+
 // =============================================================================
 // Transport (TCP connection or PDU writer)
 // =============================================================================
@@ -320,7 +389,9 @@ struct association::response_router {
     bool closed{false};
 };
 
-association::association() : responses_(std::make_shared<response_router>()) {}
+association::association()
+    : responses_(std::make_shared<response_router>()),
+      incoming_queue_(std::make_unique<message_queue>()) {}
 
 association::association(association&& other) noexcept {
     std::lock_guard<std::mutex> lock(other.mutex_);
@@ -1368,7 +1439,7 @@ void association::take_peer_link_from(association& other) {
     responses_ = std::move(other.responses_);
     other.responses_ = std::make_shared<response_router>();
     incoming_queue_ = std::move(other.incoming_queue_);
-    other.incoming_queue_ = std::make_unique<message_queue_type>();
+    other.incoming_queue_ = std::make_unique<message_queue>();
 }
 
 std::optional<association_state> association::peer_exit_state() const {
