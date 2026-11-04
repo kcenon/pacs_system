@@ -266,8 +266,10 @@ void write_image(const fs::path& path, const image_spec& spec,
     ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US,
                              static_cast<uint16_t>(spec.bits_stored - 1));
     ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
+    // Encapsulated Pixel Data is always OB (PS3.5 A.4), and dicom_file refuses to write it as OW.
     ds.insert(dicom_element{tags::pixel_data,
-                            spec.bits_allocated > 8 ? vr_type::OW : vr_type::OB,
+                            spec.bits_allocated > 8 && !ts.is_encapsulated() ? vr_type::OW
+                                                                             : vr_type::OB,
                             pixel_data});
 
     auto file = dicom_file::create(std::move(ds), ts);
