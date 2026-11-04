@@ -34,6 +34,7 @@
 #include "kcenon/pacs/services/verification_scp.h"
 
 #include <filesystem>
+#include <mutex>
 #include <thread>
 
 using namespace kcenon::pacs::integration_test;

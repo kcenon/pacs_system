@@ -3,6 +3,8 @@
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_types.h"
 
+#include <algorithm>
+
 using namespace kcenon::pacs::network;
 
 // Helper function to extract 16-bit big-endian value

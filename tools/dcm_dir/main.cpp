@@ -34,6 +34,7 @@
 #include <cctype>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <limits>
 #include <tuple>
 #include <iomanip>
