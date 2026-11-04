@@ -2124,7 +2124,7 @@ auto encode_png(std::span<const uint8_t> pixels, uint32_t width, uint32_t height
     std::vector<uint8_t> compressed{0x78, 0x01};
     constexpr std::size_t largest_block = 65535;
     for (std::size_t offset = 0; offset < raw.size();) {
-        const auto size = std::min(largest_block, raw.size() - offset);
+        const auto size = (std::min)(largest_block, raw.size() - offset);
         compressed.push_back(offset + size == raw.size() ? 1 : 0);
         compressed.push_back(static_cast<uint8_t>(size));
         compressed.push_back(static_cast<uint8_t>(size >> 8));
@@ -2193,7 +2193,7 @@ auto parse_rendered_params(
             const double width = parts.size() == 3 ? std::strtod(parts[1].c_str(), &width_end) : 0.0;
             const bool known = parts.size() == 3 && (parts[2] == "linear" || parts[2] == "linear-exact" || parts[2] == "sigmoid");
             if (!known || center_end == parts[0].c_str() || *center_end != '\0' ||
-                width_end == parts[1].c_str() || *width_end != '\0' || width < (parts[2] == "linear" ? 1.0 : std::numeric_limits<double>::min())) {
+                width_end == parts[1].c_str() || *width_end != '\0' || width < (parts[2] == "linear" ? 1.0 : (std::numeric_limits<double>::min)())) {
                 params.invalid_parameter = "window shall be center,width,function with a function of linear, linear-exact or sigmoid and a width it allows: " + value;
             } else {
                 params.window_center = center;
@@ -2317,7 +2317,7 @@ namespace {
     auto width = params.window_width ? params.window_width : first_number(dataset, core::tags::window_width);
     if (!center || !width || *width < 1.0) {
         const auto [lowest, highest] = std::minmax_element(values.begin(), values.end());
-        width = std::max(*highest - *lowest + 1.0, 2.0);
+        width = (std::max)(*highest - *lowest + 1.0, 2.0);
         center = (*highest + *lowest + 1.0) / 2.0;
     }
     std::vector<uint8_t> output(count);
@@ -2344,14 +2344,14 @@ struct scaled_image {
     }
     const double across = viewport_width != 0 ? static_cast<double>(viewport_width) / width : static_cast<double>(viewport_height) / height;
     const double down = viewport_height != 0 ? static_cast<double>(viewport_height) / height : across;
-    const double scale = std::min(across, down);
+    const double scale = (std::min)(across, down);
     const auto out_width = std::max<uint32_t>(1, static_cast<uint32_t>(std::lround(width * scale)));
     const auto out_height = std::max<uint32_t>(1, static_cast<uint32_t>(std::lround(height * scale)));
     std::vector<uint8_t> scaled(static_cast<std::size_t>(out_width) * out_height * channels);
     for (uint32_t row = 0; row < out_height; ++row) {
-        const uint32_t from_row = std::min(height - 1, static_cast<uint32_t>(row / scale));
+        const uint32_t from_row = (std::min)(height - 1, static_cast<uint32_t>(row / scale));
         for (uint32_t column = 0; column < out_width; ++column) {
-            const uint32_t from_column = std::min(width - 1, static_cast<uint32_t>(column / scale));
+            const uint32_t from_column = (std::min)(width - 1, static_cast<uint32_t>(column / scale));
             for (uint16_t channel = 0; channel < channels; ++channel) {
                 scaled[(static_cast<std::size_t>(row) * out_width + column) * channels + channel] =
                     samples[(static_cast<std::size_t>(from_row) * width + from_column) * channels + channel];
@@ -3259,9 +3259,9 @@ void add_included_fields(core::dicom_dataset& row, const dicomweb::search_parame
 
         // 8.3.4.4: min(max(0, matches - offset), the largest page, limit).
         const auto offset = parameters.offset.value_or(0);
-        const auto limit = std::min(parameters.limit.value_or(default_search_limit), largest_search_page);
-        const auto first = std::min(offset, matches->size());
-        const auto count = std::min(matches->size() - first, limit);
+        const auto limit = (std::min)(parameters.limit.value_or(default_search_limit), largest_search_page);
+        const auto first = (std::min)(offset, matches->size());
+        const auto count = (std::min)(matches->size() - first, limit);
         const auto remaining = matches->size() - first - count;
 
         const auto base = base_url(req, *ctx);

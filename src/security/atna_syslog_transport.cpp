@@ -445,7 +445,7 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     }
 
     const auto timeout_ms = config_.io_timeout.count();
-    if (timeout_ms <= 0 || timeout_ms > std::numeric_limits<int>::max()) {
+    if (timeout_ms <= 0 || timeout_ms > (std::numeric_limits<int>::max)()) {
         ::freeaddrinfo(result);
         close_unlocked();
         return kcenon::pacs::pacs_void_error(

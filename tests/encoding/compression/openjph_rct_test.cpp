@@ -73,8 +73,8 @@ TEST_CASE("OpenJPH generic RCT 32-bit bounds and reversibility", "[htj2k][openjp
 TEST_CASE("OpenJPH generic RCT 64-bit bounds and reversibility", "[htj2k][openjph-rct]") {
     // OpenJPH's 64-bit transformed lines still consume signed 32-bit samples.
     // The weighted sum is in [-2^33, 2^33-4], so multiplication/addition fit.
-    constexpr auto low = std::numeric_limits<ojph::si32>::min();
-    constexpr auto high = std::numeric_limits<ojph::si32>::max();
+    constexpr auto low = (std::numeric_limits<ojph::si32>::min)();
+    constexpr auto high = (std::numeric_limits<ojph::si32>::max)();
     check_rct<ojph::si64>({low, low + 1, -128, -1, 0, 127, high - 1, high});
 }
 

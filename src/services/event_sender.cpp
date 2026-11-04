@@ -147,7 +147,7 @@ void event_sender::run() {
                 ready = ae;
                 break;
             }
-            next = next ? std::min(*next, queue.front().not_before) : queue.front().not_before;
+            next = next ? (std::min)(*next, queue.front().not_before) : queue.front().not_before;
         }
         if (ready.empty()) {
             if (next) {

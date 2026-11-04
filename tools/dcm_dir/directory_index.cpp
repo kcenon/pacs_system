@@ -27,7 +27,7 @@ class scanner {
 public:
     explicit scanner(std::span<const uint8_t> bytes) : bytes_(bytes) {}
     std::vector<uint32_t> run() {
-        require(bytes_.size() >= 132 && bytes_.size() <= std::numeric_limits<uint32_t>::max(),
+        require(bytes_.size() >= 132 && bytes_.size() <= (std::numeric_limits<uint32_t>::max)(),
                 "DICOMDIR size is outside the supported 32-bit offset range");
         require(std::string_view(reinterpret_cast<const char*>(bytes_.data() + 128), 4) == "DICM",
                 "Missing DICOMDIR Part 10 prefix");

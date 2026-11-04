@@ -511,7 +511,7 @@ kcenon::pacs::Result<kcenon::pacs::core::dicom_file> create_dicomdir(
     ds.set_numeric<uint32_t>(dir_tags::offset_of_last_directory_record, vr_type::UL, 0);
     // Fixed-size placeholders keep both serialization passes identical in size.
     std::vector<dicom_dataset> records;
-    constexpr size_t none = std::numeric_limits<size_t>::max();
+    constexpr size_t none = (std::numeric_limits<size_t>::max)();
     std::vector<size_t> next, lower, roots;
     auto append = [&](dicom_dataset record, std::vector<size_t>& siblings) {
         const auto i = records.size();
@@ -720,7 +720,7 @@ bool parse_dicomdir(const std::filesystem::path& dicomdir_path,
 
     std::ifstream input(dicomdir_path, std::ios::binary | std::ios::ate);
     const auto size = input.tellg();
-    if (!input || size < 0 || static_cast<uint64_t>(size) > std::numeric_limits<uint32_t>::max()) {
+    if (!input || size < 0 || static_cast<uint64_t>(size) > (std::numeric_limits<uint32_t>::max)()) {
         std::cerr << "Error: Cannot read DICOMDIR within the 32-bit offset range\n";
         return false;
     }
