@@ -62,7 +62,9 @@ an interrupted store left` (storage_tests).
 ## Not verified
 
 - Power loss and block-device failure, as above.
-- Endurance: `validation/reliability/endurance.json` declares 24 hours; a shorter run of
+- Endurance: the 24-hour run that `validation/reliability/endurance.json` declares failed its RSS limit,
+  426.39 MB of growth after the warm-up against 64 MB, because `file_storage` keeps an in-memory index entry
+  of about 1 KB for every stored object; the descriptor, latency and failure limits held. A shorter run of
   `validation/reliability/endurance.py` reports itself as diagnostic.
 - A container restart as such: what it does to the processes is what the process kills do, and the
   container's files persist in both.

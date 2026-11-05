@@ -701,9 +701,9 @@
         "peer.tls"
       ],
       "gaps": [
-        "Endurance: validation/reliability/endurance.json declares 24 hours at a fixed load and limits; only shorter runs, which report themselves diagnostic, have been made.",
+        "Endurance: the 24-hour run declared in validation/reliability/endurance.json failed its RSS limit, 426.39 MB of growth after the warm-up against 64 MB, because file_storage keeps an in-memory index entry of about 1 KB for every stored object. The other four limits held.",
         "Power loss and block-device failure: no acknowledged object is flushed to the device (no fsync, SQLite synchronous=NORMAL), and nothing tests it; docs/DURABILITY.md states the limit.",
-        "Fuzz corpus replay needs clang and libFuzzer; the verification container has GCC only, so no replay ran for #1326.",
+        "Fuzz corpus replay runs in the hosted Fuzzing workflow (clang, libFuzzer and ASan over fuzz/seed_corpus), not in this gate: its runner image has GCC only, so it holds no fuzz case.",
         "A failed write or an unavailable index is answered 0xC001 (Cannot Understand) rather than 0xA7xx (Out of Resources), because the archive cannot yet tell a resource failure from an object it cannot encode."
       ],
       "known_issues": []
@@ -1642,6 +1642,16 @@
       "previous_gaps": {
         "query": [
           "Large C-FIND results to a slow reader: network_system 093691d9 overlaps socket writes under backpressure, which breaks PDU framing (SOUP-006). qr.protocol.find-scp.slow-reader-keeps-pdu-framing fails until the pin moves."
+        ]
+      }
+    },
+    {
+      "issue": 1326,
+      "change": "Two reliability gaps restated once the evidence they named existed; both stay open. The 24-hour endurance run was made on b5b2399 and failed its RSS limit. The fuzz corpus replay runs in the hosted Fuzzing workflow on every pull request, outside this gate.",
+      "previous_gaps": {
+        "reliability": [
+          "Endurance: validation/reliability/endurance.json declares 24 hours at a fixed load and limits; only shorter runs, which report themselves diagnostic, have been made.",
+          "Fuzz corpus replay needs clang and libFuzzer; the verification container has GCC only, so no replay ran for #1326."
         ]
       }
     }
