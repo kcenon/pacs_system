@@ -717,12 +717,23 @@ TEST_CASE("TLS v2 rejects plaintext and untrusted peers", "[tls][v2][security]")
         CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("certificate verify failed"));
     }
     SECTION("Trusted certificate with the wrong IP identity is rejected") {
-        auto result = connect_tls(server.port(), server.ae_title(), client_tls_config(certs),
-            {std::string(verification_sop_class_uid)}, "TLS_V2_SCU", "127.0.0.2");
+        // The client reaches this server at 127.0.0.1, and the trusted CA issued its
+        // certificate for 127.0.0.2 only. (Connecting to 127.0.0.2 instead needs that
+        // address on the loopback interface, which macOS does not configure.)
+        REQUIRE(std::filesystem::exists(certs.wrong_ip_server_cert));
+        REQUIRE(std::filesystem::exists(certs.wrong_ip_server_key));
+        auto wrong_identity = server_tls_config(certs);
+        wrong_identity.cert_path = certs.wrong_ip_server_cert;
+        wrong_identity.key_path = certs.wrong_ip_server_key;
+        tls_test_server_v2 other(wrong_identity, "TLS_V2_WRONG_IP");
+        other.register_service(std::make_shared<verification_scp>());
+        REQUIRE(other.start().is_ok());
+        auto result = connect_tls(other.port(), other.ae_title(), client_tls_config(certs));
         REQUIRE(result.is_err());
         INFO(result.error().message);
         CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("TLS handshake failed"));
         CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("certificate verify failed"));
+        CHECK(other.server().get_statistics().total_associations == 0);
     }
     CHECK(server.server().get_statistics().total_associations == 0);
     // A rejected handshake must not damage the listener or later sessions.

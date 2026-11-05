@@ -5,6 +5,7 @@
 # Creates a complete PKI setup for testing TLS-secured DICOM:
 #   - CA certificate (self-signed root)
 #   - Server certificate (signed by CA)
+#   - Wrong-IP server certificate (signed by CA, identity 127.0.0.2 only)
 #   - Client certificate (signed by CA, for mutual TLS)
 #   - Expired certificate (for validation testing)
 #
@@ -98,6 +99,52 @@ EOF
         -extfile "$CERT_DIR/server.cnf" 2>/dev/null
 
     rm -f "$CERT_DIR/server.csr" "$CERT_DIR/server.cnf"
+}
+
+# Generate a server certificate from the same CA whose only identity is
+# 127.0.0.2. A client that reaches its server at 127.0.0.1 must refuse it.
+# The test cannot connect to 127.0.0.2 instead: macOS configures only
+# 127.0.0.1 on the loopback interface.
+generate_wrong_ip_server_cert() {
+    echo "Generating wrong-IP server certificate..."
+
+    openssl genrsa -out "$CERT_DIR/wrong_ip_server.key" $KEY_SIZE 2>/dev/null
+
+    cat > "$CERT_DIR/wrong_ip_server.cnf" << EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = Wrong Identity Server
+O = PACS System
+OU = Test Server
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = IP:127.0.0.2
+EOF
+
+    openssl req -new \
+        -key "$CERT_DIR/wrong_ip_server.key" \
+        -out "$CERT_DIR/wrong_ip_server.csr" \
+        -config "$CERT_DIR/wrong_ip_server.cnf"
+
+    openssl x509 -req \
+        -in "$CERT_DIR/wrong_ip_server.csr" \
+        -CA "$CERT_DIR/ca.crt" \
+        -CAkey "$CERT_DIR/ca.key" \
+        -CAcreateserial \
+        -out "$CERT_DIR/wrong_ip_server.crt" \
+        -days $DAYS_VALID \
+        -sha256 \
+        -extensions v3_req \
+        -extfile "$CERT_DIR/wrong_ip_server.cnf" 2>/dev/null
+
+    rm -f "$CERT_DIR/wrong_ip_server.csr" "$CERT_DIR/wrong_ip_server.cnf"
 }
 
 # Generate client certificate
@@ -232,6 +279,13 @@ verify_certs() {
         exit 1
     fi
 
+    if openssl verify -CAfile "$CERT_DIR/ca.crt" "$CERT_DIR/wrong_ip_server.crt" > /dev/null 2>&1; then
+        echo "  Wrong-IP server certificate: OK"
+    else
+        echo "  Wrong-IP server certificate: FAILED"
+        exit 1
+    fi
+
     if openssl verify -CAfile "$CERT_DIR/ca.crt" "$CERT_DIR/client.crt" > /dev/null 2>&1; then
         echo "  Client certificate: OK"
     else
@@ -258,6 +312,7 @@ main() {
 
     generate_ca
     generate_server_cert
+    generate_wrong_ip_server_cert
     generate_client_cert
     generate_expired_cert
     generate_different_ca
@@ -267,7 +322,7 @@ main() {
 
     echo ""
     echo "Test certificates generated in: $CERT_DIR"
-    echo "Files: ca.crt, ca.key, server.crt, server.key, client.crt, client.key"
+    echo "Files: ca.crt, ca.key, server.crt, server.key, wrong_ip_server.crt, wrong_ip_server.key, client.crt, client.key"
 }
 
 main "$@"

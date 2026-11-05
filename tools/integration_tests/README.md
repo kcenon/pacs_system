@@ -59,6 +59,7 @@ tools/integration_tests/
         ├── generate_test_certs.sh   # Certificate generation script
         ├── ca.crt / ca.key          # Test CA certificate
         ├── server.crt / server.key  # Server certificate
+        ├── wrong_ip_server.crt / .key # Server certificate for 127.0.0.2 only
         ├── client.crt / client.key  # Client certificate (for mTLS)
         └── other_ca.crt             # Different CA for validation testing
 ```
@@ -313,8 +314,10 @@ PACS_TEST_CERT_DIR="$cert_dir" ./build/bin/pacs_integration_e2e \
 ```
 
 `PACS_TEST_CERT_DIR` selects the certificate directory exclusively when set.
-The helper generates a CA, localhost/loopback server identity, client identity,
-and separate untrusted CA. Certificates/private keys are test-only material and
+The helper generates a CA, localhost/loopback server identity, a server identity
+for 127.0.0.2 only (the wrong-IP case connects to 127.0.0.1, so it also runs on
+macOS, whose loopback interface has no 127.0.0.2), client identity, and separate
+untrusted CA. Certificates/private keys are test-only material and
 must not be committed. OpenSSL and network_system must be available at build time.
 
 ### Shared TLS Test Fixtures

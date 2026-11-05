@@ -20,6 +20,9 @@ struct test_certificate_bundle {
     std::filesystem::path client_cert;
     std::filesystem::path client_key;
     std::filesystem::path other_ca_cert;
+    /// Signed by the test CA, identity 127.0.0.2 only (not checked by all_exist())
+    std::filesystem::path wrong_ip_server_cert;
+    std::filesystem::path wrong_ip_server_key;
 
     /**
      * @brief Check if all required certificate files exist
@@ -61,7 +64,9 @@ inline test_certificate_bundle get_test_certificates() {
                 cert_dir / "server.key",
                 cert_dir / "client.crt",
                 cert_dir / "client.key",
-                cert_dir / "other_ca.crt"
+                cert_dir / "other_ca.crt",
+                cert_dir / "wrong_ip_server.crt",
+                cert_dir / "wrong_ip_server.key"
             };
         }
     }
@@ -75,7 +80,9 @@ inline test_certificate_bundle get_test_certificates() {
         default_dir / "server.key",
         default_dir / "client.crt",
         default_dir / "client.key",
-        default_dir / "other_ca.crt"
+        default_dir / "other_ca.crt",
+        default_dir / "wrong_ip_server.crt",
+        default_dir / "wrong_ip_server.key"
     };
 }
 
