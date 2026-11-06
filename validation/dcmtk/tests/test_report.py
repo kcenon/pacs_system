@@ -8,7 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'validation/dcmtk'))
-from report import evaluate, junit_counts, validate_manifest, write_junit
+from report import evaluate, junit_counts, save_summary, validate_manifest, write_junit
 from inventory import attach_results, build_inventory, tracks_cases
 
 
@@ -129,6 +129,118 @@ class GateTests(unittest.TestCase):
             p=Path(d)/'x.xml'
             write_junit(p,[dict(id='missing',status='incomplete',detail='No external peer')])
             self.assertEqual(junit_counts(p),dict(tests=1,failed=1,skipped=0))
+
+
+class LaneTests(unittest.TestCase):
+    """#1328 step 3: a pr-lane run certifies its selected cases only; the full lane keeps every requirement."""
+
+    # The same complete evidence as GateTests, without running GateTests' cases again.
+    setUp = GateTests.setUp
+    evaluate = GateTests.evaluate
+
+    def pr_lane(self):
+        """Turn the complete evidence of setUp into what a pr-lane run records."""
+        outside = [c['id'] for c in self.manifest['components'] if 'pr' not in c.get('lanes', self.manifest['lanes'])]
+        self.provenance['lane'] = 'pr'
+        for report in self.reports:
+            report['lane'] = 'pr'
+            report['cases'] = [case for case in report['cases'] if case['id'] not in outside]
+        return outside
+
+    def test_repository_manifest_leaves_only_the_provider_out_of_the_pr_lane(self):
+        self.assertEqual(set(self.manifest['lanes']), {'full', 'pr'})
+        outside = [c for c in self.manifest['components'] if 'pr' not in c.get('lanes', self.manifest['lanes'])]
+        self.assertEqual([c['id'] for c in outside], ['component.ai_provider'])
+        self.assertEqual(outside[0]['lanes'], ['full'])
+        self.assertEqual(outside[0]['lane_exclusion']['category'], 'provider')
+        ai = next(f for f in self.manifest['features'] if f['id'] == 'ai')
+        self.assertIn('component.ai_provider', ai['components'])
+
+    def test_pr_lane_passes_its_cases_without_certifying_completeness(self):
+        outside = self.pr_lane()
+        result = self.evaluate()
+        self.assertEqual(result['status'], 'passed')
+        self.assertFalse(result['validation_errors'])
+        self.assertFalse(result['certifies_completeness'])
+        self.assertTrue(result['coverage_gaps'])
+        self.assertEqual([c['id'] for c in result['outside_lane']], outside)
+        ai = next(f for f in result['features'] if f['id'] == 'ai')
+        self.assertEqual((ai['status'], ai['outside_lane']), ('incomplete', ['component.ai_provider']))
+
+    def test_pr_lane_fails_on_any_selected_case_that_did_not_pass(self):
+        self.pr_lane()
+        cases = self.reports[0]['cases']
+        original = copy.deepcopy(cases)
+        index = next(i for i, case in enumerate(cases) if case['id'] == 'component.ai_contract')
+        for position in (0, index):
+            for mutation in [dict(failed=1), dict(skipped=1), dict(status='blocked', tests=0), dict(status='failed')]:
+                with self.subTest(case=cases[position]['id'], mutation=mutation):
+                    cases[position] = original[position] | mutation
+                    self.assertEqual(self.evaluate()['status'], 'failed')
+                    cases[position] = copy.deepcopy(original[position])
+        del cases[index]
+        self.assertIn('uncompressed: missing component.ai_contract', self.evaluate()['validation_errors'])
+
+    def test_pr_lane_fails_when_a_left_out_component_reports_a_failure(self):
+        self.pr_lane()
+        self.reports[0]['cases'].append(dict(id='component.ai_provider', status='failed', tests=1, failed=1, skipped=0))
+        self.assertIn('uncompressed: additional failure component.ai_provider', self.evaluate()['validation_errors'])
+
+    def test_full_lane_requires_what_the_pr_lane_leaves_out(self):
+        self.provenance['lane'] = 'full'
+        for report in self.reports:
+            report['lane'] = 'full'
+        self.reports[0]['cases'] = [case for case in self.reports[0]['cases'] if case['id'] != 'component.ai_provider']
+        result = self.evaluate()
+        self.assertEqual(result['status'], 'failed')
+        self.assertTrue(result['certifies_completeness'])
+        self.assertIn('uncompressed: missing component.ai_provider', result['validation_errors'])
+
+    def test_a_report_from_another_lane_or_an_unknown_lane_fails(self):
+        self.pr_lane()
+        self.reports[1]['lane'] = 'full'
+        self.assertTrue(any(error.endswith('mismatched lane') for error in self.evaluate()['validation_errors']))
+        self.provenance['lane'] = 'nightly'
+        for report in self.reports:
+            report['lane'] = 'nightly'
+        result = self.evaluate()
+        self.assertEqual(result['status'], 'failed')
+        self.assertIn('unknown lane: nightly', result['validation_errors'])
+
+    def test_manifest_rejects_a_lane_exclusion_it_cannot_justify(self):
+        for mutation in [dict(lanes=['pr']), dict(lanes=[]), dict(lanes=['full', 'full']), dict(lanes=['full', 'nightly']),
+                         dict(lane_exclusion=dict(category='convenience', reason='slow')),
+                         dict(lane_exclusion=dict(category='provider', reason='')), dict(lane_exclusion=None)]:
+            with self.subTest(mutation=mutation):
+                manifest = copy.deepcopy(self.manifest)
+                target = next(c for c in manifest['components'] if c['id'] == 'component.ai_provider')
+                target.update(mutation)
+                if target['lane_exclusion'] is None:
+                    del target['lane_exclusion']
+                with self.assertRaises(ValueError):
+                    validate_manifest(manifest)
+        manifest = copy.deepcopy(self.manifest)
+        manifest['components'][0]['lane_exclusion'] = dict(category='provider', reason='no lanes declared')
+        with self.assertRaises(ValueError):
+            validate_manifest(manifest)
+        manifest['components'][0]['lanes'] = sorted(manifest['lanes'])
+        with self.assertRaises(ValueError):
+            validate_manifest(manifest)
+        manifest = copy.deepcopy(self.manifest)
+        del manifest['lanes']['full']
+        with self.assertRaises(ValueError):
+            validate_manifest(manifest)
+
+    def test_summary_names_the_lane_and_what_it_does_not_certify(self):
+        with tempfile.TemporaryDirectory() as directory:
+            save_summary(directory, self.evaluate())
+            self.assertTrue((Path(directory)/'summary.txt').read_text().startswith('PACS full validation: FAILED\n'))
+        self.pr_lane()
+        with tempfile.TemporaryDirectory() as directory:
+            save_summary(directory, self.evaluate())
+            text = (Path(directory)/'summary.txt').read_text()
+        self.assertTrue(text.startswith('PACS validation, lane pr: PASSED\nCompleteness: not certified by this lane'))
+        self.assertIn('\ncomponent.ai_provider (lanes: full; provider): ', text)
 
 
 class TopologyTests(unittest.TestCase):

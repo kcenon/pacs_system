@@ -18,7 +18,7 @@ import time
 import uuid
 
 import pydicom
-from report import digest, junit_counts, passed, validate_manifest, write_junit
+from report import components_in_lane, digest, junit_counts, passed, validate_manifest, write_junit
 from deferrals import audit_deferrals
 from inventory import (attach_results, build_inventory, catch_listing, catch_results,
                        ctest_results, evaluate_inventory, tracks_cases)
@@ -134,6 +134,8 @@ class Validation:
                        peer_revision=json.loads((HERE/'lock.json').read_text())['revision'],
                        manifest_digest=digest(HERE/'features.json'), cases=self.results,
                        commands=self.command_results, run_uid=self.run_uid)
+        if getattr(self.args, 'lane', None):  # probes that reuse this class write their own reports without one
+            payload['lane'] = self.args.lane
         if self.test_inventory is not None:
             payload['test_inventory'] = self.test_inventory
         (self.output/'results.json').write_text(json.dumps(payload,indent=2)+'\n')
@@ -781,12 +783,12 @@ class Validation:
                     detail=f'{counts["passed"]} passed, {counts["failed"]} failed, {counts["blocked"]} blocked; '
                            'see browser/browser-summary.json')
 
-    def probe_matrix(self, spec, script, name):
+    def probe_matrix(self, spec, script, name, extra=()):
         """Report a probe's own results from <name>/<name>-summary.json; a nonzero exit only means some cases failed."""
         directory = self.output/name
         self.command(['python3', script, '--output', directory,
                       '--build-dir', self.args.build_dir, '--source-revision', self.args.source_revision,
-                      '--source-digest', self.args.source_digest],
+                      '--source-digest', self.args.source_digest, *extra],
                      timeout=spec['timeout_seconds'], allowed=(0, 1))
         counts = json.loads((directory/f'{name}-summary.json').read_text())['counts']
         return dict(tests=sum(counts.values()), failed=counts['failed']+counts['blocked'], skipped=0,
@@ -807,6 +809,8 @@ class Validation:
             except Exception as exc:
                 counts['detail'] += f'; no individual results from ai/ai-contract.xml: {exc}'
             return counts
+        if spec.get('kind') == 'ai-provider':
+            return self.probe_matrix(spec, HERE/'tests/ai_probe.py', 'ai-provider', extra=['--provider'])
         if spec.get('kind') == 'reliability':
             return self.probe_matrix(spec, HERE.parent/'reliability/fault_probe.py', 'reliability')
         if spec.get('kind') == 'browser':
@@ -907,12 +911,14 @@ class Validation:
                               self.private/'pacs-certs'])
             except Exception as exc:
                 self.case('certificate-setup',lambda:require(False,str(exc)))
+            # A lane runs only its components; report.evaluate() names the others as not certified.
+            selected = set(components_in_lane(self.manifest, self.args.lane))
             for spec in self.manifest['components']:
-                if spec.get('kind') == 'discovery':
+                if spec.get('kind') == 'discovery' or spec['id'] not in selected:
                     continue
                 self.case(spec['id'],lambda spec=spec:self.component(spec))
             for spec in self.manifest['components']:
-                if spec.get('kind') == 'discovery':
+                if spec.get('kind') == 'discovery' and spec['id'] in selected:
                     self.case(spec['id'],lambda spec=spec:self.component(spec))
         self.save()
         return int(any(r['status']!='passed' for r in self.results))
@@ -928,6 +934,8 @@ def main():
     p.add_argument('--source-revision', required=True)
     p.add_argument('--source-digest', required=True)
     p.add_argument('--interop-only', action='store_true', help='Diagnostic subset; cannot pass the full gate')
+    p.add_argument('--lane', choices=('pr', 'full'), default='full',
+                   help='Components to run, as features.json "lanes" declares; only full certifies completeness')
     args = p.parse_args()
     validation = Validation(args)
     try:

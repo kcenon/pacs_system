@@ -40,10 +40,30 @@ def passed(result):
             and type(result.get('failed')) is int and result['failed'] == 0)
 
 
+# The only reasons a component may stay out of a lane (#1328): a pull request run has no provider account, cannot
+# wait for an endurance run, and runs on one platform. A lane that leaves any component out certifies nothing about
+# completeness; only "full" does.
+LANE_EXCLUSION_CATEGORIES = ('provider', 'endurance', 'platform')
+
+
+def components_in_lane(manifest, lane):
+    """IDs of the components a lane runs. A component without "lanes" belongs to every lane."""
+    return [spec['id'] for spec in manifest['components'] if lane in spec.get('lanes', manifest['lanes'])]
+
+
 def evaluate(manifest, reports, provenance):
-    """Missing/empty/skipped evidence cannot certify a feature or a complete run."""
+    """Missing/empty/skipped evidence cannot certify a feature or a complete run.
+
+    provenance['lane'] (default "full") selects the components required in the uncompressed profile. Every lane
+    requires all interop cases in every profile and fails on any selected case that did not pass. Only the full
+    lane also fails on declared coverage gaps; another lane reports them, and the components it left out, as not
+    certified."""
     errors, seen, evidence, inventories = [], set(), {}, {}
     profiles = manifest['profiles']
+    lane = provenance.get('lane', 'full')
+    if lane not in manifest['lanes']:
+        errors.append(f'unknown lane: {lane}')
+    selected = set(components_in_lane(manifest, lane))
     for report in reports:
         if not isinstance(report, dict):
             errors.append('invalid report object')
@@ -72,7 +92,7 @@ def evaluate(manifest, reports, provenance):
             local[key] = result
         required = list(manifest['interop_cases'])
         if profile == 'uncompressed':
-            required += [c['id'] for c in manifest['components']]
+            required += [c['id'] for c in manifest['components'] if c['id'] in selected]
         for key in required:
             result = local.get(key)
             if result is None:
@@ -94,15 +114,20 @@ def evaluate(manifest, reports, provenance):
     for profile in set(profiles) - seen:
         errors.append(f'missing profile: {profile}')
     gaps = [dict(feature=f['id'], requirement=g) for f in manifest['features'] for g in f.get('gaps', [])]
+    outside = [dict(id=spec['id'], lanes=spec.get('lanes', sorted(manifest['lanes'])), **spec.get('lane_exclusion', {}))
+               for spec in manifest['components'] if spec['id'] not in selected]
     features = []
     for feature in manifest['features']:
-        required = [f'uncompressed/{key}' for key in feature['components']]
+        required = [f'uncompressed/{key}' for key in feature['components'] if key in selected]
         required += [f'{p}/{key}' for p in profiles for key in feature['interop']]
+        unselected = [key for key in feature['components'] if key not in selected]
         bad = [k for k in required if not passed(evidence.get(k))]
         features.append(dict(id=feature['id'], status='failed' if bad else
-                             'incomplete' if feature.get('gaps') or not required else 'passed',
-                             missing_or_failed=bad, gaps=feature.get('gaps', [])))
-    return dict(schema_version=1, status='passed' if not errors and not gaps else 'failed',
+                             'incomplete' if feature.get('gaps') or unselected or not required else 'passed',
+                             missing_or_failed=bad, gaps=feature.get('gaps', []), outside_lane=unselected))
+    certifies = lane == 'full'
+    return dict(schema_version=1, status='passed' if not errors and (not gaps or not certifies) else 'failed',
+                lane=lane, certifies_completeness=certifies, outside_lane=outside,
                 validation_errors=errors, coverage_gaps=gaps, features=features,
                 provenance=provenance, test_inventories=inventories)
 
@@ -124,6 +149,29 @@ def validate_manifest(manifest):
             conditions = {r['condition'] for r in requirements if r['feature_id'] == feature}
             if not {'positive','negative'} <= conditions:
                 raise ValueError(f'{feature}: positive and negative requirements are mandatory')
+    lanes = manifest.get('lanes')
+    if (not isinstance(lanes, dict) or 'full' not in lanes
+            or any(not isinstance(text, str) or not text for text in lanes.values())):
+        raise ValueError('lanes must describe every lane and include "full"')
+    for spec in manifest['components']:
+        if 'lanes' not in spec:
+            if 'lane_exclusion' in spec:
+                raise ValueError(f'{spec["id"]}: lane_exclusion without lanes')
+            continue
+        declared = spec['lanes']
+        if (not isinstance(declared, list) or not declared or len(set(declared)) != len(declared)
+                or set(declared) - set(lanes)):
+            raise ValueError(f'{spec["id"]}: lanes must be a nonempty list of declared lanes')
+        if 'full' not in declared:
+            raise ValueError(f'{spec["id"]}: every component belongs to the full lane')
+        exclusion = spec.get('lane_exclusion')
+        if set(lanes) - set(declared):
+            if (not isinstance(exclusion, dict) or exclusion.get('category') not in LANE_EXCLUSION_CATEGORIES
+                    or not isinstance(exclusion.get('reason'), str) or not exclusion['reason']):
+                raise ValueError(f'{spec["id"]}: a component left out of a lane needs lane_exclusion with a '
+                                 f'category in {LANE_EXCLUSION_CATEGORIES} and a reason')
+        elif exclusion is not None:
+            raise ValueError(f'{spec["id"]}: lane_exclusion on a component in every lane')
     components = [c['id'] for c in manifest['components']]
     interop = manifest['interop_cases']
     ids = components + interop
@@ -151,12 +199,21 @@ def save_summary(output, summary):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     (output/'summary.json').write_text(json.dumps(summary, indent=2)+'\n')
-    lines = [f'PACS full validation: {summary["status"].upper()}', '',
-             'Feature states (component tests do not establish external interoperability):']
+    lane, outside = summary.get('lane', 'full'), summary.get('outside_lane', [])
+    if summary.get('certifies_completeness', True):
+        lines = [f'PACS full validation: {summary["status"].upper()}']
+    else:
+        lines = [f'PACS validation, lane {lane}: {summary["status"].upper()}',
+                 f'Completeness: not certified by this lane; the full lane judges it '
+                 f'({len(summary["coverage_gaps"])} coverage gaps, {len(outside)} required components outside this lane).']
+    lines += ['', 'Feature states (component tests do not establish external interoperability):']
     lines += [f'{f["id"]}: {f["status"]}' for f in summary['features']]
     lines += ['', 'Validation errors:'] + summary['validation_errors']
     lines += ['', 'Outstanding coverage requirements:']
     lines += [f'{g["feature"]}: {g["requirement"]}' for g in summary['coverage_gaps']]
+    if outside:
+        lines += ['', f'Required outside lane {lane}:']
+        lines += [f'{c["id"]} (lanes: {", ".join(c["lanes"])}; {c.get("category")}): {c.get("reason")}' for c in outside]
     (output/'summary.txt').write_text('\n'.join(lines)+'\n')
     cases = [dict(id=f['id'], status=f['status'],
                   detail='; '.join(f['missing_or_failed'] + f['gaps'])) for f in summary['features']]

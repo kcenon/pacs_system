@@ -89,7 +89,7 @@ class Driver:
         self.provenance = dict(source_revision=subprocess.check_output(
             ['git','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip(),
             source_digest='',peer_revision=self.lock['revision'],
-            manifest_digest=digest(ROOT/'validation/dcmtk/features.json'))
+            manifest_digest=digest(ROOT/'validation/dcmtk/features.json'),lane=args.lane)
 
     def command(self,args,log,timeout=180,allowed=(0,)):
         event = dict(command=[str(a) for a in args], log=log, timeout_seconds=timeout,
@@ -141,7 +141,7 @@ class Driver:
             self.command([*dc,'up','-d','--no-build','--wait','--wait-timeout','150'],f'{profile}/startup.log',180)
             self.command([*dc,'run','--no-deps','--name',container,'runner','--profile',profile,
                           '--source-revision',self.provenance['source_revision'],
-                          '--source-digest',self.provenance['source_digest'],
+                          '--source-digest',self.provenance['source_digest'],'--lane',self.args.lane,
                           *(['--interop-only'] if self.args.interop_only else [])],f'{profile}/runner.log',
                          self.args.timeout,allowed=(0,1))
         except Exception as exc:
@@ -232,6 +232,10 @@ def main():
                         help='Seconds allowed for each validation container; uncompressed runs the 60-minute '
                              'component.stability_slow besides every other component')
     parser.add_argument('--interop-only',action='store_true',help='Diagnostic subset; omitted components fail the gate')
+    parser.add_argument('--lane',choices=['pr','full'],default='full',
+                        help='full (default) certifies completeness: every component, no declared gap. pr runs the '
+                             'components features.json "lanes" selects for pull requests and certifies only that '
+                             'they passed')
     parser.add_argument('--runner-image',help='Reuse only an image whose provenance labels match this source')
     parser.add_argument('--keep',action='store_true',help='Keep this run\'s containers and synthetic volumes for debugging')
     args = parser.parse_args()

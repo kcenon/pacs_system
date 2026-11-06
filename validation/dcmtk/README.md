@@ -10,7 +10,8 @@ Run from a checkout with Python 3.10+, Git, Docker and Docker Compose v2:
 python3 scripts/run_dcmtk_validation.py --output /tmp/pacs-validation-run-1
 ```
 
-The output directory must be new and outside the source tree. Docker's ordinary
+This runs the `full` lane, the only one that certifies completeness. `--lane pr` runs what pull requests
+run; see [Lanes](#lanes). The output directory must be new and outside the source tree. Docker's ordinary
 `DOCKER_HOST` and `DOCKER_CONFIG` settings work, including Colima. The driver uses
 image builds, named volumes and `docker cp`; it needs no host bind mount or exposed
 host port. It does not modify sibling ecosystem repositories or change production
@@ -49,11 +50,12 @@ and startup log identify the project for later `docker compose -p ... -f ... dow
    [ADR-004](../../docs/adr/ADR-004-cli-scp-tcp-transport.md) for the retained v1 API
    and the separately tracked TLS migration.
 5. In the uncompressed profile, discover individual CTest and Catch2 cases before
-   running every component suite listed in `features.json`,
+   running every component suite the lane selects from `features.json`,
    the existing integration suite, v2 TLS cases and bounded stress cases. JUnit
    failures, unexpected skips, missing binaries, empty results and timeouts fail.
    Compare every job's selected case identities with its actual execution results.
-6. Evaluate the entire feature manifest. A subset cannot claim complete validation.
+6. Evaluate the entire feature manifest. A subset cannot claim complete validation: only
+   the `full` lane certifies completeness.
 
 ### Supported object and codec corpus
 
@@ -152,9 +154,29 @@ python3 validation/dcmtk/tests/qr_protocol_probe.py --binary build/bin/qr_scp --
 
 `features.json` maps **20 feature groups** to executable evidence and lists these
 remaining coverage requirements. They deliberately prevent an overall `passed`
-result. Remove a gap only when its test and feature mapping are implemented, not
+result in the `full` lane. Remove a gap only when its test and feature mapping are implemented, not
 because related component tests happen to pass. `known_issues` are references,
 not an allowlist or permission to ignore failures.
+
+### Lanes
+
+`features.json` `"lanes"` separates what a run selects from overall completeness (#1328, step 3):
+
+| Lane | Runs | Passes when | Run by |
+|------|------|-------------|--------|
+| `full` | Every component and interop case in every profile | No validation error and no declared coverage gap | The weekly schedule and manual dispatch; the driver's default |
+| `pr` | Every interop case in every profile, and every component except those whose `lane_exclusion` names a provider account, an endurance run or a platform matrix | No selected case failed, went missing, was skipped or blocked | Pull requests and pushes |
+
+The `pr` lane never certifies completeness. Its summary starts with
+`PACS validation, lane pr:` and a `Completeness: not certified` line, and lists the declared
+gaps and the components it left out with their reasons; a feature with either reads
+`incomplete`. A component can leave the `pr` lane only through a `lane_exclusion` whose
+category is `provider`, `endurance` or `platform`, and every component stays in `full`;
+`validate_manifest` enforces both. Today only `component.ai_provider` is left out.
+`summary.xml` lists feature completeness in both lanes, so in `pr` an `incomplete` feature
+still shows as a JUnit failure; the lane's verdict is the first line of `summary.txt`
+and `status` in `summary.json`. Each report records its lane, and a report from
+another lane is a provenance mismatch.
 
 The initial audit recorded defects in the v1 CLI TCP path (#1303), retrieval
 SCP behavior (#1304/#1306), compressed storage (#1292), v2 TLS (#1305), C-GET
@@ -164,7 +186,8 @@ and rebuilt images to establish the integrated result. Cross-platform TLS and th
 broader external security/audit matrix (#1317) require their own execution evidence.
 
 The primary outputs are the actual results, not the workflow's existence. The
-[CI workflow](../../.github/workflows/dcmtk-validation.yml) runs the same command
+[CI workflow](../../.github/workflows/dcmtk-validation.yml) runs the same command, with
+`--lane pr` on pull requests and pushes and `--lane full` weekly and on demand,
 and uploads logs and JUnit even when the gate fails. No `continue-on-error`,
 all-skipped success option or artifact-existence success rule is used by this gate.
 
@@ -228,7 +251,7 @@ python3 scripts/run_dcmtk_validation.py \
 python3 -m unittest discover -s validation/dcmtk/tests -v
 ```
 
-The diagnostic run still fails the **full** gate because profiles/components are
+The diagnostic run still fails the **full** gate, and the `pr` lane, because profiles/components are
 missing. Inspect individual outcomes to assess the selected scope. A prebuilt
 `--runner-image` is accepted only when its labels match the current source-content
 digest and pinned peer revision; the default builds the runner from source.
@@ -540,8 +563,9 @@ a trend, never a pass.
 that shares no code with PACS, and runs the hidden `[ai-contract]` cases of `ai_tests` against it: completion with an SR and a
 SEG tied to the archived source, a failure, a timeout followed by a cancel, a result about a study the archive does not hold,
 and a request without the token. A case counts only together with what the service recorded that it received and wrote.
-`ai.actual-provider` is reported blocked: no provider is declared and none is reachable here, and the contract service does
-not stand in for one. Run either directly; Orthanc, DCMTK `storescu` and pydicom must be installed:
+`component.ai_provider` runs `tests/ai_probe.py --provider`, in the `full` lane only, and reports `ai.actual-provider`
+blocked: no provider is declared and none is reachable here, and the contract service does not stand in for one. Run
+either directly; Orthanc, DCMTK `storescu` and pydicom must be installed:
 
 ```sh
 python3 validation/dcmtk/tests/workflow_probe.py --output /tmp/workflow --build-dir build \

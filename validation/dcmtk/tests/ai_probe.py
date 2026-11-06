@@ -5,8 +5,9 @@ validation/peers/ai/ai_contract_service.py shares no code with PACS. This probe 
 starts the service, runs the hidden [ai-contract] cases of ai_tests against it, and then checks what the
 service itself recorded: the request bodies, the bearer token, the polls and the cancellation, and the
 UID references inside the result objects it wrote. Each Catch2 case counts only together with that
-record. The cases with an actual inference provider are reported blocked: no provider is declared, and
-no provider endpoint or account exists here; the contract service cannot stand in for one.
+record. With --provider it runs only the cases with an actual inference provider (component.ai_provider,
+full lane), and reports them blocked: no provider is declared, and no provider endpoint or account exists
+here; the contract service cannot stand in for one.
 """
 import argparse
 import json
@@ -54,6 +55,7 @@ class AiContract(Validation):
         self.token = secrets.token_hex(16)  # made for this run; it opens nothing but the contract service
         self.requests = self.output/'service-requests.jsonl'
         self.source = self.work/'source.dcm'
+        self.source_uids = None  # set by source_case; the provider cases archive nothing
         self.outcomes = {}
 
     def source_case(self):
@@ -189,7 +191,7 @@ class AiContract(Validation):
         self.save()
         print(f'{case_id}: blocked: {detail}', flush=True)
 
-    def run_all(self):
+    def run_contract_cases(self):
         self.case('ai.source', self.source_case, phase='fixture_preparation')
         args = ['python3', SERVICE, '--port', self.port, '--results-dir', self.work/'results', '--log', self.requests,
                 '--token', self.token]
@@ -201,10 +203,18 @@ class AiContract(Validation):
         self.case('ai.contract.timeout-cancel', self.timeout_case, requires=run)
         self.case('ai.contract.foreign-study', self.foreign_case, requires=run)
         self.case('ai.contract.unauthorized', self.unauthorized_case, requires=run)
+
+    def run_provider_cases(self):
         self.blocked('ai.actual-provider', 'No inference provider is named in the PRD or the conformance statement, and no provider '
                      'endpoint or account is configured here; the contract service does not stand in for one.')
+
+    def run_all(self, provider=False):
+        if provider:
+            self.run_provider_cases()
+        else:
+            self.run_contract_cases()
         counts = {status: sum(1 for row in self.results if row['status'] == status) for status in ('passed', 'failed', 'blocked')}
-        (self.output/'ai-summary.json').write_text(json.dumps(dict(
+        (self.output/('ai-provider-summary.json' if provider else 'ai-summary.json')).write_text(json.dumps(dict(
             counts=counts, port=self.port, source=self.source_uids,
             failures=[dict(id=row['id'], detail=row['detail']) for row in self.results if row['status'] == 'failed'],
             blocked=[dict(id=row['id'], detail=row['detail']) for row in self.results if row['status'] == 'blocked']), indent=1)+'\n')
@@ -218,9 +228,11 @@ def main():
     parser.add_argument('--build-dir', default='/workspace/build')
     parser.add_argument('--source-revision', required=True)
     parser.add_argument('--source-digest', required=True)
+    parser.add_argument('--provider', action='store_true',
+                        help='Run only the cases with an actual inference provider (component.ai_provider)')
     args = parser.parse_args()
     args.profile = 'uncompressed'
-    return AiContract(args).run_all()
+    return AiContract(args).run_all(provider=args.provider)
 
 
 if __name__ == '__main__':

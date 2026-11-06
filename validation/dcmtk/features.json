@@ -1,11 +1,15 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "profiles": [
     "uncompressed",
     "jpeg-lossless",
     "jpeg-ls-lossless",
     "rle-lossless"
   ],
+  "lanes": {
+    "full": "Every component and interop case in every profile, and no declared coverage gap. The only lane that certifies completeness; it runs weekly and on demand.",
+    "pr": "Every interop case in every profile and every component except those whose lane_exclusion names a provider account, an endurance run or a platform matrix. It fails on any selected case that does not pass and certifies no completeness; pull requests and pushes run it."
+  },
   "components": [
     {
       "id": "component.core_tests",
@@ -224,6 +228,17 @@
       "binary": "ai_tests",
       "args": ["[ai-contract]"],
       "timeout_seconds": 600
+    },
+    {
+      "id": "component.ai_provider",
+      "kind": "ai-provider",
+      "args": [],
+      "timeout_seconds": 300,
+      "lanes": ["full"],
+      "lane_exclusion": {
+        "category": "provider",
+        "reason": "ai.actual-provider needs an inference provider endpoint and account, which no pull request or push run has; tests/ai_probe.py --provider reports it blocked until a provider is declared (#1323)."
+      }
     },
     {
       "id": "component.reliability_faults",
@@ -632,7 +647,8 @@
       "id": "ai",
       "components": [
         "component.ai_tests",
-        "component.ai_contract"
+        "component.ai_contract",
+        "component.ai_provider"
       ],
       "interop": [],
       "gaps": [
@@ -1654,6 +1670,11 @@
           "Fuzz corpus replay needs clang and libFuzzer; the verification container has GCC only, so no replay ran for #1326."
         ]
       }
+    },
+    {
+      "issue": 1328,
+      "change": "Lanes separate what a run selects from overall completeness (step 3 of #1328 only). The full lane keeps the previous rule: every component and interop case in every profile, no validation error and no declared gap. The pr lane, run by pull requests and pushes, may leave out only components whose lane_exclusion names a provider, endurance or platform requirement, fails on any selected case that does not pass, and reports gaps and left-out components as not certified. ai.actual-provider moved from component.ai_contract to component.ai_provider, which only the full lane runs; no gap was removed or changed.",
+      "previous_gaps": {}
     }
   ]
 }
