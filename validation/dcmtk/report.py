@@ -205,7 +205,7 @@ def save_summary(output, summary):
     else:
         lines = [f'PACS validation, lane {lane}: {summary["status"].upper()}',
                  f'Completeness: not certified by this lane; the full lane judges it '
-                 f'({len(summary["coverage_gaps"])} coverage gaps, {len(outside)} required components outside this lane).']
+                 f'(coverage gaps: {len(summary["coverage_gaps"])}; required components outside this lane: {len(outside)}).']
     lines += ['', 'Feature states (component tests do not establish external interoperability):']
     lines += [f'{f["id"]}: {f["status"]}' for f in summary['features']]
     lines += ['', 'Validation errors:'] + summary['validation_errors']

@@ -1,4 +1,4 @@
-name: PACS Full Validation with DCMTK Docker
+name: PACS Validation with DCMTK Docker
 
 # Two lanes (validation/dcmtk/features.json "lanes", #1328 step 3):
 # - pr, on pull requests and pushes: every case it selects must pass. It certifies no completeness;

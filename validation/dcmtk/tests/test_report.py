@@ -236,10 +236,13 @@ class LaneTests(unittest.TestCase):
             save_summary(directory, self.evaluate())
             self.assertTrue((Path(directory)/'summary.txt').read_text().startswith('PACS full validation: FAILED\n'))
         self.pr_lane()
+        summary = self.evaluate()
         with tempfile.TemporaryDirectory() as directory:
-            save_summary(directory, self.evaluate())
+            save_summary(directory, summary)
             text = (Path(directory)/'summary.txt').read_text()
-        self.assertTrue(text.startswith('PACS validation, lane pr: PASSED\nCompleteness: not certified by this lane'))
+        self.assertTrue(text.startswith(
+            'PACS validation, lane pr: PASSED\nCompleteness: not certified by this lane; the full lane judges it '
+            f'(coverage gaps: {len(summary["coverage_gaps"])}; required components outside this lane: 1).\n'))
         self.assertIn('\ncomponent.ai_provider (lanes: full; provider): ', text)
 
 
