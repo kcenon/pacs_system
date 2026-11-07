@@ -943,6 +943,10 @@ public:
      * @param subscriber_ae The subscriber AE Title
      * @return Result containing vector of subscriptions or error
      */
+    /// Remove only the AE's global subscription; what it subscribed to stays (PS3.4 Table CC.2.3-2).
+    [[nodiscard]] auto suspend_ups_global_subscription(std::string_view subscriber_ae)
+        -> VoidResult;
+
     [[nodiscard]] auto get_ups_subscriptions(std::string_view subscriber_ae) const
         -> Result<std::vector<ups_subscription>>;
 

@@ -55,9 +55,9 @@ enum class private_tag_action : std::uint8_t {
 /**
  * @brief DICOM de-identification/anonymization engine
  *
- * This class provides comprehensive DICOM de-identification capabilities
- * based on DICOM PS3.15 Annex E profiles. It supports multiple profiles
- * for different use cases (research, HIPAA compliance, GDPR, etc.).
+ * This class applies configured DICOM de-identification actions based on a
+ * subset of PS3.15 Annex E. Preset names do not establish full profile or
+ * regulatory compliance; see the conformance statement for coverage and limits.
  *
  * Thread Safety: This class is NOT thread-safe. Create separate instances
  * for concurrent operations, or use external synchronization.
@@ -67,7 +67,7 @@ enum class private_tag_action : std::uint8_t {
  * // Basic anonymization
  * anonymizer anon(anonymization_profile::hipaa_safe_harbor);
  * auto result = anon.anonymize(dataset);
- * if (result.is_ok()) {
+ * if (result.is_ok() && result.value().is_successful()) {
  *     auto report = result.value();
  *     std::cout << "Removed " << report.tags_removed << " tags\n";
  * }
@@ -133,15 +133,20 @@ public:
      * Applies the configured profile and any custom tag actions to
      * de-identify the dataset. The dataset is modified in place.
      *
-     * Actions apply to top-level elements only. A sequence (SQ) element
-     * without an action of its own is emptied: its items are removed and the
-     * element is kept with no items, counted in tags_emptied.
+     * K/C/U sequences are processed recursively using the same UID mapping
+     * and private-tag policy at every depth. X removes a sequence; Z empties
+     * it; D replaces its contents with one empty dummy item. A sequence with
+     * no configured action is emptied as a conservative fallback. Opaque UN
+     * values without an action are also emptied; attempting to retain or
+     * transform non-empty UN values produces a report error.
+     * Unparsed sequence payloads and nesting beyond 64 items produce report
+     * errors; callers must check report.is_successful() before saving data.
      *
      * @param dataset The dataset to anonymize (modified in place)
      * @return Result containing the anonymization report
      *
-     * @note UIDs are regenerated with new values (no mapping preserved).
-     *       Use anonymize_with_mapping() for consistent UID handling.
+     * @note One temporary mapping is shared across the entire dataset tree.
+     *       Use anonymize_with_mapping() for consistency across multiple files.
      */
     [[nodiscard]] auto anonymize(core::dicom_dataset& dataset)
         -> kcenon::common::Result<anonymization_report>;
@@ -397,6 +402,16 @@ private:
     bool detailed_reporting_{false};
 
     // Internal helpers
+    void apply_actions(
+        core::dicom_dataset& dataset,
+        const std::map<core::dicom_tag, tag_action_config>& actions,
+        uid_mapping& mapping,
+        anonymization_report& report,
+        std::size_t depth
+    );
+
+    void record_action(anonymization_report& report, tag_action_record record, bool sequence = false);
+
     [[nodiscard]] auto apply_action(
         core::dicom_dataset& dataset,
         core::dicom_tag tag,

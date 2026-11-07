@@ -164,7 +164,7 @@ TEST_CASE("UPS Global Subscription Instance UID constant",
     CHECK(ups_global_subscription_instance_uid == "1.2.840.10008.5.1.4.34.5");
 }
 
-TEST_CASE("UPS Watch N-ACTION type constants", "[services][ups][watch-scu]") {
+TEST_CASE("UPS Watch SCU N-ACTION type constants", "[services][ups][watch-scu]") {
     CHECK(ups_watch_action_subscribe == 3);
     CHECK(ups_watch_action_unsubscribe == 4);
     CHECK(ups_watch_action_suspend_global == 5);

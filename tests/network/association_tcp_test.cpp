@@ -19,6 +19,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/core/result.h"
 #include "kcenon/pacs/network/association.h"
+#include "kcenon/pacs/network/dicom_server.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
@@ -29,6 +30,7 @@
 #include "kcenon/pacs/services/verification_scp.h"
 
 #include <atomic>
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <future>
@@ -188,6 +190,16 @@ public:
             return std::nullopt;
         }
         return pdu;
+    }
+
+    /// Recognize a real TLS handshake record without interpreting it as a DICOM PDU.
+    bool reads_tls_client_hello() {
+        std::array<uint8_t, 5> header{};
+        if (!read_exact(header) || header[0] != 22 || header[1] != 3) return false;
+        const size_t length = (static_cast<size_t>(header[3]) << 8) | header[4];
+        if (length == 0 || length > 16384) return false;
+        std::vector<uint8_t> body(length);
+        return read_exact(body) && body.front() == 1; // ClientHello handshake type.
     }
 
     /// Whether the SCU closed the connection (EOF) within the timeout
@@ -441,6 +453,61 @@ TEST_CASE("association over TCP: no A-ASSOCIATE response aborts at the timeout",
     CHECK(elapsed < 4s);
     CHECK(scp.get());
 }
+
+TEST_CASE("association TLS cannot use the in-memory server shortcut", "[association][tcp][tls]") {
+    uint16_t port;
+    { scripted_peer available; port = available.port(); }
+    kcenon::pacs::network::dicom_server legacy(server_config{"TLS_LEGACY", port});
+    legacy.register_service(std::make_shared<services::verification_scp>());
+    REQUIRE(legacy.start().is_ok());
+    auto config = make_scu_config("TLS_LEGACY");
+    auto plaintext = association::connect("127.0.0.1", port, config, 1s);
+    REQUIRE(plaintext.is_ok()); // Prove the legacy in-memory shortcut is available.
+    CHECK(plaintext.value().negotiated_tls_version().empty());
+    REQUIRE(plaintext.value().release(1s).is_ok());
+    config.tls.enabled = true;
+    config.tls.verify_peer = false;
+    auto result = association::connect("127.0.0.1", port, config, 1s);
+    REQUIRE(result.is_err());
+    INFO(result.error().message);
+    // v1 may refuse TCP before its accept worker is ready, or close it afterward.
+    // Either must fail instead of returning the available in-memory association.
+    CHECK(result.error().code == error_codes::connection_failed);
+    legacy.stop();
+}
+
+#ifndef PACS_WITH_TLS
+TEST_CASE("association TLS reports missing OpenSSL without sending plaintext", "[association][tcp][tls]") {
+    scripted_peer peer; // TCP succeeds; the unsupported TLS path must then fail closed.
+    auto config = make_scu_config("NO_TLS");
+    config.tls.enabled = true;
+    auto result = association::connect("127.0.0.1", peer.port(), config, 1s);
+    REQUIRE(result.is_err());
+    CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("TLS support is unavailable"));
+    REQUIRE(peer.accept_connection());
+    CHECK(peer.sees_close()); // No A-ASSOCIATE bytes were sent.
+}
+#endif
+
+#ifdef PACS_WITH_TLS
+TEST_CASE("association over TLS: a silent handshake has a bounded timeout",
+          "[association][tcp][tls]") {
+    scripted_peer peer;
+    auto scp = std::async(std::launch::async, [&peer] {
+        return peer.accept_connection() && peer.reads_tls_client_hello() && peer.sees_close();
+    });
+    auto config = make_scu_config("SILENT_TLS");
+    config.tls.enabled = true;
+    config.tls.verify_peer = false; // The peer stays silent; no trust decision is reached.
+    const auto started = std::chrono::steady_clock::now();
+    auto result = association::connect("127.0.0.1", peer.port(), config, 300ms);
+    REQUIRE(result.is_err());
+    CHECK(result.error().code == error_codes::connection_timeout);
+    CHECK_THAT(result.error().message, Catch::Matchers::ContainsSubstring("TLS handshake timeout"));
+    CHECK(std::chrono::steady_clock::now() - started < 4s);
+    CHECK(scp.get());
+}
+#endif
 
 TEST_CASE("association over TCP: an oversized PDU length is refused with A-ABORT",
           "[association][tcp]") {

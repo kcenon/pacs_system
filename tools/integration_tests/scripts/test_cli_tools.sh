@@ -308,11 +308,11 @@ test_dcm_dir() {
     log_info "--- dcm_dir ---"
 
     # Set up directory with DICOM files
-    local DIR_INPUT="${WORK_DIR}/dicomdir_input"
+    local DIR_INPUT="${WORK_DIR}/FILES"
     local DICOMDIR_FILE="${WORK_DIR}/DICOMDIR"
     mkdir -p "${DIR_INPUT}"
-    cp "${TEST_DATA}/ct_minimal.dcm" "${DIR_INPUT}/"
-    cp "${TEST_DATA}/mr_minimal.dcm" "${DIR_INPUT}/"
+    cp "${TEST_DATA}/ct_minimal.dcm" "${DIR_INPUT}/CTIMG1"
+    cp "${TEST_DATA}/mr_minimal.dcm" "${DIR_INPUT}/MRIMG1"
 
     # Create DICOMDIR
     run_test "dcm_dir: create DICOMDIR" \
@@ -321,6 +321,8 @@ test_dcm_dir() {
 
     # List DICOMDIR
     if [[ -f "${DICOMDIR_FILE}" ]]; then
+        run_test "dcm_dir: verify stored links and referenced files" \
+            "\"${BINARY_DIR}/dcm_dir\" verify --check-files --check-consistency \"${DICOMDIR_FILE}\""
         local output
         output=$("${BINARY_DIR}/dcm_dir" list "${DICOMDIR_FILE}" 2>&1)
         run_test "dcm_dir: list DICOMDIR" \

@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/storage/worklist_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <chrono>
 #include <ctime>
@@ -406,8 +407,8 @@ auto worklist_repository::worklist_count(std::string_view status)
     }
 
     auto query = kcenon::pacs::compat::format(
-        "SELECT COUNT(*) as count FROM {} WHERE step_status = '{}'",
-        table_name(), std::string(status));
+        "SELECT COUNT(*) as count FROM {} WHERE step_status = {}",
+        table_name(), sql_literal(status));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());

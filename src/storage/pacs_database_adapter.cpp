@@ -20,6 +20,9 @@
 
 #include <array>
 #include <chrono>
+#include <mutex>
+#include <string>
+#include <unordered_map>
 #include <kcenon/pacs/compat/format.h>
 #include <kcenon/pacs/compat/factory_result.h>
 
@@ -52,11 +55,9 @@ struct pacs_database_adapter::impl {
     /// Transaction state
     bool in_transaction{false};
 
-    /// Last error message
-    std::string last_error_msg;
-
-    /// Last insert rowid (SQLite compatibility)
-    int64_t last_rowid{0};
+    /// Held from an INSERT until its rowid is read: the connection keeps only the latest rowid,
+    /// whichever thread inserted last.
+    std::mutex insert_mutex;
 
     impl() = default;
 
@@ -67,6 +68,27 @@ struct pacs_database_adapter::impl {
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+namespace {
+
+/// The last rowid and error each thread got through each adapter. Several threads share one adapter,
+/// and a value kept on the adapter belonged to whichever thread wrote it last (ThreadSanitizer, #1322).
+struct thread_state {
+    int64_t rowid{0};
+    std::string error;
+};
+
+thread_local std::unordered_map<const void*, thread_state> state_by_adapter;
+
+void remember_error(const void* adapter, std::string message) {
+    state_by_adapter[adapter].error = std::move(message);
+}
+
+void remember_rowid(const void* adapter, int64_t rowid) {
+    state_by_adapter[adapter].rowid = rowid;
+}
+
+}  // namespace
 
 namespace {
 
@@ -451,9 +473,12 @@ auto pacs_database_adapter::connect() -> VoidResult {
         should_use_native_sqlite(impl_->connection_string)) {
         const auto target =
             extract_sqlite_connection_target(impl_->connection_string);
+        // Every thread of the program shares this connection. FULLMUTEX serializes it whatever the
+        // library's default: Apple's system SQLite is built multi-thread (THREADSAFE=2), where two
+        // threads on one connection crash, while Debian's is serialized.
         const auto rc = sqlite3_open_v2(
             target.c_str(), &impl_->native_sqlite_db,
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI | SQLITE_OPEN_FULLMUTEX,
             nullptr);
         if (rc != SQLITE_OK) {
             const auto message = sqlite_error_message(
@@ -462,7 +487,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
                 sqlite3_close(impl_->native_sqlite_db);
                 impl_->native_sqlite_db = nullptr;
             }
-            impl_->last_error_msg = message;
+            remember_error(impl_.get(), message);
             return make_void_error(
                 rc, kcenon::pacs::compat::format("Failed to connect: {}", message),
                 "storage");
@@ -472,14 +497,14 @@ auto pacs_database_adapter::connect() -> VoidResult {
         auto pragma_result =
             execute_native_sqlite(impl_->native_sqlite_db, "PRAGMA foreign_keys = ON");
         if (pragma_result.is_err()) {
-            impl_->last_error_msg = pragma_result.error().message;
+            remember_error(impl_.get(), pragma_result.error().message);
             sqlite3_close(impl_->native_sqlite_db);
             impl_->native_sqlite_db = nullptr;
             return pragma_result;
         }
 
         impl_->use_native_sqlite = true;
-        impl_->last_error_msg.clear();
+        remember_error(impl_.get(), {});
         return ok();
     }
 
@@ -491,7 +516,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
                 .enable_logging(database::integrated::db_log_level::warning)
                 .build());
         if (database_result.is_err()) {
-            impl_->last_error_msg = database_result.error().message;
+            remember_error(impl_.get(), database_result.error().message);
             return make_void_error(database_result.error().code,
                                    database_result.error().message, "storage");
         }
@@ -503,7 +528,7 @@ auto pacs_database_adapter::connect() -> VoidResult {
                                impl_->connection_string);
 
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_void_error(
                 result.error().code,
                 kcenon::pacs::compat::format("Failed to connect: {}",
@@ -511,10 +536,10 @@ auto pacs_database_adapter::connect() -> VoidResult {
                 "storage");
         }
 
-        impl_->last_error_msg.clear();
+        remember_error(impl_.get(), {});
         return ok();
     } catch (const std::exception& e) {
-        impl_->last_error_msg = e.what();
+        remember_error(impl_.get(), e.what());
         return make_void_error(
             -1, kcenon::pacs::compat::format("Connection failed: {}", e.what()),
             "storage");
@@ -556,7 +581,7 @@ auto pacs_database_adapter::disconnect() -> VoidResult {
 
     auto result = impl_->db->disconnect();
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_void_error(
             result.error().code,
             kcenon::pacs::compat::format("Failed to disconnect: {}",
@@ -615,7 +640,7 @@ auto pacs_database_adapter::run_select(const std::string& query)
     if (impl_->use_native_sqlite) {
         auto result = select_native_sqlite(impl_->native_sqlite_db, query);
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_error<database_result>(
                 result.error().code,
                 kcenon::pacs::compat::format("SELECT failed: {}", result.error().message),
@@ -627,7 +652,7 @@ auto pacs_database_adapter::run_select(const std::string& query)
 
     auto result = impl_->db->select(query);
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_error<database_result>(
             result.error().code,
             kcenon::pacs::compat::format("SELECT failed: {}", result.error().message),
@@ -644,23 +669,24 @@ auto pacs_database_adapter::run_insert(const std::string& query)
         return make_error<uint64_t>(-1, "Not connected to database", "storage");
     }
 
+    std::lock_guard<std::mutex> inserting(impl_->insert_mutex);
     if (impl_->use_native_sqlite) {
         auto result = mutate_native_sqlite(impl_->native_sqlite_db, query);
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_error<uint64_t>(
                 result.error().code,
                 kcenon::pacs::compat::format("INSERT failed: {}", result.error().message),
                 "storage");
         }
 
-        impl_->last_rowid = sqlite3_last_insert_rowid(impl_->native_sqlite_db);
+        remember_rowid(impl_.get(), sqlite3_last_insert_rowid(impl_->native_sqlite_db));
         return result;
     }
 
     auto result = impl_->db->insert(query);
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_error<uint64_t>(
             result.error().code,
             kcenon::pacs::compat::format("INSERT failed: {}", result.error().message),
@@ -674,8 +700,8 @@ auto pacs_database_adapter::run_insert(const std::string& query)
             impl_->db->select("SELECT last_insert_rowid() as rowid");
         if (rowid_result.is_ok() && !rowid_result.value().empty()) {
             try {
-                impl_->last_rowid =
-                    std::stoll(rowid_result.value()[0].at("rowid"));
+                remember_rowid(impl_.get(),
+                               std::stoll(rowid_result.value()[0].at("rowid")));
             } catch (...) {
                 // Ignore conversion errors
             }
@@ -695,7 +721,7 @@ auto pacs_database_adapter::run_update(const std::string& query)
     if (impl_->use_native_sqlite) {
         auto result = mutate_native_sqlite(impl_->native_sqlite_db, query);
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_error<uint64_t>(
                 result.error().code,
                 kcenon::pacs::compat::format("UPDATE failed: {}", result.error().message),
@@ -707,7 +733,7 @@ auto pacs_database_adapter::run_update(const std::string& query)
 
     auto result = impl_->db->update(query);
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_error<uint64_t>(
             result.error().code,
             kcenon::pacs::compat::format("UPDATE failed: {}", result.error().message),
@@ -727,7 +753,7 @@ auto pacs_database_adapter::run_remove(const std::string& query)
     if (impl_->use_native_sqlite) {
         auto result = mutate_native_sqlite(impl_->native_sqlite_db, query);
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_error<uint64_t>(
                 result.error().code,
                 kcenon::pacs::compat::format("DELETE failed: {}", result.error().message),
@@ -739,7 +765,7 @@ auto pacs_database_adapter::run_remove(const std::string& query)
 
     auto result = impl_->db->remove(query);
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_error<uint64_t>(
             result.error().code,
             kcenon::pacs::compat::format("DELETE failed: {}", result.error().message),
@@ -759,7 +785,7 @@ auto pacs_database_adapter::run_execute(const std::string& query)
     if (impl_->use_native_sqlite) {
         auto result = execute_native_sqlite(impl_->native_sqlite_db, query);
         if (result.is_err()) {
-            impl_->last_error_msg = result.error().message;
+            remember_error(impl_.get(), result.error().message);
             return make_void_error(
                 result.error().code,
                 kcenon::pacs::compat::format("Execute failed: {}", result.error().message),
@@ -771,7 +797,7 @@ auto pacs_database_adapter::run_execute(const std::string& query)
 
     auto result = impl_->db->execute(query);
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_void_error(
             result.error().code,
             kcenon::pacs::compat::format("Execute failed: {}", result.error().message),
@@ -835,7 +861,7 @@ auto pacs_database_adapter::begin_transaction_internal() -> VoidResult {
         return ok();
     }();
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_void_error(
             result.error().code,
             kcenon::pacs::compat::format("BEGIN TRANSACTION failed: {}",
@@ -873,7 +899,7 @@ auto pacs_database_adapter::commit_internal() -> VoidResult {
     impl_->in_transaction = false;
 
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_void_error(
             result.error().code,
             kcenon::pacs::compat::format("COMMIT failed: {}", result.error().message),
@@ -909,7 +935,7 @@ auto pacs_database_adapter::rollback_internal() -> VoidResult {
     impl_->in_transaction = false;
 
     if (result.is_err()) {
-        impl_->last_error_msg = result.error().message;
+        remember_error(impl_.get(), result.error().message);
         return make_void_error(
             result.error().code,
             kcenon::pacs::compat::format("ROLLBACK failed: {}",
@@ -941,11 +967,19 @@ auto pacs_database_adapter::in_transaction() const noexcept -> bool {
 // ============================================================================
 
 auto pacs_database_adapter::last_insert_rowid() const -> int64_t {
-    return impl_ ? impl_->last_rowid : 0;
+    if (!impl_) {
+        return 0;
+    }
+    const auto found = state_by_adapter.find(impl_.get());
+    return found == state_by_adapter.end() ? 0 : found->second.rowid;
 }
 
 auto pacs_database_adapter::last_error() const -> std::string {
-    return impl_ ? impl_->last_error_msg : "";
+    if (!impl_) {
+        return "";
+    }
+    const auto found = state_by_adapter.find(impl_.get());
+    return found == state_by_adapter.end() ? std::string{} : found->second.error;
 }
 
 // ============================================================================

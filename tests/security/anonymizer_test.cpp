@@ -293,65 +293,6 @@ TEST_CASE("Anonymizer: Custom Tag Actions", "[security][anonymization]") {
     }
 }
 
-TEST_CASE("Anonymizer: Sequences without an action are emptied",
-          "[security][anonymization]") {
-    constexpr dicom_tag other_patient_ids_sequence{0x0010, 0x1002};
-    constexpr dicom_tag request_attributes_sequence{0x0040, 0x0275};
-    constexpr dicom_tag requested_procedure_id{0x0040, 0x1001};
-
-    // Identifiers that no profile action reaches inside sequence items
-    auto dataset = create_test_dataset();
-    dicom_dataset other_id;
-    other_id.set_string(tags::patient_id, vr_type::LO, "SSN-987-65-4321");
-    dataset.get_or_create_sequence(other_patient_ids_sequence).push_back(std::move(other_id));
-    dicom_dataset request;
-    request.set_string(tags::accession_number, vr_type::SH, "ACC-777");
-    request.set_string(requested_procedure_id, vr_type::SH, "RP-555");
-    dataset.get_or_create_sequence(request_attributes_sequence).push_back(std::move(request));
-
-    anonymizer anon(anonymization_profile::basic);
-
-    SECTION("their items are removed and the elements are kept") {
-        auto without_sequences = create_test_dataset();
-        auto baseline = anonymizer(anonymization_profile::basic).anonymize(without_sequences);
-        REQUIRE(baseline.is_ok());
-
-        auto result = anon.anonymize(dataset);
-        REQUIRE(result.is_ok());
-        for (const auto tag : {other_patient_ids_sequence, request_attributes_sequence}) {
-            const auto* items = dataset.get_sequence(tag);
-            REQUIRE(items != nullptr);
-            CHECK(items->empty());
-        }
-        CHECK(result.value().tags_emptied == baseline.value().tags_emptied + 2);
-    }
-
-    SECTION("a sequence with its own action follows that action") {
-        anon.add_tag_action(other_patient_ids_sequence, tag_action_config::make_remove());
-        anon.add_tag_action(request_attributes_sequence, tag_action_config::make_keep());
-        REQUIRE(anon.anonymize(dataset).is_ok());
-
-        CHECK_FALSE(dataset.contains(other_patient_ids_sequence));
-        const auto* items = dataset.get_sequence(request_attributes_sequence);
-        REQUIRE(items != nullptr);
-        REQUIRE(items->size() == 1);
-        CHECK((*items)[0].get_string(tags::accession_number) == "ACC-777");
-    }
-
-    SECTION("detailed reporting records each emptied sequence") {
-        anon.set_detailed_reporting(true);
-        auto result = anon.anonymize(dataset);
-        REQUIRE(result.is_ok());
-
-        const auto& records = result.value().action_records;
-        for (const auto tag : {other_patient_ids_sequence, request_attributes_sequence}) {
-            CHECK(std::any_of(records.begin(), records.end(), [tag](const auto& record) {
-                return record.tag == tag && record.action == tag_action::empty;
-            }));
-        }
-    }
-}
-
 TEST_CASE("Anonymizer: Date Shifting", "[security][anonymization]") {
     anonymizer anon(anonymization_profile::retain_longitudinal);
 
@@ -837,6 +778,7 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         CHECK(dataset.get_string(tags::patient_name) == "DOE^JOHN");
     }
 
+#ifdef PACS_WITH_DIGITAL_SIGNATURES
     SECTION("Encrypt succeeds with valid key") {
         std::array<std::uint8_t, 32> key{};
         for (std::size_t i = 0; i < key.size(); ++i) {
@@ -851,10 +793,10 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         auto dataset = create_test_dataset();
         auto original_name = dataset.get_string(tags::patient_name);
         auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.empty());
 
         auto encrypted = dataset.get_string(tags::patient_name);
-        // With OpenSSL: encrypted hex output
-        // Without OpenSSL: may keep original or show error
         CHECK(encrypted != original_name);
     }
 
@@ -871,8 +813,12 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
         auto ds1 = create_test_dataset();
         auto ds2 = create_test_dataset();
 
-        (void)anon.anonymize(ds1);
-        (void)anon.anonymize(ds2);
+        auto first = anon.anonymize(ds1);
+        auto second = anon.anonymize(ds2);
+        REQUIRE(first.is_ok());
+        REQUIRE(second.is_ok());
+        REQUIRE(first.value().errors.empty());
+        REQUIRE(second.value().errors.empty());
 
         auto enc1 = ds1.get_string(tags::patient_name);
         auto enc2 = ds2.get_string(tags::patient_name);
@@ -895,12 +841,34 @@ TEST_CASE("Anonymizer: AES-256-GCM Encryption", "[security][anonymization]") {
                            tag_action_config{.action = tag_action::encrypt});
 
         auto dataset = create_test_dataset();
-        (void)anon.anonymize(dataset);
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.empty());
 
         auto encrypted = dataset.get_string(tags::patient_id);
-        if (!encrypted.empty()) {
-            CHECK(encrypted.find_first_not_of("0123456789abcdef")
-                  == std::string::npos);
-        }
+        REQUIRE_FALSE(encrypted.empty());
+        CHECK(encrypted.find_first_not_of("0123456789abcdef") == std::string::npos);
     }
+#else
+    SECTION("Unavailable encryption reports a failed action without claiming a replacement") {
+        std::array<std::uint8_t, 32> key{};
+        REQUIRE(anon.set_encryption_key(key).is_ok());
+        anon.set_detailed_reporting(true);
+        anon.add_tag_action(tags::patient_name, tag_action_config{.action = tag_action::encrypt});
+        auto dataset = create_test_dataset();
+        auto result = anon.anonymize(dataset);
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value().errors.size() == 1);
+        CHECK(result.value().errors.front() ==
+              "Encryption requires OpenSSL (build with PACS_WITH_DIGITAL_SIGNATURES)");
+        CHECK(dataset.get_string(tags::patient_name) == "DOE^JOHN");
+        const auto& actions = result.value().action_records;
+        const auto action = std::find_if(actions.begin(), actions.end(), [](const auto& record) {
+            return record.tag == tags::patient_name;
+        });
+        REQUIRE(action != actions.end());
+        CHECK_FALSE(action->success);
+        CHECK(action->new_value.empty());
+    }
+#endif
 }

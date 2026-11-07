@@ -12,11 +12,12 @@ target_include_directories(dcm_modify
 )
 
 # Link required PACS libraries
-# Note: dcm_modify only needs core and encoding - no network dependencies
+# The compatibility anonymizer delegates to pacs_security (no network dependency).
 target_link_libraries(dcm_modify
     PRIVATE
         pacs_core
         pacs_encoding
+        pacs_security
 )
 
 # Set C++20 standard

@@ -15,6 +15,7 @@
 #include "crow.h"
 
 #include "../../src/web/endpoints/endpoint_uuid.h"
+#include "../../src/web/rest_app.h"
 
 #include "kcenon/pacs/storage/index_database.h"
 #include "kcenon/pacs/web/endpoints/system_endpoints.h"
@@ -31,13 +32,13 @@
 
 namespace kcenon::pacs::web::endpoints {
 // Internal registration functions, declared the same way in rest_server.cpp
-void register_annotation_endpoints_impl(crow::SimpleApp &app,
+void register_annotation_endpoints_impl(rest_app &app,
                                         std::shared_ptr<rest_server_context> ctx);
-void register_measurement_endpoints_impl(crow::SimpleApp &app,
+void register_measurement_endpoints_impl(rest_app &app,
                                          std::shared_ptr<rest_server_context> ctx);
-void register_key_image_endpoints_impl(crow::SimpleApp &app,
+void register_key_image_endpoints_impl(rest_app &app,
                                        std::shared_ptr<rest_server_context> ctx);
-void register_viewer_state_endpoints_impl(crow::SimpleApp &app,
+void register_viewer_state_endpoints_impl(rest_app &app,
                                           std::shared_ptr<rest_server_context> ctx);
 } // namespace kcenon::pacs::web::endpoints
 
@@ -86,7 +87,7 @@ TEST_CASE("resource POST endpoints draw IDs from concurrent handler threads",
   auto ctx = std::make_shared<rest_server_context>();
   ctx->database = std::move(db_result.value());
 
-  crow::SimpleApp app;
+  rest_app app;
   endpoints::register_annotation_endpoints_impl(app, ctx);
   endpoints::register_measurement_endpoints_impl(app, ctx);
   endpoints::register_key_image_endpoints_impl(app, ctx);

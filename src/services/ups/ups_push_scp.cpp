@@ -11,8 +11,28 @@
 #include "kcenon/pacs/network/dimse/command_field.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
+#include "kcenon/pacs/services/ups/ups_rules.h"
+
+#include <iomanip>
+#include <mutex>
+#include <random>
+#include <sstream>
 
 namespace kcenon::pacs::services {
+
+namespace {
+
+/// PS3.5 B.2: a UUID derived UID, for an N-CREATE that left the choice to the SCP.
+[[nodiscard]] std::string generate_uid() {
+    static thread_local std::mt19937_64 engine{std::random_device{}()};
+    std::uniform_int_distribution<uint64_t> high{1, UINT64_MAX};
+    std::uniform_int_distribution<uint64_t> low{};
+    std::ostringstream uid;
+    uid << "2.25." << high(engine) << std::setw(19) << std::setfill('0') << low(engine) % 10000000000000000000ULL;
+    return uid.str();
+}
+
+}  // namespace
 
 // =============================================================================
 // Construction
@@ -43,6 +63,10 @@ void ups_push_scp::set_change_state_handler(ups_change_state_handler handler) {
 
 void ups_push_scp::set_request_cancel_handler(ups_request_cancel_handler handler) {
     request_cancel_handler_ = std::move(handler);
+}
+
+void ups_push_scp::set_cancel_request_handler(ups_cancel_request_handler handler) {
+    cancel_request_handler_ = std::move(handler);
 }
 
 // =============================================================================
@@ -149,11 +173,10 @@ network::Result<std::monostate> ups_push_scp::handle_n_create(
     }
 
     // Get the SOP Instance UID (workitem UID)
-    auto sop_instance_uid = request.affected_sop_instance_uid();
+    // PS3.7 10.1.5: the SCU may leave the UID to the SCP, which then answers with it.
+    std::string sop_instance_uid{request.affected_sop_instance_uid()};
     if (sop_instance_uid.empty()) {
-        return send_n_create_response(
-            assoc, context_id, request.message_id(),
-            "", status_error_missing_attribute);
+        sop_instance_uid = generate_uid();
     }
 
     // Verify we have a dataset
@@ -165,23 +188,25 @@ network::Result<std::monostate> ups_push_scp::handle_n_create(
 
     const auto& dataset = request.dataset().value().get();
 
-    // Validate initial state is SCHEDULED (if present in dataset)
-    if (dataset.contains(ups_tags::procedure_step_state)) {
-        auto state_str = dataset.get_string(ups_tags::procedure_step_state);
-        auto parsed_state = storage::parse_ups_state(state_str);
+    // Table CC.1.1-2 and CC.2.5.3: what an N-CREATE must and must not carry
+    if (const auto status = ups_create_status(dataset); status != status_success) {
+        return send_n_create_response(
+            assoc, context_id, request.message_id(),
+            sop_instance_uid, status);
+    }
 
-        if (!parsed_state.has_value() ||
-            parsed_state.value() != storage::ups_state::scheduled) {
-            return send_n_create_response(
-                assoc, context_id, request.message_id(),
-                sop_instance_uid, status_error_cannot_understand);
-        }
+    std::lock_guard<std::mutex> state_lock(state_mutex_);
+    if (get_handler_ && get_handler_(sop_instance_uid).is_ok()) {
+        return send_n_create_response(
+            assoc, context_id, request.message_id(),
+            sop_instance_uid, status_error_duplicate_sop_instance);
     }
 
     // Build UPS workitem from request data
     storage::ups_workitem workitem;
     workitem.workitem_uid = sop_instance_uid;
     workitem.state = "SCHEDULED";
+    workitem.attributes = dataset;
 
     // Extract optional fields from dataset
     if (dataset.contains(ups_tags::procedure_step_label)) {
@@ -200,9 +225,10 @@ network::Result<std::monostate> ups_push_scp::handle_n_create(
     // Call the handler to create the workitem
     auto result = create_handler_(workitem);
     if (result.is_err()) {
+        logger_->error("UPS N-CREATE " + sop_instance_uid + ": " + result.error().message);
         return send_n_create_response(
             assoc, context_id, request.message_id(),
-            sop_instance_uid, status_error_unable_to_process);
+            sop_instance_uid, ups_status_from_error_code(result.error().code));
     }
 
     ++creates_processed_;
@@ -253,26 +279,42 @@ network::Result<std::monostate> ups_push_scp::handle_n_set(
 
     const auto& dataset = request.dataset().value().get();
 
-    // Reject if dataset tries to set a final state directly via N-SET
-    // (state changes must go through N-ACTION)
-    if (dataset.contains(ups_tags::procedure_step_state)) {
-        auto state_str = dataset.get_string(ups_tags::procedure_step_state);
-        auto parsed_state = storage::parse_ups_state(state_str);
-        if (parsed_state.has_value() &&
-            (parsed_state.value() == storage::ups_state::completed ||
-             parsed_state.value() == storage::ups_state::canceled)) {
+    std::lock_guard<std::mutex> state_lock(state_mutex_);
+    if (get_handler_) {
+        auto current = get_handler_(sop_instance_uid);
+        if (current.is_err()) {
             return send_n_set_response(
                 assoc, context_id, request.message_id(),
-                sop_instance_uid, status_error_cannot_understand);
+                sop_instance_uid, status_ups_no_such_instance);
+        }
+        const auto status = ups_set_status(
+            current.value().state, current.value().transaction_uid,
+            dataset.get_string(ups_tags::transaction_uid));
+        if (status != status_success) {
+            return send_n_set_response(
+                assoc, context_id, request.message_id(),
+                sop_instance_uid, status);
         }
     }
 
-    // Call the handler to update the workitem
-    auto result = set_handler_(sop_instance_uid, dataset);
-    if (result.is_err()) {
+    // State changes go through N-ACTION only.
+    if (dataset.contains(ups_tags::procedure_step_state)) {
         return send_n_set_response(
             assoc, context_id, request.message_id(),
-            sop_instance_uid, status_error_unable_to_process);
+            sop_instance_uid, status_error_invalid_attribute_value);
+    }
+
+    // The Transaction UID only proves control here; it is not a change to the instance.
+    core::dicom_dataset modifications = dataset;
+    modifications.remove(ups_tags::transaction_uid);
+
+    // Call the handler to update the workitem
+    auto result = set_handler_(sop_instance_uid, modifications);
+    if (result.is_err()) {
+        logger_->error("UPS N-SET " + sop_instance_uid + ": " + result.error().message);
+        return send_n_set_response(
+            assoc, context_id, request.message_id(),
+            sop_instance_uid, ups_status_from_error_code(result.error().code));
     }
 
     ++sets_processed_;
@@ -313,14 +355,14 @@ network::Result<std::monostate> ups_push_scp::handle_n_get(
     if (result.is_err()) {
         return send_n_get_response(
             assoc, context_id, request.message_id(),
-            sop_instance_uid, status_error_invalid_object_instance);
+            sop_instance_uid, status_ups_no_such_instance);
     }
 
     ++gets_processed_;
 
     // Build response dataset from workitem
     const auto& workitem = result.value();
-    core::dicom_dataset response_dataset;
+    core::dicom_dataset response_dataset = workitem.attributes;
 
     response_dataset.set_string(
         ups_tags::procedure_step_state,
@@ -347,10 +389,20 @@ network::Result<std::monostate> ups_push_scp::handle_n_get(
             encoding::vr_type::DS,
             std::to_string(workitem.progress_percent));
     }
-    if (!workitem.transaction_uid.empty()) {
-        response_dataset.set_string(
-            ups_tags::transaction_uid,
-            encoding::vr_type::UI, workitem.transaction_uid);
+
+    // Table CC.2.5-3: the Transaction UID is the lock, and N-GET never returns it.
+    response_dataset.remove(ups_tags::transaction_uid);
+
+    // An empty identifier list means every attribute (PS3.7 10.1.2.1.4).
+    const auto wanted = request.attribute_identifier_list();
+    if (!wanted.empty()) {
+        core::dicom_dataset selected;
+        for (const auto tag : wanted) {
+            if (const auto* element = response_dataset.get(tag)) {
+                selected.insert(*element);
+            }
+        }
+        response_dataset = std::move(selected);
     }
 
     return send_n_get_response(
@@ -421,7 +473,7 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
         if (!parsed_state.has_value()) {
             return send_n_action_response(
                 assoc, context_id, request.message_id(),
-                sop_instance_uid, action_id, status_error_cannot_understand);
+                sop_instance_uid, action_id, status_error_invalid_attribute_value);
         }
 
         // Extract Transaction UID (required when transitioning to IN PROGRESS)
@@ -430,18 +482,40 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
             txn_uid = dataset.get_string(ups_tags::transaction_uid);
         }
 
-        if (parsed_state.value() == storage::ups_state::in_progress &&
-            txn_uid.empty()) {
+        std::lock_guard<std::mutex> state_lock(state_mutex_);
+
+        // Table CC.1.1-2, answered from the state the instance has now.
+        if (get_handler_) {
+            auto current = get_handler_(sop_instance_uid);
+            if (current.is_err()) {
+                return send_n_action_response(
+                    assoc, context_id, request.message_id(),
+                    sop_instance_uid, action_id, status_ups_no_such_instance);
+            }
+            auto status = ups_change_state_status(
+                current.value().state, current.value().transaction_uid, new_state, txn_uid);
+            // Hosts that keep no attributes have nothing the requirements could be checked against.
+            if (status == status_success && !current.value().attributes.empty() &&
+                !ups_final_state_met(current.value().attributes, new_state)) {
+                status = status_ups_final_state_unmet;
+            }
+            if (status != status_success) {
+                return send_n_action_response(
+                    assoc, context_id, request.message_id(),
+                    sop_instance_uid, action_id, status);
+            }
+        } else if (parsed_state.value() == storage::ups_state::in_progress && txn_uid.empty()) {
             return send_n_action_response(
                 assoc, context_id, request.message_id(),
-                sop_instance_uid, action_id, status_error_missing_attribute);
+                sop_instance_uid, action_id, status_ups_wrong_transaction);
         }
 
         auto result = change_state_handler_(sop_instance_uid, new_state, txn_uid);
         if (result.is_err()) {
+            logger_->error("UPS state change of " + sop_instance_uid + ": " + result.error().message);
             return send_n_action_response(
                 assoc, context_id, request.message_id(),
-                sop_instance_uid, action_id, status_error_unable_to_process);
+                sop_instance_uid, action_id, ups_status_from_error_code(result.error().code));
         }
 
         ++actions_processed_;
@@ -452,27 +526,45 @@ network::Result<std::monostate> ups_push_scp::handle_n_action(
             sop_instance_uid, action_id, status_success);
 
     } else if (action_id == ups_action_request_cancel) {
-        // N-ACTION Type 3: Request Cancellation
-        if (!request_cancel_handler_) {
+        // N-ACTION Type 2: Request UPS Cancel
+        if (!cancel_request_handler_ && !request_cancel_handler_) {
             return kcenon::pacs::pacs_void_error(
                 kcenon::pacs::error_codes::ups_handler_not_set,
                 "No Request Cancel handler configured for UPS Push SCP");
         }
 
-        // Extract cancellation reason (optional)
-        std::string reason;
-        if (request.has_dataset()) {
-            const auto& dataset = request.dataset().value().get();
-            if (dataset.contains(ups_tags::reason_for_cancellation)) {
-                reason = dataset.get_string(ups_tags::reason_for_cancellation);
+        std::lock_guard<std::mutex> state_lock(state_mutex_);
+
+        // Table CC.1.1-2 and Table CC.2.2-2.
+        if (get_handler_) {
+            auto current = get_handler_(sop_instance_uid);
+            if (current.is_err()) {
+                return send_n_action_response(
+                    assoc, context_id, request.message_id(),
+                    sop_instance_uid, action_id, status_ups_no_such_instance);
+            }
+            if (current.value().state == "COMPLETED") {
+                return send_n_action_response(
+                    assoc, context_id, request.message_id(),
+                    sop_instance_uid, action_id, status_ups_cannot_cancel_completed);
+            }
+            if (current.value().state == "CANCELED") {
+                return send_n_action_response(
+                    assoc, context_id, request.message_id(),
+                    sop_instance_uid, action_id, status_ups_already_canceled);
             }
         }
 
-        auto result = request_cancel_handler_(sop_instance_uid, reason);
+        const core::dicom_dataset no_information;
+        const auto& information = request.has_dataset() ? request.dataset().value().get() : no_information;
+        auto result = cancel_request_handler_
+            ? cancel_request_handler_(sop_instance_uid, information, std::string(assoc.calling_ae()))
+            : request_cancel_handler_(sop_instance_uid, information.get_string(ups_tags::reason_for_cancellation));
         if (result.is_err()) {
+            logger_->error("UPS cancel request for " + sop_instance_uid + ": " + result.error().message);
             return send_n_action_response(
                 assoc, context_id, request.message_id(),
-                sop_instance_uid, action_id, status_error_unable_to_process);
+                sop_instance_uid, action_id, ups_status_from_error_code(result.error().code));
         }
 
         ++actions_processed_;

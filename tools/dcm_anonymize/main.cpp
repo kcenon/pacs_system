@@ -5,7 +5,7 @@
  *
  * A command-line utility for DICOM de-identification/anonymization compliant
  * with DICOM PS3.15 (Security Profiles). Supports multiple anonymization
- * profiles including HIPAA Safe Harbor and GDPR compliance.
+ * identifier presets, including recursive sequence processing.
  *
  * @see Issue #284 - dcm_anonymize: Implement DICOM anonymization utility
  * @see DICOM PS3.15 Annex E - Attribute Confidentiality Profiles
@@ -99,8 +99,7 @@ void print_usage(const char* program_name) {
         << "                          basic                - Remove direct "
            "identifiers\n";
     std::cout
-        << "                          clean_pixel          - Remove burned-in "
-           "annotations\n";
+        << "                          clean_pixel          - Metadata only; no pixel cleaning\n";
     std::cout
         << "                          clean_descriptions   - Clean free-text "
            "fields\n";
@@ -117,7 +116,7 @@ void print_usage(const char* program_name) {
 
     std::cout << "Tag Customization Options:\n";
     std::cout
-        << "  -k, --keep <tag>        Keep specific tag unchanged\n";
+        << "  -k, --keep <tag>        Keep scalar value; recursively clean SQ items\n";
     std::cout << "                          Example: -k \"(0010,0040)\" or -k "
                  "PatientSex\n";
     std::cout << "  -r, --replace <tag=val> Replace tag with specific value\n";
@@ -127,6 +126,8 @@ void print_usage(const char* program_name) {
     std::cout << "      --retain-uid        Retain original UIDs\n";
     std::cout << "      --date-offset <days> Shift dates by specified days\n\n";
 
+    std::cout << "Private elements are removed at every depth, including kept sequences.\n";
+    std::cout << "Custom retention may retain identifying information.\n\n";
     std::cout << "Mapping Options:\n";
     std::cout << "  -m, --mapping-file <f>  UID mapping file (JSON format)\n";
     std::cout << "                          Used for consistent anonymization "
@@ -139,7 +140,7 @@ void print_usage(const char* program_name) {
 
     std::cout << "Processing Options:\n";
     std::cout << "  --recursive             Process directories recursively\n";
-    std::cout << "  --verify                Verify anonymization result\n";
+    std::cout << "  --verify                Check common identifiers recursively (heuristic)\n";
     std::cout << "  --dry-run               Show what would be done without "
                  "modifying\n";
     std::cout << "  --detailed              Show detailed anonymization "
@@ -163,7 +164,7 @@ void print_usage(const char* program_name) {
         << "  basic                    - Removes patient name, ID, birth date, "
            "etc.\n";
     std::cout
-        << "  clean_pixel              - Extends basic with pixel data cleaning\n";
+        << "  clean_pixel              - Metadata only; pixel cleaning is not implemented\n";
     std::cout
         << "  clean_descriptions       - Extends basic with description field cleaning\n";
     std::cout
@@ -171,9 +172,9 @@ void print_usage(const char* program_name) {
     std::cout
         << "  retain_patient_characteristics - Keeps sex, age, size, weight\n";
     std::cout
-        << "  hipaa_safe_harbor        - Full HIPAA Safe Harbor compliance\n";
+        << "  hipaa_safe_harbor        - HIPAA-oriented preset; compliance is not guaranteed\n";
     std::cout
-        << "  gdpr_compliant           - GDPR pseudonymization requirements\n\n";
+        << "  gdpr_compliant           - Pseudonymization preset; compliance is not guaranteed\n\n";
 
     std::cout << "Exit Codes:\n";
     std::cout << "  0  Success\n";
@@ -409,12 +410,12 @@ bool create_backup(const std::filesystem::path& file_path) {
 /**
  * @brief Verify that anonymization was successful
  * @param dataset The anonymized dataset
- * @param profile The anonymization profile used
+ * @param depth Sequence nesting depth (diagnostics never include tag values)
  * @return Vector of warnings (empty if verification passed)
  */
 std::vector<std::string> verify_anonymization(
     const kcenon::pacs::core::dicom_dataset& dataset,
-    kcenon::pacs::security::anonymization_profile profile) {
+    std::size_t depth = 0) {
     std::vector<std::string> warnings;
 
     using namespace kcenon::pacs::core;
@@ -434,8 +435,17 @@ std::vector<std::string> verify_anonymization(
         auto value = dataset.get_string(tag);
         if (!value.empty() && value != "Anonymous" && value != "ANONYMOUS" &&
             value.find("ANON") == std::string::npos) {
-            warnings.push_back("Tag " + name + " may contain identifying "
-                               "information: " + value);
+            warnings.push_back("Tag " + name + " at depth " + std::to_string(depth) +
+                               " may contain identifying information");
+        }
+    }
+
+    for (const auto& [tag, element] : dataset) {
+        if (element.is_sequence()) {
+            for (const auto& item : element.sequence_items()) {
+                auto nested = verify_anonymization(item, depth + 1);
+                warnings.insert(warnings.end(), nested.begin(), nested.end());
+            }
         }
     }
 
@@ -490,6 +500,7 @@ bool process_file(const std::filesystem::path& input_path,
 
     // Create anonymizer with profile
     anonymizer anon(opts.profile);
+    anon.set_private_tag_action(private_tag_action::remove_all);
 
     // Configure date offset if specified
     if (opts.date_offset_days) {
@@ -509,7 +520,7 @@ bool process_file(const std::filesystem::path& input_path,
         anon.add_tag_action(tag, tag_action_config::make_replace(value));
         if (opts.verbose) {
             std::cout << "  Replacing tag: " << tag.to_string()
-                      << " = " << value << "\n";
+                      << "\n";
         }
     }
 
@@ -525,20 +536,18 @@ bool process_file(const std::filesystem::path& input_path,
             tag_action_config::make_replace(*opts.new_patient_name));
     }
 
-    // Handle UID retention
+    // Retain both primary and referenced instance UIDs consistently. K on a
+    // sequence retains its structure while still cleaning identifiers in items.
     if (opts.retain_uid) {
-        anon.add_tag_action(tags::study_instance_uid,
-                            tag_action_config::make_keep());
-        anon.add_tag_action(tags::series_instance_uid,
-                            tag_action_config::make_keep());
-        anon.add_tag_action(tags::sop_instance_uid,
-                            tag_action_config::make_keep());
+        for (const auto& [tag, config] : anonymizer::get_profile_actions(opts.profile)) {
+            if (config.action == tag_action::replace_uid) {
+                anon.add_tag_action(tag, tag_action_config::make_keep());
+            }
+        }
     }
 
-    // Perform anonymization
-    auto anon_result = (!opts.mapping_file.empty() || !mapping.empty())
-        ? anon.anonymize_with_mapping(dataset, mapping)
-        : anon.anonymize(dataset);
+    // One mapping for the whole invocation, including batches without --mapping.
+    auto anon_result = anon.anonymize_with_mapping(dataset, mapping);
 
     if (anon_result.is_err()) {
         std::cerr << "Error: Anonymization failed for '"
@@ -548,6 +557,11 @@ bool process_file(const std::filesystem::path& input_path,
     }
 
     auto report = anon_result.value();
+    if (!report.is_successful()) {
+        std::cerr << "Error: Anonymization reported " << report.errors.size()
+                  << " failed actions; output was not saved\n";
+        return false;
+    }
     stats.tags_removed += report.tags_removed;
     stats.tags_replaced += report.tags_replaced;
     stats.tags_kept += report.tags_kept;
@@ -565,14 +579,14 @@ bool process_file(const std::filesystem::path& input_path,
 
     // Verify if requested
     if (opts.verify) {
-        auto warnings = verify_anonymization(dataset, opts.profile);
+        auto warnings = verify_anonymization(dataset);
         if (!warnings.empty()) {
             std::cout << "  Verification warnings:\n";
             for (const auto& warning : warnings) {
                 std::cout << "    - " << warning << "\n";
             }
         } else if (opts.verbose) {
-            std::cout << "  Verification: PASSED\n";
+            std::cout << "  Verification: no heuristic identifier warnings (not a compliance check)\n";
         }
     }
 

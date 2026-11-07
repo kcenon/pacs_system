@@ -4,7 +4,7 @@
 
 /**
  * @file dicom_server.h
- * @brief Multi-threaded DICOM server for handling multiple associations
+ * @brief Legacy in-process DICOM server for handling multiple associations
  *
  * This file provides the dicom_server class for managing DICOM network
  * associations, including connection acceptance, service dispatching,
@@ -55,15 +55,16 @@ class association_pool;
 /**
  * @brief Multi-threaded DICOM server for handling multiple associations
  *
- * Manages the DICOM network server lifecycle including:
- * - TCP connection acceptance
+ * Manages the legacy in-process server lifecycle including:
  * - Association negotiation
  * - Service registration and dispatching
  * - Worker thread pool management
  * - Association pooling
  *
- * The server integrates with the ecosystem's thread_system for efficient
- * task scheduling and network_system for TCP operations.
+ * The listening socket does not serve external DICOM associations: accepted TCP
+ * connections are closed. Use network::v2::dicom_server_v2 for external SCPs.
+ * The existing callbacks, registry and in-process association path are retained
+ * for compatibility. See docs/adr/ADR-004-cli-scp-tcp-transport.md.
  *
  * @par Example: Usage
  * @code

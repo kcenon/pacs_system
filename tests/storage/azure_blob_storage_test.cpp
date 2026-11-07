@@ -12,6 +12,7 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include "transfer_syntax_fixture.h"
 
 #include <atomic>
 
@@ -555,4 +556,11 @@ TEST_CASE("azure_blob_storage: block blob upload cancellation",
 
   CHECK(result.is_err());
   CHECK_FALSE(storage.exists("1.2.3.4.5"));
+}
+
+TEST_CASE("azure_blob_storage: transfer syntax and encapsulation survive persistence",
+          "[storage][azure_blob_storage][encapsulated]") {
+    azure_blob_storage storage{create_test_config()};
+    storage_syntax_test::check_representation(storage,
+        create_test_dataset("1.2.3.1292", "1.2.3.1292.1", "1.2.3.1292.1.1"));
 }

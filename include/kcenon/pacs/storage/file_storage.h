@@ -163,6 +163,11 @@ public:
     [[nodiscard]] auto store(const core::dicom_dataset& dataset)
         -> VoidResult override;
 
+    [[nodiscard]] auto store(const core::dicom_dataset& dataset,
+                             const encoding::transfer_syntax& syntax) -> VoidResult override;
+    [[nodiscard]] auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file> override;
+
     /**
      * @brief Retrieve a DICOM dataset by SOP Instance UID
      *
@@ -231,6 +236,13 @@ public:
      */
     [[nodiscard]] auto get_file_path(std::string_view sop_instance_uid) const
         -> std::filesystem::path;
+
+    /**
+     * @brief What this storage does with a SOP Instance it holds already
+     */
+    [[nodiscard]] auto duplicate_handling() const noexcept -> duplicate_policy {
+        return config_.duplicate;
+    }
 
     /**
      * @brief Import DICOM files from a directory

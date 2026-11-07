@@ -57,6 +57,10 @@ monitoring_system, network_system).
 
 | Date | Version | Description |
 |------|---------|-------------|
+| 2026-11-03 | 1.11.0 | Declare DICOMweb as measured against independent clients and a reference server: media types, Transfer Syntaxes and frames (Section 8.1), statuses and what both protocols refuse (Section 8.2), matching and the maximum per response (Section 8.3), and that with no OAuth 2.0 there is no authorization, rather than a fallback (Section 8.5). |
+| 2026-11-02 | 1.10.0 | Declare the normalized services as measured against independent peers: Worklist matching and return keys (Section 3.4), MPPS statuses (Section 3.5), commitment reports on a new association (Section 3.6), the Print contract and its spool (Section 3.7), and the UPS SOP Classes, which `pacs_server` now provides (Section 3.8). `pacs_server` also provides Storage Commitment and Print, which this statement already claimed for it. Implicit VR requests of these services are now readable: their attributes were missing from the data dictionary. |
+| 2026-11-01 | 1.9.0 | Declare the Query/Retrieve contract: keys, matching, responses, retrieve rules and association limits (Section 3.3). The retired Patient/Study Only model is SCP only. |
+| 2026-11-01 | 1.8.0 | Correct SOP Class UIDs and names against PS3.6: Legacy Converted Enhanced CT (`.2.2`), US Multi-frame (`.3.1`, retired `.3`), Label Map (`.66.7`) and Height Map (`.66.8`) Segmentation, Waveform Presentation State (`.9.100.1`), Waveform Annotation SR (`.88.77`), Wide Field Ophthalmic Photography (`.77.1.5.5`). Section 3.2 now lists every registered class, and `store_scp` and `pacs_server` accept exactly that list by default. |
 | 2026-10-24 | 1.7.0 | Section 4 states PACS_SCP negotiation and codec support per transfer syntax: Explicit VR Big Endian, Deflated Explicit VR Little Endian, HEVC, JPEG XL, and Frame Deflate are not negotiated, and the last four have no working codec; Appendix B lists these and the JPEG Lossless decoder limitation |
 | 2026-10-23 | 1.6.0 | Add JPEG-LS Lossless and Near-Lossless transfer syntaxes; list all optional codec libraries in Appendix B |
 | 2026-03-05 | 1.5.0 | Add HEVC, JPEG XL, Frame Deflate transfer syntaxes; Heightmap/Label Map Segmentation, Waveform PS/Annotation SOP classes; TLS 1.3 BCP 195 profiles; OAuth 2.0 and DICOMweb Storage Commitment |
@@ -108,15 +112,17 @@ monitoring_system, network_system).
 
 | AE | Function |
 |----|----------|
-| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Print SCP, Verification SCP |
-| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Print SCU, Verification SCU |
+| PACS_SCP | Storage SCP, Query/Retrieve SCP, Worklist SCP, MPPS SCP, Storage Commitment SCP, Print SCP, UPS SCP, Verification SCP |
+| PACS_SCU | Storage SCU, Query/Retrieve SCU, Worklist SCU, MPPS SCU, Storage Commitment SCU, Print SCU, UPS SCU, Verification SCU |
 
 ### 2.2 AE Specifications
 
 #### 2.2.1 PACS_SCP Application Entity
 
 **Description**: Accepts incoming associations for storage, query/retrieve,
-worklist, MPPS, storage commitment, print management, and verification services.
+worklist, MPPS, storage commitment, print management, Unified Procedure Step, and
+verification services. It opens associations of its own to deliver C-MOVE objects and
+N-EVENT-REPORT messages, to the peers named with `--peer AE:host:port`.
 
 ##### Association Policies
 
@@ -143,7 +149,7 @@ worklist, MPPS, storage commitment, print management, and verification services.
 #### 2.2.2 PACS_SCU Application Entity
 
 **Description**: Initiates outgoing associations for storage, query/retrieve,
-worklist, MPPS, storage commitment, and print management operations.
+worklist, MPPS, storage commitment, print management, and Unified Procedure Step operations.
 
 ##### Association Policies
 
@@ -214,7 +220,7 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | CT Image Storage | 1.2.840.10008.5.1.4.1.1.2 | Yes | Yes |
 | Enhanced CT Image Storage | 1.2.840.10008.5.1.4.1.1.2.1 | Yes | Yes |
-| CT For Processing Image Storage | 1.2.840.10008.5.1.4.1.1.2.2 | Yes | Yes |
+| Legacy Converted Enhanced CT Image Storage | 1.2.840.10008.5.1.4.1.1.2.2 | Yes | Yes |
 
 #### MR
 
@@ -228,17 +234,17 @@ Response command pattern: `response = request | 0x8000`
 | SOP Class | UID | SCP | SCU |
 |-----------|-----|-----|-----|
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | Yes | Yes |
-| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | Yes | Yes |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | Yes | Yes |
 | US Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.6 | Yes | Yes |
-| US Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3.1 | Yes | Yes |
+| US Multi-frame Image Storage (Retired) | 1.2.840.10008.5.1.4.1.1.3 | Yes | Yes |
 
 #### XA / XRF
 
 | SOP Class | UID | SCP | SCU |
 |-----------|-----|-----|-----|
-| XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | Yes | Yes |
+| X-Ray Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | Yes | Yes |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | Yes | Yes |
-| XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | Yes | Yes |
+| X-Ray Radiofluoroscopic Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | Yes | Yes |
 | X-Ray 3D Angiographic Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.1 | Yes | Yes |
 | X-Ray 3D Craniofacial Image Storage | 1.2.840.10008.5.1.4.1.1.13.1.2 | Yes | Yes |
 
@@ -259,6 +265,10 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | CR Image Storage | 1.2.840.10008.5.1.4.1.1.1 | Yes | Yes |
 | Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7 | Yes | Yes |
+| Multi-frame Single Bit Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.1 | Yes | Yes |
+| Multi-frame Grayscale Byte Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.2 | Yes | Yes |
+| Multi-frame Grayscale Word Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.3 | Yes | Yes |
+| Multi-frame True Color Secondary Capture Image Storage | 1.2.840.10008.5.1.4.1.1.7.4 | Yes | Yes |
 
 #### NM
 
@@ -295,8 +305,8 @@ Response command pattern: `response = request | 0x8000`
 |-----------|-----|-----|-----|
 | Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.4 | Yes | Yes |
 | Surface Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.5 | Yes | Yes |
-| Heightmap Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.7 | Yes | Yes |
-| Label Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.8 | Yes | Yes |
+| Label Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.7 | Yes | Yes |
+| Height Map Segmentation Storage | 1.2.840.10008.5.1.4.1.1.66.8 | Yes | Yes |
 
 #### SR
 
@@ -321,18 +331,43 @@ Response command pattern: `response = request | 0x8000`
 | General ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.2 | Yes | Yes |
 | Ambulatory ECG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.1.3 | Yes | Yes |
 | Hemodynamic Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.2.1 | Yes | Yes |
-| Cardiac Electrophysiology Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.3.1 | Yes | Yes |
+| Basic Cardiac Electrophysiology Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.3.1 | Yes | Yes |
 | Basic Voice Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.1 | Yes | Yes |
 | General Audio Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.4.2 | Yes | Yes |
 | Arterial Pulse Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.5.1 | Yes | Yes |
 | Respiratory Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.6.1 | Yes | Yes |
+| Multi-channel Respiratory Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.6.2 | Yes | Yes |
 | Routine Scalp EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.1 | Yes | Yes |
-| Electromyography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.2 | Yes | Yes |
-| Electrooculography Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.3 | Yes | Yes |
+| Electromyogram Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.2 | Yes | Yes |
+| Electrooculogram Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.3 | Yes | Yes |
 | Sleep EEG Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.7.4 | Yes | Yes |
 | Body Position Waveform Storage | 1.2.840.10008.5.1.4.1.1.9.8.1 | Yes | Yes |
-| Waveform Presentation State Storage | 1.2.840.10008.5.1.4.1.1.11.11 | Yes | Yes |
-| Waveform Annotation Storage | 1.2.840.10008.5.1.4.1.1.11.12 | Yes | Yes |
+| Waveform Presentation State Storage | 1.2.840.10008.5.1.4.1.1.9.100.1 | Yes | Yes |
+| Waveform Annotation SR Storage | 1.2.840.10008.5.1.4.1.1.88.77 | Yes | Yes |
+
+#### Ophthalmic
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Ophthalmic Photography 8 Bit Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.1 | Yes | Yes |
+| Ophthalmic Photography 16 Bit Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.2 | Yes | Yes |
+| Ophthalmic Tomography Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.4 | Yes | Yes |
+| Wide Field Ophthalmic Photography Stereographic Projection Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.5 | Yes | Yes |
+| Ophthalmic OCT B-scan Volume Analysis Storage | 1.2.840.10008.5.1.4.1.1.77.1.5.8 | Yes | Yes |
+
+#### Whole Slide Imaging and Parametric Maps
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| VL Whole Slide Microscopy Image Storage | 1.2.840.10008.5.1.4.1.1.77.1.6 | Yes | Yes |
+| Parametric Map Storage | 1.2.840.10008.5.1.4.1.1.30 | Yes | Yes |
+
+#### Encapsulated Documents
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Encapsulated PDF Storage | 1.2.840.10008.5.1.4.1.1.104.1 | Yes | Yes |
+| Encapsulated CDA Storage | 1.2.840.10008.5.1.4.1.1.104.2 | Yes | Yes |
 
 ### 3.3 Query/Retrieve
 
@@ -344,15 +379,96 @@ Response command pattern: `response = request | 0x8000`
 | Study Root Q/R Information Model - FIND | 1.2.840.10008.5.1.4.1.2.2.1 | Yes | Yes |
 | Study Root Q/R Information Model - MOVE | 1.2.840.10008.5.1.4.1.2.2.2 | Yes | Yes |
 | Study Root Q/R Information Model - GET | 1.2.840.10008.5.1.4.1.2.2.3 | Yes | Yes |
-| Patient/Study Only Q/R Information Model - FIND (Retired) | 1.2.840.10008.5.1.4.1.2.3.1 | Yes | Yes |
+| Patient/Study Only Q/R Information Model - FIND (Retired) | 1.2.840.10008.5.1.4.1.2.3.1 | Yes | No |
 
-Query levels supported: PATIENT, STUDY, SERIES, IMAGE.
+Query levels: PATIENT, STUDY, SERIES and IMAGE under Patient Root; STUDY, SERIES and
+IMAGE under Study Root; PATIENT and STUDY under Patient/Study Only. `qr_scp` and
+`pacs_server` answer from one implementation, the Hierarchical Search Method of PS3.4
+C.4.1.3.1. Relational Queries are not negotiated.
+
+**Keys held for existence and matching**
+
+| Level | Unique Key | Required Keys | Optional Keys |
+|-------|------------|---------------|---------------|
+| PATIENT | Patient ID | Patient's Name | Patient's Birth Date, Patient's Sex |
+| STUDY | Study Instance UID | Study Date, Study Time, Accession Number, Study ID; under Study Root also Patient's Name, Patient ID | Referring Physician's Name, Study Description, Modalities in Study; under Study Root also Patient's Birth Date, Patient's Sex |
+| SERIES | Series Instance UID | Modality, Series Number | Series Description |
+| IMAGE | SOP Instance UID | Instance Number | SOP Class UID |
+
+**Matching**
+
+- UIDs use Single Value or List of UID Matching, with no wild cards.
+- AE, CS, LO, LT, PN, SH, ST, UC, UR and UT keys use Single Value or Wild Card Matching.
+  `?` is one character, whatever its encoded length. Only PN ignores case, and only
+  for ASCII letters (the implementation choice C.2.2.2.1.1 and C.2.2.2.4 leave open).
+- DA and TM keys use Single Value or Range Matching by meaning. A TM value with less
+  precision covers what it names, so `10` means 10:00:00 through 10:59:59.
+- A stored attribute with no value matches any key, as C.2.2.1.2 requires. This
+  applies to Optional Keys too, which C.2.2.1.3 says behave like Required Keys.
+- A key with several values, outside List of UID Matching, matches when any value does.
+  C.2.2.2.8 leaves this undefined without Extended Negotiation.
+- Text keys are decoded from the Identifier's Specific Character Set and compare with
+  the UTF-8 the index holds, so a key in one character set finds an object stored in
+  another. An index written before this behavior needs a rescan to hold UTF-8.
+
+**C-FIND responses**
+
+Each response holds the requested keys held by the index, Query/Retrieve Level and
+Retrieve AE Title, and declares ISO_IR 192 when its text is not ASCII. A key the index
+does not hold is ignored and not returned, and matches then carry Pending status FF01.
+
+| Request | Result |
+|---------|--------|
+| No Identifier, or no valid level for the model | A900 |
+| A Unique Key above the level is missing or holds several values | A900 |
+| The index cannot answer | C001, never an empty success |
+| No entity matches | 0000 with no matches |
+| C-CANCEL naming the operation | FE00, and no further matches |
+
+**C-MOVE and C-GET**
+
+The Identifier needs Query/Retrieve Level and the Unique Keys of that level and those
+above, or the answer is A900. The Unique Key of the level may be a list of UIDs, except
+Patient ID. A Unique Key below the level is refused, since it names less than the level
+would deliver. Required and Optional Keys do not belong in the Identifier and are ignored,
+so they neither narrow nor widen what the Unique Keys select. An object the index holds
+but whose file cannot be read counts as a failed sub-operation and is named in Failed SOP
+Instance UID List. A C-MOVE destination must be configured with `--peer`, or the answer
+is A801.
+
+**Associations**
+
+Past the association limit a peer receives A-ASSOCIATE-RJ (rejected-transient, local limit
+exceeded). An association silent for the idle timeout receives A-ABORT, unless a request is
+being served, as a requester waiting for a long retrieve is silent but not idle.
+
+**Cancellation**
+
+Once C-CANCEL takes effect, no new match is sent and no new C-STORE sub-operation starts. A
+store already in flight may still land at the receiver; it counts as failed unless its
+acknowledgement arrived first. The final FE00 reports the sub-operations left undone.
+
+**Known limitation**
+
+Streams of C-FIND responses are unreliable for a peer that reads more slowly than the SCP
+writes, once the responses outgrow the socket buffers. The network layer starts a write while
+an earlier one is still incomplete, which breaks PDU framing. The query then fails, and a
+damaged response may arrive before the failure (SOUP-006 in [SOUP.md](SOUP.md)). Retrieves are
+not affected in this way, because each object waits for its acknowledgement.
 
 ### 3.4 Modality Worklist
 
 | SOP Class | UID | SCP | SCU |
 |-----------|-----|-----|-----|
 | Modality Worklist Information Model - FIND | 1.2.840.10008.5.1.4.31 | Yes | Yes |
+
+An identifier without the Scheduled Procedure Step Sequence, a required key (PS3.4 K.6.1.2.2), is
+refused with A900H. `pacs_server` answers from its worklist table with the matching of Section 3.3,
+and returns the keys asked for: Patient ID, Name, Birth Date and Sex, Accession Number, Study Instance
+UID, Referring Physician, Requested Procedure ID, and in the sequence Modality, Scheduled Station AE
+Title and Name, Start Date and Time, Scheduled Procedure Step ID and Description. A key it does not hold
+matches nothing and comes back empty when it has no value; the table has no Requested Procedure
+Description. A failure status from an SCP ends `worklist_scu` with exit 2, not with an empty worklist.
 
 ### 3.5 Modality Performed Procedure Step (MPPS)
 
@@ -361,6 +477,16 @@ Query levels supported: PATIENT, STUDY, SERIES, IMAGE.
 | Modality Performed Procedure Step | 1.2.840.10008.3.1.2.3.3 | Yes | Yes |
 
 MPPS status transitions: IN PROGRESS -> COMPLETED | DISCONTINUED
+
+| Request | Status (PS3.4 F.7.2) |
+|---------|----------------------|
+| N-CREATE of an existing instance | 0111H |
+| N-SET of an instance that does not exist | 0112H |
+| N-SET after COMPLETED or DISCONTINUED | 0110H, and nothing changes |
+
+`pacs_server` keeps instances in its database, so they can be completed after a restart. It reads the
+study from the Scheduled Step Attributes Sequence, where the standard puts it. `mpps_scu` sends every
+Type 1 and Type 2 attribute of Table F.7.2-1, so a peer that validates the request accepts it.
 
 ### 3.6 Storage Commitment Push Model
 
@@ -405,6 +531,27 @@ SCU (Requestor)                    SCP (Provider)
 | Transaction UID tracking | Yes |
 | Asynchronous commit verification | Yes |
 | Well-known SOP Instance UID (1.2.840.10008.1.20.1.1) | Yes |
+
+#### Delivering the Result
+
+A requestor named with `--peer` gets its report on an association `pacs_server` opens: the same AE Title as
+the request, proposing the SCP role through Role Selection, as PS3.4 J.3.3 requires, since the SCU may
+release as soon as it has the N-ACTION response. Without an address the report goes on the requesting
+association, which only reaches a requestor that holds it open. Reports to one AE keep their order.
+
+A report no attempt could deliver is tried `--event-attempts` times (default 3), `--event-retry-delay`
+seconds apart (default 5), then logged and dropped. A status from the peer, even a failure, ends the
+attempts, because the peer has the report. Waiting reports are not kept across a restart; the requestor
+asks again with a new Transaction UID, and what is stored is still committed.
+
+An instance is committed when the index holds it under that SOP Class and its file exists. An instance
+the index names under another SOP Class fails with 0119H, and one whose file is gone with 0112H.
+
+| Request | Status |
+|---------|--------|
+| Action Type other than 1 | 0123H |
+| Requested SOP Instance other than the well-known one | 0117H |
+| No Transaction UID, no Referenced SOP Sequence, or an item without both UIDs | 0120H |
 
 #### Failure Reason Codes
 
@@ -474,6 +621,97 @@ Workstation (Print SCU)                      Printer (Print SCP)
 | Well-Known Printer SOP Instance UID (1.2.840.10008.5.1.1.17) | Yes |
 | Meta SOP Class fallback negotiation | Yes |
 
+A Film Session belongs to the association that created it (PS3.4 H.4.1): another association cannot
+reach it, a second one on the same association is refused, and it ends with the association. A Film Box
+joins the session it names. A Color Print Meta context prints Color Image Boxes.
+
+Image Display Format is `STANDARD\C,R`, `ROW\R1,R2,...` or `COL\C1,C2,...`, up to 4096 Image Boxes.
+SLIDE, SUPERSLIDE and CUSTOM are refused. The layout is fixed by the N-CREATE.
+
+| Request | Status |
+|---------|--------|
+| Film Box with no Referenced Film Session Sequence or Image Display Format | 0120H |
+| Film Box naming a session this association does not hold, or a format it cannot lay out | 0106H |
+| Number of Copies that is not a positive number | 0106H |
+| Second Film Session on an association | 0213H |
+| Image Box with no position or no image sequence of its class | 0120H |
+| Image Box with the position of another | 0106H |
+| Film Session, Film Box or Image Box this association does not hold | 0112H |
+| Printer instance other than the well-known one | 0112H |
+| Action Type other than 1 | 0123H |
+| Printing a Film Box with no image | B603H, and no job |
+| Printing a Film Session with no Film Box | C600H |
+| A job the spool cannot take | C602H |
+
+`pacs_server` has no physical printer. Each printed Film Box becomes a directory under `--print-spool`
+(default `<storage-dir>.print-spool`), holding `job.json` and the pixel bytes of each image. The manifest
+appears last, so a job with a manifest has all its images. Print Job, Presentation LUT and Annotation Box
+are not provided. `print_scu` sends one image with `--image`, and through Color Print Meta with `--color`;
+without an image the printer answers B603H and the tool ends with exit 1.
+
+### 3.8 Unified Procedure Step (PS3.4 Annex CC)
+
+| SOP Class | UID | SCP | SCU |
+|-----------|-----|-----|-----|
+| Unified Procedure Step - Push | 1.2.840.10008.5.1.4.34.6.1 | Yes | Yes |
+| Unified Procedure Step - Watch | 1.2.840.10008.5.1.4.34.6.2 | Yes | Yes |
+| Unified Procedure Step - Pull | 1.2.840.10008.5.1.4.34.6.3 | Yes | Yes |
+| Unified Procedure Step - Event | 1.2.840.10008.5.1.4.34.6.4 | Yes | No |
+| Unified Procedure Step - Query | 1.2.840.10008.5.1.4.34.6.5 | Yes | No |
+
+Each request carries the UPS Push SOP Class UID, whichever of these was negotiated (CC.2). A request a
+negotiated class does not carry is answered 0211H: N-CREATE on Push; N-SET and Change UPS State on Pull;
+Request UPS Cancel on Push and Watch; subscriptions on Watch; C-FIND on Pull, Watch and Query; N-GET on all
+four. The SCU classes cover N-CREATE, N-GET, N-SET, the N-ACTIONs and subscriptions, and parse event reports;
+no client sends C-FIND on Pull or Query, and no product listens for UPS events as an SCU.
+
+Change UPS State follows Table CC.1.1-2:
+
+| Request | SCHEDULED | IN PROGRESS | COMPLETED | CANCELED | No such UPS |
+|---------|-----------|-------------|-----------|----------|-------------|
+| To IN PROGRESS, correct Transaction UID | Success | C302H | C300H | C300H | C307H |
+| To COMPLETED, correct Transaction UID | C310H | Success or C304H | B306H | C300H | C307H |
+| To CANCELED, correct Transaction UID | C310H | Success or C304H | C300H | B304H | C307H |
+| Any of these, incorrect Transaction UID | C301H | C301H | C301H | C301H | C307H |
+| To SCHEDULED | C303H | C303H | C303H | C303H | C307H |
+| Request UPS Cancel | Canceled | Reported, or C312H | C311H | B304H | C307H |
+| N-CREATE of this UID | 0111H | 0111H | 0111H | 0111H | Created |
+
+In SCHEDULED no Transaction UID is recorded, so "correct" means one was offered. COMPLETED needs, in the
+Performed Procedure Sequence, the Station Name and Workitem Code Sequences, the Start and End DateTime, and
+an Output Information Sequence, which may be empty. CANCELED needs a Procedure Step Cancellation DateTime.
+Otherwise the answer is C304H. A step in progress is not canceled by a request: its subscribers hear
+of it, and with none to tell the answer is C312H. A SCHEDULED step goes through IN PROGRESS to CANCELED.
+
+| Other requests | Status |
+|----------------|--------|
+| N-CREATE with a state other than SCHEDULED | C309H |
+| N-CREATE with a Transaction UID, or a UID or priority that is not valid | 0106H |
+| N-CREATE without a Type 1 attribute of Table CC.2.5-3 | 0120H |
+| N-SET in SCHEDULED, with a Transaction UID | C310H |
+| N-SET in IN PROGRESS, without the recorded Transaction UID | C301H |
+| N-SET in COMPLETED or CANCELED | C300H |
+| N-SET of the Procedure Step State | 0106H |
+| N-SET or N-GET of a UPS that does not exist | C307H |
+| Subscribing without Receiving AE or Deletion Lock | 0120H |
+| Subscribing a Receiving AE without an address | C308H |
+| Subscribing to a UPS that does not exist, or a filtered global subscription | C307H |
+| Suspending anything but the global subscription | C314H |
+
+The SCP creates the UID when an N-CREATE has none, and the Worklist Label when it has none. N-GET and C-FIND
+never return the Transaction UID, which is the lock. An N-SET may add attributes the N-CREATE did not have.
+C-FIND matches the keys with values by VR, as in Section 3.3, and does not look inside sequence keys.
+
+Reports go to the Receiving AE on an association `pacs_server` opens, as in Section 3.6, on the UPS Event
+context with the UPS Push class: 1 State Report, with an initial one on subscribing (Table CC.2.3-2), 2 Cancel
+Requested with the Requesting AE, 3 Progress when the progress sequence is set, 5 Assigned when the station or
+performer is set. A restart sends 4 SCP Status Change, RESTARTED with both lists WARM START, under the global
+subscription UID. A failed delivery changes neither the subscription nor the lock, and blocks no request.
+
+The state, the lock and subscriptions are in the database and the whole instance in a Part 10 file under
+`--ups-dir` (default `<storage-dir>.ups`), so they survive a restart. Nothing deletes a workitem, so deletion
+locks hold trivially. `dimse_n_scu` hosts the SCU classes.
+
 ---
 
 ## 4. Supported Transfer Syntaxes
@@ -497,6 +735,13 @@ supported" or "Not implemented".
 
 DIMSE messages carry datasets only in Implicit and Explicit VR Little Endian, so PACS_SCP does
 not accept Explicit VR Big Endian; the `dicom_file` Part 10 reader and writer handle it.
+File byte-order conversion applies recursively to sequence items: US/SS/OW/AT
+use 16-bit units, UL/SL/FL/OL/OF use 32-bit units, and FD/SV/UV/OD/OV use
+64-bit units. AT preserves group/element order; OW uses 16-bit words even with
+Bits Allocated 8. OB and text are unchanged. Incomplete binary values are rejected
+during Big Endian decoding or writing. Independent intermediate-byte and DCMTK
+pixel checks are in `tools/integration_tests/scripts/test_big_endian_values.py`;
+this does not expand retired Big Endian network negotiation.
 pacs_system has no inflate or deflate code, so it does not support Deflated Explicit VR Little
 Endian at all.
 
@@ -525,7 +770,7 @@ PACS_SCP accepts the codec-backed syntaxes whether or not the build includes the
 stores the pixel data without decoding it. Encoding and decoding need the library named in the
 last column at build time ([Appendix B](#appendix-b-known-limitations)), and
 `codec_factory::is_available()` reports which codecs a given build includes. The built-in JPEG
-Lossless decoder has a limitation listed in Appendix B. HEVC, JPEG XL, and Frame Deflate are in
+Lossless codec has limitations listed in Appendix B. HEVC, JPEG XL, and Frame Deflate are in
 the registry, but their codecs are stubs whose encoding and decoding always fail, and PACS_SCP
 does not accept them.
 
@@ -547,6 +792,17 @@ The implementation supports the DICOM File Format as defined in PS3.10:
 - File Meta Information (Group 0002)
 - Dataset encoding per negotiated Transfer Syntax
 
+Undefined-length `UN` values in Explicit VR Little or Big Endian files are decoded
+as sequences whose Items and contents use Implicit VR Little Endian (PS3.5 6.2.2).
+They are retained as `SQ` elements on re-encoding, preserving nested items and
+following elements. Defined-length `UN` remains opaque. Malformed UN item streams,
+invalid/missing delimiters and more than 64 nested sequence levels within that
+path return errors. A dataset that ends before its last element is complete is
+rejected instead of being read as far as it goes. Little Endian files may have
+only zero bytes after the last element; Explicit VR Big Endian files also refuse
+trailing bytes too short for an element header, even when they are zero. This
+does not assert strict validation of every unrelated legacy parser path.
+
 ### 5.2 DICOMDIR
 
 DICOMDIR support is provided via the `dcm_dir` utility:
@@ -556,11 +812,32 @@ DICOMDIR support is provided via the `dcm_dir` utility:
 | Create DICOMDIR | Yes |
 | List DICOMDIR contents | Yes |
 | Verify DICOMDIR integrity | Yes |
-| Update DICOMDIR | Yes |
+| Update DICOMDIR | Add/rebuild; deletion is not implemented |
 
 Directory Record types: PATIENT, STUDY, SERIES, IMAGE.
 
-Group 0004 directory record tags are fully supported.
+The writer emits records in deterministic patient/study/series/instance order and
+sets first-root, last-root, next-sibling and lower-level UL offsets to the absolute
+Item-tag positions, including the 128-byte preamble and `DICM` prefix. File Meta
+Information carries the Directory Storage SOP identifiers and group length; the
+Basic Directory dataset does not carry SOP Class/Instance UID attributes.
+
+`list`, `verify` and the update reader follow stored links, including when physical
+record order differs. They reject missing or malformed links, offsets that do not
+point to record Item tags, cycles, shared children, unreachable records and invalid
+hierarchy types. Empty directories and multiple roots/siblings are supported.
+Explicit VR Little Endian directories with defined or undefined sequence/item
+lengths are supported, with a 32-bit file-offset limit and a nesting limit of 32.
+Inactive records, MRDR/private record types and other directory hierarchies are
+not supported. Add/rebuild updates preserve the File-set UID and ID.
+
+Independent pydicom `FileSet` loading, DCMTK-created directories, literal offset
+checks and corrupt-link rejection are exercised by
+`tools/integration_tests/scripts/test_dicomdir_offsets.py`. This establishes the
+listed directory behavior, not full media application-profile or source-IOD
+validation. Referenced paths retain their actual spelling and resolve from the
+DICOMDIR parent; callers prepare compliant File ID names and media layout. The
+tool does not rename/copy files or validate every media filename/character-set rule.
 
 ---
 
@@ -575,6 +852,7 @@ Group 0004 directory record tags are fully supported.
 | Unicode UTF-8 | ISO_IR 192 | IR 192 | Full |
 | Korean (KS X 1001) | ISO 2022 IR 149 | IR 149 | Full |
 | Japanese Kanji (JIS X 0208) | ISO 2022 IR 87 | IR 87 | Full |
+| Japanese Katakana (JIS X 0201) | ISO_IR 13 | IR 13 | Full |
 | Japanese Katakana (JIS X 0201) | ISO 2022 IR 13 | IR 13 | Full |
 | Simplified Chinese (GB 2312) | ISO 2022 IR 58 | IR 58 | Full |
 
@@ -663,15 +941,57 @@ per DICOM PS3.15.
 
 ### 7.3 De-identification Profiles (PS3.15 Annex E)
 
-| Profile | Description | Support |
-|---------|-------------|---------|
-| Basic | Remove direct identifiers | Yes |
-| Clean Pixel Data | Remove burned-in annotations | Yes |
-| Clean Descriptions | Sanitize text fields | Yes |
-| Retain Longitudinal | Preserve temporal relationships via date shifting | Yes |
-| Retain Patient Characteristics | Preserve demographics for research | Yes |
-| HIPAA Safe Harbor | Remove 18 identifier categories (45 CFR 164.514) | Yes |
-| GDPR Compliant | European data protection pseudonymization | Yes |
+The named presets implement a subset of Annex E actions. They do not establish
+complete PS3.15, HIPAA, or GDPR compliance. Applications must evaluate the IOD,
+remaining identifying content, and intended disclosure before releasing data.
+
+| Preset | Implemented behavior | Limits |
+|--------|----------------------|--------|
+| Basic | Configured identifier actions, recursive sequences and consistent instance UID mappings | Partial attribute table; no complete IOD validation |
+| Clean Pixel Data | Same metadata actions as Basic | Pixel cleaning and OCR are **not implemented** |
+| Clean Descriptions | Empty configured description fields; recursively clean selected sequence items | No semantic cleaning of arbitrary text or codes |
+| Retain Longitudinal | Shift configured dates with a shared offset | Caller chooses offset; not all date/time attributes are covered |
+| Retain Patient Characteristics | Keep configured demographic fields | Retained values may identify a patient |
+| HIPAA Safe Harbor | Additional configured identifier removals | Preset name is not a compliance guarantee |
+| GDPR Compliant | Hash configured patient identifiers | Pseudonymization is not anonymization or a compliance guarantee |
+
+Sequence actions follow the current [PS3.15 Table E.1-1](https://dicom.nema.org/medical/dicom/current/output/chtml/part15/chapter_E.html)
+subset in `src/security/anonymization_sequence_rules.h`:
+
+- X removes the entire sequence. Z retains an empty sequence. D replaces the
+  contents with one empty dummy item; required IOD-specific item attributes are
+  not synthesized, so the result may require further IOD validation.
+- K, C and U retain items and recursively apply configured attribute actions at
+  every depth. U remaps instance UID values with the same mapping as the root.
+  SOP Class and Transfer Syntax UIDs remain unchanged. C does not perform semantic
+  text, code, or pixel recognition.
+- Without IOD type information, X/Z and X/Z/D choose Z; X/D chooses X. Image
+  reference X/Z/U* uses U. Referenced Study Sequence defaults to Z; an explicit
+  custom K action retains and cleans its items. Content Sequence uses D, rather
+  than claiming support for the Clean Structured Content option.
+- Anatomic Region and selected clinical/reference containers have explicit K
+  policies. Unknown sequences are emptied at all depths. Unparsed retained
+  sequence payloads, unsupported sequence transforms, and nesting beyond 64 items
+  produce report errors and clear the affected sequence. Unknown opaque UN
+  values are also emptied, since they can hide implicit-VR sequences missing
+  from the dictionary; retaining or transforming non-empty UN values fails. Callers must check both
+  the Result and `report.is_successful()` before saving.
+- Private-tag policy applies in every retained item. The library keeps private
+  elements by default for API compatibility; callers should select `remove_all`
+  when appropriate. `dcm_anonymize` removes all private elements, including their
+  creators, at every depth. A custom keep action does not override this policy.
+
+`dcm_anonymize` shares one UID mapping across all files in an invocation, rebuilds
+file metadata and the preamble, and refuses to save failed reports. Mapping files
+can preserve linkage between invocations and contain original identifiers. The
+`dcm_modify` compatibility anonymizer delegates to the same engine; its options
+apply recursively. The `dcm_modify` executable itself exposes tag editing, not an
+anonymization command.
+
+Custom retention may preserve identifying data. `--verify` only checks common
+identifiers recursively and reports tag names/depths without values; it is not a
+compliance check. The library's opt-in detailed action records can contain
+original values and must be treated as sensitive data.
 
 ### 7.4 Access Control
 
@@ -683,41 +1003,82 @@ per DICOM PS3.15.
 
 ## 8. DICOMweb Support
 
-The implementation supports DICOMweb services as defined in PS3.18:
+The implementation plays the role of origin server, natively: `pacs_server --http-port` serves these resources under
+`/dicomweb` and WADO-URI under `/wado`, and the REST API under `/api` only when asked to and with OAuth 2.0, on the same database and storage as its DICOM services, so an
+object stored over either protocol is found, unchanged, over both. `validation/dcmtk/tests/dicomweb_probe.py` measures this with curl, dcm4che and DCMTK, after
+the same tables hold on another implementation.
+
+Every request needs an `Accept` header: without one the answer is 406 (PS3.18 8.7.5). DICOM and rendered types together
+are 400. A type that does not apply to the resource is passed over, in the client's order of preference.
 
 ### 8.1 WADO-RS (Web Access to DICOM Objects - RESTful)
 
-| Feature | Support |
-|---------|---------|
-| Retrieve Study | Yes |
-| Retrieve Series | Yes |
-| Retrieve Instance | Yes |
-| Retrieve Frames | Yes (frame number parsing: single, range, comma-separated) |
-| Retrieve Metadata (DicomJSON) | Yes |
-| Retrieve Rendered (JPEG/PNG) | Yes |
-| Window/Level transformation | Yes |
-| Multipart/related responses | Yes |
-| Bulk Data URI references | Yes |
+| Resource | Media types | Notes |
+|----------|-------------|-------|
+| Study, Series | `multipart/related; type="application/dicom"` (default) | Every object, each once, even when there is one. `application/dicom` alone is 406 |
+| Instance | The same (default), and `application/dicom` | |
+| Study, Series, Instance | `multipart/related; type="application/octet-stream"` | The Bulk Data of each instance, as Table 10.4.4-1 Note 2 defines |
+| Metadata | `application/dicom+json` (default), `multipart/related; type="application/dicom+xml"` | Every top level attribute. Pixel Data by Bulk Data URI, anything else binary inline, nested values inline |
+| Bulk Data | `multipart/related; type="application/octet-stream"` (default), `application/octet-stream` | At the URI the metadata gives, per instance. Pixel Data comes decoded |
+| Frames | `multipart/related; type="application/octet-stream"` (default); `application/octet-stream` for one frame | Decoded when the object is compressed; each part has its Content-Location |
+| Frames, as held | `multipart/related; type="image/jpeg"`, `"image/jls"`, `"image/jp2"`, `"image/jphc"`, `"image/jxl"`, `"image/dicom-rle"` | Only for the form the object is held in, with the fragment delimiters removed |
+| Rendered Instance, Rendered Frame | `image/jpeg` (default), `image/png`, `image/jphc` | |
+
+**Transfer Syntax.** With no `transfer-syntax` parameter, objects go out in Explicit VR Little Endian, decoded if need
+be, unless only lossy pixels are held, or no codec for them is built: those go out as held. `transfer-syntax=*` asks for what is held. Implicit
+VR and Big Endian objects are converted, since Web Services shall not use them. A Transfer Syntax that is neither what
+is held nor Explicit VR Little Endian is 406: there is no encoder here for the others.
+
+**All or nothing.** 200 means every representation of the resource (PS3.18 10.4.3.1). An indexed file that cannot be read fails
+the whole retrieve with 500. A resource named under the wrong study or series is 404, like one that does not exist.
+
+**Frames** are numbers in ascending order, each once, as PS3.18 10.1 defines them; `2-4` is taken for `2,3,4`. Anything else
+is 400, and a frame past the end fails the whole request with 404.
+
+**Rendering.** `window=center,width,function` takes `linear`, `linear-exact` or `sigmoid`, by PS3.3 C.11.2.1.2 and C.11.2.1.3. With none, the
+first stored window applies, or else the frame's own range. MONOCHROME1, MONOCHROME2, RGB and YBR_FULL are rendered, with
+compressed objects decoded first. `viewport=width,height` scales to fit and keeps the proportions. These are refused
+with 400: a viewport with a source rectangle, PALETTE COLOR, and uncompressed YBR_FULL_422.
 
 ### 8.2 STOW-RS (Store Over the Web)
 
-| Feature | Support |
-|---------|---------|
-| Store instances | Yes |
-| Multipart/related request parsing | Yes |
-| Instance validation | Yes |
-| Store response (DicomJSON) | Yes |
-| Partial success reporting | Yes |
+| Status | Meaning |
+|--------|---------|
+| 200 | Every part stored |
+| 202 | Some parts stored; the others are in Failed SOP Sequence with a Failure Reason |
+| 400 | No boundary, no parts, no closing delimiter, or a part without the blank line ending its headers |
+| 406 | The response cannot be given in an acceptable type, or there is no `Accept` header. Nothing is stored |
+| 409 | No part stored; each is in Failed SOP Sequence with a Failure Reason |
+| 413 | The request exceeds `max_body_size` (`--http-max-body-mb` for `pacs_server`). Nothing is stored |
+| 415 | Not `multipart/related` of `application/dicom` |
+
+The response is `application/dicom+json` or `application/dicom+xml`, with a Retrieve URL for each stored object. A part
+that is not `application/dicom` is listed as a failure rather than skipped. Failure Reason (0008,1197) is 0xC000 for what cannot be read or
+understood, 0xA900 for a missing or malformed identifying attribute or another study's object in a study's target resource,
+0x0111 for a duplicate and 0xA700 when it cannot be written.
+
+STOW-RS and C-STORE store through one function, `storage::archive_instance`, so both keep an object in the Transfer Syntax it came in,
+index it in UTF-8, apply the configured duplicate policy, and refuse the same things. An object is refused, with nothing written, when
+its Patient ID is empty, because no query could reach it, or when a UID is not digits and dots of at most 64 characters, because UIDs
+name files and appear in URLs. C-STORE answers those with A900H, and a duplicate with 0111H. If the index cannot
+take an object, its file is removed again and the sender is told. Metadata and Bulk Data parts are not supported: send Part 10 objects.
 
 ### 8.3 QIDO-RS (Query based on ID for DICOM Objects)
 
 | Feature | Support |
 |---------|---------|
-| Search for Studies | Yes |
-| Search for Series | Yes |
-| Search for Instances | Yes |
-| DicomJSON response format | Yes |
-| Query parameter parsing | Yes |
+| Search for Studies, Series and Instances, at the top level and within a study or series | Yes |
+| Media types | `application/dicom+json` (default), `multipart/related; type="application/dicom+xml"` |
+| Matching | The Hierarchical Search Method, by the same evaluation as C-FIND (Section 3.3): `*` and `?` are the only wildcards, date and time ranges, UID lists with commas |
+| Maximum matches | 100 per response unless `limit` asks otherwise, and at most 1000 in one response |
+| More results than returned | `Warning: 299 <service>: There are <n> additional results that can be requested` |
+| Fuzzy Matching, Empty Value Matching, Multiple Value Matching | Not supported: asking for them gets the Warning of PS3.18 8.3.4 and a literal search |
+| `includefield` | Any attribute of the first object of the result, by Keyword or Tag. `all` at the instance level means every attribute but Bulk Data, and adds nothing at the study and series levels |
+| Attributes the index does not hold | Not used for matching, and named in a Warning |
+
+A query parameter that is not a Keyword, a Tag or one of the above is 400, like a repeated attribute or a `limit` or `offset` that is not an
+unsigned integer. A search with no matches is 200 with an empty list. Under a study or series that does not exist it is 404. Identical
+requests return the same order while the archive does not change.
 
 ### 8.4 DICOMweb Storage Commitment (Supplement 234)
 
@@ -742,26 +1103,34 @@ DICOMweb endpoints support OAuth 2.0 authorization per RFC 6749.
 |---------|---------|
 | JWT Bearer token validation | Yes |
 | JWKS (JSON Web Key Set) key retrieval | Yes |
-| Scope-based access control | Yes |
-| Token issuer validation | Yes |
-| Configurable required scopes per endpoint | Yes |
+| RS256 and ES256 signatures | Yes |
+| Token issuer, audience and validity period validation | Yes |
+| Scope-based access control | Yes, fixed per route |
 
-When OAuth 2.0 is enabled, all DICOMweb endpoints require a valid JWT Bearer
-token in the `Authorization` header. When disabled, the system falls back to
-X-User-ID header-based authentication for backward compatibility.
+When OAuth 2.0 is enabled, every DICOMweb route, including `/wado`, requires a valid JWT Bearer token: without one the
+answer is 401 with `WWW-Authenticate: Bearer`, and with the wrong scope it is 403.
+
+| Scope | Opens |
+|-------|-------|
+| `dicomweb.read` | Retrieve, metadata, Bulk Data, frames, rendered, WADO-URI, commitment status, and search |
+| `dicomweb.search` | Search only |
+| `dicomweb.write` | Store and commitment requests |
+
+**When it is not enabled, DICOMweb has no authorization at all**: everyone who can reach the port can read and store objects.
+`pacs_server` therefore listens on loopback unless told otherwise, says so when it starts, allows no web origin unless told one, and refuses
+to start with only some of its OAuth settings. These tokens protect DICOMweb and WADO-URI, and the REST API when `--http-rest-api` serves it: there one gate in front of every route requires `pacs.read` to read, `pacs.write` to change, and `pacs.admin` for settings, accounts, the audit trail and deleting a study, and `pacs_server` refuses that option without its OAuth settings. A host of `rest_server` that serves the REST API without OAuth 2.0 leaves it open, and must protect it some other way. Keys come from a JWKS file. Fetching a JWKS from a URL needs an embedder to set a fetcher.
 
 ### 8.6 Supported Media Types
 
 | Media Type | Usage |
 |-----------|-------|
-| application/dicom | Native DICOM format |
-| application/dicom+json | DicomJSON metadata |
-| application/dicom+xml | DICOM XML metadata |
-| application/octet-stream | Raw binary data |
-| image/jpeg | Rendered images |
-| image/png | Rendered images |
-| image/jphc | HTJ2K compressed images |
-| multipart/related | Multi-part responses/requests |
+| application/dicom | One instance in a single part response |
+| application/dicom+json | Metadata, search results and the store response |
+| application/dicom+xml | The same in the Native DICOM Model; multipart for metadata and search |
+| application/octet-stream | Uncompressed Bulk Data and frames |
+| image/jpeg, image/png, image/jphc | Rendered images |
+| image/jpeg, image/jls, image/jp2, image/jphc, image/jxl, image/dicom-rle | Frames as held |
+| multipart/related | Multi-part responses and store requests |
 
 ---
 
@@ -836,17 +1205,20 @@ attributes as defined in the corresponding IOD specifications in PS3.3.
 | Area | Limitation | Reference |
 |------|-----------|-----------|
 | Character Sets | CJK character sets (ISO 2022 IR 87/149/58/13) fully supported | Issue #700 (resolved) |
-| Storage Commitment | Push Model SCP/SCU fully implemented (N-ACTION, N-EVENT-REPORT) | Issue #701 (resolved) |
+| Storage Commitment | Push Model SCP/SCU implemented (N-ACTION, N-EVENT-REPORT). Reports waiting for a retry do not survive a restart | Section 3.6 |
+| Unified Procedure Step | Filtered global subscriptions are refused with C307H. No client for C-FIND on Pull or Query, and no product listens for events as an SCU | Section 3.8 |
 | JPEG Baseline Codec | Requires libjpeg-turbo at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG_CODEC`) | Optional dependency |
 | JPEG 2000 Codec | Requires OpenJPEG at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEG2000_CODEC`) | Optional dependency |
 | JPEG-LS Codec | Requires CharLS at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library (`PACS_WITH_JPEGLS_CODEC`) | Optional dependency |
 | HTJ2K Codec | Requires OpenJPH at build time; built when `PACS_BUILD_CODECS=ON` (default) and CMake finds the library or, with `PACS_FETCH_OPENJPH=ON` (default), fetches it from GitHub (`PACS_WITH_HTJ2K_CODEC`) | Optional dependency |
-| JPEG Lossless Decoder | Decodes with its built-in Huffman table and ignores DHT segments, so it decodes the streams it encodes but may fail on streams from encoders that use other tables | Section 4.2 |
+| JPEG Lossless Codec | Grayscale only. The decoder uses the Huffman tables in the stream, and refuses color frames and restart intervals instead of guessing | Section 4.2 |
 | HEVC, JPEG XL, Frame Deflate | Stub codecs: encoding and decoding always fail, and PACS_SCP does not negotiate these transfer syntaxes | Section 4.2 |
 | Explicit VR Big Endian | Not negotiated by PACS_SCP; Part 10 files only | Section 4.1 |
 | Deflated Explicit VR Little Endian | Not implemented and not negotiated | Section 4.1 |
 | Asynchronous Operations | Not supported (single operation per association) | N/A |
-| Print Management | Fully implemented (SCP + SCU) | Section 3.7 |
+| Print Management | Film Session, Film Box, Image Box and Printer (SCP + SCU). No Print Job, Presentation LUT or Annotation Box; `pacs_server` writes jobs to a spool directory | Section 3.7 |
+| Patient Information Reconciliation | A local library service with no DIMSE exchange, so not part of this statement | N/A |
+| Generic N-GET SCP | `n_get_scp` has no product host. N-GET is provided by the UPS and Printer services | Section 3.8 |
 
 `PACS_BUILD_CODECS=OFF` disables all four optional codecs. With it on, CMake looks for each library at
 configure time and disables only the codec whose library is missing, with a warning

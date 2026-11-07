@@ -217,13 +217,6 @@ TEST_CASE("C-STORE: pacs_system SCP receives from DCMTK storescu",
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // storescu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
-             "associations; this case needs a dicom_server_v2 fixture");
-    }
-
     auto port = find_available_port();
     test_directory input_dir;
 
@@ -400,10 +393,6 @@ TEST_CASE("C-STORE: Bidirectional round-trip verification",
     }
 
     // The first step runs storescu against a pacs_system SCP over TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
-             "associations; this case needs a dicom_server_v2 fixture");
-    }
 
     test_directory original_dir;
     test_directory dcmtk_storage_dir;
@@ -490,10 +479,6 @@ TEST_CASE("C-STORE: Concurrent store operations", "[dcmtk][interop][store][stres
     }
 
     // storescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
-             "associations; this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     test_directory input_dir;
@@ -601,10 +586,6 @@ TEST_CASE("C-STORE: Data integrity verification", "[dcmtk][interop][store][integ
     }
 
     // storescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("storage_test_server (v1 dicom_server) serves only in-process "
-             "associations; this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     test_directory input_dir;

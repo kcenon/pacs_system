@@ -18,7 +18,7 @@ using namespace kcenon::pacs::core;
 
 // Label Map Segmentation Storage SOP Class UID (Supplement 243)
 static constexpr std::string_view label_map_segmentation_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.66.8";
+    "1.2.840.10008.5.1.4.1.1.66.7";
 
 // =============================================================================
 // label_map_seg_iod_validator Implementation

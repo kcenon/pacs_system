@@ -38,7 +38,7 @@ namespace kcenon::pacs::security {
  */
 enum class tag_action : std::uint8_t {
     /**
-     * @brief D - Remove the attribute entirely
+     * @brief X - Remove the attribute entirely
      *
      * The attribute is completely removed from the dataset.
      */
@@ -53,22 +53,21 @@ enum class tag_action : std::uint8_t {
     empty = 1,
 
     /**
-     * @brief X - Remove or empty based on presence
+     * @brief Legacy remove-or-empty action (currently removes the attribute)
      *
-     * If the attribute exists, replace with zero-length value.
-     * Equivalent to empty for present attributes.
+     * Retained for API compatibility. Use empty for an explicit Z action.
      */
     remove_or_empty = 2,
 
     /**
-     * @brief K - Keep the attribute unchanged
+     * @brief K - Keep a scalar, recursively clean sequence items
      *
-     * The attribute and its value are retained as-is.
+     * Sequence contents remain subject to the profile and private-tag policy.
      */
     keep = 3,
 
     /**
-     * @brief C - Clean (replace with dummy value)
+     * @brief D - Replace with a dummy value
      *
      * The attribute value is replaced with a configurable
      * dummy value (e.g., "ANONYMOUS" for names).
@@ -106,7 +105,15 @@ enum class tag_action : std::uint8_t {
      * Date and time values are shifted by a consistent
      * offset while preserving temporal relationships.
      */
-    shift_date = 8
+    shift_date = 8,
+
+    /**
+     * @brief C - Recursively clean sequence items
+     *
+     * For a scalar, use the configured replacement (empty by default).
+     * This does not perform semantic text, code or pixel-content recognition.
+     */
+    clean = 9
 };
 
 /**
@@ -135,6 +142,8 @@ enum class tag_action : std::uint8_t {
             return "encrypt";
         case tag_action::shift_date:
             return "shift_date";
+        case tag_action::clean:
+            return "clean";
     }
     return "unknown";
 }
@@ -177,6 +186,10 @@ struct tag_action_config {
      */
     [[nodiscard]] static auto make_keep() -> tag_action_config {
         return {.action = tag_action::keep};
+    }
+
+    [[nodiscard]] static auto make_clean() -> tag_action_config {
+        return {.action = tag_action::clean};
     }
 
     /**
@@ -246,7 +259,7 @@ struct anonymization_report {
     /// Number of UIDs replaced
     std::size_t uids_replaced{0};
 
-    /// Number of tags kept unchanged
+    /// Number of scalar values kept or sequence containers retained
     std::size_t tags_kept{0};
 
     /// Number of dates shifted

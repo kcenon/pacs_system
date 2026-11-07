@@ -447,16 +447,17 @@ auto job_repository::update_status(std::string_view job_id,
             -1, "Database not connected", "storage"});
     }
 
-    auto builder = query_builder();
-    builder.update(table_name())
-        .set("status", std::string(client::to_string(status)));
-
+    std::map<std::string, database_value> values{
+        {"status", std::string(client::to_string(status))}};
     if (status == client::job_status::failed) {
-        builder.set("error_message", std::string(error_message))
-            .set("error_details", std::string(error_details));
+        values["error_message"] = std::string(error_message);
+        values["error_details"] = std::string(error_details);
     }
 
-    builder.where("job_id", "=", std::string(job_id));
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
+    auto builder = query_builder();
+    builder.update(table_name()).set(values).where("job_id", "=", std::string(job_id));
 
     auto result = storage_session().execute(builder.build());
     if (result.is_err()) {
@@ -474,15 +475,18 @@ auto job_repository::update_progress(std::string_view job_id,
             -1, "Database not connected", "storage"});
     }
 
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
     auto builder = query_builder();
     builder.update(table_name())
-        .set("total_items", static_cast<int64_t>(progress.total_items))
-        .set("completed_items", static_cast<int64_t>(progress.completed_items))
-        .set("failed_items", static_cast<int64_t>(progress.failed_items))
-        .set("skipped_items", static_cast<int64_t>(progress.skipped_items))
-        .set("bytes_transferred", static_cast<int64_t>(progress.bytes_transferred))
-        .set("current_item", progress.current_item)
-        .set("current_item_description", progress.current_item_description)
+        .set(std::map<std::string, database_value>{
+            {"total_items", static_cast<int64_t>(progress.total_items)},
+            {"completed_items", static_cast<int64_t>(progress.completed_items)},
+            {"failed_items", static_cast<int64_t>(progress.failed_items)},
+            {"skipped_items", static_cast<int64_t>(progress.skipped_items)},
+            {"bytes_transferred", static_cast<int64_t>(progress.bytes_transferred)},
+            {"current_item", progress.current_item},
+            {"current_item_description", progress.current_item_description}})
         .where("job_id", "=", std::string(job_id));
 
     auto result = storage_session().execute(builder.build());
@@ -501,10 +505,12 @@ auto job_repository::mark_started(std::string_view job_id) -> VoidResult {
 
     auto now_str = format_timestamp(std::chrono::system_clock::now());
 
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
     auto builder = query_builder();
     builder.update(table_name())
-        .set("status", std::string("running"))
-        .set("started_at", now_str)
+        .set(std::map<std::string, database_value>{
+            {"status", std::string("running")}, {"started_at", now_str}})
         .where("job_id", "=", std::string(job_id));
 
     auto result = storage_session().execute(builder.build());
@@ -523,10 +529,12 @@ auto job_repository::mark_completed(std::string_view job_id) -> VoidResult {
 
     auto now_str = format_timestamp(std::chrono::system_clock::now());
 
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
     auto builder = query_builder();
     builder.update(table_name())
-        .set("status", std::string("completed"))
-        .set("completed_at", now_str)
+        .set(std::map<std::string, database_value>{
+            {"status", std::string("completed")}, {"completed_at", now_str}})
         .where("job_id", "=", std::string(job_id));
 
     auto result = storage_session().execute(builder.build());
@@ -547,20 +555,16 @@ auto job_repository::mark_failed(std::string_view job_id,
 
     auto now_str = format_timestamp(std::chrono::system_clock::now());
 
-    // First get current retry count
-    auto find_result = find_by_id(std::string(job_id));
-    int current_retry = 0;
-    if (find_result.is_ok()) {
-        current_retry = find_result.value().retry_count;
-    }
-
+    // retry_count counts retries, which increment_retry() records; a failure is not a retry.
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
     auto builder = query_builder();
     builder.update(table_name())
-        .set("status", std::string("failed"))
-        .set("error_message", std::string(error_message))
-        .set("error_details", std::string(error_details))
-        .set("retry_count", static_cast<int64_t>(current_retry + 1))
-        .set("completed_at", now_str)
+        .set(std::map<std::string, database_value>{
+            {"status", std::string("failed")},
+            {"error_message", std::string(error_message)},
+            {"error_details", std::string(error_details)},
+            {"completed_at", now_str}})
         .where("job_id", "=", std::string(job_id));
 
     auto result = storage_session().execute(builder.build());

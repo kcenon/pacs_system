@@ -20,6 +20,7 @@
 #define PACS_NETWORK_ASSOCIATION_HPP
 
 #include "kcenon/pacs/network/pdu_types.h"
+#include "kcenon/pacs/network/tls_config.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 
@@ -198,9 +199,14 @@ struct association_config {
     std::string calling_ae_title;         ///< Our AE Title (16 chars max)
     std::string called_ae_title;          ///< Remote AE Title (16 chars max)
     std::vector<proposed_presentation_context> proposed_contexts;
+    /// Roles offered by the association requestor, keyed by SOP Class UID.
+    std::vector<scp_scu_role_selection> role_selections;
     uint32_t max_pdu_length = DEFAULT_MAX_PDU_LENGTH;
     std::string implementation_class_uid;
     std::string implementation_version_name;
+
+    /// Optional TLS transport; enabled TLS never falls back to plaintext/in-memory.
+    tls_config tls;
 
     association_config() = default;
 };
@@ -213,6 +219,8 @@ struct scp_config {
     std::vector<std::string> accepted_ae_titles; ///< Allowed calling AE titles (empty = all)
     std::vector<std::string> supported_abstract_syntaxes;
     std::vector<std::string> supported_transfer_syntaxes;
+    /// Requestor roles this acceptor can support; omitted SOPs use default roles.
+    std::vector<scp_scu_role_selection> supported_requestor_roles;
     uint32_t max_pdu_length = DEFAULT_MAX_PDU_LENGTH;
     std::string implementation_class_uid;
     std::string implementation_version_name;
@@ -312,6 +320,9 @@ public:
 
     /// Default timeout for operations
     static constexpr duration default_timeout{30000};  // 30 seconds
+
+    /// TLS protocol negotiated by the TCP client; empty for plaintext/in-memory.
+    [[nodiscard]] std::string negotiated_tls_version() const;
 
     /// Whether connect() reaches peers that are not an in-process
     /// dicom_server over TCP (Issue #1240). Test suites gate their TCP cases
@@ -486,6 +497,11 @@ public:
     [[nodiscard]] Result<encoding::transfer_syntax> context_transfer_syntax(
         uint8_t pc_id) const;
 
+    /// Negotiated roles from the requestor's perspective (PS3.7 D.3.3.4).
+    /// An accepted context without a role response defaults to SCU=true/SCP=false.
+    /// A SOP Class without an accepted context has neither role.
+    [[nodiscard]] scp_scu_role_selection requestor_role(std::string_view sop_class_uid) const;
+
     /**
      * @brief Get all accepted presentation contexts.
      */
@@ -523,6 +539,29 @@ public:
      */
     [[nodiscard]] Result<std::pair<uint8_t, dimse::dimse_message>> receive_dimse(
         duration timeout = default_timeout);
+
+    /// Allocate a non-reused MessageID for an SCP-initiated exchange. Exhaustion
+    /// requires a new association; delayed responses must never match a reuse.
+    [[nodiscard]] Result<uint16_t> next_request_message_id();
+
+    /// Register and send a C-STORE/C-ECHO request on a writer or in-memory
+    /// association whose receive path calls deliver_response(). Only one such
+    /// request may be outstanding (the default DIMSE operations window).
+    /// TCP SCUs continue to use send_dimse()/receive_dimse().
+    [[nodiscard]] Result<std::monostate> send_request(
+        uint8_t context_id, const dimse::dimse_message& request);
+
+    /// Consume the registered response exactly once. A receive_timeout leaves
+    /// the wait registered for polling; cancel_response_wait() retires it.
+    [[nodiscard]] Result<dimse::dimse_message> receive_response(
+        duration timeout = default_timeout);
+    void cancel_response_wait();
+
+    /// Receive-path entry point. Correlates context/command/MessageID and SOP
+    /// identity, ignores known late/duplicate responses, and never queues an
+    /// unsolicited response. Errors with no active waiter are protocol errors.
+    [[nodiscard]] Result<std::monostate> deliver_response(
+        uint8_t context_id, const dimse::dimse_message& response);
 
     // =========================================================================
     // PDU Access (for network layer integration)
@@ -641,6 +680,13 @@ public:
      */
     void enqueue_message(uint8_t context_id, dimse::dimse_message msg);
 
+    /// Register before dispatch so an early C-CANCEL cannot be lost. Repeated
+    /// registration preserves cancellation; finish removes the operation.
+    void register_cancellable_operation(uint8_t context_id, uint16_t message_id);
+    void finish_cancellable_operation(uint8_t context_id, uint16_t message_id);
+    [[nodiscard]] bool cancellation_requested(uint8_t context_id, uint16_t message_id) const;
+
+
     /**
      * @brief Re-pair with @p new_peer if paired with @p old_peer (for
      *        in-memory testing).
@@ -688,9 +734,12 @@ private:
     /// associations)
     struct transport;
 
+    struct response_router;
+    void close_response_waiters();
+
     /// Open the TCP connection and negotiate (connect() after propose())
     [[nodiscard]] Result<std::monostate> establish_over_tcp(
-        const std::string& host, uint16_t port, duration timeout);
+        const std::string& host, uint16_t port, duration timeout, const tls_config& tls);
 
     /// receive_dimse() over the TCP connection
     [[nodiscard]] Result<std::pair<uint8_t, dimse::dimse_message>> receive_over_tcp(
@@ -741,6 +790,8 @@ private:
 
     /// Proposed presentation contexts (SCU)
     std::vector<proposed_presentation_context> proposed_contexts_;
+    std::vector<scp_scu_role_selection> proposed_roles_;
+    std::vector<scp_scu_role_selection> accepted_roles_;
 
     /// Accepted presentation contexts
     std::vector<accepted_presentation_context> accepted_contexts_;
@@ -776,11 +827,14 @@ private:
     /// I/O keeps it alive while another thread aborts
     std::shared_ptr<transport> transport_;
 
-    /// Incoming message queue for in-memory testing (thread-safe)
+    std::shared_ptr<response_router> responses_;
+
+    std::map<std::pair<uint8_t, uint16_t>, bool> cancellable_operations_;
+
+    /// Incoming message queue for in-memory and asynchronous server dispatch (thread-safe)
     using message_type = std::pair<uint8_t, dimse::dimse_message>;
-    using message_queue_type = kcenon::thread::detail::concurrent_queue<message_type>;
-    mutable std::unique_ptr<message_queue_type> incoming_queue_{
-        std::make_unique<message_queue_type>()};
+    struct message_queue;
+    mutable std::unique_ptr<message_queue> incoming_queue_;
 };
 
 }  // namespace kcenon::pacs::network

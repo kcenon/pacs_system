@@ -136,6 +136,10 @@ public:
      * encapsulate_frames()), Pixel Data is written as OB with undefined
      * length, its items, and a Sequence Delimitation Item (PS3.5 A.4). Any
      * other Pixel Data value is written unchanged with its defined length.
+     * Big Endian binary values use the shared VR swap policy, including AT's
+     * two 16-bit components and OW with eight-bit pixel allocation. Incomplete
+     * binary values return an empty vector; save() reports encode_error without
+     * writing a destination file.
      */
     [[nodiscard]] auto to_bytes() const -> std::vector<uint8_t>;
 
@@ -180,6 +184,12 @@ public:
     // ========================================================================
     // Accessors
     // ========================================================================
+
+    /// Check the transfer syntax and Pixel Data representation without decoding
+    /// or transcoding pixels. No Pixel Data is required for non-image objects.
+    [[nodiscard]] static auto validate_pixel_data_representation(
+        const dicom_dataset& dataset, const encoding::transfer_syntax& syntax)
+        -> kcenon::pacs::VoidResult;
 
     /**
      * @brief Get read-only access to the File Meta Information
@@ -315,9 +325,11 @@ private:
      * @return Result containing the decoded dataset or error
      *
      * Uses dicom_dictionary for VR lookup since VR is not encoded in data.
+     * strict/depth enforce complete bounded decoding for undefined UN Items.
      */
     [[nodiscard]] static auto decode_implicit_vr_le(
-        std::span<const uint8_t> data, size_t& bytes_read)
+        std::span<const uint8_t> data, size_t& bytes_read,
+        bool strict = false, unsigned depth = 0)
         -> kcenon::pacs::Result<dicom_dataset>;
 
     /**
@@ -378,11 +390,15 @@ private:
      *        including a Sequence Delimitation Item
      * @param explicit_vr Whether to use explicit VR parsing
      * @param big_endian Whether data is big endian
+     * @param undefined_length Require a Sequence Delimitation Item
+     * @param strict Reject malformed implicit item values (undefined UN content)
+     * @param depth Nesting depth for bounded strict UN traversal
      * @return Result containing the sequence items or error
      */
     [[nodiscard]] static auto parse_sequence_items(
         std::span<const uint8_t> data, size_t& bytes_read,
-        bool explicit_vr, bool big_endian)
+        bool explicit_vr, bool big_endian, bool undefined_length = false,
+        bool strict = false, unsigned depth = 0)
         -> kcenon::pacs::Result<std::vector<dicom_dataset>>;
 
     /**
@@ -392,11 +408,13 @@ private:
      * @param explicit_vr Whether to use explicit VR parsing
      * @param big_endian Whether data is big endian
      * @return The element with its items, or with value as its raw data if
-     *         value is not a sequence of items
+     *         value is not a sequence of items outside strict UN parsing.
+     *         A recognized but malformed Item stream returns an error.
      */
     [[nodiscard]] static auto decode_defined_length_sequence(
         dicom_tag tag, std::span<const uint8_t> value,
-        bool explicit_vr, bool big_endian) -> dicom_element;
+        bool explicit_vr, bool big_endian, bool strict = false, unsigned depth = 0)
+        -> kcenon::pacs::Result<dicom_element>;
 
     /// File Meta Information (Group 0002)
     dicom_dataset meta_info_;

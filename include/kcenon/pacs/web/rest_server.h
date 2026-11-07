@@ -48,6 +48,10 @@ namespace kcenon::pacs::network {
 class dicom_server;
 } // namespace kcenon::pacs::network
 
+namespace kcenon::pacs::network::v2 {
+class dicom_server_v2;
+} // namespace kcenon::pacs::network::v2
+
 namespace kcenon::pacs::client {
 class remote_node_manager;
 class job_manager;
@@ -182,6 +186,12 @@ public:
    * @param server DICOM server instance
    */
   void set_dicom_server(std::shared_ptr<network::dicom_server> server);
+
+  /**
+   * @brief Set the DICOM server for association statistics, when it is the v2 server
+   * @param server Shared pointer to the server
+   */
+  void set_dicom_server_v2(std::shared_ptr<network::v2::dicom_server_v2> server);
 
   /**
    * @brief Set OAuth 2.0 middleware for DICOMweb endpoint authorization

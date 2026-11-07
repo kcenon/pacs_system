@@ -59,6 +59,7 @@ tools/integration_tests/
         ├── generate_test_certs.sh   # Certificate generation script
         ├── ca.crt / ca.key          # Test CA certificate
         ├── server.crt / server.key  # Server certificate
+        ├── wrong_ip_server.crt / .key # Server certificate for 127.0.0.2 only
         ├── client.crt / client.key  # Client certificate (for mTLS)
         └── other_ca.crt             # Different CA for validation testing
 ```
@@ -191,18 +192,11 @@ comment in `include/kcenon/pacs/network/association.h`):
   response (ARTIM); the timeout of `release()` bounds the wait for
   A-RELEASE-RP.
 
-Three predicates in `test_fixtures.h` gate the cases that need a capability
-pacs_system may not have:
-
-| Predicate | Value | Gates |
-|-----------|-------|-------|
-| `supports_real_tcp_dicom()` | `network::association::tcp_transport_available`, set by the TCP client path (true) | `[v2][stress]` cases; DCMTK cases where a pacs_system SCU talks to a DCMTK SCP |
-| `v1_server_accepts_tcp()` | false: v1 serves only in-process associations | DCMTK cases that run a DCMTK SCU against a v1-based fixture (`test_server`, `storage_test_server`); they run once those fixtures move to `dicom_server_v2` |
-| `move_scp_stores_to_destination()` | false: `retrieve_scp` counts C-MOVE sub-operations as successful without opening an association to the destination | the checks of what a C-MOVE destination received (`C-MOVE: pacs_system SCU basic operation` runs its C-MOVE exchange, then skips the destination check) |
-
-`supports_real_tcp_dicom()` reads a build-time flag instead of probing a
-loopback server, because a probe that failed would skip the gated cases and
-hide the regression they exist to report.
+`supports_real_tcp_dicom()` reads the TCP client build flag. The CLI and
+`test_server` fixtures use `dicom_server_v2`, so external DCMTK SCUs reach them
+through real sockets. C-MOVE destination checks run unconditionally: the Retrieve
+SCP resolves the configured AE, opens a separate association and counts actual
+C-STORE responses. No simulated-delivery capability gate remains.
 
 ## In-Memory dicom_server Hook (C++)
 
@@ -274,12 +268,12 @@ The `test_dicom_server_v2_integration.cpp` provides end-to-end integration testi
 The SCUs in these cases reach `dicom_server_v2` over TCP (see
 [Association Transports](#association-transports-c)). CI runs them in the
 `Integration Tests` jobs of `.github/workflows/integration-tests.yml`, and a
-failed case fails the job: Ubuntu runs `"[v2]~[tls]"`, macOS and Windows run
-`"[v2]~[tls]~[stress]"`, and the `Stress Tests` job runs the `[v2][stress]`
-cases on Ubuntu as part of `"[stress]"`. The `[tls][v2]` cases are not run
-in CI: they configure TLS on neither the server nor the client, the client
-fails `configure_tls()` without a client certificate, and the concurrent
-case's AE title is longer than 16 characters.
+failed case fails the job: Ubuntu runs `"[v2]"`, macOS and Windows run
+`"[v2]~[stress]"`, and the `Stress Tests` job runs the `[v2][stress]` cases
+on Ubuntu as part of `"[stress]"`. TLS cases require certificates and OpenSSL;
+missing prerequisites fail instead of skipping. A separate required `[tls][v2]`
+selection also rejects an empty TLS suite. CI generates isolated temporary
+certificates on every platform and removes them in an always-run cleanup step.
 
 ### V2 E2E Test Fixtures
 
@@ -302,94 +296,58 @@ V2 E2E tests require `PACS_WITH_NETWORK_SYSTEM=ON` during build.
 
 ## TLS Integration Tests (C++)
 
-The `test_tls_integration.cpp` provides comprehensive C++ tests for TLS-secured DICOM communication. These tests verify TLS functionality using the `network_adapter` TLS configuration.
+The `[tls][v2]` cases use the real TLS listener and association client. They
+verify negotiated protocol versions, C-ECHO, concurrent clients, mTLS C-STORE
+with complete pixel comparison, plaintext/wrong-CA rejection, missing client
+identity, invalid server credentials, receive timeout and shutdown/restart.
+Legacy `[tls]~[v2]` fixtures and the broader external TLS/security/audit matrix
+remain tracked in #1317; those fixtures do not establish v2 TLS coverage.
 
 ### Running TLS Tests
 
 ```bash
-# Generate test certificates (run once, required before TLS tests)
-./tools/integration_tests/test_data/certs/generate_test_certs.sh
-
-# Run TLS integration tests
-PACS_TEST_CERT_DIR=./tools/integration_tests/test_data/certs \
-    ./build/bin/pacs_integration_e2e "[tls]"
-
-# Run specific TLS test scenarios
-./build/bin/pacs_integration_e2e "[tls][connectivity]"  # Basic TLS connection
-./build/bin/pacs_integration_e2e "[tls][security]"      # Certificate validation
-./build/bin/pacs_integration_e2e "[tls][mtls]"          # Mutual TLS
-./build/bin/pacs_integration_e2e "[tls][version]"       # TLS version tests
-./build/bin/pacs_integration_e2e "[tls][concurrent]"    # Concurrent TLS connections
-./build/bin/pacs_integration_e2e "[tls][config]"        # Configuration validation
+cert_dir="$(mktemp -d)"
+trap 'rm -rf "$cert_dir"' EXIT
+bash tools/integration_tests/test_data/certs/generate_test_certs.sh "$cert_dir"
+PACS_TEST_CERT_DIR="$cert_dir" ./build/bin/pacs_integration_e2e \
+    "[tls][v2]" --warn UnmatchedTestSpec
 ```
 
-### TLS Test Scenarios
+`PACS_TEST_CERT_DIR` selects the certificate directory exclusively when set.
+The helper generates a CA, localhost/loopback server identity, a server identity
+for 127.0.0.2 only (the wrong-IP case connects to 127.0.0.1, so it also runs on
+macOS, whose loopback interface has no 127.0.0.2), client identity, and separate
+untrusted CA. Certificates/private keys are test-only material and
+must not be committed. OpenSSL and network_system must be available at build time.
 
-| Scenario | Tag | Description |
-|----------|-----|-------------|
-| Basic TLS Connection | `[tls][connectivity]` | TLS server accepts connection and responds to C-ECHO |
-| Certificate Validation | `[tls][security]` | Valid/invalid certificate handling |
-| Mutual TLS | `[tls][mtls]` | Client certificate authentication |
-| TLS Version | `[tls][version]` | TLS 1.2 and 1.3 negotiation |
-| Concurrent Connections | `[tls][concurrent]` | Multiple parallel TLS connections |
-| Config Validation | `[tls][config]` | TLS configuration structure validation |
-
-### Test Certificate Generation
-
-The `generate_test_certs.sh` script creates a complete PKI for testing:
-
-```bash
-# Generate certificates in custom directory
-./generate_test_certs.sh /path/to/output
-
-# Files generated:
-# - ca.crt / ca.key       - Root CA certificate
-# - server.crt / server.key - Server certificate (localhost)
-# - client.crt / client.key - Client certificate (for mTLS)
-# - other_ca.crt / other_ca.key - Different CA for validation tests
-```
-
-### TLS Test Fixtures
-
-The test file provides reusable TLS fixtures:
+### Shared TLS Test Fixtures
 
 ```cpp
-#include "test_tls_integration.cpp"
+#include "tls_test_fixtures.h"
 
-// Get test certificate paths
-auto certs = get_test_certificates();
-if (!certs.all_exist()) {
-    SKIP("Test certificates not available");
-}
-
-// Create TLS-enabled server
-tls_config server_tls;
-server_tls.enabled = true;
-server_tls.cert_path = certs.server_cert;
-server_tls.key_path = certs.server_key;
-server_tls.ca_path = certs.ca_cert;
-server_tls.verify_peer = true;  // Require client cert (mTLS)
-
-tls_test_server server(port, "TLS_SCP", server_tls);
+const auto certs = get_test_certificates();
+REQUIRE(certs.all_exist());
+tls_test_server_v2 server(server_tls_config(certs, true)); // require mTLS
 server.register_service(std::make_shared<verification_scp>());
-server.start();
-
-// Connect with TLS client
-tls_config client_tls;
-client_tls.enabled = true;
-client_tls.cert_path = certs.client_cert;
-client_tls.key_path = certs.client_key;
-client_tls.ca_path = certs.ca_cert;
-
-auto result = tls_test_client::connect(
-    "localhost", port, server.ae_title(), "TLS_SCU", client_tls);
+REQUIRE(server.start().is_ok());
+auto result = connect_tls(server.port(), server.ae_title(), client_tls_config(certs, true));
+REQUIRE(result.is_ok());
+CHECK_FALSE(result.value().negotiated_tls_version().empty());
 ```
 
-### Environment Variables
+Production callers set `server_config::tls` on `dicom_server_v2` and
+`association_config::tls` on `association::connect()`. TLS is disabled by default.
+Server certificate/key are required; client certificate/key are optional unless
+the server requires mTLS. Client verification checks both the CA chain and host/IP
+identity. `verify_peer=true` on the server requires a trusted client certificate.
+The minimum protocol is TLS 1.2 (TLS 1.3 can be required). TLS connection failures
+never retry as plaintext or use the legacy in-memory test transport. The legacy
+`dicom_server` rejects TLS configurations; it does not provide a TLS listener.
 
-| Variable | Description |
-|----------|-------------|
-| `PACS_TEST_CERT_DIR` | Directory containing test certificates |
+The pinned network_system TCP facade rejects TLS creation. PACS supplies a TLS
+adapter implementing its public session/server interfaces, with bounded handshake
+waits and outbound queues, while the existing v2 DICOM handler processes decrypted
+PDUs. The synchronous association client preserves per-call timeouts over TLS.
 
 ## C++ Test Utilities
 
@@ -476,15 +434,16 @@ stop_storescp "$storescp_pid"
 
 The DCMTK interoperability test suite validates bidirectional compatibility between the pacs_system and DCMTK reference implementation. These tests ensure compliance with DICOM standards and interoperability with real-world PACS systems.
 
-> **Note: Current Limitations**
->
-> The cases where a pacs_system SCU talks to a DCMTK SCP (`storescp`; DCMTK
-> has no `echoscp`, so `dcmtk_tool::echoscp()` starts `storescp`, which
-> answers C-ECHO) run over the association TCP client. The cases that run a DCMTK
-> SCU (`echoscu`, `storescu`, `findscu`, `movescu`) against a pacs_system SCP
-> are **skipped**: their fixtures use the v1 `dicom_server`, whose
-> `accept_worker` closes every TCP connection, so they skip on
-> `v1_server_accepts_tcp()` until the fixtures move to `dicom_server_v2`.
+> The C++ DCMTK fixtures use `dicom_server_v2` for independent SCUs and the
+> TCP association client for PACS SCUs. C-FIND selects Patient Root (`-P`) for
+> patient queries, Study Root (`-S`) for other Q/R levels, and Worklist (`-W`)
+> only for MWL. Query tests extract the peer's response files and require exact
+> returned identifiers and metadata, including empty matches and UTF-8 names.
+> C-MOVE tests verify actual destination objects. Missing DCMTK can skip local
+> cases; CI requires the tools and rejects empty/all-skipped protocol selections.
+> Shell scripts check executable contracts, retain command/server evidence, and
+> verify actual received objects; see [shell test instructions](scripts/README.md).
+> Broader external TLS/security validation remains under #1317.
 > See [Association Transports](#association-transports-c).
 
 ### Test Scenarios
@@ -632,7 +591,7 @@ auto invalid = test_data_generator::invalid(
 | `xa()` | XA Image (single frame) | 1.2.840.10008.5.1.4.1.1.12.1 |
 | `us()` | US Image (single frame) | 1.2.840.10008.5.1.4.1.1.6.1 |
 | `xa_cine()` | XA Multi-frame | 1.2.840.10008.5.1.4.1.1.12.1 |
-| `us_cine()` | US Multi-frame | 1.2.840.10008.5.1.4.1.1.6.2 |
+| `us_cine()` | US Multi-frame | 1.2.840.10008.5.1.4.1.1.3.1 |
 | `enhanced_ct()` | Enhanced CT | 1.2.840.10008.5.1.4.1.1.2.1 |
 | `enhanced_mr()` | Enhanced MR | 1.2.840.10008.5.1.4.1.1.4.1 |
 | `worklist()` | Modality Worklist | N/A |
@@ -849,8 +808,16 @@ The scripts use multiple fallback methods for detecting listening ports:
 ### Process Management
 
 The C++ `process_launcher` class handles platform differences:
-- POSIX: `fork()` + `exec()`, `kill()`, `waitpid()`
+- POSIX: `posix_spawnp()` with default signal handlers and a dedicated process
+  group, bounded output capture, `kill()`, and `waitpid()`. A failed spawn returns
+  immediately; a child never runs inherited Catch2/reporting shutdown handlers.
 - Windows: `CreateProcess()`, `TerminateProcess()`
+
+The integration executable reserves stdout for Catch2, including discovery and
+XML output. Its DCMTK echo-server helpers use `storescp`, which supports C-ECHO;
+DCMTK does not provide an `echoscp` executable. Missing DCMTK prerequisites are
+reported as unavailable, while a server failing to start after detection fails
+the test instead of being skipped.
 
 ### Timeouts
 
@@ -1027,3 +994,44 @@ When adding new binary tests:
 ## License
 
 See the main project [LICENSE](../../LICENSE) file.
+
+### External security evidence (#1317)
+
+Run `python3 validation/security/run.py --bin-dir build/bin --output /tmp/security-public-new --private-output /tmp/security-private-new`
+from the repository root. The required binary integration job runs this matrix,
+including the seven recursive anonymization cases; only checked public evidence
+is uploaded. See [scope and prerequisites](../../validation/security/README.md).
+Historical non-v2-tagged TLS cases now use the actual v2 encrypted listener. The
+retained v1 factory preserves TLS settings and rejects unsupported TLS at start.
+The certificate generator requires an expired fixture and uses fixed historical
+validity dates supported by OpenSSL 3.5; generation failure is fatal.
+
+### Big Endian file conversion (#1293)
+
+`python3 tools/integration_tests/scripts/test_big_endian_values.py build /tmp/be-new-run`
+checks raw intermediate values, independent DCMTK files and pydicom/NumPy pixels,
+including OW with eight-bit allocation. Its six cases are required in binary CI
+and the full DCMTK driver. These are file-format checks; retired Big Endian is
+still excluded from PACS_SCP presentation-context negotiation.
+
+Independent DICOMDIR acceptance:
+
+```sh
+python3 tools/integration_tests/scripts/test_dicomdir_offsets.py build build/test-results/dicomdir
+```
+
+Use a new evidence directory. Nine cases exercise actual `dcm_dir` creation,
+listing, verification and add/rebuild updates against pydicom FileSet and DCMTK,
+including shuffled physical order, empty directories and corrupt offsets. The
+script requires pydicom, `dcmdump` and `dcmmkdir`; missing tools fail the run.
+
+Independent undefined-length UN acceptance:
+
+```sh
+python3 tools/integration_tests/scripts/test_undefined_un.py build build/test-results/undefined-un
+```
+
+Requires pydicom, `dcmdump` and `dcmconv`, and a new evidence directory. Five cases
+verify actual conversions between explicit LE/BE with implicit LE UN Items,
+trailing values, defined UN preservation and 32 malformed inputs. DCMTK validates
+the original BE UN input; pydicom validates the normalized SQ output.

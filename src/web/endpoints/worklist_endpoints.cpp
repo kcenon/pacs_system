@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -51,8 +53,15 @@ void add_cors_headers(crow::response &res, const rest_server_context &ctx) {
 std::string format_datetime(
     const std::chrono::system_clock::time_point &tp) {
   auto time = std::chrono::system_clock::to_time_t(tp);
+  // Routes run on several threads, and std::gmtime shares one static buffer.
+  std::tm utc{};
+#ifdef _WIN32
+  gmtime_s(&utc, &time);
+#else
+  gmtime_r(&time, &utc);
+#endif
   std::ostringstream oss;
-  oss << std::put_time(std::gmtime(&time), "%Y-%m-%dT%H:%M:%SZ");
+  oss << std::put_time(&utc, "%Y-%m-%dT%H:%M:%SZ");
   return oss.str();
 }
 
@@ -138,24 +147,23 @@ std::pair<size_t, size_t> parse_pagination(const crow::request &req) {
 /**
  * @brief Parse worklist_item from JSON request body
  */
+/// A string member of a JSON object; absent or of another type reads as empty.
+std::string json_string(const crow::json::rvalue &object, const char *key) {
+  if (!object.has(key) || object[key].t() != crow::json::type::String) {
+    return "";
+  }
+  return std::string(object[key].s());
+}
+
 std::optional<storage::worklist_item> parse_worklist_item_json(
     const std::string &body) {
   storage::worklist_item item;
 
-  // Simple JSON parsing for required fields
-  auto get_json_string = [&body](const std::string &key) -> std::string {
-    std::string search_key = "\"" + key + "\":\"";
-    auto pos = body.find(search_key);
-    if (pos == std::string::npos) {
-      return "";
-    }
-    pos += search_key.length();
-    auto end_pos = body.find("\"", pos);
-    if (end_pos == std::string::npos) {
-      return "";
-    }
-    return body.substr(pos, end_pos - pos);
-  };
+  const auto json = crow::json::load(body);
+  if (!json || json.t() != crow::json::type::Object) {
+    return std::nullopt;
+  }
+  auto get_json_string = [&json](const char *key) { return json_string(json, key); };
 
   item.step_id = get_json_string("step_id");
   item.patient_id = get_json_string("patient_id");
@@ -192,7 +200,7 @@ std::optional<storage::worklist_item> parse_worklist_item_json(
 
 // Internal implementation function called from rest_server.cpp
 void register_worklist_endpoints_impl(
-    crow::SimpleApp &app,
+    rest_app &app,
     std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/worklist - List scheduled procedures (paginated)
   CROW_ROUTE(app, "/api/v1/worklist")
@@ -385,25 +393,21 @@ void register_worklist_endpoints_impl(
             }
 
             // Parse new status from request body
-            auto get_json_string = [&req](const std::string &key) -> std::string {
-              std::string search_key = "\"" + key + "\":\"";
-              auto pos = req.body.find(search_key);
-              if (pos == std::string::npos) {
-                return "";
-              }
-              pos += search_key.length();
-              auto end_pos = req.body.find("\"", pos);
-              if (end_pos == std::string::npos) {
-                return "";
-              }
-              return req.body.substr(pos, end_pos - pos);
-            };
-
-            std::string new_status = get_json_string("step_status");
+            const auto json = crow::json::load(req.body);
+            std::string new_status = json && json.t() == crow::json::type::Object
+                                         ? json_string(json, "step_status")
+                                         : std::string{};
             if (new_status.empty()) {
               res.code = 400;
               res.body = make_error_json("INVALID_REQUEST",
                                          "step_status is required for update");
+              return res;
+            }
+            // The values the repository keeps; anything else is the client's mistake, not a failure here.
+            if (new_status != "SCHEDULED" && new_status != "STARTED" && new_status != "COMPLETED") {
+              res.code = 400;
+              res.body = make_error_json("INVALID_REQUEST",
+                                         "step_status must be SCHEDULED, STARTED or COMPLETED");
               return res;
             }
 

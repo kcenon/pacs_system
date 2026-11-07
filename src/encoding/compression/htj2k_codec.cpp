@@ -6,6 +6,7 @@
 #include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 
 #ifdef PACS_WITH_HTJ2K_CODEC
@@ -341,61 +342,28 @@ codec_result htj2k_codec::decode(
         // Pull decoded data row by row.
         // OpenJPH returns i32 from pull() for both reversible and
         // irreversible modes (internal float-to-int conversion is done).
+        // Lossy ringing can pass the declared range. Stop it at Bits Stored: a reader
+        // that masks unused high bits would otherwise see it wrap to the opposite end.
+        const int min_sample = is_signed ? -(1 << (bit_depth - 1)) : 0;
+        const int max_sample = is_signed ? (1 << (bit_depth - 1)) - 1
+                                         : static_cast<int>((int64_t{1} << bit_depth) - 1);
         ojph::ui32 comp_num = 0;
         for (ojph::ui32 y = 0; y < decoded_height; ++y) {
             for (ojph::ui32 c = 0; c < num_comps; ++c) {
                 ojph::line_buf* line = codestream.pull(comp_num);
 
+                const size_t row = static_cast<size_t>(y) * decoded_width * num_comps;
                 if (bytes_per_sample == 1) {
-                    if (num_comps == 1) {
-                        auto* dst = output_data.data()
-                            + static_cast<size_t>(y) * decoded_width;
-                        for (ojph::ui32 x = 0; x < decoded_width; ++x) {
-                            auto val = line->i32[x];
-                            dst[x] = static_cast<uint8_t>(std::clamp(val, 0, 255));
-                        }
-                    } else {
-                        auto* dst = output_data.data()
-                            + static_cast<size_t>(y) * decoded_width * num_comps;
-                        for (ojph::ui32 x = 0; x < decoded_width; ++x) {
-                            auto val = line->i32[x];
-                            dst[x * num_comps + comp_num] =
-                                static_cast<uint8_t>(std::clamp(val, 0, 255));
-                        }
+                    auto* dst = output_data.data() + row;
+                    for (ojph::ui32 x = 0; x < decoded_width; ++x) {
+                        dst[x * num_comps + comp_num] =
+                            static_cast<uint8_t>(std::clamp(line->i32[x], min_sample, max_sample));
                     }
                 } else {
-                    if (num_comps == 1) {
-                        auto* dst = reinterpret_cast<uint16_t*>(
-                            output_data.data()
-                            + static_cast<size_t>(y) * decoded_width * 2);
-                        for (ojph::ui32 x = 0; x < decoded_width; ++x) {
-                            auto val = line->i32[x];
-                            if (is_signed) {
-                                dst[x] = static_cast<uint16_t>(
-                                    static_cast<int16_t>(
-                                        std::clamp(val, -32768, 32767)));
-                            } else {
-                                dst[x] = static_cast<uint16_t>(
-                                    std::clamp(val, 0, 65535));
-                            }
-                        }
-                    } else {
-                        auto* dst = reinterpret_cast<uint16_t*>(
-                            output_data.data()
-                            + static_cast<size_t>(y) * decoded_width * num_comps * 2);
-                        for (ojph::ui32 x = 0; x < decoded_width; ++x) {
-                            auto val = line->i32[x];
-                            if (is_signed) {
-                                dst[x * num_comps + comp_num] =
-                                    static_cast<uint16_t>(
-                                        static_cast<int16_t>(
-                                            std::clamp(val, -32768, 32767)));
-                            } else {
-                                dst[x * num_comps + comp_num] =
-                                    static_cast<uint16_t>(
-                                        std::clamp(val, 0, 65535));
-                            }
-                        }
+                    auto* dst = reinterpret_cast<uint16_t*>(output_data.data() + row * 2);
+                    for (ojph::ui32 x = 0; x < decoded_width; ++x) {
+                        dst[x * num_comps + comp_num] =
+                            static_cast<uint16_t>(std::clamp(line->i32[x], min_sample, max_sample));
                     }
                 }
             }

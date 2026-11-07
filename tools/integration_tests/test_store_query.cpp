@@ -163,13 +163,19 @@ private:
 
         // 2. Study
         auto study_uid = dataset.get_string(tags::study_instance_uid);
-        auto study_res = database_->upsert_study(pat_pk, study_uid);
+        auto study_res = database_->upsert_study(
+            pat_pk, study_uid, dataset.get_string(tags::study_id),
+            dataset.get_string(tags::study_date), dataset.get_string(tags::study_time),
+            dataset.get_string(tags::accession_number),
+            dataset.get_string(tags::referring_physician_name),
+            dataset.get_string(tags::study_description));
         if (study_res.is_err()) return storage_status::storage_error;
         auto study_pk = study_res.value();
 
         // 3. Series
         auto series_uid = dataset.get_string(tags::series_instance_uid);
-        auto series_res = database_->upsert_series(study_pk, series_uid);
+        auto series_res = database_->upsert_series(
+            study_pk, series_uid, dataset.get_string(tags::modality));
         if (series_res.is_err()) return storage_status::storage_error;
         auto series_pk = series_res.value();
 
@@ -207,6 +213,9 @@ private:
             auto pat_name_val = query_keys.get_string(tags::patient_name);
             if (!pat_name_val.empty()) query.patient_name = pat_name_val;
 
+            auto modality_val = query_keys.get_string(tags::modalities_in_study);
+            if (!modality_val.empty()) query.modality = modality_val;
+
             auto studies_result = database_->search_studies(query);
             if (studies_result.is_ok()) {
                 for (const auto& study : studies_result.value()) {
@@ -217,6 +226,7 @@ private:
                     ds.set_string(tags::study_time, vr_type::TM, study.study_time);
                     ds.set_string(tags::accession_number, vr_type::SH, study.accession_number);
                     ds.set_string(tags::study_description, vr_type::LO, study.study_description);
+                    ds.set_string(tags::modalities_in_study, vr_type::CS, study.modalities_in_study);
                     ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
 
                     auto patient = database_->find_patient_by_pk(study.patient_pk);
@@ -227,6 +237,30 @@ private:
                         ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
                     }
 
+                    results.push_back(std::move(ds));
+                }
+            }
+        } else if (level == query_level::series) {
+            series_query query;
+            auto study_uid = query_keys.get_string(tags::study_instance_uid);
+            if (!study_uid.empty()) query.study_uid = study_uid;
+            auto series_uid = query_keys.get_string(tags::series_instance_uid);
+            if (!series_uid.empty()) query.series_uid = series_uid;
+            auto modality = query_keys.get_string(tags::modality);
+            if (!modality.empty()) query.modality = modality;
+
+            auto series_result = database_->search_series(query);
+            if (series_result.is_ok()) {
+                for (const auto& series : series_result.value()) {
+                    auto study = database_->find_study_by_pk(series.study_pk);
+                    if (!study) continue;
+                    dicom_dataset ds;
+                    ds.set_string(tags::query_retrieve_level, vr_type::CS, "SERIES");
+                    ds.set_string(tags::study_instance_uid, vr_type::UI, study->study_uid);
+                    ds.set_string(tags::series_instance_uid, vr_type::UI, series.series_uid);
+                    ds.set_string(tags::modality, vr_type::CS, series.modality);
+                    ds.set_string(tags::number_of_series_related_instances, vr_type::IS,
+                                  std::to_string(series.num_instances));
                     results.push_back(std::move(ds));
                 }
             }
@@ -270,6 +304,30 @@ private:
 
     std::atomic<size_t> stored_count_{0};
 };
+
+// A missing final response or a failed DIMSE status is not an empty match.
+std::vector<dicom_dataset> find_matches(association& assoc, dicom_dataset keys,
+                                      uint16_t message_id) {
+    const auto context = assoc.accepted_context_id(study_root_find_sop_class_uid);
+    REQUIRE(context.has_value());
+    auto request = make_c_find_rq(message_id, study_root_find_sop_class_uid);
+    request.set_dataset(std::move(keys));
+    REQUIRE(assoc.send_dimse(*context, request).is_ok());
+    std::vector<dicom_dataset> results;
+    while (true) {
+        auto response = assoc.receive_dimse(default_timeout());
+        REQUIRE(response.is_ok());
+        const auto& [received_context, message] = response.value();
+        REQUIRE(received_context == *context);
+        if (message.status() == status_success) break;
+        REQUIRE(message.status() == status_pending);
+        REQUIRE(message.has_dataset());
+        auto dataset = message.dataset();
+        REQUIRE(dataset.is_ok());
+        results.push_back(dataset.value().get());
+    }
+    return results;
+}
 
 }  // namespace
 
@@ -457,36 +515,23 @@ TEST_CASE("Store multiple files from same study", "[store_query][multi]") {
     query_keys.set_string(tags::series_instance_uid, vr_type::UI, "");
     query_keys.set_string(tags::number_of_series_related_instances, vr_type::IS, "");
 
-    auto context_id = *query_assoc.accepted_context_id(
-        study_root_find_sop_class_uid);
-
-    auto find_rq = make_c_find_rq(1, study_root_find_sop_class_uid);
-    find_rq.set_dataset(std::move(query_keys));
-    (void)query_assoc.send_dimse(context_id, find_rq);
-
-    std::vector<dicom_dataset> results;
-    while (true) {
-        auto recv_result = query_assoc.receive_dimse(default_timeout());
-        if (recv_result.is_err()) break;
-
-        auto& [recv_ctx, rsp] = recv_result.value();
-        if (rsp.status() == status_success) break;
-        if (rsp.status() == status_pending && rsp.has_dataset()) {
-            auto ds_result = rsp.dataset();
-            if (ds_result.is_ok()) {
-                results.push_back(ds_result.value().get());
-            }
-        }
-    }
-
+    auto results = find_matches(query_assoc, query_keys, 1);
     REQUIRE(results.size() == 1);
     REQUIRE(results[0].get_string(tags::series_instance_uid) == series_uid);
+    REQUIRE(results[0].get_string(tags::study_instance_uid) == study_uid);
+    REQUIRE(results[0].get_string(tags::number_of_series_related_instances)
+            == std::to_string(num_images));
 
-    // Check number of instances in series
-    auto num_instances_str = results[0].get_string(tags::number_of_series_related_instances);
-    if (!num_instances_str.empty()) {
-        REQUIRE(std::stoi(num_instances_str) == num_images);
-    }
+    query_keys.set_string(tags::series_instance_uid, vr_type::UI, generate_uid());
+    REQUIRE(find_matches(query_assoc, query_keys, 2).empty());
+    query_keys.set_string(tags::series_instance_uid, vr_type::UI, series_uid);
+    query_keys.set_string(tags::study_instance_uid, vr_type::UI, generate_uid());
+    REQUIRE(find_matches(query_assoc, query_keys, 3).empty());
+    query_keys.set_string(tags::study_instance_uid, vr_type::UI, study_uid);
+    query_keys.set_string(tags::modality, vr_type::CS, "MR");
+    REQUIRE(find_matches(query_assoc, query_keys, 4).empty());
+    query_keys.set_string(tags::modality, vr_type::CS, "CT");
+    REQUIRE(find_matches(query_assoc, query_keys, 5).size() == 1);
 
     (void)query_assoc.release(default_timeout());
     server.stop();
@@ -527,9 +572,11 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
 
     auto ct_result = scu.store(assoc, ct_dataset);
     REQUIRE(ct_result.is_ok());
+    REQUIRE(ct_result.value().is_success());
 
     auto mr_result = scu.store(assoc, mr_dataset);
     REQUIRE(mr_result.is_ok());
+    REQUIRE(mr_result.value().is_success());
 
     (void)assoc.release(default_timeout());
 
@@ -552,36 +599,27 @@ TEST_CASE("Store files from multiple modalities", "[store_query][modality]") {
 
     auto& query_assoc = query_connect.value();
 
-    // Query for CT studies only
-    dicom_dataset ct_query;
-    ct_query.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
-    ct_query.set_string(tags::modalities_in_study, vr_type::CS, "CT");
-    ct_query.set_string(tags::study_instance_uid, vr_type::UI, "");
-
-    auto context_id = *query_assoc.accepted_context_id(
-        study_root_find_sop_class_uid);
-
-    auto find_rq = make_c_find_rq(1, study_root_find_sop_class_uid);
-    find_rq.set_dataset(std::move(ct_query));
-    (void)query_assoc.send_dimse(context_id, find_rq);
-
-    std::vector<dicom_dataset> ct_results;
-    while (true) {
-        auto recv_result = query_assoc.receive_dimse(default_timeout());
-        if (recv_result.is_err()) break;
-
-        auto& [recv_ctx, rsp] = recv_result.value();
-        if (rsp.status() == status_success) break;
-        if (rsp.status() == status_pending && rsp.has_dataset()) {
-            auto ds_result = rsp.dataset();
-            if (ds_result.is_ok()) {
-                ct_results.push_back(ds_result.value().get());
-            }
-        }
-    }
-
-    // Should find exactly 1 CT study
+    dicom_dataset query;
+    query.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
+    query.set_string(tags::study_instance_uid, vr_type::UI, "");
+    query.set_string(tags::modalities_in_study, vr_type::CS, "CT");
+    auto ct_results = find_matches(query_assoc, query, 1);
     REQUIRE(ct_results.size() == 1);
+    REQUIRE(ct_results[0].get_string(tags::study_instance_uid)
+            == ct_dataset.get_string(tags::study_instance_uid));
+    REQUIRE(ct_results[0].get_string(tags::modalities_in_study) == "CT");
+
+    query.set_string(tags::modalities_in_study, vr_type::CS, "MR");
+    auto mr_results = find_matches(query_assoc, query, 2);
+    REQUIRE(mr_results.size() == 1);
+    REQUIRE(mr_results[0].get_string(tags::study_instance_uid)
+            == mr_dataset.get_string(tags::study_instance_uid));
+    REQUIRE(mr_results[0].get_string(tags::modalities_in_study) == "MR");
+
+    query.set_string(tags::modalities_in_study, vr_type::CS, "US");
+    REQUIRE(find_matches(query_assoc, query, 3).empty());
+    query.set_string(tags::modalities_in_study, vr_type::CS, "");
+    REQUIRE(find_matches(query_assoc, query, 4).size() == 2);
 
     (void)query_assoc.release(default_timeout());
     server.stop();

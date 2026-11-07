@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import type {
   ApiError,
+  AssociationStatistics,
   WorklistItemInput,
   Job,
   JobListResponse,
@@ -38,7 +39,27 @@ import type {
   RecentStudiesResponse,
 } from '../types/api';
 
+import { clearAccessToken, getAccessToken } from '../lib/session';
+
 const API_BASE_URL = '/api/v1';
+
+/** A request that failed: status is undefined when no answer came back. */
+export class ApiRequestError extends Error {
+  readonly status?: number;
+  readonly code?: string;
+
+  constructor(message: string, status?: number, code?: string) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+function asRequestError(error: AxiosError<ApiError>): ApiRequestError {
+  const body = error.response?.data?.error;
+  return new ApiRequestError(body?.message ?? error.message, error.response?.status, body?.code);
+}
 
 class ApiClient {
   private client: AxiosInstance;
@@ -51,24 +72,36 @@ class ApiClient {
       },
     });
 
-    // Request interceptor for adding auth headers
     this.client.interceptors.request.use((config) => {
-      // For now, use a default user ID. In production, this would come from auth
-      config.headers['X-User-ID'] = 'admin';
+      const token = getAccessToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
       return config;
     });
 
-    // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError<ApiError>) => {
-        if (error.response?.data?.error) {
-          const apiError = error.response.data.error;
-          throw new Error(`${apiError.code}: ${apiError.message}`);
+        // The token expired or was never good: back to signing in. A 403 stays: the token is
+        // fine, and this page can say what it does not allow.
+        if (error.response?.status === 401) {
+          clearAccessToken();
         }
-        throw error;
+        throw asRequestError(error);
       }
     );
+  }
+
+  /** Asks the server about a token before keeping it, so a bad one never becomes a session. */
+  async checkAccessToken(token: string) {
+    try {
+      await axios.get(`${API_BASE_URL}/system/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      throw asRequestError(error as AxiosError<ApiError>);
+    }
   }
 
   // System endpoints
@@ -87,43 +120,8 @@ class ApiClient {
     return response.data;
   }
 
-  async updateSystemConfig(config: Record<string, unknown>) {
-    const response = await this.client.put('/system/config', config);
-    return response.data;
-  }
-
   async getSystemVersion() {
     const response = await this.client.get('/system/version');
-    return response.data;
-  }
-
-  async getDicomConfig() {
-    const response = await this.client.get('/system/dicom-config');
-    return response.data;
-  }
-
-  async updateDicomConfig(config: Record<string, unknown>) {
-    const response = await this.client.put('/system/dicom-config', config);
-    return response.data;
-  }
-
-  async getStorageConfig() {
-    const response = await this.client.get('/system/storage-config');
-    return response.data;
-  }
-
-  async updateStorageConfig(config: Record<string, unknown>) {
-    const response = await this.client.put('/system/storage-config', config);
-    return response.data;
-  }
-
-  async getLoggingConfig() {
-    const response = await this.client.get('/system/logging-config');
-    return response.data;
-  }
-
-  async updateLoggingConfig(config: Record<string, unknown>) {
-    const response = await this.client.put('/system/logging-config', config);
     return response.data;
   }
 
@@ -216,8 +214,8 @@ class ApiClient {
   }
 
   // Association endpoints
-  async getAssociations() {
-    const response = await this.client.get('/associations');
+  async getAssociations(): Promise<AssociationStatistics> {
+    const response = await this.client.get('/associations/active');
     return response.data;
   }
 
@@ -230,21 +228,15 @@ class ApiClient {
   async getDashboardStats() {
     // Fetch multiple endpoints in parallel and aggregate
     const [associations, patients, studies] = await Promise.all([
-      this.getAssociations().catch(() => ({ data: [], count: 0 })),
-      this.getPatients({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
-      this.getStudies({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
+      this.getAssociations(),
+      this.getPatients({ limit: 1 }),
+      this.getStudies({ limit: 1 }),
     ]);
 
-    const activeAssociations = (associations.data || []).filter(
-      (a: { state: string }) => a.state === 'ESTABLISHED'
-    ).length;
-
     return {
-      active_associations: activeAssociations,
+      active_associations: associations.active_count,
       total_patients: patients.pagination?.total ?? 0,
       total_studies: studies.pagination?.total ?? 0,
-      storage_used_bytes: 0,
-      storage_total_bytes: 0,
     };
   }
 

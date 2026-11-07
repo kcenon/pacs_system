@@ -27,7 +27,12 @@
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 
+#include "../common/qr_cli.h"
+
+#include <algorithm>
 #include <atomic>
+#include <set>
+#include <stdexcept>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
@@ -83,6 +88,7 @@ struct options {
     uint16_t port{0};
     std::string called_ae;
     std::string calling_ae{default_calling_ae};
+    std::chrono::milliseconds timeout{default_timeout};
 
     // Retrieve mode
     retrieve_mode mode{retrieve_mode::c_get};
@@ -148,6 +154,7 @@ Output Options:
 
 General Options:
   --calling-ae <ae>   Calling AE Title (default: RETRIEVE_SCU)
+  --timeout <seconds> Connection/DIMSE timeout; C-GET overall timeout (default: 60)
   --verbose, -v       Show detailed progress
   --help, -h          Show this help message
 
@@ -311,6 +318,19 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
                 opts.structure = storage_structure::flat;
             } else {
                 std::cerr << "Error: Invalid structure (use 'hierarchical' or 'flat')\n";
+                return false;
+            }
+        } else if (arg == "--timeout" && i + 1 < argc) {
+            try {
+                const std::string value = argv[++i];
+                size_t consumed = 0;
+                const auto seconds = std::stoll(value, &consumed);
+                if (consumed != value.size() || seconds <= 0 || seconds > 86400) {
+                    throw std::invalid_argument("timeout out of range");
+                }
+                opts.timeout = std::chrono::seconds{seconds};
+            } catch (const std::exception&) {
+                std::cerr << "Error: timeout must be 1..86400 seconds\n";
                 return false;
             }
         } else if (arg == "--overwrite") {
@@ -504,6 +524,24 @@ void display_progress(const progress_state& state, bool verbose) {
 /**
  * @brief Generate file path for received DICOM file
  */
+std::string path_component(std::string_view value) {
+    if (value.empty()) return "UNKNOWN";
+    constexpr char hex[] = "0123456789ABCDEF";
+    std::string encoded;
+    for (const unsigned char c : value) {
+        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')
+            || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.') {
+            encoded.push_back(static_cast<char>(c));
+        } else {
+            encoded.push_back('%');
+            encoded.push_back(hex[c >> 4]);
+            encoded.push_back(hex[c & 15]);
+        }
+    }
+    if (encoded == "." || encoded == "..") encoded.insert(0, "%2E");
+    return encoded;
+}
+
 std::filesystem::path generate_file_path(
     const options& opts,
     const kcenon::pacs::core::dicom_dataset& dataset) {
@@ -520,14 +558,14 @@ std::filesystem::path generate_file_path(
         auto sop_uid = dataset.get_string(tags::sop_instance_uid, "UNKNOWN");
 
         // Build hierarchical path
-        path /= patient_id;
-        path /= study_uid;
-        path /= series_uid;
-        path /= sop_uid + ".dcm";
+        path /= path_component(patient_id);
+        path /= path_component(study_uid);
+        path /= path_component(series_uid);
+        path /= path_component(sop_uid) + ".dcm";
     } else {
         // Flat structure - just use SOP Instance UID
         auto sop_uid = dataset.get_string(tags::sop_instance_uid, "UNKNOWN");
-        path /= sop_uid + ".dcm";
+        path /= path_component(sop_uid) + ".dcm";
     }
 
     return path;
@@ -539,23 +577,22 @@ std::filesystem::path generate_file_path(
 bool save_dicom_file(
     const std::filesystem::path& path,
     const kcenon::pacs::core::dicom_dataset& dataset,
+    const kcenon::pacs::encoding::transfer_syntax& syntax,
     bool overwrite) {
-
-    // Check if file exists
-    if (std::filesystem::exists(path) && !overwrite) {
-        return true;  // Skip existing file (not an error)
+    using kcenon::pacs::core::dicom_file;
+    auto file = dicom_file::create(dataset, syntax);
+    try {
+        if (std::filesystem::exists(path) && !overwrite) {
+            auto existing = dicom_file::open(path);
+            // An unrelated or stale file must never receive a success ACK.
+            return existing.is_ok() && existing.value().transfer_syntax() == syntax
+                && dicom_file::create(existing.value().dataset(), syntax).to_bytes() == file.to_bytes();
+        }
+        std::filesystem::create_directories(path.parent_path());
+        return file.save(path).is_ok();
+    } catch (const std::filesystem::filesystem_error&) {
+        return false;
     }
-
-    // Create parent directories
-    std::filesystem::create_directories(path.parent_path());
-
-    // Create DICOM file using static factory method
-    auto file = kcenon::pacs::core::dicom_file::create(
-        dataset,
-        kcenon::pacs::encoding::transfer_syntax::explicit_vr_little_endian);
-
-    auto result = file.save(path);
-    return result.is_ok();
 }
 
 /**
@@ -653,12 +690,16 @@ int perform_c_get(const options& opts) {
 
     uint8_t context_id = 3;  // Start from 3 (odd numbers for proposed contexts)
     for (auto sop_class : storage_sop_classes) {
+        config.role_selections.emplace_back(std::string(sop_class), false, true);
         config.proposed_contexts.push_back({
             context_id,
             std::string(sop_class),
             {
                 "1.2.840.10008.1.2.1",  // Explicit VR Little Endian
-                "1.2.840.10008.1.2"     // Implicit VR Little Endian
+                "1.2.840.10008.1.2",    // Implicit VR Little Endian
+                "1.2.840.10008.1.2.4.70", // JPEG Lossless
+                "1.2.840.10008.1.2.4.80", // JPEG-LS Lossless
+                "1.2.840.10008.1.2.5"     // RLE Lossless
             }
         });
         context_id += 2;
@@ -666,7 +707,7 @@ int perform_c_get(const options& opts) {
 
     // Establish association
     auto start_time = std::chrono::steady_clock::now();
-    auto connect_result = association::connect(opts.host, opts.port, config, default_timeout);
+    auto connect_result = association::connect(opts.host, opts.port, config, opts.timeout);
 
     if (connect_result.is_err()) {
         std::cerr << "Failed to establish association: "
@@ -686,6 +727,21 @@ int perform_c_get(const options& opts) {
     // Check if C-GET context was accepted
     if (!assoc.has_accepted_context(sop_class_uid)) {
         std::cerr << "Error: C-GET SOP Class not accepted by remote SCP\n";
+        assoc.abort();
+        return 2;
+    }
+
+    bool can_receive_storage = false;
+    for (const auto sop : storage_sop_classes) {
+        const auto role = assoc.requestor_role(sop);
+        can_receive_storage = can_receive_storage || role.scp_role;
+        if (opts.verbose) {
+            std::cout << "Storage role " << sop << ": requestor SCU=" << role.scu_role
+                      << " SCP=" << role.scp_role << "\n";
+        }
+    }
+    if (!can_receive_storage) {
+        std::cerr << "Error: Peer accepted no requestor Storage SCP role/context\n";
         assoc.abort();
         return 2;
     }
@@ -726,9 +782,22 @@ int perform_c_get(const options& opts) {
     uint16_t total_completed = 0;
     uint16_t total_failed = 0;
     uint16_t total_warning = 0;
+    uint16_t final_status = 0xC000;
+    bool final_completed_present = false;
+    size_t stored_count = 0;
+    size_t store_failures = 0;
+    std::set<std::string> stored_uids;
+    const auto deadline = std::chrono::steady_clock::now() + opts.timeout;
 
     while (!retrieve_complete) {
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+            deadline - std::chrono::steady_clock::now());
+        if (remaining.count() <= 0) {
+            std::cerr << "\nC-GET retrieval timed out\n";
+            assoc.abort();
+            return 2;
+        }
+        auto recv_result = assoc.receive_dimse(remaining);
         if (recv_result.is_err()) {
             std::cerr << "\nFailed to receive response: "
                       << recv_result.error().message << "\n";
@@ -740,6 +809,12 @@ int perform_c_get(const options& opts) {
         auto cmd = msg.command();
 
         if (cmd == command_field::c_get_rsp) {
+            if (recv_context_id != get_context_id || msg.message_id_responded_to() != 1
+                || !msg.command_set().contains(tag_status)) {
+                std::cerr << "\nUncorrelated C-GET response\n";
+                assoc.abort();
+                return 2;
+            }
             // C-GET response
             auto status = msg.status();
 
@@ -764,61 +839,52 @@ int perform_c_get(const options& opts) {
                 display_progress(progress, opts.verbose);
             }
 
-            // Check if retrieval is complete
-            if (status == status_success ||
-                status == status_cancel ||
-                (status & 0xF000) == 0xA000 ||  // Failure
-                (status & 0xF000) == 0xC000) {  // Unable to process
-
+            if (!is_pending(status)) {
                 retrieve_complete = true;
-
-                if (status != status_success && status != status_cancel) {
-                    std::cerr << "\nC-GET failed with status: 0x"
+                final_status = status;
+                final_completed_present = msg.completed_subops().has_value();
+                if (status != status_success) {
+                    std::cerr << "\nC-GET finished with status: 0x"
                               << std::hex << status << std::dec << "\n";
                 }
             }
 
         } else if (cmd == command_field::c_store_rq) {
-            // Incoming C-STORE sub-operation
-            if (msg.has_dataset()) {
-                auto dataset_result = msg.dataset();
-                if (dataset_result.is_err()) {
-                    if (opts.verbose) {
-                        std::cerr << "\nWarning: Failed to get dataset\n";
-                    }
-                    continue;
-                }
+            const auto sop_class = msg.affected_sop_class_uid();
+            const auto sop_instance = msg.affected_sop_instance_uid();
+            const auto context = std::find_if(assoc.accepted_contexts().begin(), assoc.accepted_contexts().end(),
+                [&](const auto& candidate) { return candidate.id == recv_context_id && candidate.is_accepted(); });
+            const auto syntax = assoc.context_transfer_syntax(recv_context_id);
+            bool saved = false;
+            if (msg.has_dataset() && syntax.is_ok() && context != assoc.accepted_contexts().end()
+                && context->abstract_syntax == sop_class && assoc.requestor_role(sop_class).scp_role
+                && !sop_instance.empty() && !stored_uids.contains(sop_instance)) {
+                const auto dataset_result = msg.dataset();
                 const auto& dataset = dataset_result.value().get();
-
-                // Generate file path
-                auto file_path = generate_file_path(opts, dataset);
-
-                // Save file
-                bool saved = save_dicom_file(file_path, dataset, opts.overwrite);
-
-                // Update bytes received
-                progress.bytes_received += 1024;  // Approximate
-
-                // Send C-STORE response
-                auto sop_class = msg.affected_sop_class_uid();
-                auto sop_instance = msg.affected_sop_instance_uid();
-
-                auto store_rsp = make_c_store_rsp(
-                    msg.message_id(),
-                    sop_class,
-                    sop_instance,
-                    saved ? status_success : 0xA700  // Out of resources
-                );
-
-                auto send_rsp_result = assoc.send_dimse(recv_context_id, store_rsp);
-                if (send_rsp_result.is_err() && opts.verbose) {
-                    std::cerr << "\nWarning: Failed to send C-STORE response\n";
-                }
-
-                if (opts.verbose && !saved) {
-                    std::cerr << "\nWarning: Failed to save " << file_path << "\n";
+                if (dataset.get_string(kcenon::pacs::core::tags::sop_class_uid) == sop_class
+                    && dataset.get_string(kcenon::pacs::core::tags::sop_instance_uid) == sop_instance) {
+                    saved = save_dicom_file(generate_file_path(opts, dataset), dataset,
+                                            syntax.value(), opts.overwrite);
                 }
             }
+            auto response = make_c_store_rsp(msg.message_id(), sop_class, sop_instance,
+                                             saved ? status_success : 0xC000);
+            if (assoc.send_dimse(recv_context_id, response).is_err()) {
+                std::cerr << "\nFailed to acknowledge C-STORE sub-operation\n";
+                assoc.abort();
+                return 2;
+            }
+            if (saved) {
+                stored_uids.insert(sop_instance);
+                ++stored_count;
+            } else {
+                ++store_failures;
+                std::cerr << "\nRejected or failed to persist C-STORE " << sop_instance << "\n";
+            }
+        } else {
+            std::cerr << "\nUnexpected DIMSE command during C-GET\n";
+            assoc.abort();
+            return 2;
         }
     }
 
@@ -832,7 +898,7 @@ int perform_c_get(const options& opts) {
         std::cout << "Releasing association...\n";
     }
 
-    auto release_result = assoc.release(default_timeout);
+    auto release_result = assoc.release(opts.timeout);
     if (release_result.is_err() && opts.verbose) {
         std::cerr << "Warning: Release failed: " << release_result.error().message << "\n";
     }
@@ -849,7 +915,8 @@ int perform_c_get(const options& opts) {
     std::cout << "  Level:           " << to_string(opts.level) << "\n";
     std::cout << "  Output:          " << opts.output_dir << "\n";
     std::cout << "  ----------------------------------------\n";
-    std::cout << "  Completed:       " << total_completed << "\n";
+    std::cout << "  Completed:       " << (final_completed_present ? total_completed : stored_count) << "\n";
+    std::cout << "  Received:        " << stored_count << "\n";
     if (total_warning > 0) {
         std::cout << "  Warnings:        " << total_warning << "\n";
     }
@@ -859,13 +926,15 @@ int perform_c_get(const options& opts) {
     std::cout << "  Total time:      " << total_duration.count() << " ms\n";
     std::cout << "========================================\n";
 
-    // Return appropriate exit code
-    if (total_failed > 0 && total_completed == 0) {
-        return 2;  // Complete failure
-    } else if (total_failed > 0) {
-        return 1;  // Partial failure
+    if (final_completed_present && total_completed != stored_count) {
+        std::cerr << "C-GET completed counter does not match acknowledged objects\n";
+        return 2;
     }
-    return 0;  // Success
+    if (release_result.is_err() || final_status != status_success
+        || total_failed || total_warning || store_failures) {
+        return stored_count ? 1 : 2;
+    }
+    return 0;
 }
 
 /**
@@ -906,7 +975,7 @@ int perform_c_move(const options& opts) {
 
     // Establish association
     auto start_time = std::chrono::steady_clock::now();
-    auto connect_result = association::connect(opts.host, opts.port, config, default_timeout);
+    auto connect_result = association::connect(opts.host, opts.port, config, opts.timeout);
 
     if (connect_result.is_err()) {
         std::cerr << "Failed to establish association: "
@@ -963,12 +1032,13 @@ int perform_c_move(const options& opts) {
 
     // Process C-MOVE responses
     bool move_complete = false;
+    uint16_t move_status = 0;
     uint16_t total_completed = 0;
     uint16_t total_failed = 0;
     uint16_t total_warning = 0;
 
     while (!move_complete) {
-        auto recv_result = assoc.receive_dimse(default_timeout);
+        auto recv_result = assoc.receive_dimse(opts.timeout);
         if (recv_result.is_err()) {
             std::cerr << "\nFailed to receive C-MOVE response: "
                       << recv_result.error().message << "\n";
@@ -1008,12 +1078,9 @@ int perform_c_move(const options& opts) {
         }
 
         // Check if C-MOVE is complete
-        if (status == status_success ||
-            status == status_cancel ||
-            (status & 0xF000) == 0xA000 ||  // Failure
-            (status & 0xF000) == 0xC000) {  // Unable to process
-
+        if (kcenon::pacs::cli::is_final_retrieve_status(status)) {
             move_complete = true;
+            move_status = status;
 
             if (status != status_success && status != status_cancel) {
                 std::cerr << "\nC-MOVE failed with status: 0x"
@@ -1032,7 +1099,7 @@ int perform_c_move(const options& opts) {
         std::cout << "Releasing association...\n";
     }
 
-    auto release_result = assoc.release(default_timeout);
+    auto release_result = assoc.release(opts.timeout);
     if (release_result.is_err() && opts.verbose) {
         std::cerr << "Warning: Release failed: " << release_result.error().message << "\n";
     }
@@ -1059,13 +1126,7 @@ int perform_c_move(const options& opts) {
     std::cout << "  Total time:      " << total_duration.count() << " ms\n";
     std::cout << "========================================\n";
 
-    // Return appropriate exit code
-    if (total_failed > 0 && total_completed == 0) {
-        return 2;  // Complete failure
-    } else if (total_failed > 0) {
-        return 1;  // Partial failure
-    }
-    return 0;  // Success
+    return kcenon::pacs::cli::retrieve_exit_code(move_status, total_failed);
 }
 
 }  // namespace

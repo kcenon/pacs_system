@@ -23,33 +23,7 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch_session.hpp>
 
-#include <iostream>
-
 int main(int argc, char* argv[]) {
-    std::cout << R"(
-  ___ _   _ _____ _____ ____ ____      _  _____ ___ ___  _   _
- |_ _| \ | |_   _| ____/ ___|  _ \    / \|_   _|_ _/ _ \| \ | |
-  | ||  \| | | | |  _|| |  _| |_) |  / _ \ | |  | | | | |  \| |
-  | || |\  | | | | |__| |_| |  _ <  / ___ \| |  | | |_| | |\  |
- |___|_| \_| |_| |_____\____|_| \_\/_/   \_\_| |___\___/|_| \_|
-
-                    PACS Integration Test Suite
-                    ===========================
-
-)" << "\n";
-
-    Catch::Session session;
-
-    // Apply command line arguments
-    int result = session.applyCommandLine(argc, argv);
-    if (result != 0) {
-        return result;
-    }
-
-    // Run tests
-    result = session.run();
-
-    std::cout << "\n=== Integration Test Suite Complete ===\n";
-
-    return result;
+    // Catch owns stdout, including machine-readable discovery and XML reporters.
+    return Catch::Session().run(argc, argv);
 }

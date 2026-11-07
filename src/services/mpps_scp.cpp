@@ -16,6 +16,23 @@
 
 namespace kcenon::pacs::services {
 
+namespace {
+
+/// A handler refuses with a PS3.4 F.7.2 status by using it as the error code.
+[[nodiscard]] network::dimse::status_code status_from_error_code(int code) noexcept {
+    using namespace network::dimse;
+    switch (code) {
+        case status_error_processing_failure:
+        case status_error_duplicate_sop_instance:
+        case status_error_no_such_object_instance:
+            return static_cast<status_code>(code);
+        default:
+            return status_error_unable_to_process;
+    }
+}
+
+}  // namespace
+
 // =============================================================================
 // Construction
 // =============================================================================
@@ -170,7 +187,7 @@ network::Result<std::monostate> mpps_scp::handle_n_create(
     if (result.is_err()) {
         return send_n_create_response(
             assoc, context_id, request.message_id(),
-            sop_instance_uid, status_error_unable_to_process);
+            sop_instance_uid, status_from_error_code(result.error().code));
     }
 
     // Update statistics
@@ -201,26 +218,18 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
     }
 
     // Verify the SOP Class is MPPS
-    auto sop_class_uid = request.affected_sop_class_uid();
-    if (sop_class_uid.empty()) {
-        // For N-SET, use requested SOP class if affected is empty
-        sop_class_uid = request.command_set().get_string(
-            tag_requested_sop_class_uid);
-    }
-
-    if (sop_class_uid != mpps_sop_class_uid) {
+    if (request.requested_sop_class_uid() != mpps_sop_class_uid ||
+        !request.affected_sop_class_uid().empty()) {
         return send_n_set_response(
             assoc, context_id, request.message_id(),
             "", status_refused_sop_class_not_supported);
     }
 
-    // Get the SOP Instance UID (from Requested SOP Instance UID for N-SET)
-    auto sop_instance_uid = request.command_set().get_string(
-        tag_requested_sop_instance_uid);
-
-    if (sop_instance_uid.empty()) {
-        // Try affected SOP instance UID as fallback
-        sop_instance_uid = request.affected_sop_instance_uid();
+    // N-SET requires Requested SOP Instance UID; Affected is not a fallback.
+    auto sop_instance_uid = request.requested_sop_instance_uid();
+    if (!request.affected_sop_instance_uid().empty()) {
+        return send_n_set_response(assoc, context_id, request.message_id(),
+                                   sop_instance_uid, status_error_cannot_understand);
     }
 
     if (sop_instance_uid.empty()) {
@@ -267,7 +276,7 @@ network::Result<std::monostate> mpps_scp::handle_n_set(
     if (result.is_err()) {
         return send_n_set_response(
             assoc, context_id, request.message_id(),
-            sop_instance_uid, status_error_unable_to_process);
+            sop_instance_uid, status_from_error_code(result.error().code));
     }
 
     // Update statistics

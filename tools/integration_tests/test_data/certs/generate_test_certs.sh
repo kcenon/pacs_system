@@ -5,6 +5,7 @@
 # Creates a complete PKI setup for testing TLS-secured DICOM:
 #   - CA certificate (self-signed root)
 #   - Server certificate (signed by CA)
+#   - Wrong-IP server certificate (signed by CA, identity 127.0.0.2 only)
 #   - Client certificate (signed by CA, for mutual TLS)
 #   - Expired certificate (for validation testing)
 #
@@ -100,6 +101,52 @@ EOF
     rm -f "$CERT_DIR/server.csr" "$CERT_DIR/server.cnf"
 }
 
+# Generate a server certificate from the same CA whose only identity is
+# 127.0.0.2. A client that reaches its server at 127.0.0.1 must refuse it.
+# The test cannot connect to 127.0.0.2 instead: macOS configures only
+# 127.0.0.1 on the loopback interface.
+generate_wrong_ip_server_cert() {
+    echo "Generating wrong-IP server certificate..."
+
+    openssl genrsa -out "$CERT_DIR/wrong_ip_server.key" $KEY_SIZE 2>/dev/null
+
+    cat > "$CERT_DIR/wrong_ip_server.cnf" << EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = Wrong Identity Server
+O = PACS System
+OU = Test Server
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = IP:127.0.0.2
+EOF
+
+    openssl req -new \
+        -key "$CERT_DIR/wrong_ip_server.key" \
+        -out "$CERT_DIR/wrong_ip_server.csr" \
+        -config "$CERT_DIR/wrong_ip_server.cnf"
+
+    openssl x509 -req \
+        -in "$CERT_DIR/wrong_ip_server.csr" \
+        -CA "$CERT_DIR/ca.crt" \
+        -CAkey "$CERT_DIR/ca.key" \
+        -CAcreateserial \
+        -out "$CERT_DIR/wrong_ip_server.crt" \
+        -days $DAYS_VALID \
+        -sha256 \
+        -extensions v3_req \
+        -extfile "$CERT_DIR/wrong_ip_server.cnf" 2>/dev/null
+
+    rm -f "$CERT_DIR/wrong_ip_server.csr" "$CERT_DIR/wrong_ip_server.cnf"
+}
+
 # Generate client certificate
 generate_client_cert() {
     echo "Generating client certificate..."
@@ -170,22 +217,40 @@ EOF
         -out "$CERT_DIR/expired.csr" \
         -config "$CERT_DIR/expired.cnf"
 
-    # Create certificate that expired yesterday
-    openssl x509 -req \
-        -in "$CERT_DIR/expired.csr" \
-        -CA "$CERT_DIR/ca.crt" \
-        -CAkey "$CERT_DIR/ca.key" \
-        -CAcreateserial \
-        -out "$CERT_DIR/expired.crt" \
-        -days -1 \
-        -sha256 \
-        -extensions v3_req \
-        -extfile "$CERT_DIR/expired.cnf" 2>/dev/null || {
-        # Fallback: create with faketime if available
-        echo "Note: Could not create backdated certificate"
-        rm -f "$CERT_DIR/expired.key" "$CERT_DIR/expired.csr" "$CERT_DIR/expired.cnf"
-        return
-    }
+    # OpenSSL 3.5 rejects `x509 -days -1`. Use explicit historical dates;
+    # absence of this negative fixture must fail setup instead of silently skip.
+    local signing_dir signing_config_dir cert_config_dir
+    signing_dir="$(mktemp -d "$CERT_DIR/expired-sign.XXXXXX")"
+    signing_config_dir="$signing_dir"
+    cert_config_dir="$CERT_DIR"
+    # Paths inside an OpenSSL config do not receive Git Bash argv conversion.
+    if command -v cygpath >/dev/null 2>&1; then
+        signing_config_dir="$(cygpath -m "$signing_dir")"
+        cert_config_dir="$(cygpath -m "$CERT_DIR")"
+    fi
+    touch "$signing_dir/index"
+    printf '1000\n' > "$signing_dir/serial"
+    cat > "$signing_dir/ca.cnf" << EOF
+[ca]
+default_ca = test_ca
+[test_ca]
+database = "$signing_config_dir/index"
+serial = "$signing_config_dir/serial"
+new_certs_dir = "$signing_config_dir"
+certificate = "$cert_config_dir/ca.crt"
+private_key = "$cert_config_dir/ca.key"
+default_md = sha256
+policy = subject_policy
+[subject_policy]
+commonName = supplied
+organizationName = optional
+organizationalUnitName = optional
+EOF
+    openssl ca -batch -notext -config "$signing_dir/ca.cnf" \
+        -in "$CERT_DIR/expired.csr" -out "$CERT_DIR/expired.crt" \
+        -startdate 20000101000000Z -enddate 20010101000000Z \
+        -extensions v3_req -extfile "$CERT_DIR/expired.cnf" 2>/dev/null
+    rm -rf "$signing_dir"
 
     rm -f "$CERT_DIR/expired.csr" "$CERT_DIR/expired.cnf"
 }
@@ -211,6 +276,13 @@ verify_certs() {
         echo "  Server certificate: OK"
     else
         echo "  Server certificate: FAILED"
+        exit 1
+    fi
+
+    if openssl verify -CAfile "$CERT_DIR/ca.crt" "$CERT_DIR/wrong_ip_server.crt" > /dev/null 2>&1; then
+        echo "  Wrong-IP server certificate: OK"
+    else
+        echo "  Wrong-IP server certificate: FAILED"
         exit 1
     fi
 
@@ -240,6 +312,7 @@ main() {
 
     generate_ca
     generate_server_cert
+    generate_wrong_ip_server_cert
     generate_client_cert
     generate_expired_cert
     generate_different_ca
@@ -249,7 +322,7 @@ main() {
 
     echo ""
     echo "Test certificates generated in: $CERT_DIR"
-    echo "Files: ca.crt, ca.key, server.crt, server.key, client.crt, client.key"
+    echo "Files: ca.crt, ca.key, server.crt, server.key, wrong_ip_server.crt, wrong_ip_server.key, client.crt, client.key"
 }
 
 main "$@"

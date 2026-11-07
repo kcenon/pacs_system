@@ -39,12 +39,25 @@ namespace {
 #ifdef PACS_WITH_DATABASE_SYSTEM
 
 /**
- * @brief Check if SQLite backend is supported
+ * @brief Check that the adapter opens the kind of database these tests use
+ *
+ * The tests open a file, which pacs_database_adapter serves through SQLite directly. ":memory:"
+ * goes through the unified database backend instead, which may lack SQLite, so probing it skipped
+ * every case here although the file-backed path works.
  */
 bool is_sqlite_backend_supported() {
-    pacs_database_adapter db(":memory:");
-    auto result = db.connect();
-    return result.is_ok();
+    // A name of its own: CTest may run these cases in parallel processes.
+    const auto path = std::filesystem::temp_directory_path() /
+        ("annotation_probe_" +
+         std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + "_test.db");
+    bool supported = false;
+    {
+        pacs_database_adapter db(path.string());
+        supported = db.connect().is_ok();
+    }
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+    return supported;
 }
 
 /**
@@ -283,6 +296,23 @@ TEST_CASE("Annotation update operation", "[integration][annotation]") {
         auto retrieved = repo.find_by_id(ann.annotation_id);
         REQUIRE(retrieved.is_ok());
         REQUIRE(retrieved.value().geometry_json == ann.geometry_json);
+    }
+
+    SECTION("update_annotation stores every column") {
+        // database_system's set(field, value) replaces the columns of an earlier set(), so an
+        // UPDATE built from chained calls stored updated_at alone.
+        ann.geometry_json = R"({"x1":10,"y1":20,"x2":30,"y2":40})";
+        ann.text = "Edited annotation";
+        ann.style.color = "#00FF00";
+
+        auto result = repo.update_annotation(ann);
+        REQUIRE(result.is_ok());
+
+        auto retrieved = repo.find_by_id(ann.annotation_id);
+        REQUIRE(retrieved.is_ok());
+        REQUIRE(retrieved.value().geometry_json == ann.geometry_json);
+        REQUIRE(retrieved.value().text == ann.text);
+        REQUIRE(retrieved.value().style.color == ann.style.color);
     }
 }
 

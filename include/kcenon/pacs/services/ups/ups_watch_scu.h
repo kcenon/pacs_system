@@ -27,6 +27,7 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace kcenon::pacs::services {
@@ -46,6 +47,9 @@ struct ups_subscribe_data {
 
     /// Whether to request a deletion lock
     bool deletion_lock{false};
+
+    /// Receiving AE (0074,1234); empty means this association's calling AE Title
+    std::string receiving_ae;
 };
 
 /**
@@ -54,6 +58,9 @@ struct ups_subscribe_data {
 struct ups_unsubscribe_data {
     /// Workitem SOP Instance UID (empty for global unsubscription)
     std::string workitem_uid;
+
+    /// Receiving AE (0074,1234); empty means this association's calling AE Title
+    std::string receiving_ae;
 };
 
 /**
@@ -214,6 +221,11 @@ public:
     [[nodiscard]] network::Result<ups_result> suspend_global(
         network::association& assoc);
 
+    /// Suspend the global subscription of another AE than this association's.
+    [[nodiscard]] network::Result<ups_result> suspend_global(
+        network::association& assoc,
+        const std::string& receiving_ae);
+
     // =========================================================================
     // N-EVENT-REPORT Handler
     // =========================================================================
@@ -247,7 +259,9 @@ private:
     [[nodiscard]] network::Result<ups_result> send_watch_action(
         network::association& assoc,
         const std::string& sop_instance_uid,
-        uint16_t action_type_id);
+        uint16_t action_type_id,
+        const std::string& receiving_ae,
+        std::optional<bool> deletion_lock);
 
     [[nodiscard]] static ups_watch_event parse_event_dataset(
         uint16_t event_type_id,

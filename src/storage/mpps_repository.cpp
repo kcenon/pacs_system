@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/storage/mpps_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <chrono>
 #include <ctime>
@@ -414,8 +415,8 @@ auto mpps_repository::mpps_count(std::string_view status) -> Result<size_t> {
     }
 
     auto query = kcenon::pacs::compat::format(
-        "SELECT COUNT(*) as count FROM {} WHERE status = '{}'",
-        table_name(), std::string(status));
+        "SELECT COUNT(*) as count FROM {} WHERE status = {}",
+        table_name(), sql_literal(status));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());

@@ -937,3 +937,30 @@ TEST_CASE("image_params validation for JPEG-LS", "[encoding][compression][jpegls
         REQUIRE(params.valid_for_jpeg_ls() == false);
     }
 }
+
+#ifdef PACS_WITH_JPEGLS_CODEC
+TEST_CASE("jpeg_ls_codec refuses near-lossless encoding of signed samples",
+          "[encoding][compression][jpegls]") {
+    // NEAR bounds errors on bit patterns: -1 (0xFFFF) and 0 are one step apart as
+    // values and the whole range apart as patterns.
+    const std::vector<uint8_t> pixels{0xFF, 0xFF, 0x00, 0x00, 0x01, 0x00, 0xFE, 0xFF};
+    image_params params;
+    params.width = 2;
+    params.height = 2;
+    params.bits_allocated = 16;
+    params.bits_stored = 16;
+    params.high_bit = 15;
+    params.samples_per_pixel = 1;
+    params.pixel_representation = 1;
+
+    jpeg_ls_codec near_lossless(false, 3);
+    CHECK(near_lossless.encode(pixels, params, {}).is_err());
+
+    jpeg_ls_codec lossless(true);
+    auto encoded = lossless.encode(pixels, params, {});
+    REQUIRE(encoded.is_ok());
+    auto decoded = lossless.decode(encoded.value().data, params);
+    REQUIRE(decoded.is_ok());
+    CHECK(decoded.value().data == pixels);
+}
+#endif

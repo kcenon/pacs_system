@@ -922,9 +922,7 @@ TEST_CASE("pdu_decoder regression: length-prefixed bounds checks",
 
         auto bytes = make_associate_rq_with_items(items);
         auto result = pdu_decoder::decode_associate_rq(bytes);
-        REQUIRE(result.is_ok());
-        // Role was dropped; no out-of-bounds read occurred.
-        CHECK(result.value().user_info.role_selections.empty());
+        REQUIRE(result.is_err());  // malformed role cannot silently become default roles
     }
 
     SECTION("SCP/SCU role selection with odd uid_length near uint16 max") {
@@ -948,8 +946,7 @@ TEST_CASE("pdu_decoder regression: length-prefixed bounds checks",
 
         auto bytes = make_associate_rq_with_items(items);
         auto result = pdu_decoder::decode_associate_rq(bytes);
-        REQUIRE(result.is_ok());
-        CHECK(result.value().user_info.role_selections.empty());
+        REQUIRE(result.is_err());
     }
 }
 
@@ -966,4 +963,17 @@ TEST_CASE("pdu_decode_error to_string", "[network][pdu_decoder]") {
     CHECK(std::string(to_string(pdu_decode_error::invalid_item_type)) == "Invalid item type");
     CHECK(std::string(to_string(pdu_decode_error::malformed_pdu)) == "Malformed PDU");
     CHECK(std::string(to_string(pdu_decode_error::buffer_overflow)) == "Buffer overflow");
+}
+
+TEST_CASE("role selection decodes an unpadded odd-length UID from independent bytes",
+          "[network][pdu_decoder][roles]") {
+    const std::vector<uint8_t> items{
+        0x50,0,0,13, 0x54,0,0,9, 0,5, '1','.','2','.','3',0,1};
+    auto result = pdu_decoder::decode_associate_rq(make_associate_rq_with_items(items));
+    REQUIRE(result.is_ok());
+    REQUIRE(result.value().user_info.role_selections.size() == 1);
+    const auto& role = result.value().user_info.role_selections[0];
+    CHECK(role.sop_class_uid == "1.2.3");
+    CHECK_FALSE(role.scu_role);
+    CHECK(role.scp_role);
 }

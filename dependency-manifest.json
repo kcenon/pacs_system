@@ -73,6 +73,9 @@
       "source": "add_subdirectory or sibling checkout",
       "resolution": "../network_system",
       "version": "093691d9523265d672880e2cb7c0ea0e4463a8f8",
+      "patches": [
+        ".github/actions/checkout-kcenon-deps/patches/network_system/0001-serialize-tcp-socket-writes.patch"
+      ],
       "license": "BSD-3-Clause"
     },
     {
@@ -131,7 +134,7 @@
     {
       "name": "Crow",
       "resolution": "FetchContent",
-      "version": "v1.3.1",
+      "version": "v1.3.2",
       "license": "BSD-3-Clause"
     },
     {
@@ -143,7 +146,7 @@
     {
       "name": "OpenJPH",
       "resolution": "find_package(openjph) or FetchContent fallback",
-      "version": "0.21.5",
+      "version": "0.30.1",
       "license": "BSD-2-Clause"
     }
   ],

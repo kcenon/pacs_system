@@ -1,0 +1,49 @@
+# One service per DIMSE-N profile, each in its own container with its own ports and database.
+# The validation image supplies the build and the peers (validation/dcmtk/Dockerfile):
+#
+#   PACS_VALIDATION_IMAGE=pacs-validation docker compose -f validation/peers/dimse-n/compose.yaml --profile ups up
+#
+# `peers` qualifies the tools with no PACS process running; every other profile runs it first too,
+# so a result never rests on an unqualified peer.
+x-profile: &profile
+  image: ${PACS_VALIDATION_IMAGE:?name the image built from validation/dcmtk/Dockerfile}
+  working_dir: /workspace/pacs_system
+  volumes:
+    - ${PACS_VALIDATION_RESULTS:-./results}:/results
+  entrypoint:
+    - python3
+    - validation/dcmtk/tests/dimse_n_probe.py
+    - --build-dir=/workspace/build
+    - --peers-dir=/opt/pacs-peers
+    - --source-revision=${PACS_SOURCE_REVISION:-unknown}
+    - --source-digest=${PACS_SOURCE_DIGEST:-unknown}
+
+services:
+  peers:
+    <<: *profile
+    profiles: [peers]
+    command: [--output=/results/peers, --groups=none]
+  mpps:
+    <<: *profile
+    profiles: [mpps]
+    command: [--output=/results/mpps, --groups=mpps]
+  mwl:
+    <<: *profile
+    profiles: [mwl]
+    command: [--output=/results/mwl, --groups=mwl]
+  stgcmt:
+    <<: *profile
+    profiles: [stgcmt]
+    command: [--output=/results/stgcmt, --groups=stgcmt]
+  ups:
+    <<: *profile
+    profiles: [ups]
+    command: [--output=/results/ups, --groups=ups]
+  print:
+    <<: *profile
+    profiles: [print]
+    command: [--output=/results/print, --groups=print]
+  nget:
+    <<: *profile
+    profiles: [nget]
+    command: [--output=/results/nget, --groups=nget]

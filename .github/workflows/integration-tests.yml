@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -80,6 +80,10 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -100,7 +104,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+        vcpkgGitCommitId: '33f8517b96502c15c69b22512bbd7797195f24fc'
 
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
@@ -188,7 +192,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -249,6 +253,10 @@ jobs:
         brew link --overwrite ccache &>/dev/null || echo "ccache already linked or link failed"
         brew link --overwrite fmt &>/dev/null || echo "fmt already linked or link failed"
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     # Setup ccache for faster C++ compilation
     # Must run after Install dependencies (macOS) to ensure ccache is linked
     - name: Setup ccache
@@ -277,7 +285,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+        vcpkgGitCommitId: '33f8517b96502c15c69b22512bbd7797195f24fc'
 
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
@@ -324,22 +332,32 @@ jobs:
       working-directory: pacs_system
       run: cmake --build build --parallel
 
-    - name: Generate TLS Test Certificates (Unix)
-      if: runner.os != 'Windows'
+    - name: Generate isolated TLS test certificates
       working-directory: pacs_system
+      shell: bash
       run: |
-        if [ -f "./tools/integration_tests/test_data/certs/generate_test_certs.sh" ]; then
-          chmod +x ./tools/integration_tests/test_data/certs/generate_test_certs.sh
-          ./tools/integration_tests/test_data/certs/generate_test_certs.sh
+        command -v openssl
+        cert_dir="$(mktemp -d "${RUNNER_TEMP}/pacs-tls.XXXXXX")"
+        # Git Bash must not convert X.509 /CN= subjects into Windows paths.
+        export MSYS2_ARG_CONV_EXCL='/CN='
+        cert_env_dir="$cert_dir"
+        if command -v cygpath >/dev/null 2>&1; then
+          cert_env_dir="$(cygpath -w "$cert_dir")"
         fi
+        echo "PACS_TEST_CERT_DIR=$cert_env_dir" >> "$GITHUB_ENV"
+        bash tools/integration_tests/test_data/certs/generate_test_certs.sh "$cert_dir"
 
-    - name: Generate TLS Test Certificates (Windows)
-      if: runner.os == 'Windows'
-      working-directory: pacs_system
-      shell: pwsh
+    - name: Run required TLS v2 cases
+      working-directory: pacs_system/build
+      shell: bash
+      timeout-minutes: 3
       run: |
-        # Skip TLS cert generation on Windows for now - requires OpenSSL CLI
-        Write-Host "TLS certificate generation skipped on Windows"
+        test_binary="./bin/pacs_integration_e2e"
+        if [ -f "${test_binary}.exe" ]; then
+          test_binary="${test_binary}.exe"
+        fi
+        "$test_binary" "[tls][v2]" --warn UnmatchedTestSpec \
+          --reporter console --reporter junit::out=integration-test-tls-v2.xml
 
     - name: Run Integration Tests (Unix)
       if: runner.os != 'Windows'
@@ -401,22 +419,24 @@ jobs:
           fi
 
           # dicom_server_v2 over the association TCP client (#1240). Ubuntu runs
-          # every [v2] case; macOS runs all but [v2][stress], which the Stress
-          # Tests job also runs on Ubuntu. The [tls][v2] cases are left out:
-          # they configure TLS on neither end and fail in their own setup.
+          # every [v2] case, including actual TLS; macOS runs all but [v2][stress],
+          # which the Stress Tests job also runs on Ubuntu. Missing certificates
+          # or TLS support fail the TLS cases instead of skipping them.
           if [ "$RUNNER_OS" = "Linux" ]; then
-            V2_SPEC="[v2]~[tls]"
+            V2_SPEC="[v2]"
           else
-            V2_SPEC="[v2]~[tls]~[stress]"
+            V2_SPEC="[v2]~[stress]"
           fi
           echo "=== Running dicom_server_v2 tests ($V2_SPEC) ==="
           if [ -n "$TIMEOUT_CMD" ]; then
             $TIMEOUT_CMD $TEST_TIMEOUT ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --warn UnmatchedTestSpec \
               --reporter console \
               --reporter junit::out=integration-test-v2.xml \
               2>&1 || status=$?
           else
             ./bin/pacs_integration_e2e "$V2_SPEC" \
+              --warn UnmatchedTestSpec \
               --reporter console \
               --reporter junit::out=integration-test-v2.xml \
               2>&1 || status=$?
@@ -442,18 +462,11 @@ jobs:
           ls -la integration-test-*.xml 2>/dev/null || echo "No test result files"
 
         else
-          echo "Integration test binary not found, running CTest integration tests"
-          ctest \
-            --output-on-failure \
-            --timeout 120 \
-            --output-junit integration-test-results.xml \
-            --tests-regex "integration::" \
-            || status=$?
+          echo "Required integration test binary not found"
+          status=1
         fi
 
         exit $status
-      env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
 
     - name: Run Integration Tests (Windows)
       if: runner.os == 'Windows'
@@ -485,9 +498,9 @@ jobs:
           Write-Host "Config tests completed (exit code $LASTEXITCODE)"
 
           # dicom_server_v2 over the association TCP client (#1240), without
-          # [v2][stress] and [tls][v2] (see the Unix step)
+          # [v2][stress] (see the Unix step); TLS cases are required.
           Write-Host "=== Running dicom_server_v2 tests ==="
-          & .\bin\pacs_integration_e2e.exe "[v2]~[tls]~[stress]" --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
+          & .\bin\pacs_integration_e2e.exe "[v2]~[stress]" --warn UnmatchedTestSpec --reporter console --reporter junit::out=integration-test-v2.xml 2>&1
           if ($LASTEXITCODE -ne 0) { $status = $LASTEXITCODE }
           Write-Host "dicom_server_v2 tests completed (exit code $LASTEXITCODE)"
 
@@ -513,14 +526,15 @@ jobs:
           Get-ChildItem -Filter "integration-test-*.xml" | ForEach-Object { Write-Host $_.Name }
         }
         else {
-          Write-Host "Integration test binary not found, running CTest integration tests"
-          ctest --output-on-failure --timeout 120 --output-junit integration-test-results.xml --tests-regex "integration::"
-          $status = $LASTEXITCODE
+          Write-Host "Required integration test binary not found"
+          $status = 1
         }
 
         exit $status
-      env:
-        PACS_TEST_CERT_DIR: ${{ github.workspace }}/pacs_system/tools/integration_tests/test_data/certs
+
+    - name: Remove TLS test certificates
+      if: always()
+      run: python -c "import os,shutil; p=os.environ.get('PACS_TEST_CERT_DIR'); shutil.rmtree(p) if p and os.path.isdir(p) else None"
 
     - name: Upload Integration Test Results
       uses: actions/upload-artifact@v7
@@ -549,7 +563,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15, windows-2022]
         build_type: [Release]
 
     steps:
@@ -582,6 +596,10 @@ jobs:
         # coreutils provides gtimeout; macOS runners have no timeout command
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo ccache coreutils
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -602,7 +620,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 'e7d7451462697d77ef319ddf2da8ff7320a82662'
+        vcpkgGitCommitId: '33f8517b96502c15c69b22512bbd7797195f24fc'
 
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
@@ -852,7 +870,11 @@ jobs:
           ninja-build \
           cmake \
           netcat-openbsd \
-          lsof
+          lsof \
+          dcmtk \
+          python3 \
+          python3-pydicom \
+          python3-numpy
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -881,34 +903,89 @@ jobs:
           chmod +x ./tools/integration_tests/scripts/*.sh
         fi
 
+    - name: Check shell test helpers
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_shell_helpers.py
+
+    - name: Verify MPPS protocol and durable state
+      working-directory: pacs_system
+      run: python3 validation/dcmtk/tests/mpps_scp_protocol_probe.py --bin-dir build/bin --output build/test-results/mpps-protocol
+      timeout-minutes: 3
+
+    - name: Verify undefined-length UN sequence preservation and malformed rejection
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_undefined_un.py build build/test-results/undefined-un
+      timeout-minutes: 3
+
+    - name: Verify DICOMDIR offsets with independent readers and corrupt links
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_dicomdir_offsets.py build build/test-results/dicomdir
+      timeout-minutes: 3
+
+    - name: Verify Big Endian intermediate bytes and independent pixels
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_big_endian_values.py build build/test-results/big-endian
+      timeout-minutes: 3
+
+    - name: Verify external TLS, audit delivery and public-output confidentiality
+      working-directory: pacs_system
+      run: python3 validation/security/run.py --bin-dir build/bin --output build/test-results/security --private-output "${{ runner.temp }}/pacs-security-private"
+      timeout-minutes: 4
+
+    - name: Check security evidence publication eligibility
+      id: security_evidence
+      if: always()
+      working-directory: pacs_system
+      shell: bash
+      run: |
+        python3 - <<'PY'
+        import json, os
+        from pathlib import Path
+        path = Path('build/test-results/security/results.json')
+        try:
+            cases = json.loads(path.read_text())['cases']
+            safe = any(case['id'] == 'logs.public-clean' and case['status'] == 'passed' for case in cases)
+        except (OSError, ValueError, KeyError, TypeError):
+            safe = False
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('publish=' + str(safe).lower() + '\n')
+        PY
+
+    - name: Upload checked public security evidence
+      if: always() && steps.security_evidence.outputs.publish == 'true'
+      uses: actions/upload-artifact@v7
+      with:
+        name: security-public-evidence
+        path: pacs_system/build/test-results/security/
+        retention-days: 30
+
     - name: Run Binary Integration Tests
       id: binary_tests
       working-directory: pacs_system
+      shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/run_all_binary_tests.sh" ]; then
-          cd tools/integration_tests/scripts
-          ./run_all_binary_tests.sh ../../../build --verbose
-        else
-          echo "Binary integration test scripts not found"
-        fi
+        bash tools/integration_tests/scripts/run_all_binary_tests.sh build --verbose 2>&1 | tee build/binary-shell.log
       timeout-minutes: 10
-      # Known failing, so this step reports failure without failing the job:
-      # every suite runs a pacs_system SCU against a server in another process,
-      # which needs the real TCP client path in association::connect() (#1240),
-      # and the scripts pass arguments the CLI tools no longer accept (#1258).
-      # Remove continue-on-error when both are fixed.
-      continue-on-error: true
 
     - name: Record binary integration test outcome
       if: always()
       run: |
-        # continue-on-error above keeps the job green; record the real outcome
-        # so the known failure (#1240, #1258) stays visible in the job summary
         outcome='${{ steps.binary_tests.outcome }}'
-        echo "Binary integration tests: ${outcome} (known failure, quarantined under #1240 and #1258)" >> "$GITHUB_STEP_SUMMARY"
-        if [ "$outcome" = failure ]; then
-          echo "::warning title=Known failure (#1240 and #1258)::Binary integration tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
-        fi
+        echo "Binary integration tests: ${outcome}" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload binary integration evidence
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: binary-shell-test-results
+        path: |
+          pacs_system/build/binary-shell.log
+          pacs_system/build/test-results/shell/
+          pacs_system/build/test-results/mpps-protocol/
+          pacs_system/build/test-results/big-endian/
+          pacs_system/build/test-results/dicomdir/
+          pacs_system/build/test-results/undefined-un/
+        retention-days: 30
 
   # ============================================================================
   # Test Summary
@@ -944,7 +1021,7 @@ jobs:
           if [ -f "test-results/${suite}-test-results-ubuntu-24.04/${suite}-test-results.xml" ]; then
             ubuntu_status="✅ Passed"
           fi
-          if [ -f "test-results/${suite}-test-results-macos-14/${suite}-test-results.xml" ]; then
+          if [ -f "test-results/${suite}-test-results-macos-15/${suite}-test-results.xml" ]; then
             macos_status="✅ Passed"
           fi
           if [ -f "test-results/${suite}-test-results-windows-2022/${suite}-test-results.xml" ]; then

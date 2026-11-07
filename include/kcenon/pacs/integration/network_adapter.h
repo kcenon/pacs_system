@@ -19,6 +19,7 @@
 #pragma once
 
 #include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/network/tls_config.h"
 
 #include <chrono>
 #include <cstdint>
@@ -116,41 +117,7 @@ private:
 // TLS Configuration
 // =============================================================================
 
-/**
- * @struct tls_config
- * @brief Configuration for TLS/SSL secure transport
- *
- * DICOM supports TLS 1.2/1.3 for secure communication as defined in
- * DICOM PS3.15 (Security and System Management Profiles).
- */
-struct tls_config {
-    /// Enable TLS for connections
-    bool enabled = false;
-
-    /// Path to certificate file (PEM format)
-    std::filesystem::path cert_path;
-
-    /// Path to private key file (PEM format)
-    std::filesystem::path key_path;
-
-    /// Path to CA certificate file for verification (optional)
-    std::filesystem::path ca_path;
-
-    /// Verify peer certificate
-    bool verify_peer = true;
-
-    /// Minimum TLS version (1.2 recommended for DICOM)
-    enum class tls_version { v1_2, v1_3 } min_version = tls_version::v1_2;
-
-    /**
-     * @brief Check if TLS configuration is valid
-     * @return true if all required paths are set when enabled
-     */
-    [[nodiscard]] bool is_valid() const noexcept {
-        if (!enabled) return true;
-        return !cert_path.empty() && !key_path.empty();
-    }
-};
+using tls_config = network::tls_config;
 
 // =============================================================================
 // Connection Configuration
@@ -243,10 +210,11 @@ public:
     // ─────────────────────────────────────────────────────
 
     /**
-     * @brief Create a DICOM server using network_system
+     * @brief Create a retained v1 DICOM server
      *
-     * Creates and configures a network_system messaging_server (or
-     * secure_messaging_server if TLS is enabled) for DICOM communication.
+     * The returned v1 server supports in-process associations. TLS configuration
+     * is preserved and start() rejects it explicitly. Use dicom_server_v2 with
+     * server_config::tls for TCP/TLS; this factory never downgrades TLS silently.
      *
      * @param config Server configuration
      * @param tls_cfg Optional TLS configuration

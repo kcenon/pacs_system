@@ -85,6 +85,15 @@ struct access_control_config {
 };
 
 /**
+ * @brief A peer that C-MOVE may send to, since a Move Destination names only an AE title
+ */
+struct move_destination {
+    std::string ae_title;
+    std::string host;
+    uint16_t port{0};
+};
+
+/**
  * @brief Complete PACS server configuration
  */
 struct pacs_server_config {
@@ -102,6 +111,34 @@ struct pacs_server_config {
 
     /// Access control settings
     access_control_config access_control;
+
+    /// Known peers: C-MOVE destinations and receivers of N-EVENT-REPORT. Without an entry,
+    /// a C-MOVE to that AE is refused as A801 and that AE cannot subscribe to UPS events.
+    std::vector<move_destination> move_destinations;
+
+    /// Attempts per N-EVENT-REPORT on an association of its own, and the wait between them.
+    int event_attempts{3};
+    std::chrono::seconds event_retry_delay{5};
+
+    /// Where print jobs are written, since no physical printer is attached.
+    std::filesystem::path print_spool_directory;
+
+    /// Where the UPS instances are kept.
+    std::filesystem::path ups_directory;
+
+    /// HTTP API settings. Port 0 leaves the REST and DICOMweb API off.
+    uint16_t http_port{0};
+    std::string http_bind{"127.0.0.1"};
+    std::size_t http_max_body_bytes{512 * 1024 * 1024};
+    std::string http_cors_origin;
+
+    /// Also serve the REST API under /api. It holds patient data and settings, so it needs OAuth 2.0.
+    bool http_rest_api{false};
+
+    /// With an issuer set, every DICOMweb request must carry a token signed by a key in this JWKS file.
+    std::string oauth2_issuer;
+    std::string oauth2_audience;
+    std::filesystem::path oauth2_jwks_file;
 
     /**
      * @brief Parse configuration from command line arguments

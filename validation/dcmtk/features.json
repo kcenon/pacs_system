@@ -1,0 +1,1680 @@
+{
+  "schema_version": 3,
+  "profiles": [
+    "uncompressed",
+    "jpeg-lossless",
+    "jpeg-ls-lossless",
+    "rle-lossless"
+  ],
+  "lanes": {
+    "full": "Every component and interop case in every profile, and no declared coverage gap. The only lane that certifies completeness; it runs weekly and on demand.",
+    "pr": "Every interop case in every profile and every component except those whose lane_exclusion names a provider account, an endurance run or a platform matrix. It fails on any selected case that does not pass and certifies no completeness; pull requests and pushes run it."
+  },
+  "components": [
+    {
+      "id": "component.core_tests",
+      "binary": "core_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.utilities_tests",
+      "binary": "utilities_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.encoding_tests",
+      "binary": "encoding_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.network_tests",
+      "binary": "network_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.services_tests",
+      "binary": "services_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.storage_tests",
+      "binary": "storage_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.security_tests",
+      "binary": "security_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.client_tests",
+      "binary": "client_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.workflow_tests",
+      "binary": "workflow_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.ai_tests",
+      "binary": "ai_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.monitoring_tests",
+      "binary": "monitoring_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.di_tests",
+      "binary": "di_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.web_tests",
+      "binary": "web_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_integration_tests",
+      "binary": "pacs_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_ihe_xds_tests",
+      "binary": "pacs_ihe_xds_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.xds_gazelle_integration_tests",
+      "binary": "xds_gazelle_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_xds_atna_integration_tests",
+      "binary": "pacs_xds_atna_integration_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.pacs_cli_roundtrip",
+      "binary": "pacs_cli_roundtrip",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.concurrency_tests",
+      "binary": "concurrency_tests",
+      "args": [],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.e2e",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "~[.slow]~[stress]~[tls]"
+      ],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.v2_tls",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[tls][v2]"
+      ],
+      "timeout_seconds": 90
+    },
+    {
+      "id": "component.stress",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[stress]"
+      ],
+      "timeout_seconds": 180
+    },
+    {
+      "id": "component.stress_hidden",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[.stress]"
+      ],
+      "timeout_seconds": 900
+    },
+    {
+      "id": "component.stability_slow",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[.slow]"
+      ],
+      "env": {
+        "PACS_STABILITY_TEST_DURATION": "60"
+      },
+      "timeout_seconds": 4500
+    },
+    {
+      "id": "component.cli",
+      "kind": "ctest",
+      "args": [
+        "--label-regex",
+        "cli"
+      ],
+      "timeout_seconds": 300
+    },
+    {
+      "id": "component.build_contract",
+      "kind": "ctest",
+      "args": [
+        "--tests-regex",
+        "^(pacs_factory_result_compat|storage_boundary_guard)$"
+      ],
+      "timeout_seconds": 60
+    },
+    {
+      "id": "component.corpus",
+      "kind": "corpus",
+      "args": [],
+      "timeout_seconds": 900
+    },
+    {
+      "id": "component.qr",
+      "kind": "qr-matrix",
+      "args": [],
+      "timeout_seconds": 1500
+    },
+    {
+      "id": "component.dimse_n",
+      "kind": "dimse-n",
+      "args": [],
+      "timeout_seconds": 1500
+    },
+    {
+      "id": "component.dicomweb",
+      "kind": "dicomweb",
+      "args": [],
+      "timeout_seconds": 1500
+    },
+    {
+      "id": "component.browser",
+      "kind": "browser",
+      "args": [],
+      "timeout_seconds": 1800
+    },
+    {
+      "id": "component.workflow",
+      "kind": "workflow",
+      "args": [],
+      "timeout_seconds": 1200
+    },
+    {
+      "id": "component.ai_contract",
+      "kind": "ai-contract",
+      "binary": "ai_tests",
+      "args": ["[ai-contract]"],
+      "timeout_seconds": 600
+    },
+    {
+      "id": "component.ai_provider",
+      "kind": "ai-provider",
+      "args": [],
+      "timeout_seconds": 300,
+      "lanes": ["full"],
+      "lane_exclusion": {
+        "category": "provider",
+        "reason": "ai.actual-provider needs an inference provider endpoint and account, which no pull request or push run has; tests/ai_probe.py --provider reports it blocked until a provider is declared (#1323)."
+      }
+    },
+    {
+      "id": "component.reliability_faults",
+      "kind": "reliability",
+      "args": [],
+      "timeout_seconds": 900
+    },
+    {
+      "id": "component.discovery",
+      "kind": "discovery",
+      "args": [],
+      "timeout_seconds": 60
+    },
+    {
+      "id": "component.legacy_tls",
+      "binary": "pacs_integration_e2e",
+      "args": [
+        "[tls]~[v2]"
+      ],
+      "timeout_seconds": 180,
+      "description": "Historical TLS test names now use actual v2 TLS transport; retained v1 rejects TLS explicitly in network adapter tests."
+    }
+  ],
+  "interop_cases": [
+    "peer.preflight",
+    "peer.tls",
+    "fixtures",
+    "echo.primary",
+    "echo.secondary",
+    "store.primary",
+    "store.secondary",
+    "move.scu",
+    "mwl.scu",
+    "mwl.sequence",
+    "echo.scp",
+    "store.scp",
+    "query.scp",
+    "get.scp",
+    "move.scp",
+    "tls.scp",
+    "query.ct",
+    "query.mr",
+    "query.cr",
+    "integrity.ct",
+    "integrity.mr",
+    "integrity.cr",
+    "get.ct",
+    "get.mr",
+    "get.cr",
+    "diagnostic.reference.fixtures",
+    "diagnostic.reference.seed",
+    "diagnostic.reference.ready",
+    "diagnostic.scp.fixtures",
+    "diagnostic.scp.import",
+    "diagnostic.scp.ready",
+    "diagnostic.query.ct",
+    "diagnostic.query.mr",
+    "diagnostic.query.cr",
+    "diagnostic.get.ct",
+    "diagnostic.get.mr",
+    "diagnostic.get.cr",
+    "diagnostic.move.scu",
+    "diagnostic.query.scp",
+    "diagnostic.get.scp",
+    "diagnostic.move.scp",
+    "cli.qr.tcp",
+    "cli.worklist.tcp",
+    "cli.mpps.tcp",
+    "cli.pacs.tcp",
+    "mwl.scp",
+    "mpps.protocol",
+    "security.matrix",
+    "security.dicom.dcmtk-mtls",
+    "security.dicom.tls12",
+    "security.dicom.tls13",
+    "security.dicom.plaintext",
+    "security.dicom.untrusted-client",
+    "security.dicom.expired-client",
+    "security.dicom.missing-client",
+    "security.dicom.reject-tls11",
+    "security.dicom.reject-tls12-under13",
+    "security.dicom.tls13-policy",
+    "security.dicom.recovery",
+    "security.dicom.client-untrusted-server",
+    "security.dicom.client-expired-server",
+    "security.dicom.client-hostname-mismatch",
+    "security.dicom.client-independent-mtls",
+    "security.audit.tls-single",
+    "security.audit.tls-concurrent",
+    "security.audit.udp-concurrent",
+    "security.audit.reject-hostname",
+    "security.audit.reject-untrusted-server",
+    "security.audit.reject-expired-server",
+    "security.audit.reject-untrusted-client",
+    "security.audit.reject-missing-client",
+    "security.audit.reject-mismatched-key",
+    "security.audit.reject-incomplete-key",
+    "security.audit.store-tls",
+    "security.audit.store-udp",
+    "security.deid.test_batch_without_mapping_file_shares_uid_replacements",
+    "security.deid.test_clean_descriptions_retains_clean_request_item",
+    "security.deid.test_diagnostics_do_not_echo_retained_identifiers",
+    "security.deid.test_failed_recursive_action_never_writes_output",
+    "security.deid.test_nested_references_all_length_and_vr_encodings",
+    "security.deid.test_retain_uid_preserves_references_while_cleaning_items",
+    "security.deid.test_x_z_d_and_unknown_sequence_fallback",
+    "security.logs.scanner-regression",
+    "security.logs.public-clean",
+    "file.big-endian",
+    "file.dicomdir",
+    "file.undefined-un"
+  ],
+  "features": [
+    {
+      "id": "core",
+      "components": [
+        "component.core_tests",
+        "component.utilities_tests",
+        "component.pacs_cli_roundtrip",
+        "component.cli",
+        "component.corpus"
+      ],
+      "interop": [
+        "file.big-endian",
+        "file.dicomdir",
+        "file.undefined-un"
+      ],
+      "gaps": [
+        "Unknown-VR and parser-level fuzz behavior outside the undefined-length UN path and the corpus malformed cases."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "encoding",
+      "components": [
+        "component.encoding_tests",
+        "component.corpus"
+      ],
+      "interop": [
+        "fixtures",
+        "integrity.ct",
+        "integrity.mr",
+        "integrity.cr",
+        "file.big-endian"
+      ],
+      "gaps": [
+        "No independent HTJ2K encoder is available: input comes from ojph_compress, which shares OpenJPH with PACS, or for signed samples from PACS streams that OpenJPEG has confirmed. Independent decoding of HTJ2K output is covered."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1292",
+        "https://github.com/kcenon/pacs_system/issues/1299"
+      ]
+    },
+    {
+      "id": "association",
+      "components": [
+        "component.network_tests",
+        "component.qr"
+      ],
+      "interop": [
+        "echo.primary",
+        "echo.secondary",
+        "echo.scp",
+        "cli.qr.tcp",
+        "cli.worklist.tcp",
+        "cli.mpps.tcp",
+        "cli.pacs.tcp"
+      ],
+      "gaps": [],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1240",
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "storage_service",
+      "components": [
+        "component.services_tests",
+        "component.corpus"
+      ],
+      "interop": [
+        "store.primary",
+        "store.secondary",
+        "store.scp"
+      ],
+      "gaps": [],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1303",
+        "https://github.com/kcenon/pacs_system/issues/1292"
+      ]
+    },
+    {
+      "id": "query",
+      "components": [
+        "component.services_tests",
+        "component.qr"
+      ],
+      "interop": [
+        "query.ct",
+        "query.mr",
+        "query.cr",
+        "query.scp",
+        "diagnostic.query.ct",
+        "diagnostic.query.mr",
+        "diagnostic.query.cr",
+        "diagnostic.query.scp",
+        "diagnostic.reference.fixtures",
+        "diagnostic.reference.seed",
+        "diagnostic.reference.ready",
+        "diagnostic.scp.fixtures",
+        "diagnostic.scp.import",
+        "diagnostic.scp.ready"
+      ],
+      "gaps": [
+        "Large C-FIND results to a slow reader hold only with the write-queue patch the pinned network_system checkout carries (SOUP-006). A build that resolves network_system from the vcpkg registry port has neither that patch nor this evidence."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "move",
+      "components": [
+        "component.services_tests",
+        "component.qr"
+      ],
+      "interop": [
+        "move.scu",
+        "move.scp",
+        "diagnostic.move.scu",
+        "diagnostic.move.scp"
+      ],
+      "gaps": [
+        "Retry paths; a destination that accepts and then stalls is covered only by the protocol probe."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1304"
+      ]
+    },
+    {
+      "id": "get",
+      "components": [
+        "component.services_tests",
+        "component.qr"
+      ],
+      "interop": [
+        "get.ct",
+        "get.mr",
+        "get.cr",
+        "get.scp",
+        "diagnostic.get.ct",
+        "diagnostic.get.mr",
+        "diagnostic.get.cr",
+        "diagnostic.get.scp"
+      ],
+      "gaps": [],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1306"
+      ]
+    },
+    {
+      "id": "mwl_mpps",
+      "components": [
+        "component.services_tests",
+        "component.e2e"
+      ],
+      "interop": [
+        "mwl.scu",
+        "mwl.sequence",
+        "mwl.scp",
+        "mpps.protocol"
+      ],
+      "gaps": [
+        "Independent MPPS N-CREATE/N-SET reference implementation; controlled wire tests do not establish full SOP/IOD conformance."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1258",
+        "https://github.com/kcenon/pacs_system/issues/1303"
+      ]
+    },
+    {
+      "id": "normalized_services",
+      "components": [
+        "component.services_tests",
+        "component.dimse_n"
+      ],
+      "interop": [],
+      "gaps": [
+        "Patient Information Reconciliation: patient_reconciliation_service is a local library call with no DIMSE exchange, so no peer can reach it. Nothing in the conformance statement claims it.",
+        "The generic n_get_scp class has no product host: it is only reachable from its unit tests. N-GET is exercised through the UPS and Printer services, and n_get_scu against DCMTK dcmprscp.",
+        "Filtered global UPS subscriptions are refused with C307H, as CC.2.3.3 allows; no peer exercises their matching.",
+        "UPS Pull and UPS Query as SCU: the library has no C-FIND client for them. UPS Event as SCU: ups_watch_scu parses reports, but no product listens for them.",
+        "Commitment reports waiting for a retry are not kept across a restart; a requester asks again, and the objects are still committed.",
+        "Reverse delivery was exercised over TCP only; no peer was run over TLS."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "security",
+      "components": [
+        "component.security_tests",
+        "component.v2_tls",
+        "component.legacy_tls"
+      ],
+      "interop": [
+        "tls.scp",
+        "security.matrix",
+        "security.dicom.dcmtk-mtls",
+        "security.dicom.tls12",
+        "security.dicom.tls13",
+        "security.dicom.plaintext",
+        "security.dicom.untrusted-client",
+        "security.dicom.expired-client",
+        "security.dicom.missing-client",
+        "security.dicom.reject-tls11",
+        "security.dicom.reject-tls12-under13",
+        "security.dicom.tls13-policy",
+        "security.dicom.recovery",
+        "security.dicom.client-untrusted-server",
+        "security.dicom.client-expired-server",
+        "security.dicom.client-hostname-mismatch",
+        "security.dicom.client-independent-mtls",
+        "security.audit.tls-single",
+        "security.audit.tls-concurrent",
+        "security.audit.udp-concurrent",
+        "security.audit.reject-hostname",
+        "security.audit.reject-untrusted-server",
+        "security.audit.reject-expired-server",
+        "security.audit.reject-untrusted-client",
+        "security.audit.reject-missing-client",
+        "security.audit.reject-mismatched-key",
+        "security.audit.reject-incomplete-key",
+        "security.audit.store-tls",
+        "security.audit.store-udp",
+        "security.deid.test_batch_without_mapping_file_shares_uid_replacements",
+        "security.deid.test_clean_descriptions_retains_clean_request_item",
+        "security.deid.test_diagnostics_do_not_echo_retained_identifiers",
+        "security.deid.test_failed_recursive_action_never_writes_output",
+        "security.deid.test_nested_references_all_length_and_vr_encodings",
+        "security.deid.test_retain_uid_preserves_references_while_cleaning_items",
+        "security.deid.test_x_z_d_and_unknown_sequence_fallback",
+        "security.logs.scanner-regression",
+        "security.logs.public-clean"
+      ],
+      "gaps": [
+        "Native TLS authentication-failure audit hooks, early service-rejection audits and full DICOM audit-schema conformance remain outside the C-STORE delivery probe (#1325)."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1305",
+        "https://github.com/kcenon/pacs_system/issues/1300"
+      ]
+    },
+    {
+      "id": "storage_backend",
+      "components": [
+        "component.storage_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "PACS archive restart/crash recovery with on-disk/database reconciliation under transfer."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "cloud",
+      "components": [
+        "component.storage_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "S3/Azure SDK builds against emulators and real provider semantics; existing tests use mocks."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "web",
+      "components": [
+        "component.web_tests",
+        "component.dicomweb"
+      ],
+      "interop": [],
+      "gaps": [
+        "HTTP was exercised without TLS; rest_server_config.enable_tls has no peer here.",
+        "Retrieve builds each response in memory, so a study larger than memory cannot be retrieved. The request body limit is checked after the body is read.",
+        "Rendered resources refuse a viewport with a source rectangle, and PALETTE COLOR and uncompressed YBR_FULL_422 images."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "workflow",
+      "components": [
+        "component.client_tests",
+        "component.workflow_tests",
+        "component.workflow"
+      ],
+      "interop": [],
+      "gaps": [
+        "Delayed routing is not implemented: a rule action with delay_minutes starts its forward job at once.",
+        "Retrieval by C-GET stores nothing in this archive, so sync and prefetch use C-MOVE only and a node without C-MOVE fails them.",
+        "sync_manager and prefetch_manager now start the jobs they create, but pacs_server hosts neither and no case runs them; the sync and prefetch cases here are job_manager's own job types.",
+        "pacs_server answers a SOP Instance it holds with 0x0111 (duplicate policy reject, not settable on its command line); Orthanc counts that as a completed sub-operation, so a repeated retrieve completes while nothing is stored. The refusals show only in the audit trail and the metrics."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "ai",
+      "components": [
+        "component.ai_tests",
+        "component.ai_contract",
+        "component.ai_provider"
+      ],
+      "interop": [],
+      "gaps": [
+        "No inference provider is declared and none is reachable here: ai.actual-provider is blocked, and the contract service does not close it.",
+        "Completion by callback: the connector sends callback_url, but nothing in PACS receives the call; completion is learned by polling.",
+        "The result handler checks only that the source study is archived; series and instance references in SR evidence and SEG Referenced Series are not checked, and get_cad_findings and get_segment_info return nothing.",
+        "Result records and source links live in memory: a restarted program no longer knows which result belongs to which source.",
+        "pacs_server hosts neither the connector nor the result handler, so results reach its archive only through a program built on pacs_ai."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "ihe",
+      "components": [
+        "component.pacs_ihe_xds_tests",
+        "component.xds_gazelle_integration_tests",
+        "component.pacs_xds_atna_integration_tests"
+      ],
+      "interop": [],
+      "gaps": [
+        "External XDS registry/repository/ATNA receiver; current registry tests use an in-process mock."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "monitoring_di",
+      "components": [
+        "component.monitoring_tests",
+        "component.di_tests",
+        "component.pacs_integration_tests",
+        "component.workflow"
+      ],
+      "interop": [],
+      "gaps": [
+        "DI replacement is not exercised: no case swaps a logger, a storage or another service while the server runs.",
+        "An externally received audit trail (an ATNA syslog receiver) belongs to #1325; the trail checked here is pacs_server's own table.",
+        "GET /api/v1/system/metrics counts C-STORE, C-FIND and associations; C-ECHO, C-MOVE and C-GET as an SCP and the normalized services are not counted."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "frontend",
+      "components": [
+        "component.browser"
+      ],
+      "interop": [],
+      "gaps": [
+        "No page shows transfer jobs, remote nodes or routing rules; the REST API serves them since #1323.",
+        "Signing in means pasting a token from the identity provider; no OpenID Connect redirect flow, so an identity provider was never part of a run.",
+        "One browser, Chromium headless shell; no Firefox or WebKit, no accessibility audit beyond the labels the tests use.",
+        "Configuration is read-only: the server reads its settings at start and has no way to change them while running."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "reliability",
+      "components": [
+        "component.concurrency_tests",
+        "component.stress",
+        "component.reliability_faults",
+        "component.stress_hidden",
+        "component.stability_slow"
+      ],
+      "interop": [
+        "peer.preflight",
+        "peer.tls"
+      ],
+      "gaps": [
+        "Endurance: the 24-hour run declared in validation/reliability/endurance.json failed its RSS limit, 426.39 MB of growth after the warm-up against 64 MB, because file_storage keeps an in-memory index entry of about 1 KB for every stored object. The other four limits held.",
+        "Power loss and block-device failure: no acknowledged object is flushed to the device (no fsync, SQLite synchronous=NORMAL), and nothing tests it; docs/DURABILITY.md states the limit.",
+        "Fuzz corpus replay runs in the hosted Fuzzing workflow (clang, libFuzzer and ASan over fuzz/seed_corpus), not in this gate: its runner image has GCC only, so it holds no fuzz case.",
+        "A failed write or an unavailable index is answered 0xC001 (Cannot Understand) rather than 0xA7xx (Out of Resources), because the archive cannot yet tell a resource failure from an object it cannot encode."
+      ],
+      "known_issues": []
+    },
+    {
+      "id": "packaging",
+      "components": [
+        "component.build_contract",
+        "component.discovery"
+      ],
+      "interop": [],
+      "gaps": [
+        "C++ module, installed consumer and supported OS/compiler matrix; see existing source-install/modules CI."
+      ],
+      "known_issues": [
+        "https://github.com/kcenon/pacs_system/issues/1266",
+        "https://github.com/kcenon/pacs_system/issues/1288"
+      ]
+    }
+  ],
+  "individual_test_inventory": true,
+  "support_requirements": [
+    {
+      "case_id": "requirement.core.positive",
+      "feature_id": "core",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "File, sequence, charset, JSON/XML and DICOMDIR round trips preserve values/references",
+      "fixture": "Synthetic core fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.core.negative",
+      "feature_id": "core",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Malformed lengths, delimiters, offsets and invalid input fail explicitly without losing trailing valid data",
+      "fixture": "Synthetic core fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.encoding.positive",
+      "feature_id": "encoding",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Valid supported codec/bit-depth/color/multiframe combinations meet exact lossless or predefined lossy bounds",
+      "fixture": "Synthetic encoding fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.encoding.negative",
+      "feature_id": "encoding",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unsupported syntax or unavailable codec rejects explicitly; malformed input causes no corruption",
+      "fixture": "Synthetic encoding fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.association.positive",
+      "feature_id": "association",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent peer negotiates intended context and completes framed DIMSE exchange",
+      "fixture": "Synthetic association fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.association.negative",
+      "feature_id": "association",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Rejected contexts, malformed PDUs, timeouts and limits produce bounded failure with no false success",
+      "fixture": "Synthetic association fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.storage_service.positive",
+      "feature_id": "storage_service",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Every supported Storage SOP/role preserves its valid IOD, UID, syntax and content",
+      "fixture": "Synthetic storage_service fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.storage_service.negative",
+      "feature_id": "storage_service",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Invalid SOP/context/data and write failure reject without success acknowledgement",
+      "fixture": "Synthetic storage_service fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1318,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.query.positive",
+      "feature_id": "query",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Supported model/level and wildcard/date/Unicode keys return the exact expected UID set",
+      "fixture": "Synthetic query fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.query.negative",
+      "feature_id": "query",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Nonmatching keys return empty results; invalid levels and cancellation have correct status",
+      "fixture": "Synthetic query fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1319,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.move.positive",
+      "feature_id": "move",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Destination receives exact objects and response counters match actual sub-operations",
+      "fixture": "Synthetic move fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1304,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.move.negative",
+      "feature_id": "move",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unknown AE, refusal, partial failures and cancellation never claim undelivered objects as complete",
+      "fixture": "Synthetic move fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1304,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.get.positive",
+      "feature_id": "get",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Accepted requestor SCP roles deliver exact objects on the C-GET association",
+      "fixture": "Synthetic get fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1315,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.get.negative",
+      "feature_id": "get",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Role/context rejection, timeout and cancellation terminate without deadlock or false completion",
+      "fixture": "Synthetic get fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1315,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.mwl_mpps.positive",
+      "feature_id": "mwl_mpps",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Nested MWL keys/results and MPPS creation/completion agree with independent state",
+      "fixture": "Synthetic mwl_mpps fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1316,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.mwl_mpps.negative",
+      "feature_id": "mwl_mpps",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Nonmatching MWL and invalid/post-completion MPPS updates reject without changing completed state",
+      "fixture": "Synthetic mwl_mpps fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1316,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.normalized_services.positive",
+      "feature_id": "normalized_services",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent Storage Commitment, UPS, MPPS, Worklist, Print and N-GET peers verify legal states, reverse events, received objects and persistent state",
+      "fixture": "Synthetic normalized_services fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1320,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.normalized_services.negative",
+      "feature_id": "normalized_services",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Invalid actions, referenced SOP failures, illegal transitions and retry errors produce correct status/state",
+      "fixture": "Synthetic normalized_services fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1320,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.security.positive",
+      "feature_id": "security",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "TLS/mTLS exchanges, cleaned nested data and external audit receipt satisfy configured policy",
+      "fixture": "Isolated CA/client/server identities and #1300 synthetic nested corpus",
+      "execution_lane": "full-required",
+      "owner_issue": 1317,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "assignment_status": "assigned",
+      "jobs": [
+        "security.matrix"
+      ],
+      "case_inventory": "validation/security/cases.json"
+    },
+    {
+      "case_id": "requirement.security.negative",
+      "feature_id": "security",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Plaintext/bad certificates/unauthorized actions reject and identifiers or secrets do not leak",
+      "fixture": "Isolated CA/client/server identities and #1300 synthetic nested corpus",
+      "execution_lane": "full-required",
+      "owner_issue": 1317,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "OpenSSL-enabled PACS binaries",
+        "Python 3.10+ and pydicom",
+        "OpenSSL CLI and TLS-enabled DCMTK tools"
+      ],
+      "assignment_status": "assigned",
+      "jobs": [
+        "security.matrix"
+      ],
+      "case_inventory": "validation/security/cases.json"
+    },
+    {
+      "case_id": "requirement.storage_backend.positive",
+      "feature_id": "storage_backend",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Acknowledged objects and matching indexes survive declared restart/recovery faults",
+      "fixture": "Synthetic storage_backend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.storage_backend.negative",
+      "feature_id": "storage_backend",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Incomplete objects, disk/database failures and duplicate retries follow explicit recovery policy",
+      "fixture": "Synthetic storage_backend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.cloud.positive",
+      "feature_id": "cloud",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Enabled AWS/Azure SDKs persist exact objects verified by independent provider clients",
+      "fixture": "Synthetic cloud fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1324,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.cloud.negative",
+      "feature_id": "cloud",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "SDK-disabled, auth, multipart/block and injected service failures cannot fall back to mock success",
+      "fixture": "Synthetic cloud fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1324,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.web.positive",
+      "feature_id": "web",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "STOW-to-DIMSE and DIMSE-to-QIDO/WADO preserve exact objects, frames and references",
+      "fixture": "Synthetic web fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1321,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.web.negative",
+      "feature_id": "web",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Unauthorized, invalid media, pagination/filter errors and partial failures return defined results",
+      "fixture": "Synthetic web fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1321,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.workflow.positive",
+      "feature_id": "workflow",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Two-peer routing/prefetch/sync/jobs agree with receiver objects and persisted job state",
+      "fixture": "Synthetic workflow fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.workflow.negative",
+      "feature_id": "workflow",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Duplicate input, restart, retries, cancellation and remote failure do not create unintended jobs/objects",
+      "fixture": "Synthetic workflow fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.ai.positive",
+      "feature_id": "ai",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Separate AI service submission/completion stores results with correct source UID references",
+      "fixture": "Synthetic ai fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.ai.negative",
+      "feature_id": "ai",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Timeout, malformed result and service failure produce correct terminal state without orphan results",
+      "fixture": "Synthetic ai fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.ihe.positive",
+      "feature_id": "ihe",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Independent XDS registration/query/retrieval and ATNA agree on content and references",
+      "fixture": "Synthetic ihe fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1325,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.ihe.negative",
+      "feature_id": "ihe",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "SOAP/MTOM errors, missing documents and reference mismatch reject without inconsistent registrations",
+      "fixture": "Synthetic ihe fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1325,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.monitoring_di.positive",
+      "feature_id": "monitoring_di",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Metrics, readiness, DI replacement and external audit agree with observed transfers",
+      "fixture": "Synthetic monitoring_di fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.monitoring_di.negative",
+      "feature_id": "monitoring_di",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Induced failures and shutdown update signals accurately without duplicate/missing required events",
+      "fixture": "Synthetic monitoring_di fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1323,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.frontend.positive",
+      "feature_id": "frontend",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Actual browser login/query/selection/job flows match live API and server state",
+      "fixture": "Synthetic frontend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1322,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.frontend.negative",
+      "feature_id": "frontend",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Authorization, empty results and server errors produce correct visible and backend outcomes",
+      "fixture": "Synthetic frontend fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1322,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "assigned"
+    },
+    {
+      "case_id": "requirement.reliability.positive",
+      "feature_id": "reliability",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Configured endurance and fault recovery preserve acknowledged data within fixed resource limits",
+      "fixture": "Synthetic reliability fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.reliability.negative",
+      "feature_id": "reliability",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Faults, sanitizer findings, skipped stress cases and failed fuzz replay cannot be hidden by retries",
+      "fixture": "Synthetic reliability fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1326,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.packaging.positive",
+      "feature_id": "packaging",
+      "support_status": "supported",
+      "condition": "positive",
+      "expected_outcome": "passed",
+      "oracle": "Required OS/compiler/options, installed consumer and module examples execute functional cases",
+      "fixture": "Synthetic packaging fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1327,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    },
+    {
+      "case_id": "requirement.packaging.negative",
+      "feature_id": "packaging",
+      "support_status": "supported",
+      "condition": "negative",
+      "expected_outcome": "passed",
+      "oracle": "Missing required dependencies, disabled features and empty test selection fail according to contract",
+      "fixture": "Synthetic packaging fixtures with independently declared expected data/state",
+      "execution_lane": "full-required",
+      "owner_issue": 1327,
+      "evidence_schema": "case identity, raw exits, peer/oracle and state artifacts",
+      "sop_class_uids": [],
+      "roles": [],
+      "syntaxes": [],
+      "build_os": "supported configurations from case discovery",
+      "prerequisites": [
+        "feature-specific peer/build prerequisites"
+      ],
+      "assignment_status": "unverified"
+    }
+  ],
+  "scope_history": [
+    {
+      "issue": 1310,
+      "change": "Separate unsupported codec rejection from valid supported codec coverage; Big Endian file I/O remains separate from DIMSE rejection.",
+      "previous_encoding_gap": "JPEG 2000, HTJ2K, JPEG XL, HEVC and all supported syntax/SOP combinations need independent peer fixtures."
+    },
+    {
+      "issue": 1318,
+      "change": "component.corpus evaluates every declared Storage SOP in every valid role and syntax, PACS codecs against independent tools, unsupported syntax rejection and file formats. Invalid data and write-failure negatives stay open under requirement.storage_service.negative; parser fuzzing stays under requirement.core.negative.",
+      "previous_gaps": {
+        "encoding": [
+          "Independent valid SOP/codec fixtures for supported syntaxes; expected rejection for unsupported HEVC/JPEG XL/Frame Deflate/Deflated Explicit VR LE. Big Endian is file-only."
+        ],
+        "storage_service": [
+          "Extend CT/MR/CR transport fixtures to every advertised Storage SOP class."
+        ],
+        "core": [
+          "Broader malformed/unknown-VR parsing and nesting behavior outside the undefined-length UN path (#1318)."
+        ]
+      }
+    },
+    {
+      "issue": 1319,
+      "change": "component.qr evaluates every declared Query/Retrieve model, level, key type and failure path with exact UID sets, statuses, counters and receiver objects, against independent DCMTK peers and a controlled protocol peer. The expected tables are themselves cross-checked on dcmqrscp, with each difference listed and justified.",
+      "previous_gaps": {
+        "association": [
+          "Independent negative negotiation/framing/timeout/limit cases from #1319 remain unverified."
+        ],
+        "query": [
+          "External patient/study/series levels, wildcard/date/unicode and cancel cases beyond IMAGE queries."
+        ],
+        "move": [
+          "Failure/cancel/unknown-destination sub-operation counters and timeout/retry paths."
+        ],
+        "get": [
+          "Refused role negotiation, cancellation and mixed failure counters."
+        ]
+      }
+    },
+    {
+      "issue": 1321,
+      "change": "component.dicomweb stores objects over one protocol and reads them over the other, through curl, dcm4che and DCMTK, after the same tables hold on Orthanc.",
+      "previous_gaps": {
+        "web": [
+          "STOW->DIMSE retrieve and DIMSE store->QIDO/WADO over HTTP with authentication."
+        ]
+      }
+    },
+    {
+      "issue": 1320,
+      "change": "component.dimse_n runs each normalized service against peers in separate processes that share no PACS code: dcm4che 5.35.2, pynetdicom 2.1.1 and DCMTK print tools, each qualified against the others before any PACS result counts.",
+      "previous_gaps": {
+        "normalized_services": [
+          "Independent Storage Commitment/UPS/Print/N-GET/PIR workflows, including reverse event reports."
+        ]
+      }
+    },
+    {
+      "issue": 1322,
+      "change": "component.browser runs the built web app in Chromium against pacs_server with its REST API on and OAuth 2.0 tokens required. Pages are checked against values declared before any page opens, against the REST API asked directly, and the worklist through DCMTK findscu.",
+      "previous_gaps": {
+        "frontend": [
+          "Browser workflow tests against live authenticated PACS APIs; build/lint is not behavioral verification."
+        ],
+        "web": [
+          "Most REST API routes under /api check no credentials, and OAuth 2.0 tokens do not cover them, so pacs_server does not serve them. Owned by the browser flows of #1322.",
+          "CORS preflight gets no Access-Control headers: Crow answers OPTIONS itself, so the routes meant to answer it never run, and a browser can only make requests that need no preflight. Owned by #1322."
+        ]
+      }
+    },
+    {
+      "issue": 1323,
+      "change": "component.workflow runs pacs_server with its REST API against two independent Orthanc servers: retrieve, store, routing, sync and prefetch jobs, duplicates, retry after an outage, cancel, pause, a graceful stop and a forced kill in the middle of a job, each checked against exact SOP Instance UID to pixel digest manifests at both ends, the audit trail and the DIMSE counters. component.ai_contract runs the AI connector and result handler against an inference service in another process and checks what that service received and wrote.",
+      "previous_gaps": {
+        "workflow": [
+          "Routing/prefetch/sync/jobs against both external PACS nodes, including retries and restart."
+        ],
+        "ai": [
+          "Independent inference-service request/result roundtrip and failure handling."
+        ],
+        "monitoring_di": [
+          "Metrics/readiness/audit under external transfer, induced failure and shutdown."
+        ],
+        "frontend": [
+          "No page shows transfer jobs: pacs_server has no job manager, and job_manager simulates C-STORE jobs (#1323)."
+        ]
+      }
+    },
+    {
+      "issue": 1326,
+      "change": "component.reliability_faults kills pacs_server just before and just after the rename of a stored file, kills the server and the client in the middle of a batch, fills the disk and locks the index, then reads the index, the files and leftovers without PACS code: every acknowledged object stays indexed with its pixels and every fixture ends held once. docs/DURABILITY.md states the contract. component.stress_hidden and component.stability_slow run the two hidden cases of pacs_integration_e2e, [.stress] and [.slow] (60 minutes, PACS_STABILITY_TEST_DURATION), which no job ran before.",
+      "previous_gaps": {
+        "reliability": [
+          "Long-duration soak, sanitizer/fuzz campaigns and loss-of-power recovery are separate required evidence."
+        ]
+      }
+    },
+    {
+      "issue": 1319,
+      "change": "The checkout action and the validation bootstrap apply .github/actions/checkout-kcenon-deps/patches/network_system/0001-serialize-tcp-socket-writes.patch to the pinned network_system, which queues socket writes. qr.protocol.find-scp.slow-reader-keeps-pdu-framing now runs against a library that starts one write at a time.",
+      "previous_gaps": {
+        "query": [
+          "Large C-FIND results to a slow reader: network_system 093691d9 overlaps socket writes under backpressure, which breaks PDU framing (SOUP-006). qr.protocol.find-scp.slow-reader-keeps-pdu-framing fails until the pin moves."
+        ]
+      }
+    },
+    {
+      "issue": 1326,
+      "change": "Two reliability gaps restated once the evidence they named existed; both stay open. The 24-hour endurance run was made on b5b2399 and failed its RSS limit. The fuzz corpus replay runs in the hosted Fuzzing workflow on every pull request, outside this gate.",
+      "previous_gaps": {
+        "reliability": [
+          "Endurance: validation/reliability/endurance.json declares 24 hours at a fixed load and limits; only shorter runs, which report themselves diagnostic, have been made.",
+          "Fuzz corpus replay needs clang and libFuzzer; the verification container has GCC only, so no replay ran for #1326."
+        ]
+      }
+    },
+    {
+      "issue": 1328,
+      "change": "Lanes separate what a run selects from overall completeness (step 3 of #1328 only). The full lane keeps the previous rule: every component and interop case in every profile, no validation error and no declared gap. The pr lane, run by pull requests and pushes, may leave out only components whose lane_exclusion names a provider, endurance or platform requirement, fails on any selected case that does not pass, and reports gaps and left-out components as not certified. ai.actual-provider moved from component.ai_contract to component.ai_provider, which only the full lane runs; no gap was removed or changed.",
+      "previous_gaps": {}
+    }
+  ]
+}

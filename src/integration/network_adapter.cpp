@@ -41,9 +41,13 @@ network_adapter::create_server(const network::server_config& config,
         return nullptr;
     }
 
-    // Create DICOM server with the provided configuration
-    // The dicom_server internally uses network_system for TCP operations
-    return std::make_unique<network::dicom_server>(config);
+    // The retained v1 server is an in-process API and rejects TLS at start().
+    // Preserve the request so this factory cannot silently downgrade to plaintext.
+    auto server_config = config;
+    if (tls_cfg.enabled) {
+        server_config.tls = tls_cfg;
+    }
+    return std::make_unique<network::dicom_server>(server_config);
 }
 
 // =============================================================================

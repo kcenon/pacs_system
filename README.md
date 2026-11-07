@@ -73,9 +73,9 @@ CI runs the unit tests ([ci.yml](.github/workflows/ci.yml)) and uploads coverage
 The [DICOM Conformance Statement](docs/DICOM_CONFORMANCE_STATEMENT.md) is the source for the
 supported SOP classes (section 3): Verification; CT, MR, US, XA, XRF, X-Ray, NM, PET, RT, SR, SEG,
 MG, CR, and SC Storage; Patient and Study Root Query/Retrieve; Modality Worklist; MPPS; Storage
-Commitment; and Basic Grayscale Print, Basic Color Print, and Printer. The
-[DCMTK interoperability workflow](.github/workflows/dcmtk-interop.yml) exercises C-ECHO, C-STORE,
-C-FIND, and C-MOVE against DCMTK tools on Ubuntu and macOS.
+Commitment; and Basic Grayscale Print, Basic Color Print, and Printer. Test routines:
+[host DCMTK interoperability](.github/workflows/dcmtk-interop.yml) and
+[Docker functional validation](validation/dcmtk/README.md), which reports failures and coverage gaps for 20 feature groups.
 
 ### Transfer Syntax Support
 
@@ -258,18 +258,18 @@ or when the copy in `README.kr.md` differs.
 
 | Metric | Value |
 |--------|-------|
-| **Header Files** | 291 files |
-| **Source Files** | 217 files |
-| **Header LOC** | ~78,700 lines |
-| **Source LOC** | ~114,800 lines |
-| **Example LOC** | ~4,100 lines |
-| **Test LOC** | ~89,600 lines |
-| **Total LOC** | ~287,300 lines |
-| **Test Files** | 191 files |
-| **Test Cases** | 2667+ tests |
+| **Header Files** | 307 files |
+| **Source Files** | 228 files |
+| **Header LOC** | ~81,200 lines |
+| **Source LOC** | ~126,700 lines |
+| **Example LOC** | ~4,200 lines |
+| **Test LOC** | ~98,700 lines |
+| **Total LOC** | ~310,700 lines |
+| **Test Files** | 216 files |
+| **Test Cases** | 2870+ tests |
 | **Example Programs** | 5 apps |
-| **Documentation** | 109 markdown files |
-| **CI/CD Workflows** | 24 workflows |
+| **Documentation** | 111 markdown files |
+| **CI/CD Workflows** | 26 workflows |
 | **Version** | 0.1.0 |
 
 <!-- STATS_END -->

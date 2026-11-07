@@ -137,6 +137,11 @@ public:
     [[nodiscard]] auto store(const core::dicom_dataset& dataset)
         -> VoidResult override;
 
+    [[nodiscard]] auto store(const core::dicom_dataset& dataset,
+                             const encoding::transfer_syntax& syntax) -> VoidResult override;
+    [[nodiscard]] auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file> override;
+
     /**
      * @brief Retrieve a DICOM dataset by SOP Instance UID
      *

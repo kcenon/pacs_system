@@ -23,6 +23,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/transfer_syntax.h"
 #include "kcenon/pacs/encoding/vr_type.h"
+#include "kcenon/pacs/core/utf8_text.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -83,16 +84,17 @@ constexpr char base64_chars[] =
 
     size_t i = 0;
     while (i < data.size()) {
-        uint32_t octet_a = i < data.size() ? data[i++] : 0;
-        uint32_t octet_b = i < data.size() ? data[i++] : 0;
-        uint32_t octet_c = i < data.size() ? data[i++] : 0;
+        const size_t remaining = data.size() - i;
+        uint32_t octet_a = data[i++];
+        uint32_t octet_b = remaining > 1 ? data[i++] : 0;
+        uint32_t octet_c = remaining > 2 ? data[i++] : 0;
 
         uint32_t triple = (octet_a << 16) | (octet_b << 8) | octet_c;
 
         result += base64_chars[(triple >> 18) & 0x3F];
         result += base64_chars[(triple >> 12) & 0x3F];
-        result += (i > data.size() + 1) ? '=' : base64_chars[(triple >> 6) & 0x3F];
-        result += (i > data.size()) ? '=' : base64_chars[triple & 0x3F];
+        result += remaining > 1 ? base64_chars[(triple >> 6) & 0x3F] : '=';
+        result += remaining > 2 ? base64_chars[triple & 0x3F] : '=';
     }
 
     return result;
@@ -707,8 +709,9 @@ int convert_file(const std::filesystem::path& input_path,
         write_dataset_json(output, file.meta_information(), opts, base_path, 1, bulk_data_counter);
     }
 
-    // Write main dataset
-    for (const auto& [tag, element] : file.dataset()) {
+    // Write main dataset. PS3.18 JSON is UTF-8 whatever the object's character set is.
+    const auto text_dataset = kcenon::pacs::core::utf8_text_copy(file.dataset());
+    for (const auto& [tag, element] : text_dataset) {
         if (!should_include_tag(tag, opts)) {
             continue;
         }

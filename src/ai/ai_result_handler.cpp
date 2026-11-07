@@ -177,9 +177,18 @@ public:
             return result;
         }
 
-        // Check if the study exists in the database
-        // Note: This would require a study lookup method in index_database
-        // For now, we just validate the UID format
+        // With an index, the source study must be in it: a result about a study this archive does
+        // not hold refers to nothing here.
+        if (database_) {
+            if (!database_->find_study(study_uid)) {
+                result.status = validation_status::invalid_reference;
+                result.invalid_references.push_back(study_uid);
+                result.error_message = "Source study " + study_uid + " is not in the archive";
+            }
+            return result;
+        }
+
+        // Without one, only the form of the UID can be checked.
         if (study_uid.length() < 10) {  // Basic UID validation
             result.status = validation_status::invalid_reference;
             result.invalid_references.push_back(study_uid);

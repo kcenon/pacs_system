@@ -157,8 +157,9 @@ network::Result<retrieve_result> retrieve_scu::perform_move(
             move_complete = true;
             result.final_status = static_cast<uint16_t>(status);
         } else if ((status & 0xF000) == 0xA000 ||
+                   (status & 0xF000) == 0xB000 ||
                    (status & 0xF000) == 0xC000) {
-            // Error status (Refused or Failed)
+            // Refused, Warning or Failed: each ends the operation (Table C.4-2)
             move_complete = true;
             result.final_status = static_cast<uint16_t>(status);
         }
@@ -285,8 +286,9 @@ network::Result<retrieve_result> retrieve_scu::perform_get(
                 retrieve_complete = true;
                 result.final_status = static_cast<uint16_t>(status);
             } else if ((status & 0xF000) == 0xA000 ||
+                       (status & 0xF000) == 0xB000 ||
                        (status & 0xF000) == 0xC000) {
-                // Error status
+                // Refused, Warning or Failed: each ends the operation (Table C.4-3)
                 retrieve_complete = true;
                 result.final_status = static_cast<uint16_t>(status);
             }

@@ -235,10 +235,13 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
     # 57e5592 and bfc2436 switched these stores to _mm512_storeu_si512.
     # A system OpenJPH found above bypasses this pin: on x86-64 it must be
     # 0.21.5 or later, or be built with -DOJPH_DISABLE_AVX512=ON.
+    # 0.30.1 is also available in the pinned vcpkg registry (#1288), and includes
+    # the coded_lists allocator fix (0.27.0) and memcpy-based generic decoder
+    # loads (OpenJPH#291), which pass the focused alignment sanitizer tests.
     FetchContent_Declare(
         openjph
         GIT_REPOSITORY https://github.com/aous72/OpenJPH.git
-        GIT_TAG        0.21.5
+        GIT_TAG        0.30.1
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(openjph)
@@ -262,17 +265,11 @@ if(NOT PACS_HTJ2K_FOUND AND PACS_FETCH_OPENJPH)
             "  - Build from source: https://github.com/aous72/OpenJPH")
         set(PACS_HTJ2K_FOUND FALSE)
     endif()
-    # FetchContent headers live at src/core/common/ojph_*.h (flat layout),
-    # but installed OpenJPH uses openjph/ prefix (#include <openjph/ojph_*.h>).
-    # Create a compatibility include directory with an openjph/ symlink so both
-    # system-installed and FetchContent builds use the same #include paths.
+    # Modern OpenJPH moved public headers from common/ into openjph/.
+    # Include their parent so source and installed builds both accept
+    # <openjph/ojph_*.h>; no compatibility symlink is needed (#1288).
     if(PACS_HTJ2K_FOUND)
-        set(_openjph_compat_include "${CMAKE_BINARY_DIR}/_openjph_compat_include")
-        file(MAKE_DIRECTORY "${_openjph_compat_include}")
-        file(CREATE_LINK
-            "${openjph_SOURCE_DIR}/src/core/common"
-            "${_openjph_compat_include}/openjph"
-            SYMBOLIC)
+        set(_pacs_openjph_source_include "${openjph_SOURCE_DIR}/src/core")
     endif()
 endif()
 
@@ -986,7 +983,7 @@ if(PACS_WITH_REST_API)
         FetchContent_Declare(
             Crow
             GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-            GIT_TAG v1.3.1  # Pinned release; compatible with ASIO 1.30+ io_context (IEC 62304 §8.1.2)
+            GIT_TAG v1.3.2  # Also registered in vcpkg; compatible with ASIO 1.30+ io_context
             GIT_SHALLOW TRUE
         )
         set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -994,7 +991,7 @@ if(PACS_WITH_REST_API)
         set(CROW_ENABLE_SSL OFF CACHE BOOL "" FORCE)
         set(CROW_ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(Crow)
-        message(STATUS "  [OK] Crow (v1.3.1) fetched")
+        message(STATUS "  [OK] Crow (v1.3.2) fetched")
     else()
         find_package(Crow CONFIG QUIET)
         if(Crow_FOUND)

@@ -650,7 +650,7 @@ PACS 시스템 (Picture Archiving and Communication System)
 | Digital X-Ray | 1.2.840.10008.5.1.4.1.1.1.1 | SCP/SCU | ✅ 구현됨 |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | SCP/SCU | ✅ 구현됨 |
 | Ultrasound Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | SCP/SCU | ✅ 구현됨 |
-| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.6.2 | SCP/SCU | ✅ 구현됨 |
+| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.3.1 | SCP/SCU | ✅ 구현됨 |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | SCP/SCU | ✅ 구현됨 |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | SCP/SCU | ✅ 구현됨 |
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | SCP/SCU | ✅ 구현됨 |

@@ -1,0 +1,190 @@
+Serialize tcp_socket writes in kcenon/network_system 093691d9
+
+pacs_system carries this patch until its network_system pin contains an
+equivalent fix. See docs/SOUP.md, "network_system overlapping writes (#1319)".
+
+tcp_socket::async_send started asio::async_write for every call, but Asio
+allows one write at a time on a stream. When a write completed only in part,
+because the peer read slowly, the next one ran inside it and interleaved the
+bytes, which broke DICOM PDU framing. Sends now wait in a queue and start one
+at a time on the socket's executor. Both copies of tcp_socket.h change, since
+translation units include either one and must agree on the class layout.
+
+The checkout action applies it to the index after cloning the pin and fails
+when it no longer applies. Remove this file once the pin moves past a
+network_system revision that serializes these writes.
+
+diff --git a/libs/network-tcp/include/network_tcp/internal/tcp_socket.h b/libs/network-tcp/include/network_tcp/internal/tcp_socket.h
+index 96c8c8e..0e17856 100644
+--- a/libs/network-tcp/include/network_tcp/internal/tcp_socket.h
++++ b/libs/network-tcp/include/network_tcp/internal/tcp_socket.h
+@@ -6,6 +6,7 @@
+ 
+ #include <array>
+ #include <atomic>
++#include <deque>
+ #include <functional>
+ #include <memory>
+ #include <mutex>
+@@ -298,6 +299,23 @@ namespace kcenon::network::internal
+ 		 */
+ 		auto do_read() -> void;
+ 
++		/*! \brief Starts the write at the head of the queue. Runs on the socket's executor. */
++		auto start_next_write() -> void;
++
++		/*! \brief Ends every queued write with this error. Runs on the socket's executor. */
++		auto fail_queued_writes(std::error_code ec) -> void;
++
++		/*! \brief One queued send. Asio forbids starting a write while another is incomplete. */
++		struct pending_write
++		{
++			std::shared_ptr<std::vector<uint8_t>> buffer;
++			std::size_t size;
++			std::shared_ptr<std::function<void(std::error_code, std::size_t)>> handler;
++		};
++
++		std::deque<pending_write> write_queue_; /*!< Only touched on the socket's executor. */
++		bool write_in_progress_{false};         /*!< Only touched on the socket's executor. */
++
+ 	private:
+ 		/*! \brief Callback type aliases for lock-free storage */
+ 		using receive_callback_t = std::function<void(const std::vector<uint8_t>&)>;
+diff --git a/libs/network-tcp/src/tcp_socket.cpp b/libs/network-tcp/src/tcp_socket.cpp
+index 3c52821..8ff9b40 100644
+--- a/libs/network-tcp/src/tcp_socket.cpp
++++ b/libs/network-tcp/src/tcp_socket.cpp
+@@ -340,12 +340,43 @@ auto tcp_socket::async_send(
+                 return;
+             }
+ 
+-            // Now safe to initiate async operation on the executor thread.
+-            // No mutex needed here since we're on the executor's thread.
+-            //
+-            // Wrap in try-catch to handle potential allocation failures in ASIO's
+-            // async operation setup. This can occur with sanitizers when the
+-            // recycling allocator's thread context is not properly initialized.
++            // Asio allows one write at a time on a stream, so later sends wait here.
++            self->write_queue_.push_back(pending_write{buffer, data_size, handler_ptr});
++            if (!self->write_in_progress_)
++            {
++                self->write_in_progress_ = true;
++                self->start_next_write();
++            }
++        });
++}
++
++auto tcp_socket::fail_queued_writes(std::error_code ec) -> void
++{
++    while (!write_queue_.empty())
++    {
++        auto item = std::move(write_queue_.front());
++        write_queue_.pop_front();
++        pending_bytes_.fetch_sub(item.size);
++        metrics_.current_pending_bytes.store(pending_bytes_.load());
++        if (*item.handler)
++        {
++            (*item.handler)(ec, 0);
++        }
++    }
++    write_in_progress_ = false;
++}
++
++auto tcp_socket::start_next_write() -> void
++{
++    if (is_closed_.load() || !socket_.is_open() || socket_.native_handle() == -1)
++    {
++        fail_queued_writes(asio::error::not_connected);
++        return;
++    }
++    auto self = shared_from_this();
++    const auto buffer = write_queue_.front().buffer;
++    const auto data_size = write_queue_.front().size;
++    const auto handler_ptr = write_queue_.front().handler;
+             try
+             {
+                 asio::async_write(
+@@ -383,31 +414,30 @@ auto tcp_socket::async_send(
+                         {
+                             (*handler_ptr)(ec, bytes_transferred);
+                         }
++
++                        self->write_queue_.pop_front();
++                        if (ec)
++                        {
++                            self->fail_queued_writes(ec);
++                        }
++                        else if (self->write_queue_.empty())
++                        {
++                            self->write_in_progress_ = false;
++                        }
++                        else
++                        {
++                            self->start_next_write();
++                        }
+                     });
+             }
+             catch (const std::bad_alloc&)
+             {
+-                // Allocation failed - restore pending bytes and report error
+-                self->pending_bytes_.fetch_sub(data_size);
+-                self->metrics_.current_pending_bytes.store(self->pending_bytes_.load());
+-
+-                if (*handler_ptr)
+-                {
+-                    (*handler_ptr)(std::make_error_code(std::errc::not_enough_memory), 0);
+-                }
++                fail_queued_writes(std::make_error_code(std::errc::not_enough_memory));
+             }
+             catch (const std::exception&)
+             {
+-                // Other exception - restore pending bytes and report generic error
+-                self->pending_bytes_.fetch_sub(data_size);
+-                self->metrics_.current_pending_bytes.store(self->pending_bytes_.load());
+-
+-                if (*handler_ptr)
+-                {
+-                    (*handler_ptr)(std::make_error_code(std::errc::operation_canceled), 0);
+-                }
++                fail_queued_writes(std::make_error_code(std::errc::operation_canceled));
+             }
+-        });
+ }
+ 
+ auto tcp_socket::set_backpressure_callback(backpressure_callback callback) -> void
+diff --git a/src/internal/tcp/tcp_socket.h b/src/internal/tcp/tcp_socket.h
+index 96c8c8e..0e17856 100644
+--- a/src/internal/tcp/tcp_socket.h
++++ b/src/internal/tcp/tcp_socket.h
+@@ -6,6 +6,7 @@
+ 
+ #include <array>
+ #include <atomic>
++#include <deque>
+ #include <functional>
+ #include <memory>
+ #include <mutex>
+@@ -298,6 +299,23 @@ namespace kcenon::network::internal
+ 		 */
+ 		auto do_read() -> void;
+ 
++		/*! \brief Starts the write at the head of the queue. Runs on the socket's executor. */
++		auto start_next_write() -> void;
++
++		/*! \brief Ends every queued write with this error. Runs on the socket's executor. */
++		auto fail_queued_writes(std::error_code ec) -> void;
++
++		/*! \brief One queued send. Asio forbids starting a write while another is incomplete. */
++		struct pending_write
++		{
++			std::shared_ptr<std::vector<uint8_t>> buffer;
++			std::size_t size;
++			std::shared_ptr<std::function<void(std::error_code, std::size_t)>> handler;
++		};
++
++		std::deque<pending_write> write_queue_; /*!< Only touched on the socket's executor. */
++		bool write_in_progress_{false};         /*!< Only touched on the socket's executor. */
++
+ 	private:
+ 		/*! \brief Callback type aliases for lock-free storage */
+ 		using receive_callback_t = std::function<void(const std::vector<uint8_t>&)>;

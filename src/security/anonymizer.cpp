@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/security/anonymizer.h"
+#include "anonymization_sequence_rules.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 
 #include <algorithm>
@@ -103,113 +104,133 @@ auto anonymizer::anonymize_with_mapping(
         profile_actions[tag] = config;
     }
 
-    // Process each tag in the profile
-    for (const auto& [tag, config] : profile_actions) {
-        if (!dataset.contains(tag)) {
+    apply_actions(dataset, profile_actions, mapping, report, 0);
+
+    return report;
+}
+
+void anonymizer::record_action(anonymization_report& report,
+                               tag_action_record record, bool sequence) {
+    ++report.total_tags_processed;
+    if (record.success) {
+        switch (record.action) {
+            case tag_action::remove:
+            case tag_action::remove_or_empty: ++report.tags_removed; break;
+            case tag_action::empty: ++report.tags_emptied; break;
+            case tag_action::replace:
+            case tag_action::clean:
+            case tag_action::encrypt: ++report.tags_replaced; break;
+            case tag_action::replace_uid:
+                // A U sequence is a retained container, not itself a UID.
+                if (sequence) { ++report.tags_kept; }
+                else { ++report.uids_replaced; }
+                break;
+            case tag_action::keep: ++report.tags_kept; break;
+            case tag_action::shift_date: ++report.dates_shifted; break;
+            case tag_action::hash: ++report.values_hashed; break;
+        }
+    } else if (!record.error_message.empty()) {
+        report.errors.push_back(record.error_message);
+    }
+    if (detailed_reporting_) {
+        report.action_records.push_back(std::move(record));
+    }
+}
+
+void anonymizer::apply_actions(
+    dicom_dataset& dataset,
+    const std::map<dicom_tag, tag_action_config>& actions,
+    uid_mapping& mapping, anonymization_report& report, std::size_t depth) {
+    // Snapshot tags because actions may erase or replace map elements.
+    std::vector<dicom_tag> tags;
+    tags.reserve(dataset.size());
+    for (const auto& [tag, element] : dataset) {
+        tags.push_back(tag);
+    }
+    for (const auto tag : tags) {
+        if ((private_tag_action_ == private_tag_action::remove_all && tag.is_private()) ||
+            (private_tag_action_ == private_tag_action::remove_data && tag.is_private_data())) {
+            dataset.remove(tag);
+            ++report.private_tags_removed;
+            continue;
+        }
+        auto* element = dataset.get(tag);
+        const auto found = actions.find(tag);
+        if (!element->is_sequence()) {
+            // UN may hide a defined-length implicit-VR sequence absent from
+            // the dictionary. Never pass opaque bytes through as a K value.
+            if (element->vr() == encoding::vr_type::UN && !element->raw_data().empty()) {
+                const auto action = found == actions.end() ? tag_action::empty : found->second.action;
+                if (action != tag_action::remove && action != tag_action::remove_or_empty &&
+                    action != tag_action::empty) {
+                    tag_action_record record;
+                    record.tag = tag;
+                    record.action = action;
+                    record.success = false;
+                    record.error_message = "Cannot clean unknown representation at " + tag.to_string();
+                    dataset.insert(dicom_element{tag, encoding::vr_type::UN});
+                    record_action(report, std::move(record));
+                    continue;
+                }
+                if (found == actions.end()) {
+                    dataset.insert(dicom_element{tag, encoding::vr_type::UN});
+                    tag_action_record record;
+                    record.tag = tag;
+                    record.action = tag_action::empty;
+                    record_action(report, std::move(record));
+                    continue;
+                }
+            }
+            if (found != actions.end()) {
+                record_action(report, apply_action(dataset, tag, found->second, &mapping));
+            }
             continue;
         }
 
-        auto record = apply_action(dataset, tag, config, &mapping);
-        report.total_tags_processed++;
-
-        switch (config.action) {
+        // Unknown sequences retain the conservative guard at every depth.
+        const auto action = found == actions.end() ? tag_action::empty : found->second.action;
+        tag_action_record record;
+        record.tag = tag;
+        record.action = action;
+        switch (action) {
             case tag_action::remove:
             case tag_action::remove_or_empty:
-                if (record.success) {
-                    report.tags_removed++;
-                }
+                dataset.remove(tag);
                 break;
             case tag_action::empty:
-                if (record.success) {
-                    report.tags_emptied++;
-                }
+                dataset.insert(dicom_element{tag, encoding::vr_type::SQ});
                 break;
-            case tag_action::replace:
-                if (record.success) {
-                    report.tags_replaced++;
-                }
+            case tag_action::replace: {
+                // D: a non-empty sequence with a dummy item. IOD-specific
+                // mandatory contents still require validation by the caller.
+                dicom_element replacement{tag, encoding::vr_type::SQ};
+                replacement.sequence_items().emplace_back();
+                dataset.insert(std::move(replacement));
                 break;
-            case tag_action::replace_uid:
-                if (record.success) {
-                    report.uids_replaced++;
-                }
-                break;
+            }
             case tag_action::keep:
-                report.tags_kept++;
-                break;
-            case tag_action::shift_date:
-                if (record.success) {
-                    report.dates_shifted++;
+            case tag_action::clean:
+            case tag_action::replace_uid:
+                if (!element->raw_data().empty() ||
+                    (depth >= 64 && !element->sequence_items().empty())) {
+                    record.success = false;
+                    record.error_message = "Cannot clean sequence " + tag.to_string() +
+                        (element->raw_data().empty() ? ": nesting limit exceeded" : ": unparsed payload");
+                    dataset.insert(dicom_element{tag, encoding::vr_type::SQ});
+                } else {
+                    for (auto& item : element->sequence_items()) {
+                        apply_actions(item, actions, mapping, report, depth + 1);
+                    }
                 }
                 break;
-            case tag_action::hash:
-                if (record.success) {
-                    report.values_hashed++;
-                }
-                break;
-            case tag_action::encrypt:
-                if (record.success) {
-                    report.tags_replaced++;
-                }
+            default:
+                record.success = false;
+                record.error_message = "Unsupported sequence action at " + tag.to_string();
+                dataset.insert(dicom_element{tag, encoding::vr_type::SQ});
                 break;
         }
-
-        if (!record.success && !record.error_message.empty()) {
-            report.errors.push_back(record.error_message);
-        }
-
-        if (detailed_reporting_) {
-            report.action_records.push_back(std::move(record));
-        }
+        record_action(report, std::move(record), true);
     }
-
-    // No action reaches into sequence items, so a sequence without an action
-    // of its own is emptied instead of copied with the identifiers its items
-    // may hold
-    std::vector<dicom_tag> sequences_to_empty;
-    for (const auto& [tag, element] : dataset) {
-        if (element.is_sequence() && !profile_actions.contains(tag) &&
-            (!element.sequence_items().empty() || !element.raw_data().empty())) {
-            sequences_to_empty.push_back(tag);
-        }
-    }
-    for (const auto& tag : sequences_to_empty) {
-        dataset.insert(dicom_element{tag, encoding::vr_type::SQ});
-        report.total_tags_processed++;
-        report.tags_emptied++;
-        if (detailed_reporting_) {
-            tag_action_record record;
-            record.tag = tag;
-            record.action = tag_action::empty;
-            report.action_records.push_back(std::move(record));
-        }
-    }
-
-    // Remove private tags if configured
-    if (private_tag_action_ != private_tag_action::keep) {
-        std::vector<dicom_tag> tags_to_remove;
-
-        for (auto it = dataset.begin(); it != dataset.end(); ++it) {
-            auto tag = it->first;
-            if (private_tag_action_ == private_tag_action::remove_all) {
-                if (tag.is_private()) {
-                    tags_to_remove.push_back(tag);
-                }
-            } else if (private_tag_action_ == private_tag_action::remove_data) {
-                if (tag.is_private_data()) {
-                    tags_to_remove.push_back(tag);
-                }
-            }
-        }
-
-        for (const auto& tag : tags_to_remove) {
-            if (dataset.remove(tag)) {
-                report.private_tags_removed++;
-            }
-        }
-    }
-
-    return report;
 }
 
 auto anonymizer::get_profile() const noexcept -> anonymization_profile {
@@ -335,6 +356,15 @@ auto anonymizer::get_profile_actions(anonymization_profile profile)
         actions[tags::patient_age] = tag_action_config::make_remove();
         actions[tags::patient_address] = tag_action_config::make_remove();
         actions[tags::patient_comments] = tag_action_config::make_remove();
+        for (const auto tag : {dicom_tag{0x0010, 0x0021}, // Issuer of Patient ID
+                               dicom_tag{0x0010, 0x1000}, // Other Patient IDs
+                               dicom_tag{0x0010, 0x1001}, // Other Patient Names
+                               dicom_tag{0x0010, 0x1005}, // Patient Birth Name
+                               dicom_tag{0x0010, 0x1060}, // Mother's Birth Name
+                               dicom_tag{0x0010, 0x2154}, // Telephone Numbers
+                               dicom_tag{0x0010, 0x2155}}) { // Telecom Information
+            actions[tag] = tag_action_config::make_remove();
+        }
     };
 
     // Institution identifiers
@@ -369,6 +399,11 @@ auto anonymizer::get_profile_actions(anonymization_profile profile)
     auto add_study_identifiers = [&actions]() {
         actions[tags::accession_number] = tag_action_config::make_empty();
         actions[tags::study_id] = tag_action_config::make_replace("ANON_STUDY");
+        for (const auto tag : {dicom_tag{0x0040, 0x1001}, // Requested Procedure ID
+                               dicom_tag{0x0040, 0x0009}, // Scheduled Procedure Step ID
+                               dicom_tag{0x0040, 0x0253}}) { // Performed Procedure Step ID
+            actions[tag] = tag_action_config::make_empty();
+        }
     };
 
     // Dates for shifting
@@ -460,6 +495,7 @@ auto anonymizer::get_profile_actions(anonymization_profile profile)
             break;
     }
 
+    detail::add_sequence_and_uid_actions(actions, profile);
     return actions;
 }
 
@@ -526,37 +562,42 @@ auto anonymizer::apply_action(
             record.success = true;
             break;
 
+        case tag_action::clean:
         case tag_action::replace:
             dataset.set_string(tag, element->vr(), config.replacement_value);
             record.new_value = config.replacement_value;
             record.success = true;
             break;
 
-        case tag_action::replace_uid:
-            if (mapping != nullptr) {
-                auto result = mapping->get_or_create(record.original_value);
-                if (result.is_ok()) {
-                    dataset.set_string(tag, element->vr(), result.value());
-                    record.new_value = result.value();
-                    record.success = true;
-                } else {
-                    record.success = false;
-                    record.error_message = "Failed to create UID mapping";
+        case tag_action::replace_uid: {
+            // UI may have VM > 1. Each component shares the same mapping with
+            // scalar values, nested references, and subsequent files.
+            uid_mapping temporary;
+            auto& uid_map = mapping != nullptr ? *mapping : temporary;
+            std::string replacement;
+            std::size_t start = 0;
+            while (start < record.original_value.size()) {
+                const auto end = record.original_value.find('\\', start);
+                const auto uid = record.original_value.substr(start, end - start);
+                if (!uid.empty()) {
+                    auto result = uid_map.get_or_create(uid);
+                    if (result.is_err()) {
+                        record.success = false;
+                        record.error_message = "Failed to create UID mapping at " + tag.to_string();
+                        break;
+                    }
+                    replacement += result.value();
                 }
-            } else {
-                // Generate new UID without mapping
-                uid_mapping temp;
-                auto result = temp.get_or_create(record.original_value);
-                if (result.is_ok()) {
-                    dataset.set_string(tag, element->vr(), result.value());
-                    record.new_value = result.value();
-                    record.success = true;
-                } else {
-                    record.success = false;
-                    record.error_message = "Failed to generate new UID";
-                }
+                if (end == std::string::npos) { break; }
+                replacement += '\\';
+                start = end + 1;
+            }
+            if (record.success) {
+                dataset.set_string(tag, element->vr(), replacement);
+                record.new_value = std::move(replacement);
             }
             break;
+        }
 
         case tag_action::hash: {
             auto hashed = hash_value(record.original_value);

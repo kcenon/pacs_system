@@ -56,7 +56,7 @@ TEST_CASE("ups_query_scp SOP class support", "[services][ups][query]") {
     ups_query_scp scp;
 
     SECTION("supports UPS Query FIND") {
-        CHECK(scp.supports_sop_class("1.2.840.10008.5.1.4.34.6.4"));
+        CHECK(scp.supports_sop_class("1.2.840.10008.5.1.4.34.6.5"));
         CHECK(scp.supports_sop_class(ups_query_find_sop_class_uid));
     }
 
@@ -80,7 +80,7 @@ TEST_CASE("ups_query_scp SOP class support", "[services][ups][query]") {
 // ============================================================================
 
 TEST_CASE("ups_query_find_sop_class_uid constant", "[services][ups][query]") {
-    CHECK(ups_query_find_sop_class_uid == "1.2.840.10008.5.1.4.34.6.4");
+    CHECK(ups_query_find_sop_class_uid == "1.2.840.10008.5.1.4.34.6.5");
 }
 
 // ============================================================================
@@ -153,7 +153,7 @@ TEST_CASE("make_c_find_rq for UPS Query creates valid request", "[services][ups]
 
     CHECK(request.command() == command_field::c_find_rq);
     CHECK(request.message_id() == 42);
-    CHECK(request.affected_sop_class_uid() == "1.2.840.10008.5.1.4.34.6.4");
+    CHECK(request.affected_sop_class_uid() == "1.2.840.10008.5.1.4.34.6.5");
     CHECK(request.is_request());
     CHECK_FALSE(request.is_response());
 }
@@ -164,7 +164,7 @@ TEST_CASE("make_c_find_rsp for UPS Query creates valid response", "[services][up
 
         CHECK(response.command() == command_field::c_find_rsp);
         CHECK(response.message_id_responded_to() == 42);
-        CHECK(response.affected_sop_class_uid() == "1.2.840.10008.5.1.4.34.6.4");
+        CHECK(response.affected_sop_class_uid() == "1.2.840.10008.5.1.4.34.6.5");
         CHECK(response.status() == status_pending);
         CHECK(response.is_response());
     }

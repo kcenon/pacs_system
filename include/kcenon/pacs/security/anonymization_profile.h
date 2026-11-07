@@ -28,7 +28,8 @@ namespace kcenon::pacs::security {
  * @brief DICOM de-identification profiles based on PS3.15 Annex E
  *
  * Each profile defines a set of actions to be performed on specific
- * DICOM attributes to achieve varying levels of de-identification.
+ * DICOM attributes. These partial presets do not establish complete PS3.15
+ * conformance or regulatory compliance; see the conformance statement for limits.
  *
  * Profile selection depends on:
  * - Regulatory requirements (HIPAA, GDPR)
@@ -51,12 +52,10 @@ enum class anonymization_profile : std::uint8_t {
     basic = 0,
 
     /**
-     * @brief Clean Pixel Data - Remove burned-in annotations
+     * @brief Clean Pixel Data - compatibility name for a metadata-only preset
      *
-     * Extends basic profile by processing pixel data to remove
-     * burned-in patient information in image corners.
-     *
-     * Suitable for: Images that may contain overlay text
+     * Uses the Basic metadata actions. Pixel cleaning and OCR are not
+     * implemented; burned-in patient information may remain in Pixel Data.
      */
     clean_pixel = 1,
 
@@ -67,9 +66,8 @@ enum class anonymization_profile : std::uint8_t {
      * may contain identifying information:
      * - Study/Series Description
      * - Patient Comments
-     * - Additional Patient History
      *
-     * Suitable for: Data with descriptive fields
+     * No semantic recognition of arbitrary text or coded identifying content.
      */
     clean_descriptions = 2,
 
@@ -96,30 +94,18 @@ enum class anonymization_profile : std::uint8_t {
     retain_patient_characteristics = 4,
 
     /**
-     * @brief HIPAA Safe Harbor - 18 identifier removal
+     * @brief HIPAA Safe Harbor - compatibility name for an identifier preset
      *
-     * Implements HIPAA Safe Harbor method by removing all
-     * 18 categories of identifiers specified in 45 CFR 164.514(b)(2):
-     * - Names, addresses, dates (except year)
-     * - Phone/fax numbers, email addresses
-     * - SSN, medical record numbers, account numbers
-     * - Certificate/license numbers, vehicle identifiers
-     * - Device identifiers, web URLs, IP addresses
-     * - Biometric identifiers, photos, unique codes
-     *
-     * Suitable for: HIPAA-compliant data sharing in US
+     * Adds configured identifier removals to Basic. This does not implement
+     * every identifier category or guarantee compliance with HIPAA.
      */
     hipaa_safe_harbor = 5,
 
     /**
-     * @brief GDPR Compliant - European data protection
+     * @brief GDPR Compliant - compatibility name for a pseudonymization preset
      *
-     * Implements GDPR pseudonymization requirements:
-     * - All personal data processed per Article 4(5)
-     * - Maintains ability to re-identify with separate key
-     * - Supports data subject rights (erasure, portability)
-     *
-     * Suitable for: European Union data processing
+     * Hashes configured patient identifiers. Pseudonymization alone does not
+     * establish anonymization, data-subject rights support, or GDPR compliance.
      */
     gdpr_compliant = 6
 };

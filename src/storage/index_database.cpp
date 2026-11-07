@@ -177,8 +177,12 @@ auto index_database::open(std::string_view db_path, const index_config& config)
     effective_path = std::string(db_path);
 #endif
 
+    // Association threads share this connection. FULLMUTEX serializes it whatever the library's
+    // default: Apple's system SQLite is built multi-thread (THREADSAFE=2), where two threads on one
+    // connection crash, while Debian's is serialized.
     auto rc = sqlite3_open_v2(effective_path.c_str(), &db,
-                              SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+                              SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI |
+                                  SQLITE_OPEN_FULLMUTEX,
                               nullptr);
     if (rc != SQLITE_OK) {
         std::string error_msg =
@@ -1674,6 +1678,11 @@ auto index_database::unsubscribe_ups(std::string_view subscriber_ae,
                                       std::string_view workitem_uid)
     -> VoidResult {
     return ups_repository_->unsubscribe_ups(subscriber_ae, workitem_uid);
+}
+
+auto index_database::suspend_ups_global_subscription(std::string_view subscriber_ae)
+    -> VoidResult {
+    return ups_repository_->suspend_ups_global_subscription(subscriber_ae);
 }
 
 auto index_database::get_ups_subscriptions(std::string_view subscriber_ae) const

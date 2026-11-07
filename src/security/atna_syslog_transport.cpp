@@ -9,6 +9,7 @@
 #include <cstring>
 #include <ctime>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 
 // Platform-specific network headers
@@ -46,7 +47,13 @@ struct atna_syslog_transport::tls_context {
 
     ~tls_context() {
         if (ssl) {
-            SSL_shutdown(ssl);
+            if (SSL_is_init_finished(ssl) && SSL_shutdown(ssl) == 0) {
+                // Receive the peer's close-notify and pending TLS 1.3 tickets.
+                // Closing TCP with unread tickets can reset the connection and
+                // discard audit records already reported as written. Socket I/O
+                // timeouts bound a peer that does not complete the exchange.
+                SSL_shutdown(ssl);
+            }
             SSL_free(ssl);
         }
         if (ctx) {
@@ -137,6 +144,7 @@ atna_syslog_transport& atna_syslog_transport::operator=(
 kcenon::pacs::VoidResult atna_syslog_transport::send(
     const std::string& xml_message) {
 
+    std::lock_guard lock(mutex_);
     auto syslog_msg = format_syslog_message(xml_message);
 
     auto result = (config_.protocol == syslog_transport_protocol::tls)
@@ -186,6 +194,7 @@ std::string atna_syslog_transport::format_syslog_message(
 // =============================================================================
 
 bool atna_syslog_transport::is_connected() const noexcept {
+    std::lock_guard lock(mutex_);
     if (config_.protocol == syslog_transport_protocol::udp) {
         return true;  // UDP is connectionless
     }
@@ -193,6 +202,11 @@ bool atna_syslog_transport::is_connected() const noexcept {
 }
 
 void atna_syslog_transport::close() {
+    std::lock_guard lock(mutex_);
+    close_unlocked();
+}
+
+void atna_syslog_transport::close_unlocked() {
     delete tls_;
     tls_ = nullptr;
 
@@ -306,7 +320,7 @@ kcenon::pacs::VoidResult atna_syslog_transport::send_tls(
 
     if (bytes_written <= 0) {
         int ssl_err = SSL_get_error(tls_->ssl, bytes_written);
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::send_failed,
             "TLS write failed (SSL error: " +
@@ -328,13 +342,13 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     }
 
     // Clean up previous state
-    close();
+    close_unlocked();
 
     // Create SSL context
     tls_ = new tls_context();
     tls_->ctx = SSL_CTX_new(TLS_client_method());
     if (!tls_->ctx) {
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "Failed to create TLS context: " + get_openssl_error());
@@ -347,19 +361,30 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     if (!config_.ca_cert_path.empty()) {
         if (SSL_CTX_load_verify_locations(
                 tls_->ctx, config_.ca_cert_path.c_str(), nullptr) != 1) {
-            close();
+            close_unlocked();
             return kcenon::pacs::pacs_void_error(
                 kcenon::pacs::error_codes::connection_failed,
                 "Failed to load CA certificate: " + get_openssl_error());
         }
+    } else if (config_.verify_server && SSL_CTX_set_default_verify_paths(tls_->ctx) != 1) {
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
+            "Failed to load default TLS syslog trust store");
     }
 
     // Load client certificate (mutual TLS)
+    if (config_.client_cert_path.empty() != config_.client_key_path.empty()) {
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
+            "TLS syslog client certificate and key must be configured together");
+    }
     if (!config_.client_cert_path.empty()) {
         if (SSL_CTX_use_certificate_file(
                 tls_->ctx, config_.client_cert_path.c_str(),
                 SSL_FILETYPE_PEM) != 1) {
-            close();
+            close_unlocked();
             return kcenon::pacs::pacs_void_error(
                 kcenon::pacs::error_codes::connection_failed,
                 "Failed to load client certificate: " + get_openssl_error());
@@ -370,11 +395,18 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
         if (SSL_CTX_use_PrivateKey_file(
                 tls_->ctx, config_.client_key_path.c_str(),
                 SSL_FILETYPE_PEM) != 1) {
-            close();
+            close_unlocked();
             return kcenon::pacs::pacs_void_error(
                 kcenon::pacs::error_codes::connection_failed,
                 "Failed to load client key: " + get_openssl_error());
         }
+    }
+
+    if (!config_.client_key_path.empty() && SSL_CTX_check_private_key(tls_->ctx) != 1) {
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
+            "TLS syslog client certificate and key do not match");
     }
 
     // Set verification mode
@@ -396,7 +428,7 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     int ret = ::getaddrinfo(
         config_.host.c_str(), port_str.c_str(), &hints, &result);
     if (ret != 0 || result == nullptr) {
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "Failed to resolve TLS syslog host: " + config_.host);
@@ -406,16 +438,39 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
         result->ai_family, result->ai_socktype, result->ai_protocol);
     if (socket_ == invalid_socket) {
         ::freeaddrinfo(result);
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "Failed to create TCP socket");
     }
 
+    const auto timeout_ms = config_.io_timeout.count();
+    if (timeout_ms <= 0 || timeout_ms > (std::numeric_limits<int>::max)()) {
+        ::freeaddrinfo(result);
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed, "Invalid TLS syslog I/O timeout");
+    }
+#ifdef _WIN32
+    const DWORD timeout = static_cast<DWORD>(timeout_ms);
+#else
+    const timeval timeout{static_cast<time_t>(timeout_ms / 1000),
+                          static_cast<suseconds_t>((timeout_ms % 1000) * 1000)};
+#endif
+    if (::setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO,
+                     reinterpret_cast<const char*>(&timeout), sizeof(timeout)) != 0 ||
+        ::setsockopt(socket_, SOL_SOCKET, SO_SNDTIMEO,
+                     reinterpret_cast<const char*>(&timeout), sizeof(timeout)) != 0) {
+        ::freeaddrinfo(result);
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed, "Failed to set TLS syslog I/O timeout");
+    }
+
     if (::connect(socket_, result->ai_addr,
                   static_cast<int>(result->ai_addrlen)) != 0) {
         ::freeaddrinfo(result);
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "Failed to connect to TLS syslog server: " +
@@ -426,7 +481,7 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
     // Create SSL object and perform handshake
     tls_->ssl = SSL_new(tls_->ctx);
     if (!tls_->ssl) {
-        close();
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "Failed to create SSL object: " + get_openssl_error());
@@ -434,12 +489,27 @@ kcenon::pacs::VoidResult atna_syslog_transport::ensure_tls_connected() {
 
     SSL_set_fd(tls_->ssl, static_cast<int>(socket_));
 
-    // Set SNI hostname
-    SSL_set_tlsext_host_name(tls_->ssl, config_.host.c_str());
+    // A trusted chain alone does not identify the configured Audit Record
+    // Repository. RFC 5425 subject-name authorization requires endpoint identity.
+    unsigned char address[16];
+    const bool ip = inet_pton(AF_INET, config_.host.c_str(), address) == 1 ||
+                    inet_pton(AF_INET6, config_.host.c_str(), address) == 1;
+    if ((!ip && SSL_set_tlsext_host_name(tls_->ssl, config_.host.c_str()) != 1) ||
+        (config_.verify_server &&
+         (ip ? X509_VERIFY_PARAM_set1_ip_asc(SSL_get0_param(tls_->ssl), config_.host.c_str())
+             : SSL_set1_host(tls_->ssl, config_.host.c_str())) != 1)) {
+        close_unlocked();
+        return kcenon::pacs::pacs_void_error(
+            kcenon::pacs::error_codes::connection_failed,
+            "Failed to configure TLS syslog receiver identity verification");
+    }
 
     if (SSL_connect(tls_->ssl) != 1) {
         std::string err = get_openssl_error();
-        close();
+        const auto verification = SSL_get_verify_result(tls_->ssl);
+        if (verification != X509_V_OK)
+            err += std::string("; receiver certificate: ") + X509_verify_cert_error_string(verification);
+        close_unlocked();
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::connection_failed,
             "TLS handshake failed: " + err);

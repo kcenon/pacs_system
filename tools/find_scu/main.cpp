@@ -29,7 +29,10 @@
 #include "kcenon/pacs/encoding/vr_type.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dimse/dimse_message.h"
+#include "kcenon/pacs/core/utf8_text.h"
 #include "kcenon/pacs/services/query_scp.h"
+
+#include "../common/qr_cli.h"
 
 #include <algorithm>
 #include <chrono>
@@ -594,8 +597,11 @@ kcenon::pacs::core::dicom_dataset build_query_dataset(const options& opts) {
 
     // Apply user-specified query keys
     for (const auto& key : opts.keys) {
-        ds.set_string(key.tag, vr_type::UN, key.value);
+        ds.set_string(key.tag, kcenon::pacs::cli::key_vr(key.tag), key.value);
     }
+
+    // Shell arguments are UTF-8, and the SCP must be told so.
+    kcenon::pacs::core::declare_utf8_text(ds);
 
     return ds;
 }
@@ -619,6 +625,22 @@ void format_text_result(std::ostream& os, const kcenon::pacs::core::dicom_datase
     os << "\n";
 }
 
+/// Multi-valued DICOM text holds backslashes, which JSON must not read as escapes.
+std::string json_escaped(const std::string& value) {
+    std::ostringstream escaped;
+    for (const char character : value) {
+        const auto byte = static_cast<unsigned char>(character);
+        if (character == '"' || character == '\\') {
+            escaped << '\\' << character;
+        } else if (byte < 0x20) {
+            escaped << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(byte) << std::dec;
+        } else {
+            escaped << character;
+        }
+    }
+    return escaped.str();
+}
+
 void format_json_results(std::ostream& os,
                          const std::vector<kcenon::pacs::core::dicom_dataset>& results) {
     os << "[\n";
@@ -637,7 +659,7 @@ void format_json_results(std::ostream& os,
                     << std::setfill('0') << tag.group()
                     << std::setw(4) << std::setfill('0') << tag.element();
 
-            os << "    \"" << tag_str.str() << "\": \"" << value << "\"";
+            os << "    \"" << tag_str.str() << "\": \"" << json_escaped(value) << "\"";
         }
         os << "\n  }";
         if (i < results.size() - 1) os << ",";
@@ -810,6 +832,7 @@ int perform_query(const options& opts) {
     // Receive responses
     std::vector<kcenon::pacs::core::dicom_dataset> results;
     bool query_complete = false;
+    bool query_failed = false;
     size_t pending_count = 0;
 
     auto dimse_timeout = opts.dimse_timeout.count() > 0
@@ -842,7 +865,8 @@ int perform_query(const options& opts) {
                 if (opts.max_results == 0 || results.size() < opts.max_results) {
                     auto dataset_result = find_rsp.dataset();
                     if (dataset_result.is_ok()) {
-                        results.push_back(dataset_result.value().get());
+                        // Output is UTF-8 whatever character set the SCP answered in.
+                        results.push_back(kcenon::pacs::core::utf8_text_copy(dataset_result.value().get()));
                     }
                 }
             }
@@ -855,11 +879,13 @@ int perform_query(const options& opts) {
             query_complete = true;
         } else if (status == status_cancel) {
             query_complete = true;
+            query_failed = true;
             if (!opts.quiet) {
                 std::cout << "Query was cancelled.\n";
             }
         } else {
             query_complete = true;
+            query_failed = true;
             std::cerr << "Query failed with status: 0x" << std::hex << status
                       << std::dec << "\n";
         }
@@ -933,7 +959,7 @@ int perform_query(const options& opts) {
         std::cout << "Query Complete\n";
     }
 
-    return results.empty() ? 1 : 0;
+    return query_failed || results.empty() ? 1 : 0;
 }
 
 }  // namespace

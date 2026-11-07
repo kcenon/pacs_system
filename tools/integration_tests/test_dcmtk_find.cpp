@@ -23,6 +23,7 @@
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/services/verification_scp.h"
 
+#include <algorithm>
 #include <future>
 #include <mutex>
 #include <set>
@@ -223,6 +224,8 @@ dicom_dataset create_test_study(
 
     dicom_dataset ds;
 
+    ds.set_string(tags::specific_character_set, vr_type::CS, "ISO_IR 192");
+
     // Patient level
     ds.set_string(tags::patient_id, vr_type::LO, patient_id);
     ds.set_string(tags::patient_name, vr_type::PN, patient_name);
@@ -242,6 +245,43 @@ dicom_dataset create_test_study(
     return ds;
 }
 
+// Read the actual response objects exported by the independent findscu process.
+// Exit zero alone also covers zero matches, so it cannot establish query content.
+void require_find_matches(
+    uint16_t port, const std::string& ae, const std::string& level,
+    const std::vector<std::pair<std::string, std::string>>& keys,
+    const std::vector<dicom_dataset>& expected, const std::string& calling_ae = "FINDSCU") {
+    test_directory output("find_responses_");
+    const auto result = dcmtk_tool::findscu("localhost", port, ae, level, keys,
+                                           calling_ae, std::chrono::seconds{30}, output.path());
+    INFO("findscu stdout: " << result.stdout_output);
+    INFO("findscu stderr: " << result.stderr_output);
+    REQUIRE(result.success());
+    const auto identity = level == "PATIENT" ? tags::patient_id : tags::study_instance_uid;
+    std::set<std::string> wanted, actual;
+    for (const auto& dataset : expected) wanted.insert(dataset.get_string(identity));
+    size_t count = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(output.path())) {
+        if (!entry.is_regular_file()) continue;
+        auto file = dicom_file::open(entry.path());
+        REQUIRE(file.is_ok());
+        const auto& received = file.value().dataset();
+        const auto uid = received.get_string(identity);
+        REQUIRE(actual.insert(uid).second); // No duplicate pending identifier.
+        const auto found = std::find_if(expected.begin(), expected.end(), [&](const auto& ds) {
+            return ds.get_string(identity) == uid;
+        });
+        REQUIRE(found != expected.end());
+        CHECK(received.get_string(tags::query_retrieve_level) == level);
+        CHECK(received.get_string(tags::patient_id) == found->get_string(tags::patient_id));
+        CHECK(received.get_string(tags::patient_name) == found->get_string(tags::patient_name));
+        if (level == "STUDY") CHECK(received.get_string(tags::study_date) == found->get_string(tags::study_date));
+        ++count;
+    }
+    CHECK(count == wanted.size());
+    CHECK(actual == wanted);
+}
+
 }  // namespace
 
 // =============================================================================
@@ -253,24 +293,18 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
         SKIP("DCMTK not installed - skipping interoperability test");
     }
 
-    // findscu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
-
     // Setup: Start pacs_system query server with test data
     auto port = find_available_port();
     const std::string ae_title = "PACS_FIND_SCP";
 
     test_query_database db;
 
-    // Populate test data
-    db.add_study(create_test_study("PAT001", "SMITH^JOHN", "20231201", "CT"));
-    db.add_study(create_test_study("PAT002", "SMITH^JANE", "20231215", "MR"));
-    db.add_study(create_test_study("PAT003", "JONES^WILLIAM", "20240101", "CT"));
-    db.add_study(create_test_study("PAT004", "BROWN^ALICE", "20240115", "XA"));
+    const std::vector<dicom_dataset> studies{
+        create_test_study("PAT001", "SMITH^JOHN", "20231201", "CT"),
+        create_test_study("PAT002", "SMITH^JANE", "20231215", "MR"),
+        create_test_study("PAT003", "JONES^WILLIAM", "20240101", "CT"),
+        create_test_study("PAT004", "BROWN^ALICE", "20240115", "XA")};
+    for (const auto& study : studies) db.add_study(study);
 
     test_server server(port, ae_title);
 
@@ -296,121 +330,35 @@ TEST_CASE("C-FIND: pacs_system SCP with DCMTK findscu", "[dcmtk][interop][find]"
         return process_launcher::is_port_listening(port);
     }, server_ready_timeout()));
 
-    SECTION("Basic study-level query succeeds") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientID", ""},
-            {"PatientName", ""},
-            {"StudyDate", ""},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        REQUIRE(result.success());
-    }
-
+    auto expected = studies;
+    std::string level = "STUDY";
+    std::vector<std::pair<std::string, std::string>> keys{
+        {"PatientID", ""}, {"PatientName", ""}, {"StudyDate", ""}, {"StudyInstanceUID", ""}};
+    int repetitions = 1;
+    SECTION("Basic study-level query succeeds") {}
     SECTION("Query with PatientID filter") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientID", "PAT001"},
-            {"PatientName", ""},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        REQUIRE(result.success());
+        keys[0].second = "PAT001";
+        expected = {studies[0]};
     }
-
     SECTION("Query with wildcard PatientName") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientName", "SMITH*"},
-            {"PatientID", ""},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        REQUIRE(result.success());
+        keys[1].second = "SMITH*";
+        expected = {studies[0], studies[1]};
     }
-
     SECTION("Query with date range") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"StudyDate", "20231201-20231231"},
-            {"PatientID", ""},
-            {"PatientName", ""},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        REQUIRE(result.success());
+        keys[2].second = "20231201-20231231";
+        expected = {studies[0], studies[1]};
     }
-
     SECTION("Query with no matching results") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientID", "NONEXISTENT"},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        // Should succeed even with no results (returns 0 matches)
-        REQUIRE(result.success());
+        keys[0].second = "NONEXISTENT";
+        expected.clear();
     }
-
-    SECTION("Multiple consecutive queries") {
-        for (int i = 0; i < 3; ++i) {
-            std::vector<std::pair<std::string, std::string>> keys = {
-                {"PatientID", ""},
-                {"StudyInstanceUID", ""}
-            };
-
-            auto result = dcmtk_tool::findscu(
-                "localhost", port, ae_title, "STUDY", keys,
-                "FINDSCU_" + std::to_string(i));
-
-            INFO("Iteration: " << i);
-            INFO("stdout: " << result.stdout_output);
-            INFO("stderr: " << result.stderr_output);
-
-            REQUIRE(result.success());
-        }
-    }
-
+    SECTION("Multiple consecutive queries") { repetitions = 3; }
     SECTION("Patient-level query") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientID", ""},
-            {"PatientName", ""},
-            {"PatientBirthDate", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "PATIENT", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        REQUIRE(result.success());
+        level = "PATIENT";
+        keys = {{"PatientID", ""}, {"PatientName", ""}, {"PatientBirthDate", ""}};
+    }
+    for (int i = 0; i < repetitions; ++i) {
+        require_find_matches(port, ae_title, level, keys, expected, "FINDSCU_"+std::to_string(i));
     }
 }
 
@@ -424,7 +372,7 @@ TEST_CASE("C-FIND: pacs_system SCU query operations", "[dcmtk][interop][find]") 
     }
 
     // Setup: Start pacs_system server with query capability (the SCU below
-    // reaches it in memory)
+    // reaches it over TCP)
     auto port = find_available_port();
     const std::string ae_title = "QUERY_SCP";
 
@@ -622,10 +570,6 @@ TEST_CASE("C-FIND: Concurrent query operations", "[dcmtk][interop][find][stress]
 
     SECTION("3 concurrent DCMTK findscu clients") {
         // findscu needs a pacs_system SCP that accepts TCP
-        if (!v1_server_accepts_tcp()) {
-            SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-                 "this section needs a dicom_server_v2 fixture");
-        }
 
         constexpr int num_clients = 3;
         std::vector<std::future<dcmtk_result>> futures;
@@ -769,16 +713,13 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
     }
 
     // findscu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "LEVEL_TEST_SCP";
 
     test_query_database db;
-    db.add_study(create_test_study("PAT001", "TEST^PATIENT", "20240101", "CT"));
+    const auto study = create_test_study("PAT001", "TEST^PATIENT", "20240101", "CT");
+    db.add_study(study);
 
     test_server server(port, ae_title);
 
@@ -806,10 +747,7 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
             {"StudyInstanceUID", ""}
         };
 
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        REQUIRE(result.success());
+        require_find_matches(port, ae_title, "STUDY", keys, {study});
     }
 
     SECTION("PATIENT level query") {
@@ -818,10 +756,7 @@ TEST_CASE("C-FIND: Query level variations", "[dcmtk][interop][find][levels]") {
             {"PatientName", ""}
         };
 
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "PATIENT", keys);
-
-        REQUIRE(result.success());
+        require_find_matches(port, ae_title, "PATIENT", keys, {study});
     }
 }
 
@@ -835,18 +770,16 @@ TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]
     }
 
     // findscu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "SPECIAL_CHAR_SCP";
 
     test_query_database db;
     // Add study with special characters in patient name
-    db.add_study(create_test_study("PAT001", "O'BRIEN^MARY", "20240101", "CT"));
-    db.add_study(create_test_study("PAT002", "MÜLLER^HANS", "20240101", "MR"));
+    const auto apostrophe = create_test_study("PAT001", "O'BRIEN^MARY", "20240101", "CT");
+    const auto utf8 = create_test_study("PAT002", "MÜLLER^HANS", "20240101", "MR");
+    db.add_study(apostrophe);
+    db.add_study(utf8);
 
     test_server server(port, ae_title);
 
@@ -864,20 +797,10 @@ TEST_CASE("C-FIND: Special character handling", "[dcmtk][interop][find][special]
         return process_launcher::is_port_listening(port);
     }, server_ready_timeout()));
 
-    SECTION("Query with special characters in response") {
-        std::vector<std::pair<std::string, std::string>> keys = {
-            {"PatientID", "PAT001"},
-            {"PatientName", ""},
-            {"StudyInstanceUID", ""}
-        };
-
-        auto result = dcmtk_tool::findscu(
-            "localhost", port, ae_title, "STUDY", keys);
-
-        INFO("stdout: " << result.stdout_output);
-        INFO("stderr: " << result.stderr_output);
-
-        // Should succeed despite special characters
-        REQUIRE(result.success());
-    }
+    auto expected = apostrophe;
+    SECTION("Apostrophe in response") {}
+    SECTION("UTF-8 in response") { expected = utf8; }
+    require_find_matches(port, ae_title, "STUDY",
+        {{"PatientID", expected.get_string(tags::patient_id)}, {"PatientName", ""},
+         {"StudyInstanceUID", ""}}, {expected});
 }

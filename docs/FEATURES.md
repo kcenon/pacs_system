@@ -464,7 +464,7 @@ if (result.is_ok()) {
 | DX Image Storage | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | ✅ |
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
-| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | ✅ |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | ✅ |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ |
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
@@ -1503,7 +1503,7 @@ double hit_ratio = stats.hit_ratio();  // 0.0 - 1.0
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/v1/system/status` | GET | System health status (via health_checker) |
-| `/api/v1/system/metrics` | GET | Performance metrics |
+| `/api/v1/system/metrics` | GET | DIMSE counters (`pacs_server`: C-STORE, C-FIND, associations) |
 | `/api/v1/system/config` | GET | Current server configuration |
 | `/api/v1/system/config` | PUT | Update configuration |
 | `/api/v1/system/version` | GET | API version info |

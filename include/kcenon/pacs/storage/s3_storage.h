@@ -215,6 +215,11 @@ public:
   [[nodiscard]] auto store(const core::dicom_dataset &dataset)
       -> VoidResult override;
 
+    [[nodiscard]] auto store(const core::dicom_dataset& dataset,
+                             const encoding::transfer_syntax& syntax) -> VoidResult override;
+    [[nodiscard]] auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file> override;
+
   /**
    * @brief Retrieve a DICOM dataset by SOP Instance UID
    *
@@ -335,6 +340,11 @@ public:
    * @return true if S3 is reachable, false otherwise
    */
   [[nodiscard]] auto is_connected() const -> bool;
+
+    [[nodiscard]] auto store_with_progress(const core::dicom_dataset& dataset,
+        const encoding::transfer_syntax& syntax, progress_callback callback) -> VoidResult;
+    [[nodiscard]] auto retrieve_file_with_progress(std::string_view uid,
+        progress_callback callback) -> Result<core::dicom_file>;
 
 private:
   // =========================================================================

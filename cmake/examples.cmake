@@ -144,6 +144,14 @@ if(PACS_BUILD_EXAMPLES)
         message(STATUS "  [--] mpps_scu: OFF (requires pacs_integration)")
     endif()
 
+    # DIMSE-N SCU - library SCU classes with no tool of their own, for validation against peers
+    if(TARGET pacs_integration)
+        add_subdirectory(tools/dimse_n_scu)
+        message(STATUS "  [OK] dimse_n_scu: Storage Commitment, UPS and N-GET client")
+    else()
+        message(STATUS "  [--] dimse_n_scu: OFF (requires pacs_integration)")
+    endif()
+
     # Print SCU - Print Management client
     if(TARGET pacs_integration)
         add_subdirectory(tools/print_scu)
@@ -254,6 +262,7 @@ if(PACS_BUILD_EXAMPLES)
             mpps_scu
             mpps_scp
             print_scu
+            dimse_n_scu
             qr_scp
             secure_echo_scu
             secure_echo_scp

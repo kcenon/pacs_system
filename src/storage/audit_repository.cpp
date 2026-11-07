@@ -571,8 +571,15 @@ auto audit_repository::cleanup_old_audit_logs(std::chrono::hours age)
     -> Result<size_t> {
     auto cutoff = std::chrono::system_clock::now() - age;
     auto cutoff_time = std::chrono::system_clock::to_time_t(cutoff);
+    // Callers may run on any thread, and std::gmtime shares one static buffer.
+    std::tm utc{};
+#ifdef _WIN32
+    gmtime_s(&utc, &cutoff_time);
+#else
+    gmtime_r(&cutoff_time, &utc);
+#endif
     std::ostringstream oss;
-    oss << std::put_time(std::gmtime(&cutoff_time), "%Y-%m-%d %H:%M:%S");
+    oss << std::put_time(&utc, "%Y-%m-%d %H:%M:%S");
     auto cutoff_str = oss.str();
 
     const char* sql = "DELETE FROM audit_log WHERE timestamp < ?;";

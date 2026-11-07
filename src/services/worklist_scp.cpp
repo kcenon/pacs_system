@@ -95,6 +95,13 @@ network::Result<std::monostate> worklist_scp::handle_message(
     // Get the query keys from the request
     const auto& query_keys = request.dataset().value().get();
 
+    // PS3.4 K.6.1.2.2: the Scheduled Procedure Step Sequence is a required matching key.
+    if (query_keys.get_sequence(core::tags::scheduled_procedure_step_sequence) == nullptr) {
+        return send_final_response(
+            assoc, context_id, request.message_id(),
+            status_error_dataset_mismatch);
+    }
+
     // Get calling AE for logging and access control
     std::string calling_ae{assoc.calling_ae()};
 

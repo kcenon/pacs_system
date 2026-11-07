@@ -650,7 +650,7 @@ To create a fully controllable, high-performance PACS solution that demonstrates
 | Digital X-Ray | 1.2.840.10008.5.1.4.1.1.1.1 | SCP/SCU | ✅ Implemented |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | SCP/SCU | ✅ Implemented |
 | Ultrasound Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | SCP/SCU | ✅ Implemented |
-| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.6.2 | SCP/SCU | ✅ Implemented |
+| Ultrasound Multi-frame | 1.2.840.10008.5.1.4.1.1.3.1 | SCP/SCU | ✅ Implemented |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | SCP/SCU | ✅ Implemented |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | SCP/SCU | ✅ Implemented |
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | SCP/SCU | ✅ Implemented |

@@ -20,14 +20,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { ApiErrorNotice } from '@/components/ui/api-error';
+import { useToast } from '@/components/ui/use-toast';
 import { apiClient } from '@/api/client';
 import { formatDateTime } from '@/lib/utils';
 import type { AuditRecord, PaginatedResponse } from '@/types/api';
 
 function getOutcomeBadge(outcome: string) {
   const variants: Record<string, 'success' | 'destructive' | 'secondary'> = {
-    Success: 'success',
-    Failure: 'destructive',
+    SUCCESS: 'success',
+    FAILURE: 'destructive',
   };
   return <Badge variant={variants[outcome] || 'secondary'}>{outcome}</Badge>;
 }
@@ -103,6 +105,7 @@ export function AuditPage() {
   const [dateTo, setDateTo] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<AuditRecord | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const { addToast } = useToast();
   const [page, setPage] = useState(0);
   const pageSize = 20;
 
@@ -159,7 +162,11 @@ export function AuditPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Export failed:', err);
+      addToast({
+        title: 'Export failed',
+        description: err instanceof Error ? err.message : 'The server did not answer',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -212,11 +219,12 @@ export function AuditPage() {
                 className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">All Events</option>
-                <option value="STORE">Store</option>
-                <option value="QUERY">Query</option>
-                <option value="RETRIEVE">Retrieve</option>
-                <option value="ASSOCIATION">Association</option>
-                <option value="LOGIN">Login</option>
+                <option value="C_STORE">Store</option>
+                <option value="C_FIND">Query</option>
+                <option value="DATA_EXPORT">Retrieve</option>
+                <option value="ASSOCIATION_ESTABLISHED">Association</option>
+                <option value="DATA_ACCESS">API change</option>
+                <option value="SECURITY_EVENT">Refused request</option>
               </select>
               <select
                 value={outcome}
@@ -227,8 +235,8 @@ export function AuditPage() {
                 className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="">All Outcomes</option>
-                <option value="Success">Success</option>
-                <option value="Failure">Failure</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILURE">Failure</option>
               </select>
             </div>
 
@@ -276,9 +284,7 @@ export function AuditPage() {
           {isLoading ? (
             <div className="py-8 text-center text-muted-foreground">Loading audit logs...</div>
           ) : error ? (
-            <div className="py-8 text-center text-destructive">
-              Error loading audit logs. Make sure the API server is running.
-            </div>
+            <ApiErrorNotice error={error} what="audit logs" />
           ) : records.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />

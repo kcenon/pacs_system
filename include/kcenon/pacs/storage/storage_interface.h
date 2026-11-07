@@ -18,6 +18,7 @@
 #pragma once
 
 #include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/dicom_file.h>
 
 #include <kcenon/common/patterns/result.h>
 
@@ -113,6 +114,20 @@ public:
     [[nodiscard]] virtual auto store(const core::dicom_dataset& dataset)
         -> VoidResult = 0;
 
+    /// Store without transcoding, preserving the explicitly supplied syntax.
+    /// The default supports only Explicit VR LE for legacy implementations.
+    [[nodiscard]] virtual auto store(const core::dicom_dataset& dataset,
+                                    const encoding::transfer_syntax& syntax) -> VoidResult;
+
+    [[nodiscard]] auto store_instance(const core::dicom_file& instance) -> VoidResult {
+        return store(instance.dataset(),instance.transfer_syntax());
+    }
+
+    /// Resolve the legacy dataset-only call. Encapsulated or ambiguous item
+    /// streams require an explicit syntax; they must never default to native.
+    [[nodiscard]] static auto native_store_syntax(const core::dicom_dataset& dataset)
+        -> Result<encoding::transfer_syntax>;
+
     /**
      * @brief Retrieve a DICOM dataset by SOP Instance UID
      *
@@ -121,6 +136,10 @@ public:
      */
     [[nodiscard]] virtual auto retrieve(std::string_view sop_instance_uid)
         -> Result<core::dicom_dataset> = 0;
+
+    /// Retrieve both dataset and Part 10 syntax for forwarding/tier migration.
+    [[nodiscard]] virtual auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file>;
 
     /**
      * @brief Remove a DICOM dataset by SOP Instance UID

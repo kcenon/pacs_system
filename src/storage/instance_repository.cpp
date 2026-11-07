@@ -11,6 +11,7 @@
  */
 
 #include "kcenon/pacs/storage/instance_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <chrono>
 #include <ctime>
@@ -285,9 +286,9 @@ auto instance_repository::list_instances(std::string_view series_uid)
         "i.file_path, i.file_size, i.file_hash, i.created_at "
         "FROM instances i "
         "JOIN series s ON i.series_pk = s.series_pk "
-        "WHERE s.series_uid = '{}' "
+        "WHERE s.series_uid = {} "
         "ORDER BY i.instance_number ASC, i.sop_uid ASC;",
-        std::string(series_uid));
+        sql_literal(series_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {
@@ -318,29 +319,29 @@ auto instance_repository::search_instances(const instance_query& query)
 
     if (query.series_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("s.series_uid = '{}'", *query.series_uid));
+            kcenon::pacs::compat::format("s.series_uid = {}", sql_literal(*query.series_uid)));
     }
     if (query.sop_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("i.sop_uid = '{}'", *query.sop_uid));
+            kcenon::pacs::compat::format("i.sop_uid = {}", sql_literal(*query.sop_uid)));
     }
     if (query.sop_class_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("i.sop_class_uid = '{}'",
-                                 *query.sop_class_uid));
+            kcenon::pacs::compat::format("i.sop_class_uid = {}",
+                                 sql_literal(*query.sop_class_uid)));
     }
     if (query.content_date.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("i.content_date = '{}'", *query.content_date));
+            kcenon::pacs::compat::format("i.content_date = {}", sql_literal(*query.content_date)));
     }
     if (query.content_date_from.has_value()) {
         where_clauses.push_back(kcenon::pacs::compat::format(
-            "i.content_date >= '{}'", *query.content_date_from));
+            "i.content_date >= {}", sql_literal(*query.content_date_from)));
     }
     if (query.content_date_to.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("i.content_date <= '{}'",
-                                 *query.content_date_to));
+            kcenon::pacs::compat::format("i.content_date <= {}",
+                                 sql_literal(*query.content_date_to)));
     }
     if (query.instance_number.has_value()) {
         where_clauses.push_back(kcenon::pacs::compat::format(
@@ -428,8 +429,8 @@ auto instance_repository::instance_count(std::string_view series_uid)
         "SELECT COUNT(*) AS cnt "
         "FROM instances i "
         "JOIN series s ON i.series_pk = s.series_pk "
-        "WHERE s.series_uid = '{}';",
-        std::string(series_uid));
+        "WHERE s.series_uid = {};",
+        sql_literal(series_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {
@@ -500,9 +501,9 @@ auto instance_repository::get_study_files(std::string_view study_instance_uid)
         "FROM instances i "
         "JOIN series se ON i.series_pk = se.series_pk "
         "JOIN studies st ON se.study_pk = st.study_pk "
-        "WHERE st.study_uid = '{}' "
+        "WHERE st.study_uid = {} "
         "ORDER BY se.series_number, i.instance_number;",
-        std::string(study_instance_uid));
+        sql_literal(study_instance_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {
@@ -536,9 +537,9 @@ auto instance_repository::get_series_files(std::string_view series_instance_uid)
         "SELECT i.file_path "
         "FROM instances i "
         "JOIN series se ON i.series_pk = se.series_pk "
-        "WHERE se.series_uid = '{}' "
+        "WHERE se.series_uid = {} "
         "ORDER BY i.instance_number;",
-        std::string(series_instance_uid));
+        sql_literal(series_instance_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {

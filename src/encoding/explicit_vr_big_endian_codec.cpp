@@ -46,70 +46,6 @@ constexpr bool is_special_tag(core::dicom_tag tag) {
     return tag.group() == ITEM_GROUP;
 }
 
-// ============================================================================
-// VR Classification for Byte Swapping
-// ============================================================================
-
-/**
- * @brief Determines if a VR requires byte swapping for big-endian encoding.
- * @param vr The VR type
- * @return true if byte swapping is needed
- */
-constexpr bool requires_byte_swap(vr_type vr) {
-    switch (vr) {
-        // 16-bit numeric
-        case vr_type::US:
-        case vr_type::SS:
-        // 32-bit numeric
-        case vr_type::UL:
-        case vr_type::SL:
-        case vr_type::FL:
-        // 64-bit numeric
-        case vr_type::FD:
-        // Attribute tag (2x 16-bit)
-        case vr_type::AT:
-        // Bulk data with word/long ordering
-        case vr_type::OW:
-        case vr_type::OL:
-        case vr_type::OF:
-        case vr_type::OD:
-            return true;
-
-        default:
-            // String VRs and OB don't need byte swapping
-            return false;
-    }
-}
-
-/**
- * @brief Gets the swap unit size for a VR type.
- * @param vr The VR type
- * @return Number of bytes per swap unit (2, 4, or 8)
- */
-constexpr size_t swap_unit_size(vr_type vr) {
-    switch (vr) {
-        case vr_type::US:
-        case vr_type::SS:
-        case vr_type::OW:
-        case vr_type::AT:
-            return 2;
-
-        case vr_type::UL:
-        case vr_type::SL:
-        case vr_type::FL:
-        case vr_type::OL:
-        case vr_type::OF:
-            return 4;
-
-        case vr_type::FD:
-        case vr_type::OD:
-            return 8;
-
-        default:
-            return 1;  // No swapping
-    }
-}
-
 }  // namespace
 
 // ============================================================================
@@ -131,20 +67,7 @@ kcenon::pacs::Result<T> make_codec_error(int code, const std::string& message) {
 
 std::vector<uint8_t> explicit_vr_big_endian_codec::to_big_endian(
     vr_type vr, std::span<const uint8_t> data) {
-    if (!requires_byte_swap(vr) || data.empty()) {
-        return {data.begin(), data.end()};
-    }
-
-    switch (swap_unit_size(vr)) {
-        case 2:
-            return swap_ow_bytes(data);
-        case 4:
-            return swap_ol_bytes(data);
-        case 8:
-            return swap_od_bytes(data);
-        default:
-            return {data.begin(), data.end()};
-    }
+    return swap_vr_value_bytes(vr, data);
 }
 
 std::vector<uint8_t> explicit_vr_big_endian_codec::from_big_endian(
@@ -191,8 +114,7 @@ std::vector<uint8_t> explicit_vr_big_endian_codec::encode_element(
 
     // Get padded data and convert to big-endian
     auto data = element.raw_data();
-    auto padded_data = pad_to_even(element.vr(), data);
-    auto be_data = to_big_endian(element.vr(), padded_data);
+    auto be_data = pad_to_even(element.vr(), to_big_endian(element.vr(), data));
     uint32_t length = static_cast<uint32_t>(be_data.size());
 
     // Write length based on VR type
@@ -361,6 +283,21 @@ explicit_vr_big_endian_codec::decode_element(std::span<const uint8_t>& data) {
     auto value_data = data.subspan(0, length);
     data = data.subspan(length);
 
+    if (vr == vr_type::SQ) {
+        core::dicom_element sequence{tag, vr_type::SQ};
+        while (!value_data.empty()) {
+            auto item = decode_sequence_item(value_data);
+            if (item.is_err()) return item.error();
+            sequence.sequence_items().push_back(std::move(item.value()));
+        }
+        return sequence;
+    }
+    if (value_data.size() % vr_endian_value_alignment(vr) != 0) {
+        return make_codec_error<core::dicom_element>(
+            kcenon::pacs::error_codes::invalid_length_encoding,
+            "Incomplete binary value in Big Endian dataset");
+    }
+
     // Convert from big-endian to native (little-endian)
     auto le_data = from_big_endian(vr, value_data);
 
@@ -444,6 +381,11 @@ explicit_vr_big_endian_codec::decode_undefined_length(
             if (item_length != UNDEFINED_LENGTH && data.size() >= item_length) {
                 // Convert from big-endian
                 auto item_data = data.subspan(0, item_length);
+                if (item_data.size() % vr_endian_value_alignment(vr) != 0) {
+                    return make_codec_error<core::dicom_element>(
+                        kcenon::pacs::error_codes::invalid_length_encoding,
+                        "Incomplete binary value in Big Endian item");
+                }
                 auto le_item = from_big_endian(vr, item_data);
                 accumulated_data.insert(accumulated_data.end(),
                                         le_item.begin(), le_item.end());
@@ -499,6 +441,11 @@ explicit_vr_big_endian_codec::decode_sequence_item(
 
             if (is_item_delimiter(elem_tag)) {
                 // Skip delimiter
+                if (data.size() < 8) {
+                    return make_codec_error<core::dicom_dataset>(
+                        kcenon::pacs::error_codes::insufficient_data,
+                        "Truncated Big Endian item delimiter");
+                }
                 data = data.subspan(8);
                 break;
             }

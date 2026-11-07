@@ -91,7 +91,7 @@ static constexpr std::array<waveform_sop_class_info, 17> kWaveformRegistry = {{
      waveform_type::ecg_ambulatory, false},
     {hemodynamic_waveform_storage_uid, "Hemodynamic Waveform Storage",
      waveform_type::hemodynamic, false},
-    {cardiac_ep_waveform_storage_uid, "Basic Cardiac EP Waveform Storage",
+    {cardiac_ep_waveform_storage_uid, "Basic Cardiac Electrophysiology Waveform Storage",
      waveform_type::cardiac_ep, false},
     {basic_voice_audio_storage_uid, "Basic Voice Audio Waveform Storage",
      waveform_type::audio_basic, false},
@@ -115,7 +115,7 @@ static constexpr std::array<waveform_sop_class_info, 17> kWaveformRegistry = {{
      waveform_type::body_position, false},
     {waveform_presentation_state_storage_uid, "Waveform Presentation State Storage",
      waveform_type::presentation_state, false},
-    {waveform_annotation_storage_uid, "Waveform Annotation Storage",
+    {waveform_annotation_storage_uid, "Waveform Annotation SR Storage",
      waveform_type::annotation, false},
 }};
 

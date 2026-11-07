@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/network/v2/dicom_server_v2.h"
+#include "kcenon/pacs/network/detail/tls_server.h"
 
 #include <algorithm>
 #include <sstream>
@@ -31,6 +32,27 @@ using kcenon::common::error_info;
 #endif
 
 namespace kcenon::pacs::network::v2 {
+
+#ifdef PACS_WITH_NETWORK_SYSTEM
+namespace {
+/// Connections past the limit that still get a real rejection rather than a bare close.
+constexpr size_t kLimitRejectionBacklog = 16;
+
+void discard_unrouted_session(
+    const std::shared_ptr<kcenon::network::interfaces::i_session>& session) {
+    // The adapter initially installs receive/error callbacks capturing the
+    // session itself. Normally route_session_events() replaces those cycles;
+    // rejected or shutdown-time connections need the same cleanup. This runs
+    // in the connection callback, outside the session's own callback lock.
+    if (auto messaging =
+            std::dynamic_pointer_cast<kcenon::network::session::messaging_session>(session)) {
+        messaging->set_receive_callback(nullptr);
+        messaging->set_error_callback(nullptr);
+    }
+    session->close(); // Preserve the adapter's disconnection callback.
+}
+} // namespace
+#endif
 
 // =============================================================================
 // Construction / Destruction
@@ -139,6 +161,7 @@ Result<std::monostate> dicom_server_v2::start() {
         closer_running_ = true;
     }
     closer_thread_ = std::thread([this]() { run_session_closer(); });
+    start_idle_monitor();
 
     try {
         // Create TCP server via tcp_facade
@@ -146,9 +169,12 @@ Result<std::monostate> dicom_server_v2::start() {
         kcenon::network::facade::tcp_facade::server_config srv_cfg;
         srv_cfg.server_id = config_.ae_title;
         srv_cfg.port = config_.port;
-        auto server_result = compat::factory_result(facade.create_server(srv_cfg));
+        auto server_result = config_.tls.enabled
+            ? detail::make_tls_server(config_)
+            : compat::factory_result(facade.create_server(srv_cfg));
         if (server_result.is_err()) {
             running_ = false;
+            stop_idle_monitor();
             stop_session_closer();
             return server_result.error();
         }
@@ -182,8 +208,9 @@ Result<std::monostate> dicom_server_v2::start() {
         if (result.is_err()) {
             running_ = false;
             server_.reset();
+            stop_idle_monitor();
             stop_session_closer();
-            return error_info("Failed to start server");
+            return error_info("Failed to start server: " + result.error().message);
         }
 
         return std::monostate{};
@@ -192,6 +219,7 @@ Result<std::monostate> dicom_server_v2::start() {
         if (server_) {
             server_.reset();
         }
+        stop_idle_monitor();
         stop_session_closer();
         return error_info(std::string("Exception during server start: ") + e.what());
     } catch (...) {
@@ -199,6 +227,7 @@ Result<std::monostate> dicom_server_v2::start() {
         if (server_) {
             server_.reset();
         }
+        stop_idle_monitor();
         stop_session_closer();
         return error_info("Unknown exception during server start");
     }
@@ -237,6 +266,7 @@ void dicom_server_v2::stop(duration timeout) {
     for (auto& handler : handlers_to_stop) {
         try {
             handler->stop(false);  // Force abort
+            handler->wait_for_service();
         } catch (...) {
             // Suppress exceptions during handler stop
         }
@@ -245,6 +275,7 @@ void dicom_server_v2::stop(duration timeout) {
 
     // Phase 2: Close the sessions the handlers queued now, then end the
     // closer thread
+    stop_idle_monitor();
     stop_session_closer();
 
     // Phase 3: Stop network_system's server: the acceptor, any session left
@@ -342,19 +373,18 @@ void dicom_server_v2::on_connection(
     if (!running_) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
         // A connection that arrives while stop() runs gets no handler
-        session->close();
+        discard_unrouted_session(session);
 #endif
         return;
     }
 
     // Check max associations limit
-    bool at_limit = false;
+    size_t handler_count = 0;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
-        at_limit = config_.max_associations > 0 &&
-                   handlers_.size() >= config_.max_associations;
+        handler_count = handlers_.size();
     }
-    if (at_limit) {
+    if (config_.max_associations > 0 && handler_count >= config_.max_associations) {
         // Reject due to resource limit
         report_error("Max associations limit reached, rejecting connection");
 
@@ -363,10 +393,16 @@ void dicom_server_v2::on_connection(
             stats_.rejected_associations++;
         }
 
+        // A short backlog gets a real A-ASSOCIATE-RJ, so a peer can tell the limit from
+        // a network fault. Past that, a flood must not grow the handler table.
+        if (handler_count < config_.max_associations + kLimitRejectionBacklog) {
+            create_handler(std::move(session), true);
+            return;
+        }
 #ifdef PACS_WITH_NETWORK_SYSTEM
         // Not under handlers_mutex_: closing reports the disconnection to
         // on_disconnection(), which takes it
-        session->close();
+        discard_unrouted_session(session);
 #endif
         return;
     }
@@ -445,7 +481,7 @@ void dicom_server_v2::on_network_error(
 // =============================================================================
 
 void dicom_server_v2::create_handler(
-    std::shared_ptr<kcenon::network::interfaces::i_session> session) {
+    std::shared_ptr<kcenon::network::interfaces::i_session> session, bool reject_for_limit) {
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
     // network_system reports the server id as every session's id(), so a
@@ -469,6 +505,9 @@ void dicom_server_v2::create_handler(
     // Create handler
     auto handler = std::make_shared<dicom_association_handler>(
         std::move(session), config_, service_map, session_id);
+    if (reject_for_limit) {
+        handler->reject_for_association_limit();
+    }
 
     // Closes from inside network_system callbacks would deadlock
     handler->set_session_closer(
@@ -531,9 +570,23 @@ void dicom_server_v2::create_handler(
         });
 
     // Register handler
+    bool stopping = false;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
-        handlers_[session_id] = handler;
+        // stop() flips running_ before taking this same lock to collect handlers.
+        // A connection callback already in flight must not publish a new handler
+        // after that collection and outlive the session closer/io_context.
+        stopping = !running_;
+        if (!stopping) {
+            handlers_[session_id] = handler;
+        }
+    }
+    if (stopping) {
+#ifdef PACS_WITH_NETWORK_SYSTEM
+        discard_unrouted_session(session_for_routing);
+#endif
+        handler->stop(false);
+        return;
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM
@@ -622,47 +675,45 @@ void dicom_server_v2::close_session_later(
             return;
         }
     }
-#ifdef PACS_WITH_NETWORK_SYSTEM
-    // The closer has stopped, which stop() does only after it closed every
-    // handler; a closed handler does not close again, so this does not run
-    // inside a network_system callback
-    session->close();
-#endif
+    // A callback can win close_handler's state exchange, then reach here only
+    // after stop() has joined the closer. Never close inline: network_system
+    // invokes callbacks under its session lock, so close() would re-enter it.
+    // The underlying server still owns this session and closes it during stop().
 }
 
 void dicom_server_v2::run_session_closer() {
     std::unique_lock<std::mutex> lock(closer_mutex_);
     for (;;) {
         std::vector<std::shared_ptr<kcenon::network::interfaces::i_session>> due;
-        if (!closer_running_) {
-            // Stopping: close everything that is left now
-            for (auto& [deadline, session] : sessions_to_close_) {
-                due.push_back(std::move(session));
-            }
-            sessions_to_close_.clear();
-        } else if (sessions_to_close_.empty()) {
-            closer_cv_.wait(lock);
-            continue;
-        } else {
-            const auto now = clock::now();
-            auto earliest = sessions_to_close_.front().first;
-            for (auto it = sessions_to_close_.begin(); it != sessions_to_close_.end();) {
-                if (it->first <= now) {
-                    due.push_back(std::move(it->second));
-                    it = sessions_to_close_.erase(it);
-                } else {
-                    earliest = (std::min)(earliest, it->first);
-                    ++it;
-                }
-            }
-            if (due.empty()) {
-                closer_cv_.wait_until(lock, earliest);
-                continue;
+        std::vector<std::shared_ptr<dicom_association_handler>> retired;
+        retired.swap(retired_handlers_);
+        const bool stopping = !closer_running_;
+        const auto now = clock::now();
+        auto earliest = time_point::max();
+        for (auto it = sessions_to_close_.begin(); it != sessions_to_close_.end();) {
+            if (stopping || it->first <= now) {
+                due.push_back(std::move(it->second));
+                it = sessions_to_close_.erase(it);
+            } else {
+                earliest = (std::min)(earliest, it->first);
+                ++it;
             }
         }
-
-        const bool stopping = !closer_running_;
+        if (!stopping && retired.empty() && due.empty()) {
+            if (sessions_to_close_.empty()) {
+                closer_cv_.wait(lock);
+            } else {
+                closer_cv_.wait_until(lock, earliest);
+            }
+            continue;
+        }
         lock.unlock();
+        // A network callback may still hold a handler reference. Explicitly
+        // join here; merely dropping our reference does not join that worker.
+        for (auto& handler : retired) {
+            handler->wait_for_service();
+        }
+        retired.clear();
 #ifdef PACS_WITH_NETWORK_SYSTEM
         for (auto& session : due) {
             try {
@@ -707,8 +758,12 @@ void dicom_server_v2::remove_handler(const std::string& session_id) {
     std::lock_guard<std::mutex> lock(handlers_mutex_);
     auto it = handlers_.find(session_id);
     if (it != handlers_.end()) {
-        // Handler cleans itself up via stop() in destructor
+        {
+            std::lock_guard<std::mutex> closer_lock(closer_mutex_);
+            retired_handlers_.push_back(std::move(it->second));
+        }
         handlers_.erase(it);
+        closer_cv_.notify_one();
     }
 }
 
@@ -727,27 +782,62 @@ void dicom_server_v2::check_idle_timeouts() {
         return;  // No timeout configured
     }
 
-    auto now = clock::now();
-    std::vector<std::string> timed_out;
-
+    // Copied first: a handler's own lock is never taken under handlers_mutex_, because
+    // closing a handler takes the two in the other order.
+    std::vector<std::shared_ptr<dicom_association_handler>> handlers;
     {
         std::lock_guard<std::mutex> lock(handlers_mutex_);
+        handlers.reserve(handlers_.size());
         for (const auto& [session_id, handler] : handlers_) {
-            auto idle_duration = std::chrono::duration_cast<std::chrono::seconds>(
-                now - handler->last_activity());
-
-            if (idle_duration >= config_.idle_timeout) {
-                timed_out.push_back(session_id);
-            }
+            handlers.push_back(handler);
         }
     }
 
-    // Stop timed-out handlers
-    for (const auto& session_id : timed_out) {
-        auto handler = find_handler(session_id);
-        if (handler) {
-            handler->stop(false);  // Force abort
+    const auto now = clock::now();
+    for (const auto& handler : handlers) {
+        // A peer waiting for a long C-MOVE is silent but not idle.
+        if (handler->service_active()) {
+            continue;
         }
+        const auto idle_duration = std::chrono::duration_cast<std::chrono::seconds>(now - handler->last_activity());
+        if (idle_duration >= config_.idle_timeout) {
+            handler->abort_idle();
+        }
+    }
+}
+
+void dicom_server_v2::start_idle_monitor() {
+    if (config_.idle_timeout.count() == 0) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lock(idle_mutex_);
+        idle_running_ = true;
+    }
+    idle_thread_ = std::thread([this]() {
+        std::unique_lock<std::mutex> lock(idle_mutex_);
+        while (!idle_cv_.wait_for(lock, std::chrono::seconds{1}, [this] { return !idle_running_; })) {
+            lock.unlock();
+            check_idle_timeouts();
+            lock.lock();
+        }
+    });
+}
+
+void dicom_server_v2::stop_idle_monitor() {
+    {
+        std::lock_guard<std::mutex> lock(idle_mutex_);
+        idle_running_ = false;
+    }
+    idle_cv_.notify_all();
+    if (!idle_thread_.joinable()) {
+        return;
+    }
+    if (idle_thread_.get_id() == std::this_thread::get_id()) {
+        // stop() from a callback the monitor runs: it ends on its own.
+        idle_thread_.detach();
+    } else {
+        idle_thread_.join();
     }
 }
 

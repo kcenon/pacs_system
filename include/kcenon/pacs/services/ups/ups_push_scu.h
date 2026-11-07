@@ -106,7 +106,7 @@ struct ups_change_state_data {
 };
 
 /**
- * @brief Data for N-ACTION Type 3 (request cancellation)
+ * @brief Data for N-ACTION Type 2 (Request UPS Cancel)
  */
 struct ups_request_cancel_data {
     /// Workitem SOP Instance UID (required)
@@ -324,7 +324,7 @@ public:
         const ups_change_state_data& data);
 
     /**
-     * @brief Request cancellation of a UPS workitem (N-ACTION Type 3)
+     * @brief Request cancellation of a UPS workitem (N-ACTION Type 2)
      *
      * @param assoc The established association to use
      * @param data The cancellation request data

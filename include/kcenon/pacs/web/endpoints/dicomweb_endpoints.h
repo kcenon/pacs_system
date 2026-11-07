@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 #include "kcenon/pacs/storage/instance_record.h"
 #include "kcenon/pacs/storage/series_record.h"
 #include "kcenon/pacs/storage/study_record.h"
@@ -68,6 +70,7 @@ struct accept_info {
     std::string media_type;
     std::string transfer_syntax;
     float quality = 1.0f;
+    std::string type;  ///< The type parameter of a multipart media type
 };
 
 /**
@@ -86,6 +89,47 @@ struct accept_info {
  */
 [[nodiscard]] auto is_acceptable(const std::vector<accept_info>& accept_infos,
                                   std::string_view media_type) -> bool;
+
+/**
+ * @brief The kinds of resource PS3.18 Table 10.4.4-1 and 10.6.4-1 give media types to
+ */
+enum class wado_resource {
+    collection,      ///< A study or series: many objects, so only multipart
+    instance,        ///< One object: also the single part application/dicom
+    metadata,        ///< DICOM JSON, or one XML part per object
+    bulk_data,       ///< One element's bytes
+    frames,          ///< Frames, one part each
+    rendered,        ///< An image for display
+    search,          ///< QIDO-RS results
+    store_response,  ///< The response module of STOW-RS
+};
+
+/**
+ * @brief What an Accept header selects for a resource
+ */
+struct media_choice {
+    int status{406};              ///< 200 when something was selected; otherwise the status to answer
+    std::string media;            ///< The selected type, or the part type of a multipart response
+    bool multipart{false};        ///< Whether the response is multipart/related
+    std::string transfer_syntax;  ///< The transfer-syntax parameter asked for: empty, "*" or a UID
+    std::string detail;           ///< Why nothing was selected
+
+    [[nodiscard]] bool ok() const noexcept { return status == 200; }
+};
+
+/**
+ * @brief Choose a response media type (PS3.18 8.7.5)
+ *
+ * No Accept header is 406, and DICOM and rendered types together are 400. Types that do not
+ * apply to the resource are passed over, in the client's order of preference.
+ *
+ * @param accept_header The raw Accept header value
+ * @param resource What is being asked for
+ * @param items How many items the response would hold; a single part type needs exactly one
+ * @param held_syntax For frames, the Transfer Syntax held, which decides the compressed types on offer
+ */
+[[nodiscard]] auto choose_media_type(std::string_view accept_header, wado_resource resource, std::size_t items = 1,
+                                     std::string_view held_syntax = {}) -> media_choice;
 
 /**
  * @brief Builder for multipart MIME responses
@@ -177,6 +221,18 @@ private:
  * @return DicomJSON string
  */
 [[nodiscard]] auto dataset_to_dicom_json(
+    const core::dicom_dataset& dataset,
+    bool include_bulk_data = false,
+    std::string_view bulk_data_uri_prefix = "") -> std::string;
+
+/**
+ * @brief Convert a DICOM dataset to the Native DICOM Model (PS3.19 Annex A)
+ * @param dataset The DICOM dataset to convert
+ * @param include_bulk_data Whether to include bulk data inline
+ * @param bulk_data_uri_prefix URI prefix for bulk data references
+ * @return The XML document
+ */
+[[nodiscard]] auto dataset_to_native_xml(
     const core::dicom_dataset& dataset,
     bool include_bulk_data = false,
     std::string_view bulk_data_uri_prefix = "") -> std::string;
@@ -352,6 +408,16 @@ struct validation_result {
     const store_response& response,
     std::string_view base_url) -> std::string;
 
+/**
+ * @brief Build STOW-RS response in the Native DICOM Model
+ * @param response The store response
+ * @param base_url Base URL for retrieve URLs
+ * @return XML response body
+ */
+[[nodiscard]] auto build_store_response_xml(
+    const store_response& response,
+    std::string_view base_url) -> std::string;
+
 // ============================================================================
 // QIDO-RS Support (Query based on ID for DICOM Objects)
 // ============================================================================
@@ -414,6 +480,37 @@ struct validation_result {
 [[nodiscard]] auto parse_instance_query_params(
     const std::string& url_params) -> storage::instance_query;
 
+/**
+ * @brief One matching key of a search, with its Attribute resolved
+ */
+struct search_key {
+    core::dicom_tag tag;
+    encoding::vr_type vr;
+    std::string value;  ///< UID lists are separated with backslashes, as C-FIND has them
+    std::string name;   ///< As the request wrote it
+};
+
+/**
+ * @brief The Query Parameters of a search (PS3.18 8.3.4)
+ */
+struct search_parameters {
+    std::optional<std::string> error;            ///< Why the request deserves a 400
+    std::vector<search_key> keys;                ///< Matching keys
+    std::vector<std::string> keys_not_used;      ///< Keys inside sequences, which nothing here can match
+    std::optional<std::size_t> limit;            ///< limit, when given
+    std::optional<std::size_t> offset;           ///< offset, when given
+    std::vector<std::string> unsupported_flags;  ///< fuzzymatching and the like, asked for and not performed
+    std::vector<core::dicom_tag> include_fields; ///< includefield Attributes
+    bool include_all{false};                     ///< includefield=all
+};
+
+/**
+ * @brief Parse a search request's Query Parameters strictly
+ * @param url The request URL, or only its query
+ * @return The parameters; error is set for what 10.6.3-1 answers with 400
+ */
+[[nodiscard]] auto parse_search_parameters(std::string_view url) -> search_parameters;
+
 // ============================================================================
 // Frame Retrieval (WADO-RS)
 // ============================================================================
@@ -431,6 +528,16 @@ struct validation_result {
  */
 [[nodiscard]] auto parse_frame_numbers(std::string_view frame_list)
     -> std::vector<uint32_t>;
+
+/**
+ * @brief Parse the {frames} of a URL as PS3.18 10.1 defines it, or nothing when it is not that
+ * @param frame_list Frame numbers in ascending order; "2-4" is taken for "2,3,4"
+ * @return Frame numbers (1-based), each once, or nullopt for anything else
+ *
+ * parse_frame_numbers() drops what it cannot read, which is how a frame goes missing from a response.
+ */
+[[nodiscard]] auto parse_frame_list(std::string_view frame_list)
+    -> std::optional<std::vector<uint32_t>>;
 
 /**
  * @brief Extract a single frame from pixel data
@@ -487,6 +594,12 @@ struct rendered_params {
 
     /// Annotation (burned-in or removed)
     bool burn_annotations{false};
+
+    /// Set when a parameter cannot be honored, with the reason
+    std::string invalid_parameter;
+
+    /// VOI LUT function of the window: linear, linear-exact or sigmoid
+    std::string window_function{"linear"};
 };
 
 /**
@@ -507,16 +620,32 @@ struct rendered_result {
     std::string content_type;       ///< MIME type (image/jpeg or image/png)
     bool success{false};            ///< Operation succeeded
     std::string error_message;      ///< Error message if failed
+    int status{0};                  ///< HTTP status for a failure that is not a bad request
 
     [[nodiscard]] static rendered_result ok(
         std::vector<uint8_t> d, std::string_view mime_type) {
-        return {std::move(d), std::string(mime_type), true, ""};
+        return {std::move(d), std::string(mime_type), true, "", 0};
     }
 
     [[nodiscard]] static rendered_result error(std::string msg) {
-        return {{}, "", false, std::move(msg)};
+        return {{}, "", false, std::move(msg), 0};
+    }
+
+    [[nodiscard]] static rendered_result not_found(std::string msg) {
+        return {{}, "", false, std::move(msg), 404};
     }
 };
+
+/**
+ * @brief Write 8 bit samples as a PNG image
+ * @param pixels Interleaved samples, row by row
+ * @param width Image width
+ * @param height Image height
+ * @param channels 1 for grayscale, 3 for RGB
+ * @return The PNG file, or empty if the sizes do not agree
+ */
+[[nodiscard]] auto encode_png(std::span<const uint8_t> pixels, uint32_t width, uint32_t height, uint16_t channels)
+    -> std::vector<uint8_t>;
 
 /**
  * @brief Apply window/level transformation to pixel data

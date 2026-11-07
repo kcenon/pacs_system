@@ -570,9 +570,22 @@ auto azure_blob_storage::store(const core::dicom_dataset &dataset)
   return store_with_progress(dataset, nullptr);
 }
 
-auto azure_blob_storage::store_with_progress(
-    const core::dicom_dataset &dataset, azure_progress_callback callback)
-    -> VoidResult {
+auto azure_blob_storage::store(const core::dicom_dataset& dataset,
+    const encoding::transfer_syntax& syntax) -> VoidResult {
+  return store_with_progress(dataset,syntax,nullptr);
+}
+
+auto azure_blob_storage::store_with_progress(const core::dicom_dataset& dataset,
+    azure_progress_callback callback) -> VoidResult {
+  auto syntax = native_store_syntax(dataset);
+  if (syntax.is_err()) return syntax.error();
+  return store_with_progress(dataset,syntax.value(),std::move(callback));
+}
+
+auto azure_blob_storage::store_with_progress(const core::dicom_dataset& dataset,
+    const encoding::transfer_syntax& syntax, azure_progress_callback callback) -> VoidResult {
+  auto validation = core::dicom_file::validate_pixel_data_representation(dataset,syntax);
+  if (validation.is_err()) return validation;
   // Extract required UIDs
   auto study_uid = dataset.get_string(core::tags::study_instance_uid);
   auto series_uid = dataset.get_string(core::tags::series_instance_uid);
@@ -590,7 +603,7 @@ auto azure_blob_storage::store_with_progress(
 
   // Create DICOM file and serialize to bytes
   auto dicom_file = core::dicom_file::create(
-      dataset, encoding::transfer_syntax::explicit_vr_little_endian);
+      dataset, syntax);
 
   auto data = dicom_file.to_bytes();
   if (data.empty()) {
@@ -644,16 +657,27 @@ auto azure_blob_storage::retrieve(std::string_view sop_instance_uid)
   return retrieve_with_progress(sop_instance_uid, nullptr);
 }
 
-auto azure_blob_storage::retrieve_with_progress(
+auto azure_blob_storage::retrieve_file(std::string_view uid) -> Result<core::dicom_file> {
+  return retrieve_file_with_progress(uid,nullptr);
+}
+
+auto azure_blob_storage::retrieve_with_progress(std::string_view uid,
+    azure_progress_callback callback) -> Result<core::dicom_dataset> {
+  auto file = retrieve_file_with_progress(uid,std::move(callback));
+  if (file.is_err()) return file.error();
+  return file.value().dataset();
+}
+
+auto azure_blob_storage::retrieve_file_with_progress(
     std::string_view sop_instance_uid, azure_progress_callback callback)
-    -> Result<core::dicom_dataset> {
+    -> Result<core::dicom_file> {
   std::string blob_name;
 
   {
     std::shared_lock lock(mutex_);
     auto it = index_.find(std::string{sop_instance_uid});
     if (it == index_.end()) {
-      return make_error<core::dicom_dataset>(
+      return make_error<core::dicom_file>(
           kBlobNotFound,
           "Instance not found: " + std::string{sop_instance_uid},
           "azure_blob_storage");
@@ -664,7 +688,7 @@ auto azure_blob_storage::retrieve_with_progress(
   // Download from Azure
   auto download_result = client_->get_blob(blob_name);
   if (download_result.is_err()) {
-    return make_error<core::dicom_dataset>(kDownloadError,
+    return make_error<core::dicom_file>(kDownloadError,
                                            "Failed to download from Azure",
                                            "azure_blob_storage");
   }
@@ -679,13 +703,13 @@ auto azure_blob_storage::retrieve_with_progress(
   // Deserialize DICOM data
   auto parse_result = core::dicom_file::from_bytes(data);
   if (parse_result.is_err()) {
-    return make_error<core::dicom_dataset>(
+    return make_error<core::dicom_file>(
         kSerializationError,
         "Failed to parse DICOM data: " + parse_result.error().message,
         "azure_blob_storage");
   }
 
-  return parse_result.value().dataset();
+  return std::move(parse_result.value());
 }
 
 auto azure_blob_storage::remove(std::string_view sop_instance_uid)

@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-15]
 
     steps:
     - name: Checkout pacs_system
@@ -77,6 +77,10 @@ jobs:
         # coreutils provides gtimeout; macOS runners have no timeout command
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo dcmtk coreutils
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Select timeout command
       run: |
         # GNU timeout is `timeout` on Ubuntu and `gtimeout` (coreutils) on macOS;
@@ -87,11 +91,10 @@ jobs:
     - name: Verify DCMTK installation
       run: |
         echo "=== DCMTK Version ==="
-        echoscu --version || echo "echoscu not found"
-        which echoscu || echo "echoscu path not found"
-        which storescp || echo "storescp path not found"
-        which findscu || echo "findscu path not found"
-        which movescu || echo "movescu path not found"
+        for tool in echoscu storescu storescp findscu movescu; do
+          command -v "$tool"
+        done
+        echoscu --version
 
     - name: Configure CMake
       working-directory: pacs_system
@@ -111,14 +114,8 @@ jobs:
       working-directory: pacs_system
       run: cmake --build build --parallel
 
-    # No failure masking in the four DCMTK test steps: a failed test, an abort,
-    # or the timeout fails the step. The cases where a pacs_system SCU talks
-    # to a DCMTK SCP run over the association TCP client (#1240); the cases
-    # that run a DCMTK SCU against the v1 dicom_server fixtures skip, because
-    # v1 serves only in-process associations (v1_server_accepts_tcp() in
-    # test_fixtures.h). Catch2 exits with code 4 when all selected cases skip,
-    # so --allow-running-no-tests accepts an all-skipped run. --warn
-    # UnmatchedTestSpec still fails the step when the tag filter matches no case.
+    # Both directions use real TCP; test_server/storage_test_server use v2.
+    # A failure, timeout, empty selection, or all-skipped selection fails this job.
     - name: Run DCMTK C-ECHO Tests
       working-directory: pacs_system
       timeout-minutes: 5
@@ -128,7 +125,6 @@ jobs:
           echo "=== Running C-ECHO Interoperability Tests ==="
           "$TIMEOUT_CMD" 180 ./bin/pacs_integration_e2e \
             "[dcmtk][echo]" \
-            --allow-running-no-tests \
             --warn UnmatchedTestSpec \
             --reporter console \
             --reporter junit::out=dcmtk-echo-results.xml \
@@ -147,11 +143,13 @@ jobs:
           echo "=== Running C-STORE Interoperability Tests ==="
           "$TIMEOUT_CMD" 180 ./bin/pacs_integration_e2e \
             "[dcmtk][store]" \
-            --allow-running-no-tests \
             --warn UnmatchedTestSpec \
             --reporter console \
             --reporter junit::out=dcmtk-store-results.xml \
             2>&1
+        else
+          echo "Integration test binary not found"
+          exit 1
         fi
 
     - name: Run DCMTK C-FIND Tests
@@ -163,11 +161,13 @@ jobs:
           echo "=== Running C-FIND Interoperability Tests ==="
           "$TIMEOUT_CMD" 180 ./bin/pacs_integration_e2e \
             "[dcmtk][find]" \
-            --allow-running-no-tests \
             --warn UnmatchedTestSpec \
             --reporter console \
             --reporter junit::out=dcmtk-find-results.xml \
             2>&1
+        else
+          echo "Integration test binary not found"
+          exit 1
         fi
 
     - name: Run DCMTK C-MOVE Tests
@@ -179,11 +179,13 @@ jobs:
           echo "=== Running C-MOVE Interoperability Tests ==="
           "$TIMEOUT_CMD" 180 ./bin/pacs_integration_e2e \
             "[dcmtk][move]" \
-            --allow-running-no-tests \
             --warn UnmatchedTestSpec \
             --reporter console \
             --reporter junit::out=dcmtk-move-results.xml \
             2>&1
+        else
+          echo "Integration test binary not found"
+          exit 1
         fi
 
     - name: Merge Test Results
@@ -214,9 +216,8 @@ jobs:
         report_paths: pacs_system/build/dcmtk-interop-results.xml
         fail_on_failure: true
         # Results are posted as annotations on this job instead of a
-        # separate check run. The cases with a DCMTK SCU skip until their
-        # pacs_system SCP fixture serves TCP (see the test steps above); a
-        # failed case fails this job through fail_on_failure.
+        # separate check run. The four C++ protocol selections must run;
+        # a failed case also fails this job through fail_on_failure.
         annotate_only: true
         check_name: DCMTK C++ Tests (${{ matrix.os }})
 
@@ -230,7 +231,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-15]
 
     steps:
     - name: Checkout pacs_system
@@ -263,6 +264,10 @@ jobs:
       run: |
         brew install sqlite3 openssl@3 ninja cmake fmt jpeg-turbo dcmtk coreutils
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Configure and Build
       working-directory: pacs_system
       run: |
@@ -283,72 +288,51 @@ jobs:
       run: |
         chmod +x ./tools/integration_tests/scripts/*.sh
 
-    # The four shell test steps are known failing, so each reports failure
-    # without failing the job: the scripts run pacs_system SCPs and SCUs as
-    # separate processes against DCMTK, which needs real TCP DICOM support
-    # (#1240), and they still call echo_scu and store_scu with the old
-    # positional AE-title syntax (#1258). shell: bash sets pipefail, so the
-    # script's exit code survives the tee. Remove continue-on-error when both
-    # are fixed.
+    - name: Check shell test helpers
+      working-directory: pacs_system
+      run: python3 tools/integration_tests/scripts/test_shell_helpers.py
+
     - name: Run DCMTK Echo Shell Test
       id: shell_echo
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_echo.sh" ]; then
-          echo "=== Running C-ECHO Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_echo.sh 2>&1 | tee build/dcmtk-echo-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_echo.sh build 2>&1 | tee build/dcmtk-echo-shell.log
 
     - name: Run DCMTK Store Shell Test
       id: shell_store
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_store.sh" ]; then
-          echo "=== Running C-STORE Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_store.sh 2>&1 | tee build/dcmtk-store-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_store.sh build 2>&1 | tee build/dcmtk-store-shell.log
 
     - name: Run DCMTK Find Shell Test
       id: shell_find
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_find.sh" ]; then
-          echo "=== Running C-FIND Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_find.sh 2>&1 | tee build/dcmtk-find-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_find.sh build 2>&1 | tee build/dcmtk-find-shell.log
 
     - name: Run DCMTK Move Shell Test
       id: shell_move
       working-directory: pacs_system
       timeout-minutes: 8
-      continue-on-error: true
       shell: bash
       run: |
-        if [ -f "./tools/integration_tests/scripts/test_dcmtk_move.sh" ]; then
-          echo "=== Running C-MOVE Shell Test ==="
-          ./tools/integration_tests/scripts/test_dcmtk_move.sh 2>&1 | tee build/dcmtk-move-shell.log
-        fi
+        bash tools/integration_tests/scripts/test_dcmtk_move.sh build 2>&1 | tee build/dcmtk-move-shell.log
 
     - name: Record shell test outcomes
       if: always()
       run: |
-        # continue-on-error above keeps the job green; record the real outcomes
-        # so the known failures (#1240, #1258) stay visible in the job summary
         echo_outcome='${{ steps.shell_echo.outcome }}'
         store_outcome='${{ steps.shell_store.outcome }}'
         find_outcome='${{ steps.shell_find.outcome }}'
         move_outcome='${{ steps.shell_move.outcome }}'
         {
-          echo "### DCMTK shell tests (known failures, quarantined under #1240 and #1258)"
+          echo "### DCMTK shell tests"
           echo ""
           echo "| Test | Outcome |"
           echo "|---|---|"
@@ -357,12 +341,6 @@ jobs:
           echo "| C-FIND | ${find_outcome} |"
           echo "| C-MOVE | ${move_outcome} |"
         } >> "$GITHUB_STEP_SUMMARY"
-        for outcome in "$echo_outcome" "$store_outcome" "$find_outcome" "$move_outcome"; do
-          if [ "$outcome" = failure ]; then
-            echo "::warning title=Known failure (#1240 and #1258)::DCMTK shell tests failed; continue-on-error keeps this job green until #1240 and #1258 are fixed"
-            break
-          fi
-        done
 
     - name: Upload Shell Test Logs
       uses: actions/upload-artifact@v7
@@ -371,6 +349,7 @@ jobs:
         name: dcmtk-shell-logs-${{ matrix.os }}
         path: |
           pacs_system/build/dcmtk-*-shell.log
+          pacs_system/build/test-results/shell/
         retention-days: 30
 
   # ============================================================================
@@ -399,7 +378,7 @@ jobs:
         echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
-        for os in ubuntu-24.04 macos-14; do
+        for os in ubuntu-24.04 macos-15; do
           status="⏭️ Skipped"
           if [ -d "test-results/dcmtk-cpp-results-$os" ]; then
             status="✅ Completed"
@@ -413,7 +392,7 @@ jobs:
         echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
-        for os in ubuntu-24.04 macos-14; do
+        for os in ubuntu-24.04 macos-15; do
           status="⏭️ Skipped"
           if [ -d "test-results/dcmtk-shell-logs-$os" ]; then
             status="✅ Completed"

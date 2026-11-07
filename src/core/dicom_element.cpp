@@ -9,6 +9,7 @@
 
 #include <kcenon/pacs/core/dicom_element.h>
 #include <kcenon/pacs/core/dicom_dataset.h>
+#include <kcenon/pacs/core/encapsulated_pixel_data.h>
 #include <kcenon/pacs/core/result.h>
 
 #include <algorithm>
@@ -43,6 +44,18 @@ auto dicom_element::from_string(dicom_tag tag, encoding::vr_type vr,
     dicom_element elem{tag, vr};
     elem.set_string(value);
     return elem;
+}
+
+auto dicom_element::from_encapsulated_pixel_data(std::span<const uint8_t> value)
+    -> kcenon::pacs::Result<dicom_element> {
+    if (!inspect_encapsulated_pixel_data(value)) {
+        return kcenon::pacs::pacs_error<dicom_element>(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Malformed encapsulated Pixel Data item stream");
+    }
+    dicom_element element{{0x7FE0,0x0010},encoding::vr_type::OB,value};
+    element.encapsulated_pixel_data_ = true;
+    return element;
 }
 
 // ============================================================================
@@ -185,10 +198,12 @@ void dicom_element::add_sequence_item(dicom_dataset item) {
 // ============================================================================
 
 void dicom_element::set_value(std::span<const uint8_t> data) {
+    encapsulated_pixel_data_ = false;
     data_.assign(data.begin(), data.end());
 }
 
 void dicom_element::set_string(std::string_view value) {
+    encapsulated_pixel_data_ = false;
     // Apply padding for string VRs
     std::string padded = apply_padding(value);
     data_.assign(padded.begin(), padded.end());

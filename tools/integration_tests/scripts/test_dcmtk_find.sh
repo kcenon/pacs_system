@@ -1,289 +1,51 @@
 #!/bin/bash
-#
-# test_dcmtk_find.sh - C-FIND (Query) interoperability tests with DCMTK
-#
-# Tests bidirectional C-FIND compatibility between pacs_system and DCMTK:
-# - Test A: pacs_system SCP <- DCMTK findscu
-# - Test B: Query response verification
-#
-# @see Issue #453 - C-FIND Interoperability Test with DCMTK
-# @see Issue #449 - DCMTK Interoperability Test Automation Epic
-#
-
-set -e
-
+# Usage: test_dcmtk_find.sh [build_dir]
+set -o pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/common.sh"
-source "$SCRIPT_DIR/dcmtk_common.sh"
-
-# Configuration
-PACS_PORT=41300
-PACS_AE="PACS_FIND"
-
-TESTS_PASSED=0
-TESTS_FAILED=0
-
-# Find project root and build directory
-PROJECT_ROOT="$(find_project_root "$SCRIPT_DIR")"
-BUILD_DIR="${PROJECT_ROOT}/build"
-
-# Cleanup function
-cleanup() {
-    log_info "Cleaning up..."
-    kill_port_process "$PACS_PORT" 2>/dev/null || true
-    stop_all_dcmtk_servers
+source "${SCRIPT_DIR}/binary_common.sh"
+init_suite dcmtk-find "${1:-}" || exit 2
+require_commands echoscu storescu findscu dcmdump || exit 2
+check_dcmtk_available || exit 2
+check_cli_contract pacs_server 1 '--db-path' '--log-level' || exit 2
+FILE="${TEST_DATA_DIR}/ct_minimal.dcm"
+STUDY=$(dicom_value "${FILE}" 0020,000d) || exit 2
+PATIENT=$(dicom_value "${FILE}" 0010,0020) || exit 2
+PATIENT_NAME=$(dicom_value "${FILE}" 0010,0010) || exit 2
+STUDY_DATE=$(dicom_value "${FILE}" 0008,0020) || exit 2
+PORT=$(find_available_port 41300) || exit 2
+start_pacs_server "${PORT}" PACS_FIND || exit 1
+expect_exit 0 30 storescu -aec PACS_FIND localhost "${PORT}" "${FILE}" || exit 1
+QUERY_NUMBER=0
+query() {
+    local model="$1" level="$2" tag="$3" expected="$4"
+    shift 4
+    QUERY_NUMBER=$((QUERY_NUMBER + 1))
+    local output="${WORK_DIR}/query-${QUERY_NUMBER}"
+    mkdir -p "${output}" || return 1
+    expect_exit 0 30 findscu "${model}" -aec PACS_FIND -aet SHELL_FIND -X -od "${output}" \
+        -k "QueryRetrieveLevel=${level}" -k "${tag}=" "$@" localhost "${PORT}" || return 1
+    local expected_values=()
+    [[ -n "${expected}" ]] && expected_values+=("${expected}")
+    python3 "${SCRIPT_DIR}/dicom_inventory.py" query "${output}" "${tag}" "${expected_values[@]}"
 }
-trap cleanup EXIT
-
-# Helper to kill process on port
-kill_port_process() {
-    local port="$1"
-    if is_port_listening "$port"; then
-        local pid
-        pid=$(lsof -t -i TCP:"$port" 2>/dev/null || true)
-        if [[ -n "$pid" ]]; then
-            kill "$pid" 2>/dev/null || true
-            sleep 0.5
-        fi
-    fi
+query_levels() {
+    query -S STUDY 0020,000d "${STUDY}" -k "PatientID=${PATIENT}" &&
+        query -P PATIENT 0010,0020 "${PATIENT}" -k "PatientName=${PATIENT_NAME}"
 }
-
-#========================================
-# Test A: pacs_system SCP <- DCMTK findscu
-#========================================
-test_pacs_scp_dcmtk_scu() {
-    log_info "=== Test A: pacs_system SCP <- DCMTK findscu ==="
-
-    # Find available port
-    PACS_PORT=$(find_available_port 41300)
-
-    # Check if pacs_server binary exists
-    local server_bin="${BUILD_DIR}/bin/pacs_server"
-    if [[ ! -x "$server_bin" ]]; then
-        log_warn "pacs_server binary not found, skipping test"
-        return 77
-    fi
-
-    # Start pacs_system server
-    log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
-    local server_pid=$!
-
-    if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
-        log_fail "Failed to start pacs_system server"
-        ((++TESTS_FAILED))
-        kill "$server_pid" 2>/dev/null || true
-        return 1
-    fi
-
-    # Run DCMTK findscu with study query
-    log_info "Running DCMTK findscu (STUDY level)..."
-    if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
-        "PatientID=" "StudyInstanceUID="; then
-        log_pass "C-FIND successful: DCMTK findscu -> pacs_system SCP"
-        ((++TESTS_PASSED))
-    else
-        log_fail "C-FIND failed: DCMTK findscu -> pacs_system SCP"
-        ((++TESTS_FAILED))
-    fi
-
-    # Cleanup
-    kill "$server_pid" 2>/dev/null || true
-    wait "$server_pid" 2>/dev/null || true
+connection_error() {
+    local unused
+    unused=$(find_available_port 41308) || return 1
+    expect_exit 2 10 findscu -S -aec NONEXISTENT -k QueryRetrieveLevel=STUDY localhost "${unused}" &&
+        grep -Eiq 'refused|connect' "${LAST_COMMAND_LOG}"
 }
-
-#========================================
-# Test B: Multiple query levels
-#========================================
-test_query_levels() {
-    log_info "=== Test B: Multiple query levels ==="
-
-    # Find available port
-    PACS_PORT=$(find_available_port 41302)
-
-    local server_bin="${BUILD_DIR}/bin/pacs_server"
-    if [[ ! -x "$server_bin" ]]; then
-        log_warn "pacs_server binary not found, skipping test"
-        return 77
-    fi
-
-    log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
-    local server_pid=$!
-
-    if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
-        log_fail "Failed to start pacs_system server"
-        ((++TESTS_FAILED))
-        kill "$server_pid" 2>/dev/null || true
-        return 1
-    fi
-
-    local all_passed=true
-
-    # Test STUDY level
-    log_info "Testing STUDY level query..."
-    if ! run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
-        "PatientID=" "StudyInstanceUID="; then
-        log_fail "STUDY level query failed"
-        all_passed=false
-    fi
-
-    # Test PATIENT level
-    log_info "Testing PATIENT level query..."
-    if ! run_findscu localhost "$PACS_PORT" "$PACS_AE" "PATIENT" \
-        "PatientID=" "PatientName="; then
-        log_fail "PATIENT level query failed"
-        all_passed=false
-    fi
-
-    if $all_passed; then
-        log_pass "Multiple query levels test passed"
-        ((++TESTS_PASSED))
-    else
-        log_fail "Multiple query levels test failed"
-        ((++TESTS_FAILED))
-    fi
-
-    kill "$server_pid" 2>/dev/null || true
-    wait "$server_pid" 2>/dev/null || true
-}
-
-#========================================
-# Test C: Wildcard query
-#========================================
-test_wildcard_query() {
-    log_info "=== Test C: Wildcard query ==="
-
-    PACS_PORT=$(find_available_port 41304)
-
-    local server_bin="${BUILD_DIR}/bin/pacs_server"
-    if [[ ! -x "$server_bin" ]]; then
-        log_warn "pacs_server binary not found, skipping test"
-        return 77
-    fi
-
-    log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
-    local server_pid=$!
-
-    if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
-        log_fail "Failed to start pacs_system server"
-        ((++TESTS_FAILED))
-        kill "$server_pid" 2>/dev/null || true
-        return 1
-    fi
-
-    # Run findscu with wildcard
-    log_info "Running DCMTK findscu with wildcard..."
-    if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
-        "PatientName=SMITH*" "StudyInstanceUID="; then
-        log_pass "Wildcard query successful"
-        ((++TESTS_PASSED))
-    else
-        log_fail "Wildcard query failed"
-        ((++TESTS_FAILED))
-    fi
-
-    kill "$server_pid" 2>/dev/null || true
-    wait "$server_pid" 2>/dev/null || true
-}
-
-#========================================
-# Test D: Date range query
-#========================================
-test_date_range_query() {
-    log_info "=== Test D: Date range query ==="
-
-    PACS_PORT=$(find_available_port 41306)
-
-    local server_bin="${BUILD_DIR}/bin/pacs_server"
-    if [[ ! -x "$server_bin" ]]; then
-        log_warn "pacs_server binary not found, skipping test"
-        return 77
-    fi
-
-    log_info "Starting pacs_system server on port $PACS_PORT..."
-    "$server_bin" --port "$PACS_PORT" --ae-title "$PACS_AE" &
-    local server_pid=$!
-
-    if ! wait_for_port "127.0.0.1" "$PACS_PORT" 15; then
-        log_fail "Failed to start pacs_system server"
-        ((++TESTS_FAILED))
-        kill "$server_pid" 2>/dev/null || true
-        return 1
-    fi
-
-    # Run findscu with date range
-    log_info "Running DCMTK findscu with date range..."
-    if run_findscu localhost "$PACS_PORT" "$PACS_AE" "STUDY" \
-        "StudyDate=20231201-20240131" "StudyInstanceUID="; then
-        log_pass "Date range query successful"
-        ((++TESTS_PASSED))
-    else
-        log_fail "Date range query failed"
-        ((++TESTS_FAILED))
-    fi
-
-    kill "$server_pid" 2>/dev/null || true
-    wait "$server_pid" 2>/dev/null || true
-}
-
-#========================================
-# Test E: Connection error handling
-#========================================
-test_connection_error() {
-    log_info "=== Test E: Connection error handling ==="
-
-    local port
-    port=$(find_available_port 41308)
-
-    # Ensure nothing is listening
-    if is_port_listening "$port"; then
-        log_warn "Port $port is already in use, skipping error test"
-        return 77
-    fi
-
-    log_info "Testing findscu to non-existent server..."
-    if ! run_findscu localhost "$port" "NONEXISTENT" "STUDY" \
-        "PatientID=" 5; then
-        log_pass "Connection error handled correctly (findscu failed as expected)"
-        ((++TESTS_PASSED))
-    else
-        log_fail "findscu should have failed for non-existent server"
-        ((++TESTS_FAILED))
-    fi
-}
-
-#========================================
-# Main
-#========================================
-main() {
-    log_info "========================================"
-    log_info "DCMTK C-FIND Interoperability Tests"
-    log_info "========================================"
-
-    # Check prerequisites
-    if ! check_dcmtk_available; then
-        log_warn "DCMTK not available, skipping all tests"
-        exit 77  # Skip code
-    fi
-
-    # Register cleanup
-    register_dcmtk_cleanup
-
-    # Run tests
-    test_pacs_scp_dcmtk_scu || true
-    test_query_levels || true
-    test_wildcard_query || true
-    test_date_range_query || true
-    test_connection_error || true
-
-    # Summary
-    log_info "========================================"
-    log_info "Results: $TESTS_PASSED passed, $TESTS_FAILED failed"
-    log_info "========================================"
-
-    [[ $TESTS_FAILED -eq 0 ]]
-}
-
-main "$@"
+run_case 'Seeded study query' query -S STUDY 0020,000d "${STUDY}"
+run_case 'Patient and study models' query_levels
+run_case 'Wildcard query' query -S STUDY 0020,000d "${STUDY}" -k "PatientName=${PATIENT_NAME:0:3}*"
+run_case 'Nonmatching wildcard query' query -S STUDY 0020,000d '' -k 'PatientName=NO_SUCH_PATIENT*'
+run_case 'Date range query' query -S STUDY 0020,000d "${STUDY}" -k "StudyDate=${STUDY_DATE}-${STUDY_DATE}"
+run_case 'Open start date range' query -S STUDY 0020,000d "${STUDY}" -k "StudyDate=-${STUDY_DATE}"
+run_case 'Open end date range' query -S STUDY 0020,000d "${STUDY}" -k "StudyDate=${STUDY_DATE}-"
+run_case 'Nonmatching date range' query -S STUDY 0020,000d '' -k 'StudyDate=19000101-19000102'
+run_case 'Empty query result' query -S STUDY 0020,000d '' -k PatientID=NO_SUCH_PATIENT_1258
+run_case 'Connection error' connection_error
+finish_suite

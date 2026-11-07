@@ -127,6 +127,11 @@ public:
     // CRUD Operations
     [[nodiscard]] virtual auto store(const core::dicom_dataset& dataset)
         -> VoidResult = 0;
+    [[nodiscard]] virtual auto store(const core::dicom_dataset& dataset,
+                                    const encoding::transfer_syntax& syntax) -> VoidResult;
+    [[nodiscard]] auto store_instance(const core::dicom_file& instance) -> VoidResult;
+    [[nodiscard]] virtual auto retrieve_file(std::string_view sop_instance_uid)
+        -> Result<core::dicom_file>;
     [[nodiscard]] virtual auto retrieve(std::string_view sop_instance_uid)
         -> Result<core::dicom_dataset> = 0;
     [[nodiscard]] virtual auto remove(std::string_view sop_instance_uid)
@@ -160,6 +165,33 @@ public:
 - Batch operations have default implementations calling single operations
 
 ---
+
+### 2.2 Transfer syntax preservation
+
+File, S3, Azure and HSM backends implement `store(dataset, syntax)` without
+transcoding. For a received C-STORE, register `storage_scp::set_context_handler`
+and pass `context.dataset` and `context.transfer_syntax` to storage. For a Part 10
+file, use `store_instance(file)`. Use `retrieve_file(uid)` when forwarding or
+migrating an instance so its syntax remains attached. HSM migration uses this path.
+
+The legacy `store(dataset)` remains available for native Explicit VR Little Endian
+data. It rejects marked encapsulated Pixel Data and ambiguous complete item
+streams; callers must supply a syntax for these. Legacy custom backends support
+only Explicit VR Little Endian through the default overload until they implement
+syntax preservation. The legacy four-argument SCP callback remains available;
+registering either callback replaces the other.
+
+`dicom_element::from_encapsulated_pixel_data` validates and marks an OB item stream.
+Network and Part 10 decoding retain the Basic Offset Table, fragment item headers,
+payloads and sequence delimiter. Copying an element retains this representation;
+replacing its value clears the marker. The Part 10 writer rejects marked
+encapsulation under a native syntax and native pixels under an encapsulated
+syntax. `save` returns an error before opening a destination; `to_bytes` returns
+an empty buffer. No fallback or implicit compression is performed.
+
+Component tests exercise file and cloud serialization and tier migration. S3/Azure
+mock clients establish serialization behavior only; real SDK/provider acceptance
+is tracked separately in #1324. Outbound DIMSE serialization is tracked in #1314.
 
 ## 3. AWS S3 Storage Backend
 

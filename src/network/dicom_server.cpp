@@ -9,6 +9,7 @@
 
 #include "kcenon/pacs/network/dicom_server.h"
 #include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
+#include "kcenon/pacs/network/detail/request_context.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 #include "kcenon/pacs/integration/thread_pool_adapter.h"
@@ -102,6 +103,9 @@ std::vector<std::string> dicom_server::supported_sop_classes() const {
 // =============================================================================
 
 Result<std::monostate> dicom_server::start() {
+    if (config_.tls.enabled) {
+        return error_info{"TLS requires dicom_server_v2"};
+    }
     if (running_.exchange(true)) {
         return error_info("Server already running");
     }
@@ -459,12 +463,13 @@ Result<std::monostate> dicom_server::dispatch_to_service(
     uint8_t context_id,
     const dimse::dimse_message& msg) {
 
-    // Get the SOP Class from the message
-    std::string sop_class_uid = msg.affected_sop_class_uid();
-
-    if (sop_class_uid.empty()) {
-        return error_info("Cannot determine SOP Class UID from message");
+    auto identity = detail::request_sop_class(assoc, context_id, msg);
+    if (identity.is_err()) {
+        assoc.abort(static_cast<uint8_t>(abort_source::service_provider),
+                    static_cast<uint8_t>(abort_reason::invalid_pdu_parameter));
+        return identity.error();
     }
+    const auto& sop_class_uid = identity.value();
 
     // Find the appropriate service
     auto* service = find_service(sop_class_uid);

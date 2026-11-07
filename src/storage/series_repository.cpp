@@ -11,6 +11,7 @@
  */
 
 #include "kcenon/pacs/storage/series_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <chrono>
 #include <ctime>
@@ -260,9 +261,9 @@ auto series_repository::list_series(std::string_view study_uid)
         "se.station_name, se.num_instances, se.created_at, se.updated_at "
         "FROM series se "
         "JOIN studies st ON se.study_pk = st.study_pk "
-        "WHERE st.study_uid = '{}' "
+        "WHERE st.study_uid = {} "
         "ORDER BY se.series_number ASC, se.series_uid ASC;",
-        std::string(study_uid));
+        sql_literal(study_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {
@@ -293,24 +294,24 @@ auto series_repository::search_series(const series_query& query)
 
     if (query.study_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("st.study_uid = '{}'", *query.study_uid));
+            kcenon::pacs::compat::format("st.study_uid = {}", sql_literal(*query.study_uid)));
     }
     if (query.series_uid.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("se.series_uid = '{}'", *query.series_uid));
+            kcenon::pacs::compat::format("se.series_uid = {}", sql_literal(*query.series_uid)));
     }
     if (query.modality.has_value()) {
         where_clauses.push_back(
-            kcenon::pacs::compat::format("se.modality = '{}'", *query.modality));
+            kcenon::pacs::compat::format("se.modality = {}", sql_literal(*query.modality)));
     }
     if (query.series_description.has_value()) {
         where_clauses.push_back(kcenon::pacs::compat::format(
-            "se.series_description LIKE '{}'",
-            to_like_pattern(*query.series_description)));
+            "se.series_description LIKE {} ESCAPE '\\'",
+            sql_literal(to_like_pattern(*query.series_description))));
     }
     if (query.body_part_examined.has_value()) {
         where_clauses.push_back(kcenon::pacs::compat::format(
-            "se.body_part_examined = '{}'", *query.body_part_examined));
+            "se.body_part_examined = {}", sql_literal(*query.body_part_examined)));
     }
     if (query.series_number.has_value()) {
         where_clauses.push_back(kcenon::pacs::compat::format(
@@ -397,8 +398,8 @@ auto series_repository::series_count(std::string_view study_uid)
         "SELECT COUNT(*) AS cnt "
         "FROM series se "
         "JOIN studies st ON se.study_pk = st.study_pk "
-        "WHERE st.study_uid = '{}';",
-        std::string(study_uid));
+        "WHERE st.study_uid = {};",
+        sql_literal(study_uid));
 
     auto result = db()->select(sql);
     if (result.is_err()) {

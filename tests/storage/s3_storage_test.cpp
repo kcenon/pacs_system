@@ -12,6 +12,7 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include "transfer_syntax_fixture.h"
 
 #include <atomic>
 
@@ -454,4 +455,11 @@ TEST_CASE("cloud_storage_config: default values", "[storage][s3_storage]") {
   CHECK(config.request_timeout_ms == 30000);
   CHECK_FALSE(config.enable_encryption);
   CHECK(config.storage_class == "STANDARD");
+}
+
+TEST_CASE("s3_storage: transfer syntax and encapsulation survive persistence",
+          "[storage][s3_storage][encapsulated]") {
+    s3_storage storage{create_test_config()};
+    storage_syntax_test::check_representation(storage,
+        create_test_dataset("1.2.3.1292", "1.2.3.1292.1", "1.2.3.1292.1.1"));
 }

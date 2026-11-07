@@ -72,8 +72,9 @@ CI는 단위 테스트를 실행하고([ci.yml](.github/workflows/ci.yml)) 커�
 지원 SOP 클래스의 출처는 [DICOM 적합성 선언문](docs/DICOM_CONFORMANCE_STATEMENT.md) 3절입니다:
 Verification; CT, MR, US, XA, XRF, X-Ray, NM, PET, RT, SR, SEG, MG, CR, SC Storage; Patient 및 Study
 Root Query/Retrieve; Modality Worklist; MPPS; Storage Commitment; Basic Grayscale Print, Basic Color
-Print, Printer. [DCMTK 상호운용성 워크플로](.github/workflows/dcmtk-interop.yml)는 Ubuntu와 macOS에서
-DCMTK 도구를 상대로 C-ECHO, C-STORE, C-FIND, C-MOVE를 실행합니다.
+Print, Printer. 검증 루틴은 [호스트 DCMTK 상호운용성 검사](.github/workflows/dcmtk-interop.yml)와
+[Docker 기능 검증](validation/dcmtk/README.md)이며, 후자는 네 전송 프로필에서 PACS 기능을 검사하고
+20개 기능군별 실제 실패와 외부 검증 누락을 보고합니다.
 
 ### 전송 구문 지원
 
@@ -256,18 +257,18 @@ pacs_system/
 
 | 메트릭 | 값 |
 |--------|-------|
-| **헤더 파일** | 291 파일 |
-| **소스 파일** | 217 파일 |
-| **헤더 LOC** | ~78,700 라인 |
-| **소스 LOC** | ~114,800 라인 |
-| **예제 LOC** | ~4,100 라인 |
-| **테스트 LOC** | ~89,600 라인 |
-| **전체 LOC** | ~287,300 라인 |
-| **테스트 파일** | 191 파일 |
-| **테스트 케이스** | 2667+ 테스트 |
+| **헤더 파일** | 307 파일 |
+| **소스 파일** | 228 파일 |
+| **헤더 LOC** | ~81,200 라인 |
+| **소스 LOC** | ~126,700 라인 |
+| **예제 LOC** | ~4,200 라인 |
+| **테스트 LOC** | ~98,700 라인 |
+| **전체 LOC** | ~310,700 라인 |
+| **테스트 파일** | 216 파일 |
+| **테스트 케이스** | 2870+ 테스트 |
 | **예제 프로그램** | 5 앱 |
-| **문서** | 109 마크다운 파일 |
-| **CI/CD 워크플로우** | 24 워크플로우 |
+| **문서** | 111 마크다운 파일 |
+| **CI/CD 워크플로우** | 26 워크플로우 |
 | **버전** | 0.1.0 |
 
 <!-- STATS_END -->

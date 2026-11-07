@@ -32,9 +32,6 @@ namespace {
 /// UID root for auto-generated MPPS UIDs
 constexpr const char* uid_root = "1.2.826.0.1.3680043.2.1545";
 
-/// Requested SOP Instance UID tag (used in N-SET command set)
-constexpr core::dicom_tag tag_requested_sop_instance_uid{0x0000, 0x1001};
-
 /**
  * @brief Create N-CREATE request message for MPPS
  */
@@ -61,17 +58,8 @@ network::dimse::dimse_message make_n_set_rq(
     std::string_view sop_instance_uid,
     core::dicom_dataset modifications) {
 
-    using namespace network::dimse;
-    using namespace encoding;
-
-    dimse_message msg{command_field::n_set_rq, message_id};
-    msg.set_affected_sop_class_uid(mpps_sop_class_uid);
-
-    // For N-SET, use Requested SOP Instance UID in command set
-    msg.command_set().set_string(
-        tag_requested_sop_instance_uid,
-        vr_type::UI,
-        std::string(sop_instance_uid));
+    auto msg = network::dimse::make_n_set_rq(
+        message_id, mpps_sop_class_uid, sop_instance_uid);
     msg.set_dataset(std::move(modifications));
 
     return msg;
@@ -365,50 +353,47 @@ core::dicom_dataset mpps_scu::build_create_dataset(const mpps_create_data& data)
     ds.set_string(mpps_tags::performed_procedure_step_start_date, vr_type::DA, start_date);
     ds.set_string(mpps_tags::performed_procedure_step_start_time, vr_type::TM, start_time);
 
-    // Modality and Station
-    if (!data.modality.empty()) {
-        ds.set_string(tags::modality, vr_type::CS, data.modality);
-    }
-    if (!data.station_ae_title.empty()) {
-        ds.set_string(mpps_tags::performed_station_ae_title, vr_type::AE, data.station_ae_title);
-    }
-    if (!data.station_name.empty()) {
-        ds.set_string(mpps_tags::performed_station_name, vr_type::SH, data.station_name);
-    }
+    // PS3.4 Table F.7.2-1: Type 1 attributes have values and Type 2 attributes are
+    // present even when empty; a peer that validates the N-CREATE refuses it otherwise.
+    ds.set_string(tags::modality, vr_type::CS, data.modality);
+    ds.set_string(mpps_tags::performed_station_ae_title, vr_type::AE,
+                  data.station_ae_title.empty() ? std::string("UNKNOWN") : data.station_ae_title);
+    ds.set_string(mpps_tags::performed_station_name, vr_type::SH, data.station_name);
+    ds.set_string(dicom_tag{0x0040, 0x0243}, vr_type::SH, "");  // Performed Location
 
     // Procedure Step ID
-    if (!data.scheduled_procedure_step_id.empty()) {
-        ds.set_string(mpps_tags::performed_procedure_step_id, vr_type::SH,
-                      data.scheduled_procedure_step_id);
-    }
+    ds.set_string(mpps_tags::performed_procedure_step_id, vr_type::SH,
+                  data.scheduled_procedure_step_id.empty() ? std::string("UNSPECIFIED") : data.scheduled_procedure_step_id);
 
     // Procedure Description
-    if (!data.procedure_description.empty()) {
-        ds.set_string(mpps_tags::performed_procedure_step_description, vr_type::LO,
-                      data.procedure_description);
-    }
+    ds.set_string(mpps_tags::performed_procedure_step_description, vr_type::LO, data.procedure_description);
+    ds.set_string(dicom_tag{0x0040, 0x0255}, vr_type::LO, "");  // Performed Procedure Type Description
+    ds.set_string(mpps_tags::performed_procedure_step_end_date, vr_type::DA, "");
+    ds.set_string(mpps_tags::performed_procedure_step_end_time, vr_type::TM, "");
+    ds.set_string(tags::study_id, vr_type::SH, "");
+    (void)ds.get_or_create_sequence(dicom_tag{0x0008, 0x1032});  // Procedure Code Sequence
+    (void)ds.get_or_create_sequence(dicom_tag{0x0040, 0x0260});  // Performed Protocol Code Sequence
+    (void)ds.get_or_create_sequence(mpps_tags::performed_series_sequence);
 
-    // Patient Information (required)
+    // Patient Information
     std::string patient_name = data.patient_name.empty() ? "ANONYMOUS" : data.patient_name;
     ds.set_string(tags::patient_name, vr_type::PN, patient_name);
+    ds.set_string(tags::patient_id, vr_type::LO, data.patient_id);
+    ds.set_string(tags::patient_birth_date, vr_type::DA, data.patient_birth_date);
+    ds.set_string(tags::patient_sex, vr_type::CS, data.patient_sex);
+    (void)ds.get_or_create_sequence(dicom_tag{0x0008, 0x1120});  // Referenced Patient Sequence
 
-    if (!data.patient_id.empty()) {
-        ds.set_string(tags::patient_id, vr_type::LO, data.patient_id);
-    }
-    if (!data.patient_birth_date.empty()) {
-        ds.set_string(tags::patient_birth_date, vr_type::DA, data.patient_birth_date);
-    }
-    if (!data.patient_sex.empty()) {
-        ds.set_string(tags::patient_sex, vr_type::CS, data.patient_sex);
-    }
-
-    // Study reference
-    if (!data.study_instance_uid.empty()) {
-        ds.set_string(tags::study_instance_uid, vr_type::UI, data.study_instance_uid);
-    }
-    if (!data.accession_number.empty()) {
-        ds.set_string(tags::accession_number, vr_type::SH, data.accession_number);
-    }
+    // Study reference: these live in the Scheduled Step Attributes Sequence, which is Type 1.
+    dicom_dataset scheduled;
+    scheduled.set_string(tags::study_instance_uid, vr_type::UI, data.study_instance_uid);
+    (void)scheduled.get_or_create_sequence(dicom_tag{0x0008, 0x1110});  // Referenced Study Sequence
+    scheduled.set_string(tags::accession_number, vr_type::SH, data.accession_number);
+    scheduled.set_string(dicom_tag{0x0040, 0x1001}, vr_type::SH, "");  // Requested Procedure ID
+    scheduled.set_string(dicom_tag{0x0032, 0x1060}, vr_type::LO, "");  // Requested Procedure Description
+    scheduled.set_string(dicom_tag{0x0040, 0x0009}, vr_type::SH, data.scheduled_procedure_step_id);
+    scheduled.set_string(dicom_tag{0x0040, 0x0007}, vr_type::LO, "");  // Scheduled Procedure Step Description
+    (void)scheduled.get_or_create_sequence(dicom_tag{0x0040, 0x0008});  // Scheduled Protocol Code Sequence
+    ds.get_or_create_sequence(dicom_tag{0x0040, 0x0270}).push_back(std::move(scheduled));
 
     // Performing Information
     if (!data.performing_physician.empty()) {
@@ -447,23 +432,23 @@ core::dicom_dataset mpps_scu::build_set_dataset(const mpps_set_data& data) const
         for (const auto& s : data.performed_series) {
             dicom_dataset series_item;
 
-            if (!s.series_uid.empty()) {
-                series_item.set_string(tags::series_instance_uid, vr_type::UI, s.series_uid);
+            // PS3.4 Table F.7.2-1, items of the Performed Series Sequence.
+            series_item.set_string(tags::series_instance_uid, vr_type::UI, s.series_uid);
+            series_item.set_string(dicom_tag{0x0008, 0x0054}, vr_type::AE, "");  // Retrieve AE Title
+            series_item.set_string(mpps_tags::series_description, vr_type::LO, s.series_description);
+            series_item.set_string(mpps_tags::performing_physicians_name, vr_type::PN, s.performing_physician);
+            series_item.set_string(mpps_tags::operators_name, vr_type::PN, s.operator_name);
+            series_item.set_string(dicom_tag{0x0018, 0x1030}, vr_type::LO, s.protocol_name);
+            auto& images = series_item.get_or_create_sequence(dicom_tag{0x0008, 0x1140});
+            if (!s.sop_class_uid.empty()) {
+                for (const auto& instance : s.sop_instance_uids) {
+                    dicom_dataset reference;
+                    reference.set_string(tags::referenced_sop_class_uid, vr_type::UI, s.sop_class_uid);
+                    reference.set_string(tags::referenced_sop_instance_uid, vr_type::UI, instance);
+                    images.push_back(std::move(reference));
+                }
             }
-            if (!s.series_description.empty()) {
-                series_item.set_string(mpps_tags::series_description, vr_type::LO,
-                                       s.series_description);
-            }
-            if (!s.modality.empty()) {
-                series_item.set_string(tags::modality, vr_type::CS, s.modality);
-            }
-            if (!s.performing_physician.empty()) {
-                series_item.set_string(mpps_tags::performing_physicians_name, vr_type::PN,
-                                       s.performing_physician);
-            }
-            if (!s.operator_name.empty()) {
-                series_item.set_string(mpps_tags::operators_name, vr_type::PN, s.operator_name);
-            }
+            (void)series_item.get_or_create_sequence(dicom_tag{0x0040, 0x0220});  // Non-Image Composite
 
             seq.push_back(std::move(series_item));
         }

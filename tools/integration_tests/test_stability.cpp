@@ -526,7 +526,7 @@ TEST_CASE("Memory stability over iterations", "[stability][memory]") {
     REQUIRE(server.stored_count() == num_iterations);
 }
 
-TEST_CASE("Connection pool exhaustion recovery", "[stability][network]") {
+TEST_CASE("Stability: connection pool exhaustion recovery", "[stability][network]") {
     uint16_t port = find_available_port();
     stability_test_server server(port);
     REQUIRE(server.initialize());

@@ -26,11 +26,17 @@
 
 #include "kcenon/pacs/services/print_scu.h"
 
+#include "kcenon/pacs/core/dicom_file.h"
+#include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/encoding/vr_type.h"
 #include "kcenon/pacs/network/association.h"
 
+#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <string>
 
 namespace {
@@ -75,6 +81,10 @@ struct options {
     std::string film_size{"8INX10IN"};
     std::string magnification;
 
+    // Image Box options
+    std::string image_file;
+    bool color{false};
+
     // Output options
     bool verbose{false};
 };
@@ -110,6 +120,8 @@ Film Box Options (for 'print' command):
   --orientation <o>     Film orientation: PORTRAIT, LANDSCAPE [default: PORTRAIT]
   --film-size <size>    Film size: 8INX10IN, 14INX17IN, etc. [default: 8INX10IN]
   --magnification <m>   Magnification type: REPLICATE, BILINEAR, CUBIC, NONE
+  --image <file>        DICOM image for the first Image Box; without one the page is empty
+  --color               Print through the Basic Color Print Meta SOP Class; the image must be RGB
 
 General Options:
   --calling-ae <ae>     Calling AE Title [default: PRINT_SCU]
@@ -212,6 +224,10 @@ bool parse_arguments(int argc, char* argv[], options& opts) {
             opts.orientation = argv[++i];
         } else if (arg == "--film-size" && i + 1 < argc) {
             opts.film_size = argv[++i];
+        } else if (arg == "--image" && i + 1 < argc) {
+            opts.image_file = argv[++i];
+        } else if (arg == "--color") {
+            opts.color = true;
         } else if (arg == "--magnification" && i + 1 < argc) {
             opts.magnification = argv[++i];
         } else {
@@ -238,11 +254,11 @@ kcenon::pacs::network::Result<kcenon::pacs::network::association> create_print_a
     config.implementation_class_uid = "1.2.826.0.1.3680043.2.1545.2";
     config.implementation_version_name = "PRINT_SCU_001";
 
-    // Propose Basic Grayscale Print Management Meta SOP Class
+    // Propose the Print Management Meta SOP Class of what is going to be printed
     // (bundles Film Session, Film Box, Image Box, and Printer)
     config.proposed_contexts.push_back({
         1,
-        std::string(basic_grayscale_print_meta_sop_class_uid),
+        std::string(opts.color ? basic_color_print_meta_sop_class_uid : basic_grayscale_print_meta_sop_class_uid),
         {
             "1.2.840.10008.1.2.1",  // Explicit VR Little Endian
             "1.2.840.10008.1.2"     // Implicit VR Little Endian
@@ -262,7 +278,7 @@ kcenon::pacs::network::Result<kcenon::pacs::network::association> create_print_a
     });
     config.proposed_contexts.push_back({
         7,
-        std::string(basic_grayscale_image_box_sop_class_uid),
+        std::string(opts.color ? basic_color_image_box_sop_class_uid : basic_grayscale_image_box_sop_class_uid),
         {"1.2.840.10008.1.2.1", "1.2.840.10008.1.2"}
     });
     config.proposed_contexts.push_back({
@@ -272,6 +288,73 @@ kcenon::pacs::network::Result<kcenon::pacs::network::association> create_print_a
     });
 
     return association::connect(opts.host, opts.port, config, default_timeout);
+}
+
+/**
+ * @brief Put one image in the first Image Box of a Film Box
+ *
+ * @return What went wrong, or nothing when the printer took the image
+ */
+std::optional<std::string> send_image(
+    kcenon::pacs::services::print_scu& scu,
+    kcenon::pacs::network::association& assoc,
+    const kcenon::pacs::core::dicom_dataset& film_box_response,
+    const std::string& path,
+    bool color) {
+
+    using namespace kcenon::pacs;
+    using encoding::vr_type;
+
+    const auto* boxes = film_box_response.get_sequence(services::print_tags::referenced_image_box_sequence);
+    if (boxes == nullptr || boxes->empty()) {
+        return "The Film Box response names no Image Box";
+    }
+    auto file = core::dicom_file::open(path);
+    if (file.is_err()) {
+        return "Cannot read " + path + ": " + file.error().message;
+    }
+    const auto& source = file.value().dataset();
+
+    // Table H.4-7: the Image Pixel attributes of the printed image, and no others.
+    core::dicom_dataset image;
+    const std::array<core::dicom_tag, 9> image_pixel{
+        core::tags::samples_per_pixel, core::tags::photometric_interpretation, core::tags::rows, core::tags::columns,
+        core::tags::bits_allocated, core::tags::bits_stored, core::tags::high_bit, core::tags::pixel_representation,
+        core::tags::pixel_data};
+    for (const auto tag : image_pixel) {
+        const auto* element = source.get(tag);
+        if (element == nullptr) {
+            return path + " is not an image: it lacks " + tag.to_string();
+        }
+        image.insert(*element);
+    }
+    if (color) {
+        const auto* planar = source.get(core::dicom_tag{0x0028, 0x0006});
+        if (planar == nullptr) {
+            return path + " has no Planar Configuration, which a color image needs";
+        }
+        image.insert(*planar);
+    }
+    image.set_string(core::dicom_tag{0x0028, 0x0034}, vr_type::IS, "1\\1");
+
+    services::print_image_data data;
+    data.image_position = 1;
+    data.pixel_data
+        .get_or_create_sequence(color ? services::print_tags::basic_color_image_sequence
+                                      : services::print_tags::basic_grayscale_image_sequence)
+        .push_back(std::move(image));
+
+    const auto image_box_uid = boxes->front().get_string(core::tags::referenced_sop_instance_uid);
+    auto set = scu.set_image_box(assoc, image_box_uid, data, color);
+    if (set.is_err()) {
+        return "Failed to set Image Box: " + set.error().message;
+    }
+    if (!set.value().is_success()) {
+        std::ostringstream message;
+        message << "Image Box returned status: 0x" << std::hex << set.value().status;
+        return message.str();
+    }
+    return std::nullopt;
 }
 
 /**
@@ -375,6 +458,17 @@ int perform_print(const options& opts) {
     auto film_box_uid = box_result.value().sop_instance_uid;
     if (opts.verbose) {
         std::cout << "  Film Box UID: " << film_box_uid << "\n";
+    }
+
+    // An image is optional: the printer answers a Film Box without one with B603H, an empty page.
+    if (!opts.image_file.empty()) {
+        const auto failed = send_image(scu, assoc, box_result.value().response_data, opts.image_file, opts.color);
+        if (failed) {
+            std::cerr << *failed << "\n";
+            (void)scu.delete_film_session(assoc, session_uid);
+            (void)assoc.release(default_timeout);
+            return 1;
+        }
     }
 
     // Step 3: Print Film Box (N-ACTION)

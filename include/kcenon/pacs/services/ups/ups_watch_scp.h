@@ -40,6 +40,10 @@ inline constexpr std::string_view ups_watch_sop_class_uid =
 inline constexpr std::string_view ups_global_subscription_instance_uid =
     "1.2.840.10008.5.1.4.34.5";
 
+/// UPS Filtered Global Subscription SOP Instance UID (PS3.4 CC.2.3.3); not supported, answered C307H
+inline constexpr std::string_view ups_filtered_global_subscription_instance_uid =
+    "1.2.840.10008.5.1.4.34.5.1";
+
 // =============================================================================
 // N-ACTION Type Constants for UPS Watch
 // =============================================================================
@@ -69,6 +73,9 @@ inline constexpr uint16_t ups_event_progress_report = 3;
 /// Event Type 4: SCP Status Change — SCP going down/restarting
 inline constexpr uint16_t ups_event_scp_status_change = 4;
 
+/// Event Type 5: UPS Assigned — scheduled station or performer set
+inline constexpr uint16_t ups_event_assigned = 5;
+
 // =============================================================================
 // Handler Types
 // =============================================================================
@@ -77,9 +84,10 @@ inline constexpr uint16_t ups_event_scp_status_change = 4;
  * @brief Subscribe handler function type
  *
  * Called when an N-ACTION subscribe request is received. The handler should
- * persist the subscription (e.g., to the ups_subscriptions database table).
+ * persist the subscription (e.g., to the ups_subscriptions database table), and may
+ * refuse with C307H or C308H as its error code (see ups_status_from_error_code()).
  *
- * @param subscriber_ae The AE Title of the subscribing system
+ * @param subscriber_ae Receiving AE (0074,1234), which may differ from the requestor
  * @param workitem_uid The specific workitem UID (empty for global subscription)
  * @param deletion_lock Whether deletion lock is requested
  * @return Success if the subscription was created, error otherwise
@@ -95,13 +103,24 @@ using ups_subscribe_handler = std::function<network::Result<std::monostate>(
  * Called when an N-ACTION unsubscribe request is received. The handler should
  * remove the subscription from persistence.
  *
- * @param subscriber_ae The AE Title of the unsubscribing system
+ * @param subscriber_ae Receiving AE (0074,1234), which may differ from the requestor
  * @param workitem_uid The specific workitem UID (empty for global unsubscription)
  * @return Success if the subscription was removed, error otherwise
  */
 using ups_unsubscribe_handler = std::function<network::Result<std::monostate>(
     const std::string& subscriber_ae,
     const std::string& workitem_uid)>;
+
+/**
+ * @brief Suspend Global Subscription handler function type
+ *
+ * The AE stops hearing about new instances and keeps the subscriptions it has (Table CC.2.3-2).
+ * Without this handler a suspension is treated as a global unsubscription.
+ *
+ * @param subscriber_ae Receiving AE (0074,1234)
+ */
+using ups_suspend_handler = std::function<network::Result<std::monostate>(
+    const std::string& subscriber_ae)>;
 
 /**
  * @brief Get subscribers handler function type
@@ -192,6 +211,9 @@ public:
 
     void set_subscribe_handler(ups_subscribe_handler handler);
     void set_unsubscribe_handler(ups_unsubscribe_handler handler);
+
+    /// Set the handler for N-ACTION Type 5 (Suspend Global Subscription).
+    void set_suspend_handler(ups_suspend_handler handler);
     void set_get_subscribers_handler(ups_get_subscribers_handler handler);
     void set_event_callback(ups_event_callback callback);
 
@@ -266,18 +288,23 @@ private:
         network::association& assoc,
         uint8_t context_id,
         uint16_t message_id,
-        const std::string& sop_instance_uid);
+        const std::string& sop_instance_uid,
+        const std::string& subscriber_ae,
+        const core::dicom_dataset& information);
 
     [[nodiscard]] network::Result<std::monostate> handle_unsubscribe(
         network::association& assoc,
         uint8_t context_id,
         uint16_t message_id,
-        const std::string& sop_instance_uid);
+        const std::string& sop_instance_uid,
+        const std::string& subscriber_ae);
 
     [[nodiscard]] network::Result<std::monostate> handle_suspend_global(
         network::association& assoc,
         uint8_t context_id,
-        uint16_t message_id);
+        uint16_t message_id,
+        const std::string& sop_instance_uid,
+        const std::string& subscriber_ae);
 
     [[nodiscard]] network::Result<std::monostate> send_n_action_response(
         network::association& assoc,
@@ -297,6 +324,7 @@ private:
 
     ups_subscribe_handler subscribe_handler_;
     ups_unsubscribe_handler unsubscribe_handler_;
+    ups_suspend_handler suspend_handler_;
     ups_get_subscribers_handler get_subscribers_handler_;
     ups_event_callback event_callback_;
 

@@ -23,8 +23,11 @@
 #include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/encoding/vr_type.h"
-#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
+#include "../common/scp_lifecycle.h"
 #include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/core/utf8_text.h"
+#include "kcenon/pacs/services/qr_index.h"
 #include "kcenon/pacs/services/query_scp.h"
 #include "kcenon/pacs/services/retrieve_scp.h"
 #include "kcenon/pacs/services/verification_scp.h"
@@ -44,37 +47,6 @@
 #include <vector>
 
 namespace {
-
-/// Global pointer to server for signal handling
-std::atomic<kcenon::pacs::network::dicom_server*> g_server{nullptr};
-
-/// Global running flag for signal handling
-std::atomic<bool> g_running{true};
-
-/**
- * @brief Signal handler for graceful shutdown
- * @param signal The signal received
- */
-void signal_handler(int signal) {
-    std::cout << "\nReceived signal " << signal << ", shutting down...\n";
-    g_running = false;
-
-    auto* server = g_server.load();
-    if (server) {
-        server->stop();
-    }
-}
-
-/**
- * @brief Install signal handlers for graceful shutdown
- */
-void install_signal_handlers() {
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
-#ifndef _WIN32
-    std::signal(SIGHUP, signal_handler);
-#endif
-}
 
 /**
  * @brief Print usage information
@@ -356,11 +328,14 @@ size_t scan_storage(
         try {
             auto file = dicom_file::open(entry.path());
             if (file.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << file.error().message << "\n";
                 ++errors;
                 continue;
             }
 
-            const auto& dataset = file.value().dataset();
+            // The index holds UTF-8, whatever character set each object uses.
+            const auto dataset = kcenon::pacs::core::utf8_text_copy(file.value().dataset());
 
             // Extract patient info
             auto patient_id = dataset.get_string(tags::patient_id, "");
@@ -371,6 +346,8 @@ size_t scan_storage(
             // Insert/update patient
             auto patient_pk = db.upsert_patient(patient_id, patient_name, birth_date, sex);
             if (patient_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << patient_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -389,6 +366,8 @@ size_t scan_storage(
                 patient_pk.value(), study_uid, study_id, study_date, study_time,
                 accession, ref_phys, study_desc);
             if (study_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << study_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -413,6 +392,8 @@ size_t scan_storage(
                 study_pk.value(), series_uid, modality, series_num,
                 series_desc, body_part, station);
             if (series_pk.is_err()) {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << series_pk.error().message << "\n";
                 ++errors;
                 continue;
             }
@@ -421,7 +402,7 @@ size_t scan_storage(
             auto sop_uid = dataset.get_string(tags::sop_instance_uid, "");
             auto sop_class = dataset.get_string(tags::sop_class_uid, "");
             auto inst_num_str = dataset.get_string(tags::instance_number, "");
-            auto transfer_syntax_uid = file.value().transfer_syntax().uid();
+            const std::string transfer_syntax_uid{file.value().transfer_syntax().uid()};
 
             std::optional<int> inst_num;
             if (!inst_num_str.empty()) {
@@ -443,9 +424,12 @@ size_t scan_storage(
                     std::cout << "  Indexed " << count << " files...\n";
                 }
             } else {
+                std::cerr << "Cannot index " << entry.path() << ": "
+                          << instance_pk.error().message << "\n";
                 ++errors;
             }
         } catch (const std::exception& e) {
+            std::cerr << "Cannot index " << entry.path() << ": " << e.what() << "\n";
             ++errors;
         }
     }
@@ -457,235 +441,6 @@ size_t scan_storage(
     std::cout << "\n";
 
     return count;
-}
-
-/**
- * @brief Build query response datasets from database records
- */
-std::vector<kcenon::pacs::core::dicom_dataset> handle_query(
-    kcenon::pacs::services::query_level level,
-    const kcenon::pacs::core::dicom_dataset& query_keys,
-    [[maybe_unused]] const std::string& calling_ae,
-    kcenon::pacs::storage::index_database& db) {
-
-    using namespace kcenon::pacs::core;
-    using namespace kcenon::pacs::storage;
-    using namespace kcenon::pacs::services;
-    using namespace kcenon::pacs::encoding;
-
-    std::vector<dicom_dataset> results;
-
-    try {
-        switch (level) {
-            case query_level::patient: {
-                patient_query pq;
-                pq.patient_id = query_keys.get_string(tags::patient_id, "");
-                pq.patient_name = query_keys.get_string(tags::patient_name, "");
-
-                auto patients = db.search_patients(pq);
-                if (patients.is_ok()) {
-                    for (const auto& p : patients.value()) {
-                        dicom_dataset ds;
-                        ds.set_string(tags::query_retrieve_level, vr_type::CS, "PATIENT");
-                        ds.set_string(tags::patient_id, vr_type::LO, p.patient_id);
-                        ds.set_string(tags::patient_name, vr_type::PN, p.patient_name);
-                        ds.set_string(tags::patient_birth_date, vr_type::DA, p.birth_date);
-                        ds.set_string(tags::patient_sex, vr_type::CS, p.sex);
-                        results.push_back(std::move(ds));
-                    }
-                }
-                break;
-            }
-
-            case query_level::study: {
-                study_query sq;
-                sq.patient_id = query_keys.get_string(tags::patient_id, "");
-                sq.patient_name = query_keys.get_string(tags::patient_name, "");
-                sq.study_uid = query_keys.get_string(tags::study_instance_uid, "");
-                sq.study_date = query_keys.get_string(tags::study_date, "");
-                sq.accession_number = query_keys.get_string(tags::accession_number, "");
-                sq.study_description = query_keys.get_string(tags::study_description, "");
-
-                auto studies = db.search_studies(sq);
-                if (studies.is_ok()) {
-                    for (const auto& s : studies.value()) {
-                        // Get patient info
-                        auto patient = db.find_patient_by_pk(s.patient_pk);
-
-                        dicom_dataset ds;
-                        ds.set_string(tags::query_retrieve_level, vr_type::CS, "STUDY");
-                        if (patient) {
-                            ds.set_string(tags::patient_id, vr_type::LO, patient->patient_id);
-                            ds.set_string(tags::patient_name, vr_type::PN, patient->patient_name);
-                            ds.set_string(tags::patient_birth_date, vr_type::DA, patient->birth_date);
-                            ds.set_string(tags::patient_sex, vr_type::CS, patient->sex);
-                        }
-                        ds.set_string(tags::study_instance_uid, vr_type::UI, s.study_uid);
-                        ds.set_string(tags::study_id, vr_type::SH, s.study_id);
-                        ds.set_string(tags::study_date, vr_type::DA, s.study_date);
-                        ds.set_string(tags::study_time, vr_type::TM, s.study_time);
-                        ds.set_string(tags::accession_number, vr_type::SH, s.accession_number);
-                        ds.set_string(tags::referring_physician_name, vr_type::PN, s.referring_physician);
-                        ds.set_string(tags::study_description, vr_type::LO, s.study_description);
-                        ds.set_string(tags::modalities_in_study, vr_type::CS, s.modalities_in_study);
-                        results.push_back(std::move(ds));
-                    }
-                }
-                break;
-            }
-
-            case query_level::series: {
-                series_query serq;
-                serq.study_uid = query_keys.get_string(tags::study_instance_uid, "");
-                serq.series_uid = query_keys.get_string(tags::series_instance_uid, "");
-                serq.modality = query_keys.get_string(tags::modality, "");
-                serq.series_description = query_keys.get_string(tags::series_description, "");
-
-                auto series_list = db.search_series(serq);
-                if (series_list.is_ok()) {
-                    for (const auto& ser : series_list.value()) {
-                        // Get study info
-                        auto study = db.find_study_by_pk(ser.study_pk);
-
-                        dicom_dataset ds;
-                        ds.set_string(tags::query_retrieve_level, vr_type::CS, "SERIES");
-                        if (study) {
-                            ds.set_string(tags::study_instance_uid, vr_type::UI, study->study_uid);
-                        }
-                        ds.set_string(tags::series_instance_uid, vr_type::UI, ser.series_uid);
-                        ds.set_string(tags::modality, vr_type::CS, ser.modality);
-                        if (ser.series_number.has_value()) {
-                            ds.set_string(tags::series_number, vr_type::IS,
-                                std::to_string(ser.series_number.value()));
-                        }
-                        ds.set_string(tags::series_description, vr_type::LO, ser.series_description);
-                        // body_part_examined tag not in constants, skip
-                        results.push_back(std::move(ds));
-                    }
-                }
-                break;
-            }
-
-            case query_level::image: {
-                instance_query iq;
-                iq.series_uid = query_keys.get_string(tags::series_instance_uid, "");
-                iq.sop_uid = query_keys.get_string(tags::sop_instance_uid, "");
-                iq.sop_class_uid = query_keys.get_string(tags::sop_class_uid, "");
-
-                auto instances = db.search_instances(iq);
-                if (instances.is_ok()) {
-                    for (const auto& inst : instances.value()) {
-                        // Get series info
-                        auto series = db.find_series_by_pk(inst.series_pk);
-
-                        dicom_dataset ds;
-                        ds.set_string(tags::query_retrieve_level, vr_type::CS, "IMAGE");
-                        if (series) {
-                            ds.set_string(tags::series_instance_uid, vr_type::UI, series->series_uid);
-
-                            // Get study info
-                            auto study = db.find_study_by_pk(series->study_pk);
-                            if (study) {
-                                ds.set_string(tags::study_instance_uid, vr_type::UI, study->study_uid);
-                            }
-                        }
-                        ds.set_string(tags::sop_instance_uid, vr_type::UI, inst.sop_uid);
-                        ds.set_string(tags::sop_class_uid, vr_type::UI, inst.sop_class_uid);
-                        if (inst.instance_number.has_value()) {
-                            ds.set_string(tags::instance_number, vr_type::IS,
-                                std::to_string(inst.instance_number.value()));
-                        }
-                        results.push_back(std::move(ds));
-                    }
-                }
-                break;
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[" << current_timestamp() << "] Query error: " << e.what() << "\n";
-    }
-
-    return results;
-}
-
-/**
- * @brief Handle retrieve request - find matching DICOM files
- */
-std::vector<kcenon::pacs::core::dicom_file> handle_retrieve(
-    const kcenon::pacs::core::dicom_dataset& query_keys,
-    kcenon::pacs::storage::index_database& db) {
-
-    using namespace kcenon::pacs::core;
-    using namespace kcenon::pacs::storage;
-
-    std::vector<dicom_file> files;
-
-    try {
-        // Determine query level from keys
-        auto sop_uid = query_keys.get_string(tags::sop_instance_uid, "");
-        auto series_uid = query_keys.get_string(tags::series_instance_uid, "");
-        auto study_uid = query_keys.get_string(tags::study_instance_uid, "");
-        auto patient_id = query_keys.get_string(tags::patient_id, "");
-
-        std::vector<instance_record> instances;
-
-        if (!sop_uid.empty()) {
-            // Instance level retrieve
-            auto inst = db.find_instance(sop_uid);
-            if (inst) {
-                instances.push_back(*inst);
-            }
-        } else if (!series_uid.empty()) {
-            // Series level retrieve
-            auto result = db.list_instances(series_uid);
-            if (result.is_ok()) {
-                instances = std::move(result.value());
-            }
-        } else if (!study_uid.empty()) {
-            // Study level retrieve - get all series first
-            auto series_result = db.list_series(study_uid);
-            if (series_result.is_ok()) {
-                for (const auto& ser : series_result.value()) {
-                    auto inst_result = db.list_instances(ser.series_uid);
-                    if (inst_result.is_ok()) {
-                        for (auto& inst : inst_result.value()) {
-                            instances.push_back(std::move(inst));
-                        }
-                    }
-                }
-            }
-        } else if (!patient_id.empty()) {
-            // Patient level retrieve - get all studies first
-            auto studies_result = db.list_studies(patient_id);
-            if (studies_result.is_ok()) {
-                for (const auto& study : studies_result.value()) {
-                    auto series_result = db.list_series(study.study_uid);
-                    if (series_result.is_ok()) {
-                        for (const auto& ser : series_result.value()) {
-                            auto inst_result = db.list_instances(ser.series_uid);
-                            if (inst_result.is_ok()) {
-                                for (auto& inst : inst_result.value()) {
-                                    instances.push_back(std::move(inst));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Load files
-        for (const auto& inst : instances) {
-            auto file = dicom_file::open(inst.file_path);
-            if (file.is_ok()) {
-                files.push_back(std::move(file.value()));
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[" << current_timestamp() << "] Retrieve error: " << e.what() << "\n";
-    }
-
-    return files;
 }
 
 /**
@@ -764,27 +519,22 @@ bool run_server(const qr_scp_args& args) {
     config.implementation_version_name = "QR_SCP_001";
 
     // Create server
-    dicom_server server{config};
-    g_server = &server;
+    v2::dicom_server_v2 server{config};
 
     // Register Verification service (C-ECHO)
     server.register_service(std::make_shared<verification_scp>());
 
     // Configure Query SCP
     auto query_service = std::make_shared<query_scp>();
-    query_service->set_handler(
-        [&db](query_level level, const dicom_dataset& keys, const std::string& ae) {
-            return handle_query(level, keys, ae, *db);
-        });
+    query_service->set_find_handler(
+        [&db](const find_request& request) { return find_in_index(*db, request); });
 
     server.register_service(query_service);
 
     // Configure Retrieve SCP
     auto retrieve_service = std::make_shared<retrieve_scp>();
-    retrieve_service->set_retrieve_handler(
-        [&db](const dicom_dataset& keys) {
-            return handle_retrieve(keys, *db);
-        });
+    retrieve_service->set_retrieve_selector(
+        [&db](const retrieve_request& request) { return select_from_index(*db, request); });
 
     // Set destination resolver for C-MOVE
     retrieve_service->set_destination_resolver(
@@ -800,15 +550,17 @@ bool run_server(const qr_scp_args& args) {
     server.register_service(retrieve_service);
 
     // Set up callbacks for logging
-    server.on_association_established([](const association& assoc) {
+    server.on_association_established([](const std::string& /* session_id */,
+                                         const std::string& calling_ae,
+                                         const std::string& called_ae) {
         std::cout << "[" << current_timestamp() << "] "
-                  << "Association established from: " << assoc.calling_ae()
-                  << " -> " << assoc.called_ae() << "\n";
+                  << "Association established from: " << calling_ae
+                  << " -> " << called_ae << "\n";
     });
 
-    server.on_association_released([](const association& assoc) {
+    server.on_association_closed([](const std::string& session_id, bool graceful) {
         std::cout << "[" << current_timestamp() << "] "
-                  << "Association released: " << assoc.calling_ae() << "\n";
+                  << "Association closed: " << session_id << (graceful ? " (released)" : " (aborted)") << "\n";
     });
 
     server.on_error([](const std::string& error) {
@@ -820,7 +572,7 @@ bool run_server(const qr_scp_args& args) {
     auto result = server.start();
     if (result.is_err()) {
         std::cerr << "Failed to start server: " << result.error().message << "\n";
-        g_server = nullptr;
+
         return false;
     }
 
@@ -832,7 +584,7 @@ bool run_server(const qr_scp_args& args) {
     std::cout << "=================================================\n\n";
 
     // Wait for shutdown
-    server.wait_for_shutdown();
+    kcenon::pacs::cli::wait_for_shutdown(server);
 
     // Print final statistics
     auto server_stats = server.get_statistics();
@@ -853,7 +605,6 @@ bool run_server(const qr_scp_args& args) {
     std::cout << "  Uptime:                " << server_stats.uptime().count() << " seconds\n";
     std::cout << "=================================================\n";
 
-    g_server = nullptr;
     return true;
 }
 
@@ -878,7 +629,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Install signal handlers
-    install_signal_handlers();
+    kcenon::pacs::cli::install_shutdown_signals();
 
     bool success = run_server(args);
 

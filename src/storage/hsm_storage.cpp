@@ -55,6 +55,15 @@ hsm_storage::hsm_storage(std::unique_ptr<storage_interface> hot_tier,
 // ============================================================================
 
 auto hsm_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
+    auto syntax = native_store_syntax(dataset);
+    if (syntax.is_err()) return syntax.error();
+    return store(dataset,syntax.value());
+}
+
+auto hsm_storage::store(const core::dicom_dataset& dataset,
+    const encoding::transfer_syntax& syntax) -> VoidResult {
+    auto validation = core::dicom_file::validate_pixel_data_representation(dataset,syntax);
+    if (validation.is_err()) return validation;
     // Extract SOP Instance UID for metadata tracking
     auto sop_uid = dataset.get_string(core::tags::sop_instance_uid);
     if (sop_uid.empty()) {
@@ -63,7 +72,7 @@ auto hsm_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
     }
 
     // Store in hot tier
-    auto result = hot_tier_->store(dataset);
+    auto result = hot_tier_->store(dataset,syntax);
     if (!result.is_ok()) {
         return result;
     }
@@ -75,12 +84,18 @@ auto hsm_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
     return ok();
 }
 
-auto hsm_storage::retrieve(std::string_view sop_instance_uid)
-    -> Result<core::dicom_dataset> {
+auto hsm_storage::retrieve(std::string_view uid) -> Result<core::dicom_dataset> {
+    auto file = retrieve_file(uid);
+    if (file.is_err()) return file.error();
+    return file.value().dataset();
+}
+
+auto hsm_storage::retrieve_file(std::string_view sop_instance_uid)
+    -> Result<core::dicom_file> {
     // Find which tier contains the instance
     auto tier = find_tier(sop_instance_uid);
     if (!tier.has_value()) {
-        return make_error<core::dicom_dataset>(
+        return make_error<core::dicom_file>(
             kInstanceNotFound,
             "Instance not found: " + std::string(sop_instance_uid),
             "hsm_storage");
@@ -89,11 +104,11 @@ auto hsm_storage::retrieve(std::string_view sop_instance_uid)
     // Retrieve from the tier
     auto* storage = get_storage(*tier);
     if (storage == nullptr) {
-        return make_error<core::dicom_dataset>(
+        return make_error<core::dicom_file>(
             kTierNotAvailable, "Tier storage not available", "hsm_storage");
     }
 
-    auto result = storage->retrieve(sop_instance_uid);
+    auto result = storage->retrieve_file(sop_instance_uid);
     if (!result.is_ok()) {
         return result;
     }
@@ -558,7 +573,7 @@ auto hsm_storage::migrate_instance(std::string_view uid, storage_tier from_tier,
     }
 
     // Retrieve from source
-    auto retrieve_result = source->retrieve(uid);
+    auto retrieve_result = source->retrieve_file(uid);
     if (!retrieve_result.is_ok()) {
         return make_error<std::monostate>(
             kMigrationFailed,
@@ -567,10 +582,10 @@ auto hsm_storage::migrate_instance(std::string_view uid, storage_tier from_tier,
             "hsm_storage");
     }
 
-    auto& dataset = retrieve_result.value();
+    auto& instance = retrieve_result.value();
 
     // Store to target
-    auto store_result = target->store(dataset);
+    auto store_result = target->store_instance(instance);
     if (!store_result.is_ok()) {
         return make_error<std::monostate>(
             kMigrationFailed,

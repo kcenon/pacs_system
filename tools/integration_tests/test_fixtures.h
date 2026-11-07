@@ -25,6 +25,7 @@
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/services/storage_scu.h"
@@ -38,6 +39,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <memory>
 #include <random>
@@ -54,9 +56,11 @@
 #include <csignal>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <spawn.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
+extern char** environ;
 #endif
 
 namespace kcenon::pacs::integration_test {
@@ -142,38 +146,6 @@ inline std::chrono::milliseconds dcmtk_server_ready_timeout() {
  */
 inline bool supports_real_tcp_dicom() {
     return network::association::tcp_transport_available;
-}
-
-/**
- * @brief Check if test_server (the v1 dicom_server) accepts TCP associations
- *
- * Always false: the v1 dicom_server serves only in-process associations
- * (its accept_worker closes every TCP connection), and dicom_server_v2 is
- * the SCP that serves TCP. The DCMTK cases that run a DCMTK SCU against a
- * v1-based fixture skip on this until their fixtures move to
- * dicom_server_v2 (follow-up of Issue #1240).
- *
- * @return true if the v1 dicom_server serves DICOM over TCP
- */
-inline bool v1_server_accepts_tcp() {
-    return false;
-}
-
-/**
- * @brief Check if retrieve_scp sends C-MOVE sub-operations to the destination
- *
- * Always false: retrieve_scp::handle_c_move() opens no association to the
- * move destination. Without a store handler it counts every C-STORE
- * sub-operation as successful and sends nothing
- * (src/services/retrieve_scp.cpp), so a destination never receives a file.
- * The C-MOVE cases that check what the destination received skip on this
- * until retrieve_scp performs the sub-operations.
- *
- * @return true if retrieve_scp stores the matching instances at the
- *         C-MOVE destination
- */
-inline bool move_scp_stores_to_destination() {
-    return false;
 }
 
 /// Default AE titles
@@ -566,7 +538,7 @@ public:
         config.implementation_class_uid = "1.2.826.0.1.3680043.9.9999.1";
         config.implementation_version_name = "TEST_SCP";
 
-        server_ = std::make_unique<network::dicom_server>(config);
+        server_ = std::make_unique<network::v2::dicom_server_v2>(config);
     }
 
     ~test_server() {
@@ -646,7 +618,7 @@ public:
     [[nodiscard]] bool is_running() const noexcept { return running_; }
 
     /// @return Reference to underlying server
-    [[nodiscard]] network::dicom_server& server() { return *server_; }
+    [[nodiscard]] network::v2::dicom_server_v2& server() { return *server_; }
 
 private:
     /**
@@ -731,7 +703,7 @@ private:
 
     uint16_t port_;
     std::string ae_title_;
-    std::unique_ptr<network::dicom_server> server_;
+    std::unique_ptr<network::v2::dicom_server_v2> server_;
     bool running_{false};
 };
 
@@ -910,7 +882,7 @@ public:
      * @brief Start a process in the background
      * @param executable Path to executable
      * @param args Command line arguments
-     * @return Process ID (pid_t on POSIX, DWORD on Windows), or -1 on error
+     * @return Process ID (pid_t on POSIX, DWORD on Windows), or invalid_pid on error
      */
 #ifdef _WIN32
     using pid_type = DWORD;
@@ -964,7 +936,15 @@ public:
         CloseHandle(process);
         return false;
 #else
-        return kill(pid, 0) == 0;
+        if (pid <= 0) {
+            return false;
+        }
+        int status = 0;
+        pid_t result;
+        do {
+            result = waitpid(pid, &status, WNOHANG);
+        } while (result < 0 && errno == EINTR);
+        return result == 0;
 #endif
     }
 
@@ -1110,6 +1090,48 @@ public:
 private:
 #ifndef _WIN32
     // POSIX implementation
+    static int spawn_posix(
+        const std::string& executable, const std::vector<std::string>& args,
+        int output, int error, pid_t& pid) {
+        // Construct arguments in the parent. No allocator, inherited Catch2
+        // signal handler or reporter is run in a forked copy of the test process.
+        std::vector<char*> argv{const_cast<char*>(executable.c_str())};
+        for (const auto& arg : args) {
+            argv.push_back(const_cast<char*>(arg.c_str()));
+        }
+        argv.push_back(nullptr);
+        posix_spawn_file_actions_t actions;
+        posix_spawnattr_t attributes;
+        int rc = posix_spawn_file_actions_init(&actions);
+        if (rc != 0) {
+            return rc;
+        }
+        rc = posix_spawnattr_init(&attributes);
+        if (rc != 0) {
+            posix_spawn_file_actions_destroy(&actions);
+            return rc;
+        }
+        sigset_t defaults, mask;
+        sigfillset(&defaults);
+        sigemptyset(&mask);
+        if (rc == 0) rc = posix_spawn_file_actions_adddup2(&actions, output, STDOUT_FILENO);
+        if (rc == 0) rc = posix_spawn_file_actions_adddup2(&actions, error, STDERR_FILENO);
+        if (rc == 0 && output > STDERR_FILENO) rc = posix_spawn_file_actions_addclose(&actions, output);
+        if (rc == 0 && error > STDERR_FILENO && error != output) rc = posix_spawn_file_actions_addclose(&actions, error);
+        if (rc == 0) rc = posix_spawnattr_setsigdefault(&attributes, &defaults);
+        if (rc == 0) rc = posix_spawnattr_setsigmask(&attributes, &mask);
+        if (rc == 0) rc = posix_spawnattr_setpgroup(&attributes, 0);
+        if (rc == 0) rc = posix_spawnattr_setflags(&attributes,
+            POSIX_SPAWN_SETSIGDEF | POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETPGROUP);
+        if (rc == 0) {
+            rc = posix_spawnp(&pid, executable.c_str(), &actions, &attributes,
+                             argv.data(), ::environ);
+        }
+        posix_spawnattr_destroy(&attributes);
+        posix_spawn_file_actions_destroy(&actions);
+        return rc;
+    }
+
     static process_result run_posix(
         const std::string& executable,
         const std::vector<std::string>& args,
@@ -1118,48 +1140,28 @@ private:
         process_result result;
 
         // Create pipes for stdout and stderr
-        int stdout_pipe[2];
-        int stderr_pipe[2];
+        int stdout_pipe[2]{-1, -1};
+        int stderr_pipe[2]{-1, -1};
 
         if (pipe(stdout_pipe) != 0 || pipe(stderr_pipe) != 0) {
             result.exit_code = -1;
             result.stderr_output = "Failed to create pipes";
+            for (int fd : stdout_pipe) if (fd >= 0) close(fd);
+            for (int fd : stderr_pipe) if (fd >= 0) close(fd);
             return result;
         }
-
-        pid_t pid = fork();
-
-        if (pid < 0) {
-            result.exit_code = -1;
-            result.stderr_output = "Failed to fork";
+        for (int fd : stdout_pipe) fcntl(fd, F_SETFD, FD_CLOEXEC);
+        for (int fd : stderr_pipe) fcntl(fd, F_SETFD, FD_CLOEXEC);
+        pid_t pid = invalid_pid;
+        const int spawn_error = spawn_posix(executable, args, stdout_pipe[1], stderr_pipe[1], pid);
+        if (spawn_error != 0) {
+            result.exit_code = 127;
+            result.stderr_output = "Failed to execute " + executable + ": " + std::strerror(spawn_error);
             close(stdout_pipe[0]);
             close(stdout_pipe[1]);
             close(stderr_pipe[0]);
             close(stderr_pipe[1]);
             return result;
-        }
-
-        if (pid == 0) {
-            // Child process
-            close(stdout_pipe[0]);
-            close(stderr_pipe[0]);
-
-            dup2(stdout_pipe[1], STDOUT_FILENO);
-            dup2(stderr_pipe[1], STDERR_FILENO);
-
-            close(stdout_pipe[1]);
-            close(stderr_pipe[1]);
-
-            // Build argv
-            std::vector<char*> argv;
-            argv.push_back(const_cast<char*>(executable.c_str()));
-            for (const auto& arg : args) {
-                argv.push_back(const_cast<char*>(arg.c_str()));
-            }
-            argv.push_back(nullptr);
-
-            execv(executable.c_str(), argv.data());
-            _exit(127);  // execv failed
         }
 
         // Parent process
@@ -1180,10 +1182,10 @@ private:
             // Check timeout
             auto elapsed = std::chrono::steady_clock::now() - start;
             if (elapsed >= timeout) {
-                kill(pid, SIGKILL);
-                waitpid(pid, &status, 0);
+                kill(-pid, SIGKILL);
+                while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
                 result.timed_out = true;
-                result.exit_code = -1;
+                result.exit_code = 124;
                 break;
             }
 
@@ -1197,18 +1199,20 @@ private:
                     result.exit_code = -WTERMSIG(status);
                 }
             } else if (wait_result < 0) {
+                if (errno == EINTR) {
+                    continue;
+                }
+                result.stderr_output += "waitpid failed: " + std::string(std::strerror(errno));
                 break;
             }
 
             // Read available output
             ssize_t n;
-            while ((n = read(stdout_pipe[0], buffer.data(), buffer.size() - 1)) > 0) {
-                buffer[static_cast<size_t>(n)] = '\0';
-                result.stdout_output += buffer.data();
+            for (int reads = 0; reads < 64 && (n = read(stdout_pipe[0], buffer.data(), buffer.size())) > 0; ++reads) {
+                result.stdout_output.append(buffer.data(), static_cast<size_t>(n));
             }
-            while ((n = read(stderr_pipe[0], buffer.data(), buffer.size() - 1)) > 0) {
-                buffer[static_cast<size_t>(n)] = '\0';
-                result.stderr_output += buffer.data();
+            for (int reads = 0; reads < 64 && (n = read(stderr_pipe[0], buffer.data(), buffer.size())) > 0; ++reads) {
+                result.stderr_output.append(buffer.data(), static_cast<size_t>(n));
             }
 
             if (!child_exited) {
@@ -1216,15 +1220,15 @@ private:
             }
         }
 
+        // Stop descendants still holding output pipes after their parent exits.
+        kill(-pid, SIGKILL);
         // Read any remaining output
         ssize_t n;
         while ((n = read(stdout_pipe[0], buffer.data(), buffer.size() - 1)) > 0) {
-            buffer[static_cast<size_t>(n)] = '\0';
-            result.stdout_output += buffer.data();
+            result.stdout_output.append(buffer.data(), static_cast<size_t>(n));
         }
         while ((n = read(stderr_pipe[0], buffer.data(), buffer.size() - 1)) > 0) {
-            buffer[static_cast<size_t>(n)] = '\0';
-            result.stderr_output += buffer.data();
+            result.stderr_output.append(buffer.data(), static_cast<size_t>(n));
         }
 
         close(stdout_pipe[0]);
@@ -1237,38 +1241,12 @@ private:
         const std::string& executable,
         const std::vector<std::string>& args) {
 
-        pid_t pid = fork();
-
-        if (pid < 0) {
-            return -1;
-        }
-
-        if (pid == 0) {
-            // Child process
-            // Redirect stdout and stderr to /dev/null
-            int null_fd = open("/dev/null", O_RDWR);
-            if (null_fd >= 0) {
-                dup2(null_fd, STDOUT_FILENO);
-                dup2(null_fd, STDERR_FILENO);
-                close(null_fd);
-            }
-
-            // Create new session to detach from terminal
-            setsid();
-
-            // Build argv
-            std::vector<char*> argv;
-            argv.push_back(const_cast<char*>(executable.c_str()));
-            for (const auto& arg : args) {
-                argv.push_back(const_cast<char*>(arg.c_str()));
-            }
-            argv.push_back(nullptr);
-
-            execv(executable.c_str(), argv.data());
-            _exit(127);
-        }
-
-        return pid;
+        int null_fd = open("/dev/null", O_RDWR | O_CLOEXEC);
+        if (null_fd < 0) return invalid_pid;
+        pid_t pid = invalid_pid;
+        const int error = spawn_posix(executable, args, null_fd, null_fd, pid);
+        close(null_fd);
+        return error == 0 ? pid : invalid_pid;
     }
 
     static bool stop_background_posix(pid_t pid) {
@@ -1276,8 +1254,16 @@ private:
             return false;
         }
 
-        // Send SIGTERM first for graceful shutdown
-        if (kill(pid, SIGTERM) != 0) {
+        // Reap an exited child and never signal a PID no longer owned by us.
+        int status = 0;
+        pid_t state;
+        do {
+            state = waitpid(pid, &status, WNOHANG);
+        } while (state < 0 && errno == EINTR);
+        if (state == pid || (state < 0 && errno == ECHILD)) return true;
+        if (state < 0) return false;
+        // Send SIGTERM to the owned process group for graceful shutdown.
+        if (kill(-pid, SIGTERM) != 0) {
             return errno == ESRCH;  // Process already gone
         }
 
@@ -1292,8 +1278,8 @@ private:
         }
 
         // Force kill if still running
-        kill(pid, SIGKILL);
-        waitpid(pid, nullptr, 0);
+        kill(-pid, SIGKILL);
+        while (waitpid(pid, nullptr, 0) < 0 && errno == EINTR) {}
 
         return true;
     }

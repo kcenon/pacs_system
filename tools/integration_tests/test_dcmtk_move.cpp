@@ -26,6 +26,7 @@
 #include "kcenon/pacs/services/storage_scu.h"
 #include "kcenon/pacs/services/verification_scp.h"
 
+#include <algorithm>
 #include <future>
 #include <mutex>
 #include <set>
@@ -211,21 +212,30 @@ private:
 };
 
 /**
- * @brief Count DICOM files in directory
+ * @brief Verify destination objects by parsing files, including DCMTK's
+ *        default CT.<SOP Instance UID> names (their suffix is numeric).
  */
-size_t count_dicom_files(const std::filesystem::path& dir) {
-    size_t count = 0;
-    std::error_code ec;
-    for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
-        if (entry.is_regular_file()) {
-            auto ext = entry.path().extension().string();
-            // DCMTK storescp may save with .dcm or without extension
-            if (ext == ".dcm" || ext.empty()) {
-                ++count;
-            }
+void check_received_files(const std::filesystem::path& dir,
+                          const std::vector<dicom_file>& expected) {
+    std::set<std::string> received;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(dir)) {
+        if (!entry.is_regular_file()) continue;
+        auto file = dicom_file::open(entry.path());
+        INFO("Destination file: " << entry.path());
+        REQUIRE(file.is_ok());
+        const auto& dataset = file.value().dataset();
+        const auto uid = dataset.get_string(tags::sop_instance_uid);
+        REQUIRE(received.insert(uid).second);
+        const auto match = std::find_if(expected.begin(), expected.end(), [&](const auto& original) {
+            return original.dataset().get_string(tags::sop_instance_uid) == uid;
+        });
+        REQUIRE(match != expected.end());
+        for (const auto tag : {tags::sop_class_uid, tags::study_instance_uid,
+                               tags::series_instance_uid, tags::patient_id, tags::patient_name}) {
+            CHECK(dataset.get_string(tag) == match->dataset().get_string(tag));
         }
     }
-    return count;
+    CHECK(received.size() == expected.size());
 }
 
 /**
@@ -258,19 +268,6 @@ dimse_message make_c_move_rq(
 TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]") {
     if (!dcmtk_tool::is_available()) {
         SKIP("DCMTK not installed - skipping interoperability test");
-    }
-
-    // movescu needs a pacs_system SCP that accepts TCP; see
-    // v1_server_accepts_tcp() in test_fixtures.h
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
-
-    // The case counts the files at the destination
-    if (!move_scp_stores_to_destination()) {
-        SKIP("retrieve_scp opens no association to the C-MOVE destination; "
-             "see move_scp_stores_to_destination() in test_fixtures.h");
     }
 
     // Setup: Ports and AE titles
@@ -347,8 +344,7 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
         std::this_thread::sleep_for(std::chrono::seconds{2});
 
         // Verify files were received
-        auto received_count = count_dicom_files(dest_dir.path());
-        REQUIRE(received_count >= 2);
+        check_received_files(dest_dir.path(), repository.find_all(dicom_dataset{}));
     }
 
     SECTION("C-MOVE by PatientID succeeds") {
@@ -364,6 +360,7 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
         INFO("stderr: " << result.stderr_output);
 
         REQUIRE(result.success());
+        check_received_files(dest_dir.path(), repository.find_all(dicom_dataset{}));
     }
 
     SECTION("C-MOVE with empty result set completes gracefully") {
@@ -380,6 +377,7 @@ TEST_CASE("C-MOVE: pacs_system SCP with DCMTK movescu", "[dcmtk][interop][move]"
 
         // Should succeed even with no matching results
         REQUIRE(result.success());
+        check_received_files(dest_dir.path(), {});
     }
 }
 
@@ -393,10 +391,6 @@ TEST_CASE("C-MOVE: Unknown destination AE rejection", "[dcmtk][interop][move][er
     }
 
     // movescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto port = find_available_port();
     const std::string ae_title = "MOVE_SCP";
@@ -486,10 +480,6 @@ TEST_CASE("C-MOVE: Concurrent operations", "[dcmtk][interop][move][stress]") {
     }
 
     // movescu needs a pacs_system SCP that accepts TCP
-    if (!v1_server_accepts_tcp()) {
-        SKIP("test_server (v1 dicom_server) serves only in-process associations; "
-             "this case needs a dicom_server_v2 fixture");
-    }
 
     auto move_port = find_available_port();
     auto dest_port = find_available_port(move_port + 1);
@@ -679,18 +669,11 @@ TEST_CASE("C-MOVE: pacs_system SCU basic operation", "[dcmtk][interop][move]") {
             }
         }
 
-        // The C-MOVE exchange above has run; the destination receives files
-        // only once retrieve_scp performs the sub-operations
-        if (!move_scp_stores_to_destination()) {
-            SKIP("retrieve_scp opens no association to the C-MOVE destination; "
-                 "see move_scp_stores_to_destination() in test_fixtures.h");
-        }
-
         // Wait for destination to receive files
         std::this_thread::sleep_for(std::chrono::seconds{1});
 
         // Verify file was received
-        REQUIRE(tracker.count() >= 1);
+        REQUIRE(tracker.count() == 1);
     }
 }
 

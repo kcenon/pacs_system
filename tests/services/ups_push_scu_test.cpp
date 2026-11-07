@@ -320,16 +320,16 @@ TEST_CASE("ups_push_sop_class_uid is correct", "[services][ups][scu]") {
 // N-ACTION Type Constants Test
 // ============================================================================
 
-TEST_CASE("UPS N-ACTION type constants", "[services][ups][scu]") {
+TEST_CASE("UPS Push SCU N-ACTION type constants", "[services][ups][scu]") {
     CHECK(ups_action_change_state == 1);
-    CHECK(ups_action_request_cancel == 3);
+    CHECK(ups_action_request_cancel == 2);
 }
 
 // ============================================================================
 // UPS Tags Tests
 // ============================================================================
 
-TEST_CASE("ups_tags namespace contains UPS-specific tags", "[services][ups][scu]") {
+TEST_CASE("UPS Push SCU uses UPS-specific tags", "[services][ups][scu]") {
     using namespace ups_tags;
 
     SECTION("procedure step state tag") {

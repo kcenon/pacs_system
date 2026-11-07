@@ -29,6 +29,9 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <condition_variable>
+#include <deque>
+#include <thread>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -223,6 +226,10 @@ public:
      */
     void stop(bool graceful = false);
 
+    /// Join service execution after stop/close, from a non-service thread.
+    /// The server calls this before destroying the session's I/O context.
+    void wait_for_service();
+
     // =========================================================================
     // Server-Level Event Forwarding
     // =========================================================================
@@ -307,6 +314,15 @@ public:
      * @return Time point of last PDU received/sent
      */
     [[nodiscard]] time_point last_activity() const noexcept;
+
+    /// True while a request is queued or served: the peer may rightly be silent then.
+    [[nodiscard]] bool service_active() const;
+
+    /// End an association the idle timeout caught: the peer gets A-ABORT, not silence.
+    void abort_idle();
+
+    /// Answer the association request with a local-limit rejection instead of serving it.
+    void reject_for_association_limit() noexcept { reject_for_limit_ = true; }
 
     // =========================================================================
     // Callbacks
@@ -444,6 +460,9 @@ private:
     // Service Dispatching
     // =========================================================================
 
+    void enqueue_request(uint8_t context_id, dimse::dimse_message msg);
+    void run_services();
+
     /// Dispatch DIMSE message to appropriate service
     Result<std::monostate> dispatch_to_service(
         uint8_t context_id,
@@ -527,6 +546,17 @@ private:
     /// Thread safety
     mutable std::mutex mutex_;
     mutable std::mutex callback_mutex_;
+    std::mutex write_mutex_;
+
+    // One joined worker per active association; the receive thread remains
+    // available for responses, cancellation, and disconnects during service I/O.
+    std::thread service_thread_;
+    mutable std::mutex service_mutex_;
+    std::condition_variable service_ready_;
+    std::deque<std::pair<uint8_t, dimse::dimse_message>> service_requests_;
+    bool service_stopping_{false};
+    bool service_running_{false};
+    bool reject_for_limit_{false};
 
     /// Access control manager for RBAC
     std::shared_ptr<security::access_control_manager> access_control_;

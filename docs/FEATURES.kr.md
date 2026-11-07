@@ -463,7 +463,7 @@ if (result.is_ok()) {
 | DX Image Storage | 1.2.840.10008.5.1.4.1.1.1.1 | ✅ |
 | Secondary Capture | 1.2.840.10008.5.1.4.1.1.7 | ✅ |
 | US Image Storage | 1.2.840.10008.5.1.4.1.1.6.1 | ✅ |
-| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.6.2 | ✅ |
+| US Multi-frame Image Storage | 1.2.840.10008.5.1.4.1.1.3.1 | ✅ |
 | XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1 | ✅ |
 | Enhanced XA Image Storage | 1.2.840.10008.5.1.4.1.1.12.1.1 | ✅ |
 | XRF Image Storage | 1.2.840.10008.5.1.4.1.1.12.2 | ✅ |
@@ -1500,7 +1500,7 @@ double hit_ratio = stats.hit_ratio();  // 0.0 - 1.0
 | 엔드포인트 | 메서드 | 설명 |
 |-----------|--------|------|
 | `/api/v1/system/status` | GET | 시스템 상태 (health_checker 사용) |
-| `/api/v1/system/metrics` | GET | 성능 메트릭 |
+| `/api/v1/system/metrics` | GET | DIMSE 카운터 (`pacs_server`: C-STORE, C-FIND, 연결) |
 | `/api/v1/system/config` | GET | 현재 서버 구성 |
 | `/api/v1/system/config` | PUT | 구성 업데이트 |
 | `/api/v1/system/version` | GET | API 버전 정보 |
