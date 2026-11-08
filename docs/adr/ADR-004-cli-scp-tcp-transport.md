@@ -1,17 +1,18 @@
 ---
 doc_id: "PAC-ADR-004"
 doc_title: "ADR-004: TCP transport for CLI SCPs"
-doc_version: "1.0.0"
-doc_date: "2026-11-01"
-doc_status: "Proposed"
+doc_version: "1.1.0"
+doc_date: "2026-11-08"
+doc_status: "Accepted"
 project: "pacs_system"
 category: "ADR"
 ---
 
 # ADR-004: TCP transport for CLI SCPs
 
-Status: implemented in the issue #1303 branch, pending review and the deferred
-TLS/functional acceptance work below.
+Status: accepted on 2026-11-08. Implemented by #1303 and merged into develop with
+#1308; the TLS and functional acceptance work it deferred is done under #1292,
+#1304, #1305, #1306, #1314, #1315, #1316 and #1317.
 
 ## Context and decision
 
