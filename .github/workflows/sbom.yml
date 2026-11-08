@@ -76,7 +76,8 @@ jobs:
         print()
         print("## Internal ecosystem")
         for dep in manifest.get("internal_ecosystem", []):
-            print(f"- {dep['name']}: {dep['version']} ({dep['license']})")
+            patched = ''.join(f" + {patch}" for patch in dep.get('patches', []))
+            print(f"- {dep['name']}: {dep['version']}{patched} ({dep['license']})")
         print()
         print("## Native and system dependencies")
         for dep in manifest.get("native_and_system", []):

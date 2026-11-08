@@ -121,6 +121,15 @@ public:
     [[nodiscard]] static auto from_string(dicom_tag tag, encoding::vr_type vr,
                                           std::string_view value) -> dicom_element;
 
+    /// Create Pixel Data with an explicit encapsulated representation. Copies
+    /// retain this marker; replacing the value with set_value clears it.
+    [[nodiscard]] static auto from_encapsulated_pixel_data(std::span<const uint8_t> value)
+        -> kcenon::pacs::Result<dicom_element>;
+
+    [[nodiscard]] auto is_encapsulated_pixel_data() const noexcept -> bool {
+        return encapsulated_pixel_data_;
+    }
+
     /**
      * @brief Create an element from a numeric value
      * @tparam T The numeric type (uint16_t, int32_t, float, double, etc.)
@@ -319,6 +328,7 @@ private:
     encoding::vr_type vr_;
     std::vector<uint8_t> data_;
     std::vector<dicom_dataset> sequence_items_;  // Used only when VR == SQ
+    bool encapsulated_pixel_data_{false};
 
     /**
      * @brief Apply DICOM padding to ensure even length
@@ -406,6 +416,7 @@ auto dicom_element::as_numeric_list() const -> kcenon::pacs::Result<std::vector<
 template <typename T>
     requires std::is_arithmetic_v<T>
 void dicom_element::set_numeric(T value) {
+    encapsulated_pixel_data_ = false;
     data_.resize(sizeof(T));
     std::memcpy(data_.data(), &value, sizeof(T));
 }

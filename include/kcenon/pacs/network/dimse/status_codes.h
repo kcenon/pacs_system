@@ -78,6 +78,15 @@ constexpr status_code status_error_unable_to_process = 0xC001;
 /// Error: Duplicate SOP instance
 constexpr status_code status_error_duplicate_sop_instance = 0x0111;
 
+/// No such attribute (the SCP does not support an attribute a request names)
+constexpr status_code status_error_no_such_attribute = 0x0105;
+
+/// Invalid attribute value
+constexpr status_code status_error_invalid_attribute_value = 0x0106;
+
+/// No such SOP Instance
+constexpr status_code status_error_no_such_object_instance = 0x0112;
+
 /// Error: Missing attribute
 constexpr status_code status_error_missing_attribute = 0x0120;
 

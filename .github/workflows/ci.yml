@@ -54,7 +54,7 @@ jobs:
             triplet: x64-linux
           # macOS: use explicit /usr/bin paths to ensure Apple Clang (Xcode)
           # is used instead of Homebrew LLVM Clang, which lacks std::format
-          - os: macos-14
+          - os: macos-15
             compiler: clang
             cc: /usr/bin/clang
             cxx: /usr/bin/clang++
@@ -99,6 +99,10 @@ jobs:
           brew install openjpeg charls
         fi
 
+    - name: Link OpenSSL 3 (macOS)
+      if: runner.os == 'macOS'
+      uses: ./pacs_system/.github/actions/link-openssl-3
+
     - name: Setup MSVC (Windows)
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -113,6 +117,7 @@ jobs:
     - name: Setup vcpkg
       uses: kcenon/common_system/.github/actions/setup-vcpkg@main
       with:
+        vcpkg-commit: '33f8517b96502c15c69b22512bbd7797195f24fc'
         extra-cache-key: 'pacs-system'
         manifest-dir: 'pacs_system'
 

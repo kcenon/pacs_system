@@ -15,6 +15,11 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+#include <chrono>
+#include <string>
+#include <vector>
 
 using namespace kcenon::pacs::services;
 using namespace kcenon::pacs::network;
@@ -554,4 +559,46 @@ TEST_CASE("retrieve_result elapsed time", "[services][retrieve_scu]") {
     result.elapsed = std::chrono::milliseconds{5000};
 
     CHECK(result.elapsed.count() == 5000);
+}
+
+TEST_CASE("retrieve_scu ends on Warning B000 instead of waiting for more", "[services][retrieve_scu]") {
+    association_config proposed;
+    proposed.calling_ae_title = "ORIGINATOR";
+    proposed.called_ae_title = "RETRIEVE_SCP";
+    proposed.proposed_contexts.emplace_back(1, std::string(study_root_move_sop_class_uid),
+                                            std::vector<std::string>{"1.2.840.10008.1.2.1"});
+    proposed.proposed_contexts.emplace_back(3, std::string(study_root_get_sop_class_uid),
+                                            std::vector<std::string>{"1.2.840.10008.1.2.1"});
+    auto requester = association::propose(proposed);
+    scp_config accepted;
+    accepted.ae_title = "RETRIEVE_SCP";
+    accepted.supported_abstract_syntaxes = {std::string(study_root_move_sop_class_uid),
+                                            std::string(study_root_get_sop_class_uid)};
+    accepted.supported_transfer_syntaxes = {"1.2.840.10008.1.2.1"};
+    auto receiver = association::accept(requester.build_associate_rq(), accepted);
+    REQUIRE(requester.process_associate_ac(receiver.build_associate_ac()));
+    receiver.set_peer(&requester);
+
+    retrieve_scu_config config;
+    config.timeout = std::chrono::milliseconds{200};
+    retrieve_scu scu(config);
+    dicom_dataset keys;
+    keys.set_string(tags::query_retrieve_level, kcenon::pacs::encoding::vr_type::CS, "STUDY");
+    keys.set_string(tags::study_instance_uid, kcenon::pacs::encoding::vr_type::UI, "1.2.3");
+
+    const bool move = GENERATE(true, false);
+    dimse_message response{move ? command_field::c_move_rsp : command_field::c_get_rsp, 0};
+    response.set_affected_sop_class_uid(move ? study_root_move_sop_class_uid : study_root_get_sop_class_uid);
+    response.set_message_id_responded_to(1);
+    response.set_status(status_warning_subops_complete_failures);
+    response.set_completed_subops(2);
+    response.set_failed_subops(1);
+    response.set_warning_subops(0);
+    REQUIRE(receiver.send_dimse(move ? 1 : 3, response).is_ok());
+
+    const auto result = move ? scu.move(requester, keys, "DEST") : scu.get(requester, keys);
+    REQUIRE(result.is_ok());
+    CHECK(result.value().final_status == status_warning_subops_complete_failures);
+    CHECK(result.value().completed == 2);
+    CHECK(result.value().failed == 1);
 }

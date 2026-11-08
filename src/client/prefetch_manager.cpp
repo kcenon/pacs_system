@@ -734,6 +734,10 @@ std::string prefetch_manager::prefetch_study(
     if (impl_->job_mgr) {
         auto job_id = impl_->job_mgr->create_retrieve_job(
             source_node_id, study_uid, std::nullopt, job_priority::low);
+        // A created job only waits for a start.
+        if (auto started = impl_->job_mgr->start_job(job_id); started.is_err()) {
+            impl_->logger->warn_fmt("Prefetch job {} did not start: {}", job_id, started.error().message);
+        }
 
         // Record history
         impl_->record_prefetch_history(
@@ -760,6 +764,9 @@ std::string prefetch_manager::prefetch_patient(
     if (impl_->job_mgr) {
         auto job_id = impl_->job_mgr->create_prefetch_job(
             source_node_id, patient_id, job_priority::low);
+        if (auto started = impl_->job_mgr->start_job(job_id); started.is_err()) {
+            impl_->logger->warn_fmt("Prefetch job {} did not start: {}", job_id, started.error().message);
+        }
 
         impl_->logger->info_fmt("Created prefetch job {} for patient {}",
             job_id, std::string(patient_id));

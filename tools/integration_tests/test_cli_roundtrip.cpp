@@ -266,8 +266,10 @@ void write_image(const fs::path& path, const image_spec& spec,
     ds.set_numeric<uint16_t>(tags::high_bit, vr_type::US,
                              static_cast<uint16_t>(spec.bits_stored - 1));
     ds.set_numeric<uint16_t>(tags::pixel_representation, vr_type::US, 0);
+    // Encapsulated Pixel Data is always OB (PS3.5 A.4), and dicom_file refuses to write it as OW.
     ds.insert(dicom_element{tags::pixel_data,
-                            spec.bits_allocated > 8 ? vr_type::OW : vr_type::OB,
+                            spec.bits_allocated > 8 && !ts.is_encapsulated() ? vr_type::OW
+                                                                             : vr_type::OB,
                             pixel_data});
 
     auto file = dicom_file::create(std::move(ds), ts);
@@ -723,12 +725,27 @@ TEST_CASE("dcm_conv --verify rejects Pixel Data that does not match the Transfer
     const auto pixels = make_pixels(spec);
 
     SECTION("native Pixel Data labeled RLE Lossless") {
-        write_image(src, spec, pixels, transfer_syntax::rle_lossless);
+        // dicom_file::save refuses this mismatch, so relabel a valid file. The two
+        // UIDs have the same length, which keeps every group length correct.
+        write_image(src, spec, pixels);
+        std::ifstream in(src, std::ios::binary);
+        std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+        in.close();
+        const auto native_uid = transfer_syntax::explicit_vr_little_endian.uid();
+        const auto rle_uid = transfer_syntax::rle_lossless.uid();
+        REQUIRE(native_uid.size() == rle_uid.size());
+        const auto label = std::search(bytes.begin(), bytes.end(), native_uid.begin(), native_uid.end());
+        REQUIRE(label != bytes.end());
+        std::copy(rle_uid.begin(), rle_uid.end(), label);
+        std::ofstream(src, std::ios::binary | std::ios::trunc)
+            .write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
 
+        // The reader refuses the mismatch before conversion or verification starts.
         auto result = run_cli("dcm_conv", {src.string(), out.string(), "--rle", "--verify"});
         INFO("dcm_conv output: " << result.output);
         CHECK(result.exit_code == 2);
-        CHECK(result.output.find("Verification failed") != std::string::npos);
+        CHECK(result.output.find("Encapsulated") != std::string::npos);
+        CHECK_FALSE(fs::exists(out));
     }
 
     SECTION("encapsulated Pixel Data labeled Explicit VR Little Endian") {
@@ -1342,16 +1359,10 @@ TEST_CASE("Anonymization writes no identifiers from sequence items",
         CHECK_FALSE(contains_text(output_bytes, identifier));
     }
 
-    // The anonymizer does not process sequence items, so it empties the
-    // sequences and keeps the elements
+    // Annex E rules decide each sequence's fate, and test_recursive_anonymization.py
+    // checks them per attribute. Here the identifiers above must simply be gone.
     auto anonymized = read_dicom(out);
     CHECK(get_tag(anonymized, tags::patient_name) != "IDENTIFIED^PATIENT");
-    for (const auto tag : {other_patient_ids_sequence_tag, request_attributes_sequence_tag,
-                           referenced_study_sequence_tag}) {
-        const auto* items = anonymized.dataset().get_sequence(tag);
-        REQUIRE(items != nullptr);
-        CHECK(items->empty());
-    }
 }
 
 TEST_CASE("Transfer Syntax conversion re-encodes defined-length sequences",

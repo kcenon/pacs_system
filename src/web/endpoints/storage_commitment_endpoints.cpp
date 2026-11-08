@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -404,7 +406,7 @@ void verify_instances_async(
 }  // namespace
 
 void register_storage_commitment_endpoints_impl(
-    crow::SimpleApp& app,
+    rest_app& app,
     std::shared_ptr<rest_server_context> ctx) {
 
     // Shared transaction store for all requests
@@ -429,6 +431,12 @@ void register_storage_commitment_endpoints_impl(
                     res.body = make_error_json(
                         "DATABASE_UNAVAILABLE",
                         "Storage service is not available");
+                    return res;
+                }
+
+                if (ctx->config && req.body.size() > ctx->config->max_body_size) {
+                    res.code = 413;
+                    res.body = make_error_json("PAYLOAD_TOO_LARGE", "The request exceeds the configured limit");
                     return res;
                 }
 
@@ -484,6 +492,12 @@ void register_storage_commitment_endpoints_impl(
                     res.body = make_error_json(
                         "DATABASE_UNAVAILABLE",
                         "Storage service is not available");
+                    return res;
+                }
+
+                if (ctx->config && req.body.size() > ctx->config->max_body_size) {
+                    res.code = 413;
+                    res.body = make_error_json("PAYLOAD_TOO_LARGE", "The request exceeds the configured limit");
                     return res;
                 }
 

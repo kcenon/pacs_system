@@ -105,6 +105,16 @@ public:
      */
     [[nodiscard]] virtual std::vector<std::string> supported_sop_classes() const = 0;
 
+    /// SOP classes this service can initiate on an accepted association.
+    /// Used for explicit requestor SCP role negotiation, e.g. C-GET Storage.
+    [[nodiscard]] virtual std::vector<std::string> outbound_sop_classes() const {
+        return {};
+    }
+
+    /// The association is over. A service that keeps state for one drops it here;
+    /// no further request of that association reaches the service after this call.
+    virtual void association_ended(const network::association& assoc) { (void)assoc; }
+
     /**
      * @brief Handle an incoming DIMSE message
      *

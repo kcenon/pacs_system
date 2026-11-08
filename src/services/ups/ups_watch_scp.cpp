@@ -11,6 +11,7 @@
 #include "kcenon/pacs/network/dimse/command_field.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
 #include "kcenon/pacs/services/ups/ups_push_scp.h"
+#include "kcenon/pacs/services/ups/ups_rules.h"
 
 namespace kcenon::pacs::services {
 
@@ -31,6 +32,10 @@ void ups_watch_scp::set_subscribe_handler(ups_subscribe_handler handler) {
 
 void ups_watch_scp::set_unsubscribe_handler(ups_unsubscribe_handler handler) {
     unsubscribe_handler_ = std::move(handler);
+}
+
+void ups_watch_scp::set_suspend_handler(ups_suspend_handler handler) {
+    suspend_handler_ = std::move(handler);
 }
 
 void ups_watch_scp::set_get_subscribers_handler(
@@ -165,18 +170,41 @@ network::Result<std::monostate> ups_watch_scp::handle_n_action(
     uint16_t action_id = action_type.value();
     uint16_t message_id = request.message_id();
 
+    // Table CC.2.3-1: all three actions name the Receiving AE, usage 1/1.
+    const core::dicom_dataset no_information;
+    const auto& information = request.has_dataset() ? request.dataset().value().get() : no_information;
+    std::string receiving_ae = information.get_string(ups_tags::receiving_ae);
+    while (!receiving_ae.empty() && receiving_ae.back() == ' ') {
+        receiving_ae.pop_back();
+    }
+
+    switch (action_id) {
+        case ups_watch_action_subscribe:
+        case ups_watch_action_unsubscribe:
+        case ups_watch_action_suspend_global:
+            if (receiving_ae.empty()) {
+                return send_n_action_response(
+                    assoc, context_id, message_id,
+                    sop_instance_uid, action_id,
+                    status_error_missing_attribute);
+            }
+            break;
+        default:
+            break;
+    }
+
     switch (action_id) {
         case ups_watch_action_subscribe:
             return handle_subscribe(
-                assoc, context_id, message_id, sop_instance_uid);
+                assoc, context_id, message_id, sop_instance_uid, receiving_ae, information);
 
         case ups_watch_action_unsubscribe:
             return handle_unsubscribe(
-                assoc, context_id, message_id, sop_instance_uid);
+                assoc, context_id, message_id, sop_instance_uid, receiving_ae);
 
         case ups_watch_action_suspend_global:
             return handle_suspend_global(
-                assoc, context_id, message_id);
+                assoc, context_id, message_id, sop_instance_uid, receiving_ae);
 
         default:
             return send_n_action_response(
@@ -194,7 +222,9 @@ network::Result<std::monostate> ups_watch_scp::handle_subscribe(
     network::association& assoc,
     uint8_t context_id,
     uint16_t message_id,
-    const std::string& sop_instance_uid) {
+    const std::string& sop_instance_uid,
+    const std::string& subscriber_ae,
+    const core::dicom_dataset& information) {
 
     using namespace network::dimse;
 
@@ -204,8 +234,26 @@ network::Result<std::monostate> ups_watch_scp::handle_subscribe(
             "No subscribe handler configured for UPS Watch SCP");
     }
 
-    // Determine subscriber AE from the association
-    std::string subscriber_ae{assoc.calling_ae()};
+    // Deletion Lock (0074,1230) is required: Table CC.2.3-1, usage 1/1.
+    auto lock_value = information.get_string(ups_tags::deletion_lock);
+    while (!lock_value.empty() && lock_value.back() == ' ') {
+        lock_value.pop_back();
+    }
+    if (lock_value.empty()) {
+        return send_n_action_response(
+            assoc, context_id, message_id,
+            sop_instance_uid, ups_watch_action_subscribe,
+            status_error_missing_attribute);
+    }
+    const bool deletion_lock = lock_value == "TRUE";
+
+    // CC.2.3.3: a filtered global subscription this SCP does not support.
+    if (sop_instance_uid == ups_filtered_global_subscription_instance_uid) {
+        return send_n_action_response(
+            assoc, context_id, message_id,
+            sop_instance_uid, ups_watch_action_subscribe,
+            status_ups_no_such_instance);
+    }
 
     // Determine if this is a global or workitem-specific subscription
     std::string workitem_uid;
@@ -213,19 +261,17 @@ network::Result<std::monostate> ups_watch_scp::handle_subscribe(
         workitem_uid = sop_instance_uid;
     }
 
-    // Deletion lock defaults to false (could be extracted from dataset)
-    bool deletion_lock = false;
-
-    logger_->debug("UPS Watch: Subscribe request from " + subscriber_ae +
+    logger_->debug("UPS Watch: Subscribe request for " + subscriber_ae +
                    (workitem_uid.empty() ? " (global)" :
                     " for workitem " + workitem_uid));
 
     auto result = subscribe_handler_(subscriber_ae, workitem_uid, deletion_lock);
     if (result.is_err()) {
+        logger_->error("UPS subscribe of " + subscriber_ae + ": " + result.error().message);
         return send_n_action_response(
             assoc, context_id, message_id,
             sop_instance_uid, ups_watch_action_subscribe,
-            status_error_unable_to_process);
+            ups_status_from_error_code(result.error().code));
     }
 
     ++subscriptions_created_;
@@ -246,7 +292,8 @@ network::Result<std::monostate> ups_watch_scp::handle_unsubscribe(
     network::association& assoc,
     uint8_t context_id,
     uint16_t message_id,
-    const std::string& sop_instance_uid) {
+    const std::string& sop_instance_uid,
+    const std::string& subscriber_ae) {
 
     using namespace network::dimse;
 
@@ -255,8 +302,6 @@ network::Result<std::monostate> ups_watch_scp::handle_unsubscribe(
             kcenon::pacs::error_codes::ups_handler_not_set,
             "No unsubscribe handler configured for UPS Watch SCP");
     }
-
-    std::string subscriber_ae{assoc.calling_ae()};
 
     // Determine if this is a global or workitem-specific unsubscription
     std::string workitem_uid;
@@ -270,10 +315,11 @@ network::Result<std::monostate> ups_watch_scp::handle_unsubscribe(
 
     auto result = unsubscribe_handler_(subscriber_ae, workitem_uid);
     if (result.is_err()) {
+        logger_->error("UPS unsubscribe of " + subscriber_ae + ": " + result.error().message);
         return send_n_action_response(
             assoc, context_id, message_id,
             sop_instance_uid, ups_watch_action_unsubscribe,
-            status_error_unable_to_process);
+            ups_status_from_error_code(result.error().code));
     }
 
     ++subscriptions_removed_;
@@ -293,29 +339,38 @@ network::Result<std::monostate> ups_watch_scp::handle_unsubscribe(
 network::Result<std::monostate> ups_watch_scp::handle_suspend_global(
     network::association& assoc,
     uint8_t context_id,
-    uint16_t message_id) {
+    uint16_t message_id,
+    const std::string& sop_instance_uid,
+    const std::string& subscriber_ae) {
 
     using namespace network::dimse;
 
-    if (!unsubscribe_handler_) {
+    if (!suspend_handler_ && !unsubscribe_handler_) {
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::ups_handler_not_set,
             "No unsubscribe handler configured for UPS Watch SCP");
     }
 
-    std::string subscriber_ae{assoc.calling_ae()};
+    // Only the global subscription can be suspended (Table CC.2.3-3, C314H).
+    if (sop_instance_uid != ups_global_subscription_instance_uid) {
+        return send_n_action_response(
+            assoc, context_id, message_id,
+            sop_instance_uid, ups_watch_action_suspend_global,
+            status_ups_action_not_appropriate);
+    }
 
-    logger_->debug("UPS Watch: Suspend global subscription from " +
+    logger_->debug("UPS Watch: Suspend global subscription for " +
                    subscriber_ae);
 
-    // Suspend global = unsubscribe from global (empty workitem_uid)
-    auto result = unsubscribe_handler_(subscriber_ae, "");
+    auto result = suspend_handler_ ? suspend_handler_(subscriber_ae)
+                                   : unsubscribe_handler_(subscriber_ae, "");
     if (result.is_err()) {
+        logger_->error("UPS suspend of " + subscriber_ae + ": " + result.error().message);
         return send_n_action_response(
             assoc, context_id, message_id,
             std::string(ups_global_subscription_instance_uid),
             ups_watch_action_suspend_global,
-            status_error_unable_to_process);
+            ups_status_from_error_code(result.error().code));
     }
 
     ++subscriptions_removed_;
@@ -344,9 +399,10 @@ network::Result<std::monostate> ups_watch_scp::send_n_action_response(
 
     using namespace network::dimse;
 
+    // CC.2: every UPS is an instance of UPS Push, whatever context the request came on.
     auto response = make_n_action_rsp(
         message_id,
-        ups_watch_sop_class_uid,
+        ups_push_sop_class_uid,
         sop_instance_uid,
         action_type_id,
         status);

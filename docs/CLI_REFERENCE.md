@@ -53,6 +53,7 @@ cmake --build build
 - [Move SCU](#move-scu) - dcmtk-compatible C-MOVE
 - [Get SCU](#get-scu) - dcmtk-compatible C-GET
 - [Print SCU](#print-scu) - Print Management client
+- [DIMSE-N SCU](#dimse-n-scu) - Storage Commitment, UPS and N-GET client
 
 ### Server Applications
 - [Store SCP](#store-scp) - Storage server
@@ -219,8 +220,11 @@ is fixed, files are written without the Source Image Sequence item.
   Transfer Syntax: it decodes every frame of compressed Pixel Data, and checks
   native Pixel Data against Rows x Columns x Samples per Pixel x Bits
   Allocated / 8 x Number of Frames.
-- The JPEG Lossless decoder may fail on streams from other encoders (see
+- The JPEG Lossless codec handles grayscale only: color frames and restart
+  intervals are refused (see
   [Appendix B of the DICOM Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md#appendix-b-known-limitations)).
+- JPEG-LS near-lossless refuses signed Pixel Data: its error bound applies to bit
+  patterns, so a sample near the sign boundary could change by the whole range.
 
 ### DCM Anonymize
 
@@ -758,6 +762,12 @@ DICOM Print Management client for sending print requests to remote Print SCP sys
   --orientation PORTRAIT \
   --film-size 8INX10IN
 
+# Print an image: its Image Pixel attributes go in the first Image Box
+./build/bin/print_scu localhost 10400 PRINTER_SCP print --medium PAPER --image image.dcm
+
+# Print an RGB image through the Basic Color Print Meta SOP Class
+./build/bin/print_scu localhost 10400 PRINTER_SCP print --medium PAPER --image rgb.dcm --color
+
 # Query printer status
 ./build/bin/print_scu localhost 10400 PRINTER_SCP status
 
@@ -774,6 +784,34 @@ Features:
 - **Image Box**: N-SET for setting pixel data on image positions
 - **Printer Status**: N-GET for querying printer status (NORMAL, WARNING, FAILURE)
 - **Meta SOP Class**: Supports Basic Grayscale and Color Print Meta SOP Classes
+
+Without `--image` the printer answers B603H, an empty page, and the tool ends with exit 1.
+
+### DIMSE-N SCU
+
+Runs one operation of the SCU classes that have no tool of their own, and prints one JSON object with the
+status the peer answered. Validation drives the classes through it.
+
+```bash
+# Storage Commitment, with the result arriving on an association the SCP opens
+./build/bin/dimse_n_scu localhost 11112 MY_PACS stgcmt --calling-ae MY_AE --listen 11115 \
+  --transaction 1.2.3 --ref 1.2.840.10008.5.1.4.1.1.7:1.2.3.4
+
+# The same, with the result on this association
+./build/bin/dimse_n_scu localhost 11112 MY_PACS stgcmt --transaction 1.2.3 --ref 1.2.840.10008.5.1.4.1.1.7:1.2.3.4
+
+# Unified Procedure Step
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-create --uid 1.2.3 --label "Reconstruct"
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-state --uid 1.2.3 --state "IN PROGRESS" --transaction 1.2.3.9
+./build/bin/dimse_n_scu localhost 11112 MY_PACS ups-subscribe --uid 1.2.3 --receiving-ae WATCHER --lock
+
+# N-GET, here of a Printer under a Print Meta SOP Class
+./build/bin/dimse_n_scu localhost 10400 PRINTER n-get --context 1.2.840.10008.5.1.1.9 \
+  --class 1.2.840.10008.5.1.1.16 --instance 1.2.840.10008.5.1.1.17 --tag 21100010
+```
+
+Other operations: `ups-get`, `ups-set`, `ups-cancel`, `ups-unsubscribe`, `ups-suspend`. Exit codes: 0 Success or
+Warning; 1 the peer answered with a failure status; 2 usage or connection error; 3 no commitment report in time.
 
 ---
 
@@ -808,10 +846,19 @@ Lightweight Query/Retrieve SCP server for serving DICOM files from a storage dir
 ./build/bin/qr_scp 11112 MY_PACS --storage-dir ./dicom --max-assoc 20 --timeout 600
 ```
 
+`qr_scp` and `pacs_server` answer with the same Hierarchical Search Method. A query above
+IMAGE needs the Unique Key of every higher level: under Patient Root, a STUDY query needs
+Patient ID, or the answer is status A900. Section 3.3 of the
+[Conformance Statement](DICOM_CONFORMANCE_STATEMENT.md) lists the keys and matching rules.
+An index written by an earlier version holds text in each object's own character set; run
+`--scan-only` again so that non-ASCII keys can match it.
+
 Features:
 - **C-FIND**: Query at Patient, Study, Series, and Image levels
 - **C-MOVE**: Send images to configured destination AE titles
-- **C-GET**: Direct image retrieval over the same association
+- **C-GET**: Direct image retrieval over the same association; the requester must
+  offer Storage SCP roles and compatible transfer syntaxes. Completed counts
+  require matching C-STORE acknowledgements.
 - **Automatic Indexing**: SQLite-based fast query responses
 - **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM)
 
@@ -945,7 +992,38 @@ Full PACS server example with configuration.
 ```bash
 # Run with configuration
 ./build/tools/pacs_server/pacs_server --config pacs_server.yaml
+
+# Name a peer. Without --peer, a C-MOVE to it is refused with A801 and it cannot subscribe to UPS events.
+./build/bin/pacs_server --port 11112 --ae-title MY_PACS --peer VIEWER:192.168.1.10:11113
 ```
+
+| Option | Meaning |
+|--------|---------|
+| `--peer AE:host:port` | C-MOVE destination and N-EVENT-REPORT receiver (repeatable) |
+| `--event-attempts N` | Attempts per N-EVENT-REPORT on a new association (default 3) |
+| `--event-retry-delay S` | Seconds between those attempts (default 5) |
+| `--print-spool PATH` | Print job directory (default `<storage-dir>.print-spool`) |
+| `--ups-dir PATH` | UPS instance directory (default `<storage-dir>.ups`) |
+| `--http-port PORT` | REST and DICOMweb port (default: off) |
+| `--http-bind ADDRESS` | Address the HTTP API listens on (default `127.0.0.1`) |
+| `--http-max-body-mb N` | Largest HTTP request body in MiB (default 512); more is answered with 413 |
+| `--http-cors-origin ORIGIN` | Origin named in `Access-Control-Allow-Origin` on responses and CORS preflight answers (default: none) |
+| `--http-rest-api` | Also serve the REST API under `/api` for the web app; needs the three OAuth options |
+| `--oauth2-issuer URL` | Require OAuth 2.0 bearer tokens from this issuer on DICOMweb |
+| `--oauth2-audience ID` | Audience those tokens must name |
+| `--oauth2-jwks PATH` | JWKS file holding the keys that sign them |
+
+It provides Verification, Storage, Query/Retrieve, Worklist, MPPS, Storage Commitment, Print and Unified
+Procedure Step. Commitment reports and UPS events to a named peer go on associations it opens.
+
+With `--http-port` it also serves DICOMweb under `/dicomweb` and WADO-URI under `/wado`, on the same database and storage
+as the DICOM services, so an object stored over either protocol is found over both. With `--http-rest-api` it also serves
+the REST API under `/api`, which the web app uses: every request there needs a token whose scope allows it (`pacs.read`,
+`pacs.write` or `pacs.admin`), so the option is refused without the OAuth options. It then also manages remote nodes,
+transfer jobs and routing rules in its index database: store jobs send from its archive, sync and prefetch jobs retrieve
+what it does not hold, and a rule forwards each object it stores that matches. The three OAuth options go together:
+the server refuses to start with only some of them, and refuses to start if the port cannot be opened. Without them
+DICOMweb answers everyone who can reach the port, which is why the default address is loopback and a warning is printed.
 
 **Sample Configuration** (`pacs_server.yaml`):
 ```yaml

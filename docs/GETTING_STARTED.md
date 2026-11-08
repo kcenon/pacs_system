@@ -452,6 +452,7 @@ cmake --build build
 | `worklist_scu` / `worklist_scp` | Modality Worklist |
 | `mpps_scu` / `mpps_scp` | Modality Performed Procedure Step |
 | `print_scu` | DICOM Print Management |
+| `dimse_n_scu` | Storage Commitment, UPS and N-GET client |
 | `pacs_server` | Full PACS archive server |
 
 #### Advanced

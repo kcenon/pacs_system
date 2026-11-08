@@ -173,12 +173,12 @@ if(PACS_HTJ2K_FOUND)
             )
         endif()
     endif()
-    # FetchContent compatibility: add include bridge for openjph/ prefix
-    if(DEFINED _openjph_compat_include)
+    # The source header parent provides the installed-style openjph/ prefix.
+    if(DEFINED _pacs_openjph_source_include)
         pacs_add_build_interface_include_dirs(
             pacs_encoding
             PUBLIC
-            "${_openjph_compat_include}"
+            "${_pacs_openjph_source_include}"
         )
     endif()
     target_compile_definitions(pacs_encoding PUBLIC PACS_WITH_HTJ2K_CODEC)
@@ -197,6 +197,7 @@ add_library(pacs_network
     # TCP client path of association::connect() (Issue #1240)
     src/network/detail/dimse_framing.cpp
     src/network/detail/tcp_stream.cpp
+    src/network/detail/tls_server.cpp
     src/network/v2/dicom_association_handler.cpp
     src/network/v2/dicom_server_v2.cpp
     # Pipeline infrastructure (Issue #517)
@@ -224,6 +225,11 @@ target_compile_options(pacs_network PRIVATE
 target_link_libraries(pacs_network
     PUBLIC pacs_core pacs_encoding pacs_security
 )
+
+if(PACS_OPENSSL_FOUND)
+    target_compile_definitions(pacs_network PUBLIC PACS_WITH_TLS)
+    target_link_libraries(pacs_network PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+endif()
 
 # Link network_system (Tier 4) - DICOM PDU/Association
 if(TARGET network_system)
@@ -344,6 +350,9 @@ add_library(pacs_services
     src/services/storage_scu.cpp
     src/services/query_scu.cpp
     src/services/retrieve_scu.cpp
+    src/services/event_sender.cpp
+    src/services/qr_index.cpp
+    src/services/qr_matching.cpp
     src/services/query_scp.cpp
     src/services/retrieve_scp.cpp
     src/services/worklist_scp.cpp
@@ -356,7 +365,10 @@ add_library(pacs_services
     src/services/storage_commitment_scu.cpp
     src/services/print_scp.cpp
     src/services/print_scu.cpp
+    src/services/ups/ups_index.cpp
     src/services/ups/ups_push_scp.cpp
+    src/services/ups/ups_rules.cpp
+    src/services/ups/ups_scp.cpp
     src/services/ups/ups_push_scu.cpp
     src/services/ups/ups_query_scp.cpp
     src/services/ups/ups_watch_scp.cpp
@@ -600,6 +612,7 @@ if(PACS_BUILD_STORAGE AND SQLITE3_FOUND)
     add_library(pacs_storage
         src/storage/storage_interface.cpp
         src/storage/file_storage.cpp
+        src/storage/instance_archive.cpp
         src/storage/s3_storage.cpp
         src/storage/azure_blob_storage.cpp
         src/storage/hsm_storage.cpp
@@ -858,6 +871,7 @@ endif()
 if(TARGET Crow::Crow)
     add_library(pacs_web
         src/web/rest_server.cpp
+        src/web/rest_gate.cpp
         src/web/thumbnail_service.cpp
         src/web/metadata_service.cpp
         src/web/endpoints/system_endpoints.cpp
@@ -892,13 +906,14 @@ if(TARGET Crow::Crow)
         )
     endif()
 
+    target_compile_definitions(pacs_web PRIVATE PACS_SYSTEM_VERSION="${PROJECT_VERSION}")
     target_include_directories(pacs_web
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
     )
     target_link_libraries(pacs_web
-        PUBLIC pacs_core pacs_storage pacs_client
+        PUBLIC pacs_core pacs_storage pacs_client pacs_services
     )
     pacs_link_external_dependency(
         pacs_web

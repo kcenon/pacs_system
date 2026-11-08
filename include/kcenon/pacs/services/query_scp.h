@@ -115,6 +115,57 @@ using query_handler = std::function<std::vector<core::dicom_dataset>(
     const core::dicom_dataset& query_keys,
     const std::string& calling_ae)>;
 
+/// The Query/Retrieve Information Model a request's SOP Class selects.
+enum class qr_model {
+    patient_root,        ///< PATIENT, STUDY, SERIES, IMAGE
+    study_root,          ///< STUDY, SERIES, IMAGE
+    patient_study_only   ///< PATIENT, STUDY (Retired)
+};
+
+/// Whether the Information Model has this level (PS3.4 Annex C.6).
+[[nodiscard]] constexpr bool level_in_model(qr_model model, query_level level) noexcept {
+    switch (model) {
+        case qr_model::patient_root:
+            return true;
+        case qr_model::study_root:
+            return level != query_level::patient;
+        case qr_model::patient_study_only:
+            return level == query_level::patient || level == query_level::study;
+    }
+    return false;
+}
+
+/// Why a Query/Retrieve request could not be answered.
+enum class qr_failure {
+    none,
+    identifier_mismatch,  ///< A900: the Identifier does not fit the SOP Class
+    unable_to_process     ///< C001: the archive could not answer, so no result can be trusted
+};
+
+/// A C-FIND request as the service understood it.
+struct find_request {
+    qr_model model;
+    query_level level;
+    const core::dicom_dataset& keys;
+    std::string_view calling_ae;
+    std::string_view called_ae;
+};
+
+/// The answer to one C-FIND request.
+struct find_outcome {
+    std::vector<core::dicom_dataset> matches;
+    bool optional_keys_ignored{false};  ///< Selects Pending status FF01 over FF00 (Table C.4-1)
+    qr_failure failure{qr_failure::none};
+};
+
+/**
+ * @brief Find handler function type
+ *
+ * Unlike query_handler, it sees the Information Model and can report a failure, so a
+ * database error cannot turn into a final Success with no matches.
+ */
+using find_handler = std::function<find_outcome(const find_request& request)>;
+
 /**
  * @brief Cancel check function type
  *
@@ -216,6 +267,13 @@ public:
     void set_handler(query_handler handler);
 
     /**
+     * @brief Set the find handler, which takes precedence over query_handler
+     *
+     * @param handler The find handler function
+     */
+    void set_find_handler(find_handler handler);
+
+    /**
      * @brief Set maximum number of results to return
      *
      * @param max Maximum results (0 = unlimited)
@@ -256,7 +314,7 @@ public:
     /**
      * @brief Get supported SOP Class UIDs
      *
-     * @return Vector containing Patient Root and Study Root Find SOP Classes
+     * @return Patient Root, Study Root and retired Patient/Study Only Find SOP Classes
      */
     [[nodiscard]] std::vector<std::string> supported_sop_classes() const override;
 
@@ -321,6 +379,7 @@ private:
      * @param message_id The original request message ID
      * @param sop_class_uid The SOP Class UID
      * @param result The matching dataset
+     * @param status Pending status: FF00, or FF01 when optional keys were ignored
      * @return Success or error
      */
     [[nodiscard]] network::Result<std::monostate> send_pending_response(
@@ -328,7 +387,8 @@ private:
         uint8_t context_id,
         uint16_t message_id,
         std::string_view sop_class_uid,
-        const core::dicom_dataset& result);
+        const core::dicom_dataset& result,
+        network::dimse::status_code status);
 
     /**
      * @brief Send the final C-FIND response (success or cancel)
@@ -352,6 +412,7 @@ private:
     // =========================================================================
 
     query_handler handler_;
+    find_handler find_handler_;
     cancel_check cancel_check_;
     std::shared_ptr<kcenon::pacs::security::atna_service_auditor> auditor_;
     size_t max_results_{0};  // 0 = unlimited

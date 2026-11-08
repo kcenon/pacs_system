@@ -512,6 +512,8 @@ DecodeResult<std::tuple<
                     data.subspan(pos, item_length));
                 if (ui_result.is_ok()) {
                     user_info = std::move(ui_result.value());
+                } else {
+                    return ui_result.error();
                 }
                 break;
             }
@@ -549,7 +551,13 @@ DecodeResult<user_information> pdu_decoder::decode_user_info_item(
         const uint16_t sub_length = read_uint16_be(data, pos + 2);
         pos += 4;
 
-        if (pos + sub_length > data.size()) break;
+        if (pos + sub_length > data.size()) {
+            if (sub_type == 0x54) {
+                return make_error<user_information>(pdu_decode_error::malformed_pdu,
+                                                    "Truncated SCP/SCU Role Selection item");
+            }
+            break;
+        }
 
         switch (sub_type) {
             case 0x51:  // Maximum Length
@@ -567,24 +575,18 @@ DecodeResult<user_information> pdu_decoder::decode_user_info_item(
                 break;
 
             case 0x54: {  // SCP/SCU Role Selection
-                if (sub_length >= 4) {
-                    const uint16_t uid_length = read_uint16_be(data, pos);
-                    // UID is padded to even length in encoder. Compute in a
-                    // wider type to avoid uint16_t overflow when uid_length is
-                    // odd and near its maximum.
-                    const size_t padded_uid_length =
-                        static_cast<size_t>(uid_length) +
-                        (static_cast<size_t>(uid_length) % 2);
-                    // Bounds check: UID length field (2) + padded UID bytes +
-                    // SCU role (1) + SCP role (1) must fit inside sub_length.
-                    if (padded_uid_length + 4 <= sub_length) {
-                        scp_scu_role_selection role;
-                        role.sop_class_uid = read_uid(data, pos + 2, uid_length);
-                        role.scu_role = (data[pos + 2 + padded_uid_length] != 0);
-                        role.scp_role = (data[pos + 2 + padded_uid_length + 1] != 0);
-                        ui.role_selections.push_back(std::move(role));
-                    }
+                if (sub_length < 4) {
+                    return make_error<user_information>(pdu_decode_error::malformed_pdu,
+                                                        "SCP/SCU Role Selection item is too short");
                 }
+                const size_t uid_length = read_uint16_be(data, pos);
+                if (uid_length == 0 || uid_length > 64 || uid_length + 4 != sub_length
+                    || data[pos + 2 + uid_length] > 1 || data[pos + 3 + uid_length] > 1) {
+                    return make_error<user_information>(pdu_decode_error::malformed_pdu,
+                                                        "Invalid SCP/SCU Role Selection fields");
+                }
+                ui.role_selections.emplace_back(read_uid(data, pos + 2, uid_length),
+                    data[pos + 2 + uid_length] == 1, data[pos + 3 + uid_length] == 1);
                 break;
             }
 

@@ -38,8 +38,8 @@ TEST_CASE("Waveform Storage SOP Class UIDs are correct", "[services][waveform][s
     CHECK(eog_waveform_storage_uid == "1.2.840.10008.5.1.4.1.1.9.7.3");
     CHECK(sleep_eeg_storage_uid == "1.2.840.10008.5.1.4.1.1.9.7.4");
     CHECK(body_position_waveform_storage_uid == "1.2.840.10008.5.1.4.1.1.9.8.1");
-    CHECK(waveform_presentation_state_storage_uid == "1.2.840.10008.5.1.4.1.1.11.11");
-    CHECK(waveform_annotation_storage_uid == "1.2.840.10008.5.1.4.1.1.11.12");
+    CHECK(waveform_presentation_state_storage_uid == "1.2.840.10008.5.1.4.1.1.9.100.1");
+    CHECK(waveform_annotation_storage_uid == "1.2.840.10008.5.1.4.1.1.88.77");
 }
 
 // ============================================================================

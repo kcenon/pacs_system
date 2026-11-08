@@ -4,6 +4,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <kcenon/pacs/core/dicom_file.h>
 #include <kcenon/pacs/core/dicom_tag_constants.h>
@@ -1452,7 +1453,7 @@ TEST_CASE("dicom_file writes encapsulated pixel data", "[core][dicom_file][encap
         CHECK(parsed.value()[1] == frames[1]);
     }
 
-    SECTION("native pixel data under an encapsulated transfer syntax keeps its defined length") {
+    SECTION("native pixel data under an encapsulated transfer syntax is rejected") {
         dicom_dataset ds;
         ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
         ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.1276.2");
@@ -1462,9 +1463,10 @@ TEST_CASE("dicom_file writes encapsulated pixel data", "[core][dicom_file][encap
         auto file = dicom_file::create(std::move(ds), transfer_syntax::rle_lossless);
         const auto bytes = file.to_bytes();
 
-        CHECK_FALSE(contains_bytes(bytes, kEncapsulatedPixelDataHeader));
-        CHECK(contains_bytes(bytes, {0xE0, 0x7F, 0x10, 0x00, 'O', 'B', 0x00, 0x00,
-                                     0x08, 0x00, 0x00, 0x00}));
+        CHECK(bytes.empty());
+        const auto path = create_temp_file_path("invalid_native_as_rle_1292.dcm");
+        CHECK(file.save(path).is_err());
+        CHECK_FALSE(std::filesystem::exists(path));
     }
 
     SECTION("a native transfer syntax never writes undefined-length pixel data") {
@@ -2310,3 +2312,95 @@ TEST_CASE("dicom_file writes encapsulated Pixel Data in a sequence item",
     CHECK(frames.value() == std::vector<std::vector<uint8_t>>{{0x01, 0x02, 0x03, 0x04}});
     CHECK(reopened.value().to_bytes() == bytes);
 }
+
+TEST_CASE("dicom_file rejects inconsistent pixel representations",
+          "[core][dicom_file][encapsulated]") {
+    auto wire = create_dicom_with_encapsulated_pixel_data();
+    const std::vector<uint8_t> header{0xE0,0x7F,0x10,0x00,'O','B',0,0,0xFF,0xFF,0xFF,0xFF};
+    const auto location = std::search(wire.begin(), wire.end(), header.begin(), header.end());
+    REQUIRE(location != wire.end());
+    const auto offset = static_cast<size_t>(location-wire.begin());
+    SECTION("defined-length compressed Pixel Data is rejected") {
+        const auto size = static_cast<uint32_t>(wire.size()-offset-12);
+        for (unsigned i=0;i<4;++i) wire.at(offset+8+i) = static_cast<uint8_t>(size>>(8*i));
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("encapsulated Pixel Data must use OB") {
+        wire.at(offset+5) = 'W';
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("delimiter length must be zero") {
+        wire.at(wire.size()-4) = 2;
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("truncated item stream is rejected") {
+        wire.resize(wire.size()-8);
+        CHECK(dicom_file::from_bytes(wire).is_err());
+    }
+    SECTION("parsed compressed representation cannot be mislabeled native") {
+        auto file = dicom_file::from_bytes(wire);
+        REQUIRE(file.is_ok());
+        auto copied = file.value().dataset();
+        auto* pixel = copied.get(tags::pixel_data);
+        REQUIRE(pixel);
+        CHECK(pixel->is_encapsulated_pixel_data());
+        CHECK(dicom_file::create(copied, transfer_syntax::explicit_vr_little_endian).to_bytes().empty());
+        const auto native = std::vector<uint8_t>{1,2,3,4};
+        pixel->set_value(native);
+        CHECK_FALSE(pixel->is_encapsulated_pixel_data());
+        CHECK_FALSE(dicom_file::create(copied, transfer_syntax::explicit_vr_little_endian).to_bytes().empty());
+        CHECK(dicom_file::create(copied, transfer_syntax::rle_lossless).to_bytes().empty());
+    }
+}
+
+TEST_CASE("dicom_file rejects a dataset that stops before its last element",
+          "[core][dicom_file][malformed]") {
+    dicom_dataset dataset;
+    dataset.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.7");
+    dataset.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.1318");
+    dataset.set_string(tags::patient_name, vr_type::PN, "DOE^JOHN");
+    dataset.set_string(tags::patient_id, vr_type::LO, "PID1318");
+
+    const int which = GENERATE(0, 1, 2);
+    const auto syntax = which == 0   ? transfer_syntax::explicit_vr_little_endian
+                        : which == 1 ? transfer_syntax::implicit_vr_little_endian
+                                     : transfer_syntax::explicit_vr_big_endian;
+    INFO(syntax.name());
+    auto bytes = dicom_file::create(dataset, syntax).to_bytes();
+    REQUIRE(dicom_file::from_bytes(bytes).is_ok());
+
+    SECTION("value cut short") {
+        bytes.resize(bytes.size() - 2);
+        CHECK(dicom_file::from_bytes(bytes).is_err());
+    }
+    SECTION("element header cut short") {
+        bytes.resize(bytes.size() - 8 - 4);
+        CHECK(dicom_file::from_bytes(bytes).is_err());
+    }
+    SECTION("zero padding after the last element") {
+        bytes.insert(bytes.end(), 6, 0x00);
+        auto padded = dicom_file::from_bytes(bytes);
+        if (syntax == transfer_syntax::explicit_vr_big_endian) {
+            // The Big Endian decoder treats any incomplete trailing bytes as an error.
+            CHECK(padded.is_err());
+        } else {
+            REQUIRE(padded.is_ok());
+            CHECK(padded.value().dataset().get_string(tags::patient_id) == "PID1318");
+        }
+    }
+}
+
+#ifdef __linux__
+TEST_CASE("dicom_file::save fails when the device is full", "[core][dicom_file]") {
+    // /dev/full answers every write with ENOSPC. The object is small enough to wait in the stream's
+    // buffer until the file is closed, which is where the failure has to surface: save() used to
+    // report success there, and a store then acknowledged an empty file.
+    REQUIRE(std::filesystem::exists("/dev/full"));
+    dicom_dataset ds;
+    ds.set_string(tags::sop_class_uid, vr_type::UI, "1.2.840.10008.5.1.4.1.1.2");
+    ds.set_string(tags::sop_instance_uid, vr_type::UI, "1.2.3.4.5.6.7.8.9");
+    ds.set_string(tags::patient_name, vr_type::PN, "TEST^PATIENT");
+    const auto file = dicom_file::create(std::move(ds), transfer_syntax::explicit_vr_little_endian);
+    CHECK(file.save("/dev/full").is_err());
+}
+#endif

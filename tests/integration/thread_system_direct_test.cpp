@@ -38,13 +38,15 @@ using namespace std::chrono_literals;
 // Test 1: Direct thread_pool usage (same as thread_system's own tests)
 // =============================================================================
 
-TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]") {
-    SECTION("Create and start pool without manual workers") {
-        // This pattern is used in thread_system's own tests
+TEST_CASE("direct thread_pool basic usage", "[thread_system][direct]") {
+    SECTION("Create and start pool with an explicit worker") {
         kcenon::thread::thread_context context;
         auto pool = std::make_shared<kcenon::thread::thread_pool>("test_pool", context);
 
-        // Start pool (should auto-create workers internally)
+        auto worker = std::make_unique<kcenon::thread::thread_worker>(false, context);
+        REQUIRE(pool->enqueue(std::move(worker)).is_ok());
+
+        // The pinned API requires workers before start().
         auto start_result = pool->start();
         INFO("start() result: " << (start_result.is_err() ? "error" : "success"));
 
@@ -67,6 +69,7 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
         // Stop pool
         auto stop_result = pool->stop();
         REQUIRE_FALSE(stop_result.is_err());
+        REQUIRE_FALSE(pool->is_running());
     }
 }
 
@@ -75,7 +78,7 @@ TEST_CASE("direct thread_pool basic usage", "[thread_system][direct][!mayfail]")
 // =============================================================================
 
 TEST_CASE("manual worker batch enqueue - thread_pool_adapter pattern",
-          "[thread_system][manual][batch][!mayfail]") {
+          "[thread_system][manual][batch]") {
     SECTION("Create pool then batch enqueue workers") {
         // This is the exact pattern used by thread_pool_adapter::start()
         kcenon::thread::thread_context context;
@@ -99,7 +102,7 @@ TEST_CASE("manual worker batch enqueue - thread_pool_adapter pattern",
 
         REQUIRE_FALSE(enqueue_result.is_err());
 
-        // Start the pool (CRASH POINT on ARM64)
+        // Start the configured workers.
         INFO("About to call pool->start()...");
         auto start_result = pool->start();
         INFO("start() completed");
@@ -122,7 +125,8 @@ TEST_CASE("manual worker batch enqueue - thread_pool_adapter pattern",
         REQUIRE(task_executed);
 
         // Stop pool
-        pool->stop();
+        REQUIRE(pool->stop().is_ok());
+        REQUIRE_FALSE(pool->is_running());
     }
 }
 
@@ -130,7 +134,7 @@ TEST_CASE("manual worker batch enqueue - thread_pool_adapter pattern",
 // Test 3: Individual worker enqueue (alternative pattern)
 // =============================================================================
 
-TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!mayfail]") {
+TEST_CASE("individual worker enqueue", "[thread_system][manual][individual]") {
     SECTION("Create pool then enqueue workers individually") {
         kcenon::thread::thread_context context;
         auto pool = std::make_shared<kcenon::thread::thread_pool>("individual_enqueue_pool", context);
@@ -164,7 +168,8 @@ TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!may
 
         REQUIRE(counter == 10);
 
-        pool->stop();
+        REQUIRE(pool->stop().is_ok());
+        REQUIRE_FALSE(pool->is_running());
     }
 }
 
@@ -172,7 +177,7 @@ TEST_CASE("individual worker enqueue", "[thread_system][manual][individual][!may
 // Test 4: Stress test with repeated create/destroy
 // =============================================================================
 
-TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress][!mayfail]") {
+TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress]") {
     SECTION("Create and destroy pools repeatedly") {
         constexpr int cycles = 5;
 
@@ -209,7 +214,8 @@ TEST_CASE("repeated pool lifecycle", "[thread_system][lifecycle][stress][!mayfai
             REQUIRE(done);
 
             // Stop pool
-            pool->stop();
+            REQUIRE(pool->stop().is_ok());
+            REQUIRE_FALSE(pool->is_running());
 
             // Allow cleanup
             std::this_thread::sleep_for(50ms);

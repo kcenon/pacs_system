@@ -10,6 +10,7 @@
  */
 
 #include "kcenon/pacs/storage/ups_repository.h"
+#include "kcenon/pacs/storage/sql_literal.h"
 
 #include <algorithm>
 #include <chrono>
@@ -449,8 +450,8 @@ auto ups_repository::ups_workitem_count(std::string_view state)
     }
 
     auto query = kcenon::pacs::compat::format(
-        "SELECT COUNT(*) as count FROM {} WHERE state = '{}'",
-        table_name(), std::string(state));
+        "SELECT COUNT(*) as count FROM {} WHERE state = {}",
+        table_name(), sql_literal(state));
     auto result = db()->select(query);
     if (result.is_err()) {
         return Result<size_t>::err(result.error());
@@ -570,6 +571,31 @@ auto ups_repository::unsubscribe_ups(std::string_view subscriber_ae,
         return make_error<std::monostate>(
             -1,
             kcenon::pacs::compat::format("Failed to unsubscribe: {}",
+                                 result.error().message),
+            "storage");
+    }
+
+    return ok();
+}
+
+auto ups_repository::suspend_ups_global_subscription(std::string_view subscriber_ae)
+    -> VoidResult {
+    if (!db() || !db()->is_connected()) {
+        return make_error<std::monostate>(-1, "Database not connected",
+                                          "storage");
+    }
+
+    auto ae_condition = database::query_condition("subscriber_ae", "=", std::string(subscriber_ae));
+    auto global_condition = database::query_condition("workitem_uid", "IS NULL", nullptr);
+
+    auto builder = query_builder();
+    builder.delete_from("ups_subscriptions").where(ae_condition && global_condition);
+
+    auto result = db()->remove(builder.build());
+    if (result.is_err()) {
+        return make_error<std::monostate>(
+            -1,
+            kcenon::pacs::compat::format("Failed to suspend global subscription: {}",
                                  result.error().message),
             "storage");
     }
@@ -1434,6 +1460,34 @@ auto ups_repository::get_ups_subscriptions(std::string_view subscriber_ae) const
 
     sqlite3_finalize(stmt);
     return ok(std::move(results));
+}
+
+auto ups_repository::suspend_ups_global_subscription(std::string_view subscriber_ae)
+    -> VoidResult {
+    const char* sql =
+        "DELETE FROM ups_subscriptions WHERE subscriber_ae = ? AND workitem_uid IS NULL;";
+
+    sqlite3_stmt* stmt = nullptr;
+    auto rc = sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        return make_error<std::monostate>(
+            rc,
+            kcenon::pacs::compat::format("Failed to prepare global suspension: {}",
+                                 sqlite3_errmsg(db_)),
+            "storage");
+    }
+    sqlite3_bind_text(stmt, 1, subscriber_ae.data(),
+                      static_cast<int>(subscriber_ae.size()), SQLITE_TRANSIENT);
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    if (rc != SQLITE_DONE) {
+        return make_error<std::monostate>(
+            rc,
+            kcenon::pacs::compat::format("Failed to suspend global subscription: {}",
+                                 sqlite3_errmsg(db_)),
+            "storage");
+    }
+    return ok(std::monostate{});
 }
 
 auto ups_repository::get_ups_subscribers(std::string_view workitem_uid) const

@@ -25,6 +25,19 @@ Options:
   --log-level <level>     Log level: trace, debug, info, warning, error, critical
                           (default: info)
   --max-associations <n>  Maximum concurrent associations (default: 50)
+  --peer <AE:host:port>   C-MOVE destination and N-EVENT-REPORT receiver (repeatable)
+  --event-attempts <n>    Attempts per N-EVENT-REPORT on a new association (default: 3)
+  --event-retry-delay <s> Seconds between those attempts (default: 5)
+  --print-spool <path>    Print job directory (default: <storage-dir>.print-spool)
+  --ups-dir <path>        UPS instance directory (default: <storage-dir>.ups)
+  --http-port <port>      REST and DICOMweb port (default: off)
+  --http-bind <address>   Address the HTTP API listens on (default: 127.0.0.1)
+  --http-max-body-mb <n>  Largest HTTP request body in MiB (default: 512)
+  --http-cors-origin <o>  Origin named in Access-Control-Allow-Origin (default: none)
+  --http-rest-api         Also serve the REST API under /api; needs the OAuth 2.0 options
+  --oauth2-issuer <url>   Require OAuth 2.0 bearer tokens from this issuer on DICOMweb
+  --oauth2-audience <id>  Audience those tokens must name
+  --oauth2-jwks <path>    JWKS file holding the keys that sign them
   --help, -h              Show this help message
 
 Supported DICOM Services:
@@ -134,6 +147,116 @@ auto pacs_server_config::parse_args(int argc, char* argv[])
                 std::cerr << "Error: Invalid max-associations value\n";
                 return std::nullopt;
             }
+            continue;
+        }
+
+        if (arg == "--peer") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: --peer requires a value\n";
+                return std::nullopt;
+            }
+            const std::string spec = argv[++i];
+            const auto first = spec.find(':');
+            const auto last = spec.rfind(':');
+            move_destination destination;
+            if (first == std::string::npos || first == 0 || last == first || last + 1 == spec.size()) {
+                std::cerr << "Error: Invalid peer format. Use AE:host:port\n";
+                return std::nullopt;
+            }
+            destination.ae_title = spec.substr(0, first);
+            destination.host = spec.substr(first + 1, last - first - 1);
+            try {
+                const int port = std::stoi(spec.substr(last + 1));
+                if (port < 1 || port > 65535) {
+                    throw std::out_of_range("port");
+                }
+                destination.port = static_cast<uint16_t>(port);
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid peer port\n";
+                return std::nullopt;
+            }
+            config.move_destinations.push_back(std::move(destination));
+            continue;
+        }
+
+        if (arg == "--event-attempts" || arg == "--event-retry-delay") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            try {
+                const int value = std::stoi(argv[++i]);
+                if (value < (arg == "--event-attempts" ? 1 : 0)) {
+                    throw std::out_of_range("value");
+                }
+                if (arg == "--event-attempts") {
+                    config.event_attempts = value;
+                } else {
+                    config.event_retry_delay = std::chrono::seconds{value};
+                }
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid value for " << arg << "\n";
+                return std::nullopt;
+            }
+            continue;
+        }
+
+        if (arg == "--http-rest-api") {
+            config.http_rest_api = true;
+            continue;
+        }
+
+        if (arg == "--http-port" || arg == "--http-max-body-mb") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            try {
+                const int value = std::stoi(argv[++i]);
+                if (arg == "--http-port") {
+                    if (value < 1 || value > 65535) {
+                        throw std::out_of_range("port");
+                    }
+                    config.http_port = static_cast<uint16_t>(value);
+                } else {
+                    if (value < 1 || value > 65536) {
+                        throw std::out_of_range("size");
+                    }
+                    config.http_max_body_bytes = static_cast<std::size_t>(value) * 1024 * 1024;
+                }
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid value for " << arg << "\n";
+                return std::nullopt;
+            }
+            continue;
+        }
+
+        if (arg == "--http-bind" || arg == "--http-cors-origin" || arg == "--oauth2-issuer" || arg == "--oauth2-audience" || arg == "--oauth2-jwks") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            const std::string value = argv[++i];
+            if (arg == "--http-bind") {
+                config.http_bind = value;
+            } else if (arg == "--http-cors-origin") {
+                config.http_cors_origin = value;
+            } else if (arg == "--oauth2-issuer") {
+                config.oauth2_issuer = value;
+            } else if (arg == "--oauth2-audience") {
+                config.oauth2_audience = value;
+            } else {
+                config.oauth2_jwks_file = value;
+            }
+            continue;
+        }
+
+        if (arg == "--print-spool" || arg == "--ups-dir") {
+            if (i + 1 >= argc) {
+                std::cerr << "Error: " << arg << " requires a value\n";
+                return std::nullopt;
+            }
+            (arg == "--print-spool" ? config.print_spool_directory : config.ups_directory) = argv[++i];
             continue;
         }
 

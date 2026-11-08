@@ -6,21 +6,18 @@
 #
 # @see Issue #450 - DCMTK Process Launcher and Test Utilities
 #
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors for output (if terminal supports)
 if [[ -t 1 ]]; then
     RED='\033[0;31m'
     GREEN='\033[0;32m'
     YELLOW='\033[1;33m'
-    BLUE='\033[0;34m'
-    BOLD='\033[1m'
     NC='\033[0m' # No Color
 else
     RED=''
     GREEN=''
     YELLOW=''
-    BLUE=''
-    BOLD=''
     NC=''
 fi
 
@@ -51,20 +48,19 @@ run_with_timeout() {
 
     # Try GNU timeout (Linux native, macOS with coreutils in PATH)
     if command -v timeout &>/dev/null; then
-        timeout "${timeout_seconds}" "$@"
+        timeout --kill-after=2 "${timeout_seconds}" "$@"
         return $?
     fi
 
     # Try gtimeout (macOS with coreutils installed via Homebrew)
     if command -v gtimeout &>/dev/null; then
-        gtimeout "${timeout_seconds}" "$@"
+        gtimeout --kill-after=2 "${timeout_seconds}" "$@"
         return $?
     fi
 
-    # Fallback: run without timeout and warn
-    log_warn "No timeout command available, running without timeout"
-    "$@"
-    return $?
+    # Python is also available on our macOS/Ubuntu CI runners. Never silently
+    # drop the deadline when GNU coreutils is absent.
+    python3 "${SCRIPT_DIR}/run_with_timeout.py" "${timeout_seconds}" "$@"
 }
 
 # Check if port is listening (cross-platform)
@@ -83,12 +79,13 @@ is_port_listening() {
         if [[ "$(uname)" == "Darwin" ]]; then
             nc -z -G 1 127.0.0.1 "${port}" 2>/dev/null && return 0
         else
-            nc -z 127.0.0.1 "${port}" 2>/dev/null && return 0
+            nc -z -w 1 127.0.0.1 "${port}" 2>/dev/null && return 0
         fi
     fi
 
     # Fallback to bash /dev/tcp (if available)
-    if (echo >/dev/tcp/127.0.0.1/"${port}") 2>/dev/null; then
+    # shellcheck disable=SC2016 # Expanded by the child bash with positional args.
+    if run_with_timeout 2 bash -c 'echo > /dev/tcp/127.0.0.1/"$1"' _ "${port}" 2>/dev/null; then
         return 0
     fi
 
@@ -103,7 +100,7 @@ wait_for_port() {
     local timeout="${3:-15}"
     local elapsed=0
 
-    while ! is_port_listening "${port}"; do
+    while ! python3 -c 'import socket,sys; socket.create_connection((sys.argv[1],int(sys.argv[2])),0.2).close()' "${host}" "${port}" 2>/dev/null; do
         sleep 0.5
         elapsed=$((elapsed + 1))
         if [[ ${elapsed} -ge $((timeout * 2)) ]]; then
@@ -129,7 +126,7 @@ find_project_root() {
     done
 
     # Fallback: assume 3 levels up from script
-    echo "$(cd "${script_dir}/../../.." && pwd)"
+    (cd "${script_dir}/../../.." && pwd)
 }
 
 # Check if a binary exists and is executable
@@ -145,11 +142,5 @@ check_binary() {
 }
 
 # Mark common.sh as sourced for dependency tracking
+# shellcheck disable=SC2034 # Read by dcmtk_common.sh when sourced independently.
 COMMON_SH_SOURCED=1
-
-# Source DCMTK common functions if available
-# @see Issue #450 - DCMTK Process Launcher and Test Utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/dcmtk_common.sh" ]] && [[ -z "${DCMTK_COMMON_SH_SOURCED:-}" ]]; then
-    source "${SCRIPT_DIR}/dcmtk_common.sh"
-fi

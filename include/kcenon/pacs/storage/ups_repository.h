@@ -167,6 +167,10 @@ public:
      * @param subscriber_ae Subscriber AE title
      * @return Result containing all matching subscription rows
      */
+    /// Remove only the AE's global subscription (PS3.4 Table CC.2.3-2).
+    [[nodiscard]] auto suspend_ups_global_subscription(std::string_view subscriber_ae)
+        -> VoidResult;
+
     [[nodiscard]] auto get_ups_subscriptions(std::string_view subscriber_ae)
         -> Result<std::vector<ups_subscription>>;
 
@@ -267,6 +271,10 @@ public:
                                        std::string_view workitem_uid = "")
         -> VoidResult;
     /// @brief List every subscription owned by a subscriber AE
+    /// Remove only the AE's global subscription (PS3.4 Table CC.2.3-2).
+    [[nodiscard]] auto suspend_ups_global_subscription(std::string_view subscriber_ae)
+        -> VoidResult;
+
     [[nodiscard]] auto get_ups_subscriptions(std::string_view subscriber_ae) const
         -> Result<std::vector<ups_subscription>>;
     /// @brief List subscriber AEs that should be notified for a work item

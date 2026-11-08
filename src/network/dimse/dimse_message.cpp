@@ -8,6 +8,7 @@
  */
 
 #include <kcenon/pacs/network/dimse/dimse_message.h>
+#include <kcenon/pacs/core/dicom_file.h>
 
 #include <kcenon/pacs/encoding/implicit_vr_codec.h>
 #include <kcenon/pacs/encoding/explicit_vr_codec.h>
@@ -37,7 +38,9 @@ dimse_message::dimse_message(command_field cmd, uint16_t message_id)
     // Initialize the command set with required fields
     command_set_.set_numeric(tag_command_field, encoding::vr_type::US,
                              static_cast<uint16_t>(cmd));
-    command_set_.set_numeric(tag_message_id, encoding::vr_type::US, message_id);
+    command_set_.set_numeric(cmd == command_field::c_cancel_rq
+                                 ? tag_message_id_responded_to : tag_message_id,
+                             encoding::vr_type::US, message_id);
     update_data_set_type();
 }
 
@@ -280,6 +283,22 @@ auto dimse_message::encode(const dimse_message& msg,
         if (ds_result.is_err()) {
             return ds_result.error();
         }
+        auto& dataset = ds_result.value().get();
+        const auto validation = core::dicom_file::validate_pixel_data_representation(dataset, dataset_ts);
+        if (validation.is_err()) {
+            return make_dimse_error(dimse_error::encoding_error, validation.error().message);
+        }
+        if (dataset_ts.endianness() != encoding::byte_order::little_endian) {
+            return make_dimse_error(dimse_error::encoding_error,
+                                    "DIMSE encoding supports only Little Endian datasets");
+        }
+        if (dataset_ts.is_encapsulated()) {
+            if (const auto* pixel = dataset.get(core::tags::pixel_data)) {
+                auto marked = core::dicom_element::from_encapsulated_pixel_data(pixel->raw_data());
+                if (marked.is_err()) return marked.error();
+                dataset.insert(std::move(marked.value()));
+            }
+        }
         if (dataset_ts.vr_type() == encoding::vr_encoding::implicit) {
             dataset_bytes = encoding::implicit_vr_codec::encode(ds_result.value().get());
         } else {
@@ -311,10 +330,21 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Extract message ID
     auto msg_id = command_set.get_numeric<uint16_t>(tag_message_id);
-    if (!msg_id && dimse::is_request(cmd)) {
+    if (!msg_id && dimse::is_request(cmd) && cmd != command_field::c_cancel_rq) {
         return make_dimse_error(dimse_error::missing_required_field, "MessageID tag not found for request");
     }
-    // For responses, use message_id_responded_to if message_id is not present
+    if (cmd == command_field::c_cancel_rq) {
+        if (!command_set.get_numeric<uint16_t>(tag_message_id_responded_to)) {
+            return make_dimse_error(dimse_error::missing_required_field,
+                                    "C-CANCEL requires MessageIDBeingRespondedTo");
+        }
+        if (!dataset_data.empty() ||
+            command_set.get_numeric<uint16_t>(tag_command_data_set_type) != 0x0101) {
+            return make_dimse_error(dimse_error::invalid_data_format,
+                                    "C-CANCEL must not contain a dataset");
+        }
+    }
+    // Responses and C-CANCEL identify the original operation separately.
     uint16_t message_id = msg_id.value_or(0);
 
     dimse_message msg(cmd, message_id);
@@ -322,6 +352,11 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
     // Decode dataset if present
     if (!dataset_data.empty()) {
+        if (!dataset_ts.is_valid() || !dataset_ts.is_supported()
+            || dataset_ts.endianness() != encoding::byte_order::little_endian) {
+            return make_dimse_error(dimse_error::decoding_error,
+                                    "Unsupported DIMSE dataset transfer syntax");
+        }
         kcenon::pacs::Result<core::dicom_dataset> ds_result =
             (dataset_ts.vr_type() == encoding::vr_encoding::implicit)
                 ? encoding::implicit_vr_codec::decode(dataset_data)
@@ -329,6 +364,15 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
         if (ds_result.is_err()) {
             return make_dimse_error(dimse_error::decoding_error, "Failed to decode dataset");
+        }
+        const auto validation = core::dicom_file::validate_pixel_data_representation(ds_result.value(), dataset_ts);
+        if (validation.is_err()) {
+            return make_dimse_error(dimse_error::decoding_error, validation.error().message);
+        }
+        if (const auto* pixel = ds_result.value().get(core::tags::pixel_data);
+            dataset_ts.is_encapsulated() && pixel && !pixel->is_encapsulated_pixel_data()) {
+            return make_dimse_error(dimse_error::decoding_error,
+                                    "Encapsulated Pixel Data requires undefined length");
         }
         msg.dataset_ = std::move(ds_result.value());
     }
@@ -342,7 +386,9 @@ auto dimse_message::decode(std::span<const uint8_t> command_data,
 
 auto dimse_message::is_valid() const noexcept -> bool {
     return command_set_.contains(tag_command_field) &&
-           command_set_.contains(tag_message_id);
+           command_set_.contains(command_ == command_field::c_cancel_rq
+                                     ? tag_message_id_responded_to : tag_message_id) &&
+           (command_ != command_field::c_cancel_rq || !has_dataset());
 }
 
 auto dimse_message::is_request() const noexcept -> bool {

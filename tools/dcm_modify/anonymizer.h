@@ -1,76 +1,38 @@
+// BSD 3-Clause License. See LICENSE.
 /**
  * @file anonymizer.h
- * @brief DICOM Anonymization - Patient data removal/replacement
+ * @brief Compatibility options for the shared recursive security anonymizer.
  *
- * Implements DICOM PS3.15 compliant anonymization by removing or replacing
- * Protected Health Information (PHI) tags.
- *
- * @see DICOM PS3.15 - Security and System Management Profiles
- * @see Issue #108 - DICOM Modify Sample
+ * These presets are not a claim of complete PS3.15 or regulatory compliance.
  */
-
 #ifndef PACS_DCM_MODIFY_ANONYMIZER_HPP
 #define PACS_DCM_MODIFY_ANONYMIZER_HPP
 
-#include "kcenon/pacs/core/dicom_dataset.h"
-#include "kcenon/pacs/core/dicom_tag.h"
+#include "kcenon/pacs/security/anonymizer.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
-#include "kcenon/pacs/encoding/vr_type.h"
-
 #include <atomic>
-#include <chrono>
-#include <map>
-#include <string>
-#include <vector>
+#include <stdexcept>
+#include <utility>
 
 namespace kcenon::pacs::dcm_modify {
 
-/**
- * @brief UID mapping for consistent anonymization across related instances
- */
 class uid_mapper {
 public:
-    /**
-     * @brief Get or create a replacement UID for the original UID
-     * @param original_uid The original UID to map
-     * @return The replacement UID (consistent for same original)
-     */
+    // Retain the legacy string-returning interface. Mapping failures are never
+    // silently replaced with the original UID.
     std::string map(const std::string& original_uid) {
-        auto it = mapping_.find(original_uid);
-        if (it != mapping_.end()) {
-            return it->second;
+        auto result = mapping_.get_or_create(original_uid);
+        if (result.is_err()) {
+            throw std::runtime_error("Unable to map UID");
         }
-
-        auto new_uid = generate_uid();
-        mapping_[original_uid] = new_uid;
-        return new_uid;
+        return result.value();
     }
-
-    /**
-     * @brief Clear all mappings
-     */
-    void clear() {
-        mapping_.clear();
-    }
-
+    void clear() { mapping_.clear(); }
+    security::uid_mapping& mapping() { return mapping_; }
 private:
-    std::string generate_uid() {
-        static std::atomic<uint64_t> counter{0};
-        auto now = std::chrono::system_clock::now();
-        auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()).count();
-
-        return std::string(uid_root_) + "." + std::to_string(timestamp) + "." +
-               std::to_string(++counter);
-    }
-
-    std::map<std::string, std::string> mapping_;
-    static constexpr const char* uid_root_ = "1.2.826.0.1.3680043.8.1055.2";
+    security::uid_mapping mapping_;
 };
 
-/**
- * @brief Anonymization options
- */
 struct anonymize_options {
     /// Replace UIDs with new generated UIDs
     bool replace_uids{true};
@@ -101,216 +63,69 @@ struct anonymize_options {
 };
 
 /**
- * @brief DICOM Anonymizer - removes or replaces PHI from datasets
- *
- * Implements basic DICOM anonymization as specified in DICOM PS3.15.
- * This includes removal/replacement of:
- * - Patient identifying information
- * - UIDs (to prevent correlation)
- * - Dates (optional shifting)
- * - Free-text fields that may contain PHI
+ * Uses security::anonymizer for all traversal, sequence actions, UID mappings,
+ * and private-tag policy. Options apply at every retained sequence depth.
  */
 class anonymizer {
 public:
-    /**
-     * @brief Construct an anonymizer with default options
-     */
     anonymizer() = default;
-
-    /**
-     * @brief Construct an anonymizer with custom options
-     * @param opts Anonymization options
-     */
     explicit anonymizer(anonymize_options opts) : options_(std::move(opts)) {}
 
-    /**
-     * @brief Anonymize a DICOM dataset in place
-     * @param dataset The dataset to anonymize
-     */
-    void anonymize(core::dicom_dataset& dataset) {
-        using namespace kcenon::pacs::core;
-        using namespace kcenon::pacs::encoding;
+    [[nodiscard]] auto anonymize(core::dicom_dataset& dataset)
+        -> kcenon::common::Result<security::anonymization_report> {
+        using namespace core;
+        using security::tag_action_config;
+        security::anonymizer engine;
+        engine.set_private_tag_action(options_.keep_private_tags
+            ? security::private_tag_action::keep : security::private_tag_action::remove_all);
+        engine.add_tag_action(tags::patient_name, options_.patient_name_replacement.empty()
+            ? tag_action_config::make_remove()
+            : tag_action_config::make_replace(options_.patient_name_replacement));
+        engine.add_tag_action(tags::patient_id, tag_action_config::make_replace(
+            options_.patient_id_prefix + std::to_string(++patient_counter_)));
 
-        // Patient identifying information
-        anonymize_patient_info(dataset);
-
-        // UIDs
-        if (options_.replace_uids) {
-            anonymize_uids(dataset);
+        const auto remove_or_keep = [&engine](dicom_tag tag, bool remove) {
+            engine.add_tag_action(tag, remove ? tag_action_config::make_remove()
+                                             : tag_action_config::make_keep());
+        };
+        remove_or_keep(tags::patient_birth_date, options_.remove_birth_date);
+        remove_or_keep(tags::referring_physician_name, options_.remove_referring_physician);
+        for (auto tag : {tags::patient_address, dicom_tag{0x0010, 0x2154}}) {
+            remove_or_keep(tag, options_.remove_address);
         }
-
-        // Dates
-        if (options_.remove_birth_date) {
-            dataset.remove(tags::patient_birth_date);
+        for (auto tag : {tags::institution_name, tags::institution_address}) {
+            remove_or_keep(tag, options_.remove_institution);
         }
-
-        // Referring physician
-        if (options_.remove_referring_physician) {
-            dataset.remove(tags::referring_physician_name);
+        for (auto tag : {tags::study_description, tags::series_description}) {
+            remove_or_keep(tag, options_.remove_descriptions);
         }
-
-        // Institution
-        if (options_.remove_institution) {
-            dataset.remove(dicom_tag{0x0008, 0x0080});  // InstitutionName
-            dataset.remove(dicom_tag{0x0008, 0x0081});  // InstitutionAddress
+        // Legacy extra removals, now also applied inside retained items.
+        for (auto tag : {tags::accession_number, dicom_tag{0x0032, 0x4000},
+                         dicom_tag{0x0032, 0x1060}, dicom_tag{0x0040, 0x0254},
+                         dicom_tag{0x0018, 0x1000}}) {
+            engine.add_tag_action(tag, tag_action_config::make_remove());
         }
-
-        // Descriptions (may contain PHI in free text)
-        if (options_.remove_descriptions) {
-            dataset.remove(tags::study_description);
-            dataset.remove(dicom_tag{0x0008, 0x103E});  // SeriesDescription
+        if (!options_.replace_uids) {
+            for (const auto& [tag, config] : security::anonymizer::get_profile_actions(
+                     security::anonymization_profile::basic)) {
+                if (config.action == security::tag_action::replace_uid) {
+                    engine.add_tag_action(tag, tag_action_config::make_keep());
+                }
+            }
         }
-
-        // Address and other contact info
-        if (options_.remove_address) {
-            dataset.remove(dicom_tag{0x0010, 0x1040});  // PatientAddress
-            dataset.remove(dicom_tag{0x0010, 0x2154});  // PatientTelephoneNumbers
-        }
-
-        // Remove private tags unless explicitly kept
-        if (!options_.keep_private_tags) {
-            remove_private_tags(dataset);
-        }
-
-        // Additional PHI tags
-        remove_additional_phi(dataset);
-
-        // No step above reaches into sequence items, so every sequence is
-        // emptied instead of copied with the identifiers its items may hold
-        empty_sequences(dataset);
+        // Callers must also check result.value().is_successful() before saving.
+        return engine.anonymize_with_mapping(dataset, uid_mapper_.mapping());
     }
 
-    /**
-     * @brief Get the UID mapper for consistent UID replacement
-     * @return Reference to the UID mapper
-     */
     uid_mapper& get_uid_mapper() { return uid_mapper_; }
-
-    /**
-     * @brief Get the current options
-     * @return Reference to the options
-     */
     const anonymize_options& options() const { return options_; }
-
-    /**
-     * @brief Set new options
-     * @param opts New options
-     */
     void set_options(anonymize_options opts) { options_ = std::move(opts); }
 
 private:
-    void anonymize_patient_info(core::dicom_dataset& dataset) {
-        using namespace kcenon::pacs::core;
-        using namespace kcenon::pacs::encoding;
-
-        // Patient Name
-        if (!options_.patient_name_replacement.empty()) {
-            dataset.set_string(tags::patient_name, vr_type::PN,
-                               options_.patient_name_replacement);
-        } else {
-            dataset.remove(tags::patient_name);
-        }
-
-        // Patient ID
-        std::string patient_id = options_.patient_id_prefix +
-                                 std::to_string(++patient_counter_);
-        dataset.set_string(tags::patient_id, vr_type::LO, patient_id);
-
-        // Patient's Birth Name, Mother's Maiden Name
-        dataset.remove(dicom_tag{0x0010, 0x1005});  // PatientBirthName
-        dataset.remove(dicom_tag{0x0010, 0x1060});  // PatientMotherBirthName
-
-        // Other patient IDs
-        dataset.remove(dicom_tag{0x0010, 0x1000});  // OtherPatientIDs
-        dataset.remove(dicom_tag{0x0010, 0x1001});  // OtherPatientNames
-    }
-
-    void anonymize_uids(core::dicom_dataset& dataset) {
-        using namespace kcenon::pacs::core;
-        using namespace kcenon::pacs::encoding;
-
-        // Study Instance UID
-        auto study_uid = dataset.get_string(tags::study_instance_uid);
-        if (!study_uid.empty()) {
-            dataset.set_string(tags::study_instance_uid, vr_type::UI,
-                               uid_mapper_.map(study_uid));
-        }
-
-        // Series Instance UID
-        auto series_uid = dataset.get_string(tags::series_instance_uid);
-        if (!series_uid.empty()) {
-            dataset.set_string(tags::series_instance_uid, vr_type::UI,
-                               uid_mapper_.map(series_uid));
-        }
-
-        // SOP Instance UID
-        auto sop_uid = dataset.get_string(tags::sop_instance_uid);
-        if (!sop_uid.empty()) {
-            dataset.set_string(tags::sop_instance_uid, vr_type::UI,
-                               uid_mapper_.map(sop_uid));
-        }
-
-        // Frame of Reference UID
-        auto frame_uid = dataset.get_string(dicom_tag{0x0020, 0x0052});
-        if (!frame_uid.empty()) {
-            dataset.set_string(dicom_tag{0x0020, 0x0052}, vr_type::UI,
-                               uid_mapper_.map(frame_uid));
-        }
-    }
-
-    void remove_private_tags(core::dicom_dataset& dataset) {
-        std::vector<core::dicom_tag> private_tags;
-
-        for (const auto& [tag, element] : dataset) {
-            if (tag.is_private()) {
-                private_tags.push_back(tag);
-            }
-        }
-
-        for (const auto& tag : private_tags) {
-            dataset.remove(tag);
-        }
-    }
-
-    void remove_additional_phi(core::dicom_dataset& dataset) {
-        // Accession Number (may be linked to hospital records)
-        dataset.remove(core::dicom_tag{0x0008, 0x0050});
-
-        // Patient comments
-        dataset.remove(core::dicom_tag{0x0010, 0x4000});
-
-        // Study comments
-        dataset.remove(core::dicom_tag{0x0032, 0x4000});
-
-        // Requested Procedure Description
-        dataset.remove(core::dicom_tag{0x0032, 0x1060});
-
-        // Performed Procedure Step Description
-        dataset.remove(core::dicom_tag{0x0040, 0x0254});
-
-        // Device Serial Number
-        dataset.remove(core::dicom_tag{0x0018, 0x1000});
-    }
-
-    void empty_sequences(core::dicom_dataset& dataset) {
-        std::vector<core::dicom_tag> sequences;
-
-        for (const auto& [tag, element] : dataset) {
-            if (element.is_sequence()) {
-                sequences.push_back(tag);
-            }
-        }
-
-        for (const auto& tag : sequences) {
-            dataset.insert(core::dicom_element{tag, encoding::vr_type::SQ});
-        }
-    }
-
     anonymize_options options_;
     uid_mapper uid_mapper_;
     std::atomic<uint64_t> patient_counter_{0};
 };
 
-}  // namespace kcenon::pacs::dcm_modify
-
-#endif  // PACS_DCM_MODIFY_ANONYMIZER_HPP
+} // namespace kcenon::pacs::dcm_modify
+#endif

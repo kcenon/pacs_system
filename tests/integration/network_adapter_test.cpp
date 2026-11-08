@@ -158,6 +158,22 @@ TEST_CASE("network_adapter server creation", "[network_adapter][server]") {
         auto server = network_adapter::create_server(srv_config, tls);
         REQUIRE(server == nullptr);
     }
+
+    SECTION("Retained factory preserves TLS and rejects unsupported startup") {
+        server_config config;
+        config.ae_title = "TLS_REQUIRED";
+        config.port = 11113;
+        tls_config tls;
+        tls.enabled = true;
+        tls.cert_path = "server.crt";
+        tls.key_path = "server.key";
+        auto server = network_adapter::create_server(config, tls);
+        REQUIRE(server != nullptr);
+        auto started = server->start();
+        REQUIRE(started.is_err());
+        REQUIRE(started.error().message.find("TLS requires dicom_server_v2") != std::string::npos);
+        REQUIRE_FALSE(server->is_running());
+    }
 }
 
 // =============================================================================
@@ -272,13 +288,11 @@ TEST_CASE("server_config defaults", "[network_adapter][server][config]") {
 }
 
 // =============================================================================
-// Integration Tests (require actual network)
+// Server construction
 // =============================================================================
 
-TEST_CASE("network_adapter integration", "[network_adapter][integration][.slow]") {
-    // These tests are marked as slow and may be skipped in CI
-
-    SECTION("Server can be created and started") {
+TEST_CASE("network_adapter server construction", "[network_adapter][integration]") {
+    SECTION("Server can be created") {
         server_config config;
         config.ae_title = "INT_TEST_SCP";
         config.port = 11199;  // High port to avoid conflicts
@@ -286,7 +300,6 @@ TEST_CASE("network_adapter integration", "[network_adapter][integration][.slow]"
         auto server = network_adapter::create_server(config);
         REQUIRE(server != nullptr);
 
-        // Note: Starting the server would require proper cleanup
-        // and is better suited for integration tests
+        // Network start/stop and DIMSE behavior are exercised by the E2E suite.
     }
 }

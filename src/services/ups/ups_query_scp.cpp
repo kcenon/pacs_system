@@ -72,19 +72,21 @@ network::Result<std::monostate> ups_query_scp::handle_message(
     }
 
     // Get the SOP Class UID from the request
-    auto sop_class_uid = request.affected_sop_class_uid();
+    const std::string sop_class_uid{request.affected_sop_class_uid()};
 
-    // Verify the SOP Class is UPS Query FIND
-    if (sop_class_uid != ups_query_find_sop_class_uid) {
+    // C-FIND belongs to UPS Query, UPS Pull and UPS Watch (Tables CC.2-2, CC.2-3 and CC.2-5).
+    if (sop_class_uid != ups_query_find_sop_class_uid &&
+        sop_class_uid != "1.2.840.10008.5.1.4.34.6.3" &&
+        sop_class_uid != "1.2.840.10008.5.1.4.34.6.2") {
         return send_final_response(
-            assoc, context_id, request.message_id(),
+            assoc, context_id, request.message_id(), ups_query_find_sop_class_uid,
             status_refused_sop_class_not_supported);
     }
 
     // Verify we have a dataset (query keys)
     if (!request.has_dataset()) {
         return send_final_response(
-            assoc, context_id, request.message_id(),
+            assoc, context_id, request.message_id(), sop_class_uid,
             status_error_cannot_understand);
     }
 
@@ -107,17 +109,18 @@ network::Result<std::monostate> ups_query_scp::handle_message(
     // Send pending responses for each result
     for (const auto& result : results) {
         // Check for cancel request
-        if (cancel_check_ && cancel_check_()) {
+        if ((cancel_check_ && cancel_check_()) ||
+            assoc.cancellation_requested(context_id, request.message_id())) {
             ++queries_processed_;
 
             return send_final_response(
-                assoc, context_id, request.message_id(),
+                assoc, context_id, request.message_id(), sop_class_uid,
                 status_cancel);
         }
 
         // Send pending response with matching workitem
         auto send_result = send_pending_response(
-            assoc, context_id, request.message_id(),
+            assoc, context_id, request.message_id(), sop_class_uid,
             result);
 
         if (send_result.is_err()) {
@@ -135,7 +138,7 @@ network::Result<std::monostate> ups_query_scp::handle_message(
 
     // Send final success response (no dataset)
     return send_final_response(
-        assoc, context_id, request.message_id(),
+        assoc, context_id, request.message_id(), sop_class_uid,
         status_success);
 }
 
@@ -168,13 +171,14 @@ network::Result<std::monostate> ups_query_scp::send_pending_response(
     network::association& assoc,
     uint8_t context_id,
     uint16_t message_id,
+    std::string_view sop_class_uid,
     const core::dicom_dataset& result) {
 
     using namespace network::dimse;
 
     auto response = make_c_find_rsp(
         message_id,
-        ups_query_find_sop_class_uid,
+        sop_class_uid,
         status_pending
     );
 
@@ -187,13 +191,14 @@ network::Result<std::monostate> ups_query_scp::send_final_response(
     network::association& assoc,
     uint8_t context_id,
     uint16_t message_id,
+    std::string_view sop_class_uid,
     network::dimse::status_code status) {
 
     using namespace network::dimse;
 
     auto response = make_c_find_rsp(
         message_id,
-        ups_query_find_sop_class_uid,
+        sop_class_uid,
         status
     );
 

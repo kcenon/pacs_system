@@ -20,18 +20,17 @@ interface StatusUpdateDialogProps {
   isLoading?: boolean;
 }
 
+// The Scheduled Procedure Step Status values (0040,0020) the server keeps.
 const STATUS_OPTIONS = [
   { value: 'SCHEDULED', label: 'Scheduled' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'STARTED', label: 'Started' },
   { value: 'COMPLETED', label: 'Completed' },
-  { value: 'DISCONTINUED', label: 'Discontinued' },
 ];
 
 const STATUS_DESCRIPTIONS: Record<string, string> = {
   SCHEDULED: 'The procedure is scheduled and waiting to be performed.',
-  IN_PROGRESS: 'The procedure is currently being performed.',
-  COMPLETED: 'The procedure has been completed successfully.',
-  DISCONTINUED: 'The procedure has been cancelled or discontinued.',
+  STARTED: 'The procedure is being performed.',
+  COMPLETED: 'The procedure has been completed.',
 };
 
 export function StatusUpdateDialog({
@@ -92,8 +91,9 @@ export function StatusUpdateDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">New Status</label>
+            <label htmlFor="worklist-new-status" className="text-sm font-medium">New Status</label>
             <Select
+              id="worklist-new-status"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               options={STATUS_OPTIONS}

@@ -19,42 +19,30 @@
  *   --db-path <path>        Database path (default: ./pacs.db)
  *   --log-level <level>     Log level (default: info)
  *   --max-associations <n>  Max concurrent associations (default: 50)
+ *   --peer <AE:host:port>   C-MOVE destination and N-EVENT-REPORT receiver (repeatable)
+ *   --event-attempts <n>    Attempts per N-EVENT-REPORT on a new association
+ *   --event-retry-delay <s> Seconds between those attempts
+ *   --print-spool <path>    Print job directory
+ *   --ups-dir <path>        UPS instance directory
+ *   --http-port <port>      REST and DICOMweb port (default: off)
+ *   --http-bind <address>   Address the HTTP API listens on
+ *   --http-max-body-mb <n>  Largest HTTP request body in MiB
+ *   --http-cors-origin <o>  Origin named in Access-Control-Allow-Origin
+ *   --http-rest-api         Also serve the REST API under /api; needs OAuth 2.0
+ *   --oauth2-issuer <url>   Require OAuth 2.0 bearer tokens from this issuer on DICOMweb
+ *   --oauth2-audience <id>  Audience those tokens must name
+ *   --oauth2-jwks <path>    JWKS file holding the keys that sign them
  *   --help                  Show help message
  * @endcode
  */
 
 #include "config.h"
 #include "server_app.h"
+#include "../common/scp_lifecycle.h"
 
 #include <atomic>
 #include <csignal>
 #include <iostream>
-
-namespace {
-
-/// Global pointer to server app for signal handling
-std::atomic<kcenon::pacs::example::pacs_server_app*> g_server{nullptr};
-
-/// Signal handler for graceful shutdown
-void signal_handler(int signal) {
-    std::cout << "\nReceived signal " << signal << ", shutting down...\n";
-
-    auto* server = g_server.load();
-    if (server) {
-        server->request_shutdown();
-    }
-}
-
-/// Install signal handlers
-void install_signal_handlers() {
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
-#ifndef _WIN32
-    std::signal(SIGHUP, signal_handler);
-#endif
-}
-
-}  // namespace
 
 int main(int argc, char* argv[]) {
     std::cout << R"(
@@ -74,11 +62,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Install signal handlers
-    install_signal_handlers();
+    kcenon::pacs::cli::install_shutdown_signals();
 
     // Create and initialize server
     kcenon::pacs::example::pacs_server_app server(config.value());
-    g_server = &server;
 
     if (!server.initialize()) {
         std::cerr << "Failed to initialize PACS server\n";
@@ -92,12 +79,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Wait for shutdown
-    server.wait_for_shutdown();
+    kcenon::pacs::cli::wait_for_shutdown(server);
 
     // Print final statistics
     server.print_statistics();
-
-    g_server = nullptr;
 
     std::cout << "PACS Server terminated\n";
     return 0;

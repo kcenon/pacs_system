@@ -111,6 +111,31 @@ public:
 
 ---
 
+### Storage roles on C-GET associations
+
+`association_config::role_selections` offers per-SOP-Class requestor roles. For a
+C-GET client, add `{storage_sop_class_uid, false, true}` alongside each storage
+presentation context. `association::requestor_role(uid)` reports the negotiated
+requestor roles only when that SOP Class has an accepted context. Missing role
+responses use the protocol default (requestor SCU, acceptor SCP); they do not
+accept the requested Storage SCP role. Unsolicited roles cannot grant privileges.
+
+An acceptor can explicitly configure `scp_config::supported_requestor_roles`.
+Accepted roles are the intersection of those capabilities and the requestor's
+offer. See [PS3.7 D.3.3.4](https://dicom.nema.org/medical/dicom/current/output/chtml/part07/sect_d.3.3.4.html).
+Role sub-items use the declared UID byte length without padding, as required for
+[network negotiation UIDs](https://dicom.nema.org/medical/dicom/current/output/chtml/part05/chapter_9.html).
+
+`retrieve_scu --mode get` requires at least one accepted Storage SCP context/role
+before sending its request. It correlates responses and storage sub-operations,
+persists files with the accepted transfer syntax, and reports both peer completed
+and locally acknowledged counts. A supplied final completed counter must match
+those acknowledgements; an omitted optional counter uses the local count. Warning,
+cancellation, failure, count mismatch and persistence failure produce nonzero exits.
+`--timeout <seconds>` bounds the overall C-GET operation (default 60 seconds).
+Existing files are skipped successfully only when their syntax and dataset match.
+Received identifiers are escaped into individual output path components.
+
 ### `pacs::network::dimse::dimse_message`
 
 DIMSE message handling for both DIMSE-C and DIMSE-N services.

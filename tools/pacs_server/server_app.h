@@ -15,20 +15,39 @@
 
 #include "kcenon/pacs/core/dicom_dataset.h"
 #include "kcenon/pacs/core/dicom_file.h"
-#include "kcenon/pacs/network/dicom_server.h"
+#include "kcenon/pacs/network/v2/dicom_server_v2.h"
 #include "kcenon/pacs/network/server_config.h"
+#include "kcenon/pacs/services/event_sender.h"
 #include "kcenon/pacs/services/mpps_scp.h"
+#include "kcenon/pacs/services/print_scp.h"
 #include "kcenon/pacs/services/query_scp.h"
 #include "kcenon/pacs/services/retrieve_scp.h"
+#include "kcenon/pacs/services/storage_commitment_scp.h"
 #include "kcenon/pacs/services/storage_scp.h"
+#include "kcenon/pacs/services/ups/ups_index.h"
 #include "kcenon/pacs/services/verification_scp.h"
 #include "kcenon/pacs/services/worklist_scp.h"
+#include "kcenon/pacs/storage/audit_record.h"
 #include "kcenon/pacs/storage/file_storage.h"
 #include "kcenon/pacs/storage/index_database.h"
+#ifdef PACS_SERVER_WITH_HTTP
+#include "kcenon/pacs/web/rest_server.h"
+#include "kcenon/pacs/client/job_manager.h"
+#include "kcenon/pacs/client/remote_node_manager.h"
+#include "kcenon/pacs/client/routing_manager.h"
+#endif
+#ifdef PACS_WITH_MONITORING
+#include "kcenon/pacs/monitoring/pacs_metrics.h"
+
+namespace kcenon::pacs::monitoring {
+class health_checker;
+}
+#endif
 
 #include <atomic>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace kcenon::pacs::example {
 
@@ -49,7 +68,7 @@ namespace kcenon::pacs::example {
  * +---------------------------------------------+
  * |                                             |
  * |  +----------------+   +------------------+  |
- * |  | dicom_server   |   | index_database   |  |
+ * |  | dicom_server_v2|   | index_database   |  |
  * |  +-------+--------+   +--------+---------+  |
  * |          |                     |            |
  * |  +-------v--------+   +--------v---------+  |
@@ -189,26 +208,44 @@ private:
     /// Set up DICOM server
     [[nodiscard]] bool setup_server();
 
+    /// Set up the HTTP API, when a port is configured
+    [[nodiscard]] bool setup_http();
+
     // =========================================================================
     // Service Handlers
     // =========================================================================
+
+    /// One worklist item as a C-FIND response, or nothing when the keys do not match it
+    [[nodiscard]] std::optional<core::dicom_dataset> worklist_row(
+        const storage::worklist_item& item, const core::dicom_dataset& keys) const;
+
+    /// Why an instance cannot be committed, or nothing when it is held
+    [[nodiscard]] std::optional<services::commitment_failure_reason> verify_commitment(
+        const services::sop_reference& reference) const;
+
+    /// Write a print job to the spool directory
+    [[nodiscard]] network::Result<std::monostate> spool_print_job(const services::print_job& job);
 
     /// Handle incoming C-STORE request
     services::storage_status handle_store(
         const core::dicom_dataset& dataset,
         const std::string& calling_ae,
         const std::string& sop_class_uid,
-        const std::string& sop_instance_uid);
+        const std::string& sop_instance_uid,
+        const encoding::transfer_syntax& syntax);
 
-    /// Handle C-FIND query
-    std::vector<core::dicom_dataset> handle_query(
-        services::query_level level,
-        const core::dicom_dataset& query_keys,
-        const std::string& calling_ae);
+#ifdef PACS_SERVER_WITH_HTTP
+    /// Remote nodes, jobs and routing for the REST API; store jobs read this server's archive.
+    void setup_jobs();
+#endif
 
-    /// Handle C-MOVE/C-GET retrieve
-    std::vector<core::dicom_file> handle_retrieve(
-        const core::dicom_dataset& query_keys);
+    /// Add a row to the audit trail. A failed write to the trail is reported and does not fail the operation.
+    void record_audit(storage::audit_event_type type, bool succeeded, std::string_view source_ae,
+                      std::string_view target_ae, std::string patient_id, std::string study_uid,
+                      std::string message);
+
+    /// Give the health checker the association counters and the archive totals it reports.
+    void report_health();
 
     /// Handle worklist query
     std::vector<core::dicom_dataset> handle_worklist_query(
@@ -233,13 +270,40 @@ private:
     pacs_server_config config_;
 
     /// DICOM server
-    std::unique_ptr<network::dicom_server> server_;
+    std::shared_ptr<network::v2::dicom_server_v2> server_;
 
     /// File storage
-    std::unique_ptr<storage::file_storage> file_storage_;
+    std::shared_ptr<storage::file_storage> file_storage_;
 
     /// Index database
-    std::unique_ptr<storage::index_database> database_;
+    std::shared_ptr<storage::index_database> database_;
+
+    /// Storage SCP, kept so routing can follow what it stores
+    std::shared_ptr<services::storage_scp> storage_scp_;
+
+#ifdef PACS_WITH_MONITORING
+    /// The DIMSE work this server did, as GET /api/v1/system/metrics reports it
+    std::shared_ptr<monitoring::pacs_metrics> metrics_{std::make_shared<monitoring::pacs_metrics>()};
+
+    /// What GET /api/v1/system/status reports; it knows only the counters this server gives it
+    std::shared_ptr<monitoring::health_checker> health_;
+#endif
+
+    /// Sends N-EVENT-REPORTs on associations this server opens
+    std::shared_ptr<services::event_sender> events_;
+
+    /// UPS workitems; declared after the database and the sender it uses
+    std::unique_ptr<services::ups_index> ups_index_;
+
+#ifdef PACS_SERVER_WITH_HTTP
+    /// REST and DICOMweb, on the same database and storage as the DICOM services
+    std::unique_ptr<web::rest_server> http_server_;
+
+    /// Remote nodes, jobs and routing rules, managed through the REST API
+    std::shared_ptr<client::remote_node_manager> node_manager_;
+    std::shared_ptr<client::job_manager> job_manager_;
+    std::shared_ptr<client::routing_manager> routing_manager_;
+#endif
 
     /// Shutdown flag
     std::atomic<bool> shutdown_requested_{false};

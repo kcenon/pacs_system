@@ -208,7 +208,8 @@ public:
     /**
      * @brief Construct a new DIMSE message
      * @param cmd The command field (type of operation)
-     * @param message_id Unique message identifier
+     * @param message_id Unique message identifier; for C-CANCEL, the original
+     *                   operation's MessageIDBeingRespondedTo
      */
     dimse_message(command_field cmd, uint16_t message_id);
 

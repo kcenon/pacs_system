@@ -13,17 +13,10 @@ import {
   MemoryStick,
   Zap,
 } from 'lucide-react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ApiErrorNotice } from '@/components/ui/api-error';
 import { apiClient } from '@/api/client';
 import { formatDateTime, formatBytes } from '@/lib/utils';
 import type { SystemStatus, SystemMetrics, DashboardStats, AuditRecord, PaginatedResponse } from '@/types/api';
@@ -138,92 +131,6 @@ function HealthIndicator({
   );
 }
 
-function StorageChart({ used, total }: { used: number; total: number }) {
-  const free = total - used;
-  const usedPercent = total > 0 ? Math.round((used / total) * 100) : 0;
-
-  const data = [
-    { name: 'Used', value: used, color: '#3b82f6' },
-    { name: 'Free', value: free, color: '#e5e7eb' },
-  ];
-
-  // Mock storage breakdown by modality when we don't have real data
-  const modalityData = [
-    { name: 'CT', value: 45, color: '#3b82f6' },
-    { name: 'MR', value: 25, color: '#10b981' },
-    { name: 'XR', value: 15, color: '#f59e0b' },
-    { name: 'US', value: 10, color: '#8b5cf6' },
-    { name: 'Other', value: 5, color: '#6b7280' },
-  ];
-
-  if (total === 0) {
-    return (
-      <div className="flex h-48 items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <HardDrive className="mx-auto mb-2 h-8 w-8" />
-          <p className="text-sm">Storage data unavailable</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="flex flex-col items-center">
-        <ResponsiveContainer width="100%" height={180}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={70}
-              dataKey="value"
-              strokeWidth={2}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value: number) => formatBytes(value)}
-              contentStyle={{ borderRadius: '8px' }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="text-center">
-          <p className="text-2xl font-bold">{usedPercent}%</p>
-          <p className="text-sm text-muted-foreground">
-            {formatBytes(used)} of {formatBytes(total)}
-          </p>
-        </div>
-      </div>
-      <div className="flex flex-col items-center">
-        <ResponsiveContainer width="100%" height={180}>
-          <PieChart>
-            <Pie
-              data={modalityData}
-              cx="50%"
-              cy="50%"
-              outerRadius={70}
-              dataKey="value"
-              label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-              labelLine={false}
-            >
-              {modalityData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-        <p className="text-sm text-muted-foreground">Storage by Modality</p>
-      </div>
-    </div>
-  );
-}
-
 function ActivityFeed({ activities, loading }: { activities: AuditRecord[]; loading: boolean }) {
   const getEventIcon = (eventType: string) => {
     if (eventType.includes('STORE')) return <HardDrive className="h-4 w-4 text-blue-500" />;
@@ -316,6 +223,7 @@ export function DashboardPage() {
   const {
     data: stats,
     isLoading: statsLoading,
+    error: statsError,
     refetch: refetchStats,
     isRefetching: isStatsRefetching,
   } = useQuery<DashboardStats>({
@@ -325,7 +233,7 @@ export function DashboardPage() {
   });
 
   // Recent activity query
-  const { data: recentActivity, isLoading: activityLoading } = useQuery<PaginatedResponse<AuditRecord>>({
+  const { data: recentActivity, isLoading: activityLoading, error: activityError } = useQuery<PaginatedResponse<AuditRecord>>({
     queryKey: ['recent-activity'],
     queryFn: () => apiClient.getRecentActivity(10),
     refetchInterval: FAST_POLL_INTERVAL,
@@ -336,12 +244,19 @@ export function DashboardPage() {
     refetchStats();
   };
 
-  // Mock component health data (would come from backend in production)
-  const componentHealth = status?.components || {
-    database: { status: 'healthy' as const, latency_ms: 5 },
-    storage: { status: 'healthy' as const, latency_ms: 12 },
-    server: { status: 'healthy' as const, latency_ms: 2 },
-  };
+  // Only what the server reported: a page that assumes health hides the failure it exists to show.
+  const componentHealth: Record<string, { status: 'healthy' | 'unhealthy'; latency_ms?: number }> = {};
+  if (status?.database) {
+    componentHealth.database = {
+      status: status.database.connected ? 'healthy' : 'unhealthy',
+      latency_ms: status.database.response_time_ms,
+    };
+  }
+  if (status?.storage) {
+    componentHealth.storage = {
+      status: status.storage.writable && status.storage.readable ? 'healthy' : 'unhealthy',
+    };
+  }
 
   return (
     <div className="space-y-6">
@@ -377,7 +292,9 @@ export function DashboardPage() {
             )}
           </CardTitle>
           <CardDescription>
-            {status?.message || 'Checking system status...'}
+            {statusError
+              ? statusError.message
+              : status?.message || (statusLoading ? 'Checking system status...' : 'No message from the server')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -392,12 +309,14 @@ export function DashboardPage() {
                 </strong>
               </span>
             )}
-            {metrics?.requests_total !== undefined && (
+            {!!metrics?.requests_total && (
               <span>Total Requests: <strong>{metrics.requests_total.toLocaleString()}</strong></span>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {statsError && <ApiErrorNotice error={statsError} what="the counts" />}
 
       {/* Quick Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -424,19 +343,15 @@ export function DashboardPage() {
         />
         <StatCard
           title="Storage Used"
-          value={stats?.storage_used_bytes ? formatBytes(stats.storage_used_bytes) : '-'}
-          description={
-            stats?.storage_total_bytes
-              ? `of ${formatBytes(stats.storage_total_bytes)}`
-              : 'Of allocated space'
-          }
+          value={status?.storage ? formatBytes(status.storage.used_bytes) : '-'}
+          description={status?.storage ? `of ${formatBytes(status.storage.total_bytes)}` : 'Not reported'}
           icon={HardDrive}
-          loading={statsLoading}
+          loading={statusLoading}
         />
       </div>
 
       {/* Detailed Sections */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4">
         {/* Component Health */}
         <Card>
           <CardHeader>
@@ -462,19 +377,6 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Storage Usage Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Storage Usage</CardTitle>
-            <CardDescription>Disk space utilization</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <StorageChart
-              used={stats?.storage_used_bytes || 0}
-              total={stats?.storage_total_bytes || 0}
-            />
-          </CardContent>
-        </Card>
       </div>
 
       {/* Recent Activity */}
@@ -484,10 +386,11 @@ export function DashboardPage() {
           <CardDescription>Latest system events and DICOM operations</CardDescription>
         </CardHeader>
         <CardContent>
-          <ActivityFeed
-            activities={recentActivity?.data || []}
-            loading={activityLoading}
-          />
+          {activityError ? (
+            <ApiErrorNotice error={activityError} what="recent activity" />
+          ) : (
+            <ActivityFeed activities={recentActivity?.data || []} loading={activityLoading} />
+          )}
         </CardContent>
       </Card>
 

@@ -53,7 +53,7 @@ network::Result<ups_result> ups_watch_scu::subscribe(
                     " for workitem " + data.workitem_uid));
 
     auto result = send_watch_action(
-        assoc, sop_instance_uid, ups_watch_action_subscribe);
+        assoc, sop_instance_uid, ups_watch_action_subscribe, data.receiving_ae, data.deletion_lock);
 
     if (result.is_ok() && result.value().is_success()) {
         subscribes_performed_.fetch_add(1, std::memory_order_relaxed);
@@ -78,7 +78,7 @@ network::Result<ups_result> ups_watch_scu::unsubscribe(
                     " for workitem " + data.workitem_uid));
 
     auto result = send_watch_action(
-        assoc, sop_instance_uid, ups_watch_action_unsubscribe);
+        assoc, sop_instance_uid, ups_watch_action_unsubscribe, data.receiving_ae, std::nullopt);
 
     if (result.is_ok() && result.value().is_success()) {
         unsubscribes_performed_.fetch_add(1, std::memory_order_relaxed);
@@ -92,13 +92,21 @@ network::Result<ups_result> ups_watch_scu::unsubscribe(
 
 network::Result<ups_result> ups_watch_scu::suspend_global(
     network::association& assoc) {
+    return suspend_global(assoc, std::string{});
+}
+
+network::Result<ups_result> ups_watch_scu::suspend_global(
+    network::association& assoc,
+    const std::string& receiving_ae) {
 
     logger_->debug("UPS Watch SCU: Suspend global subscription");
 
     auto result = send_watch_action(
         assoc,
         std::string(ups_global_subscription_instance_uid),
-        ups_watch_action_suspend_global);
+        ups_watch_action_suspend_global,
+        receiving_ae,
+        std::nullopt);
 
     if (result.is_ok() && result.value().is_success()) {
         unsubscribes_performed_.fetch_add(1, std::memory_order_relaxed);
@@ -198,7 +206,9 @@ void ups_watch_scu::reset_statistics() noexcept {
 network::Result<ups_result> ups_watch_scu::send_watch_action(
     network::association& assoc,
     const std::string& sop_instance_uid,
-    uint16_t action_type_id) {
+    uint16_t action_type_id,
+    const std::string& receiving_ae,
+    std::optional<bool> deletion_lock) {
 
     using namespace network::dimse;
 
@@ -219,12 +229,21 @@ network::Result<ups_result> ups_watch_scu::send_watch_action(
             "No accepted presentation context for UPS Watch SOP Class");
     }
 
-    // Build the N-ACTION request
+    // Build the N-ACTION request. CC.2: the request names UPS Push on its UPS Watch context.
     auto request = make_n_action_rq(
         next_message_id(),
-        ups_watch_sop_class_uid,
+        ups_push_sop_class_uid,
         sop_instance_uid,
         action_type_id);
+
+    // Table CC.2.3-1: who hears the events, which need not be this AE, and whether it holds a lock.
+    core::dicom_dataset information;
+    information.set_string(ups_tags::receiving_ae, encoding::vr_type::AE,
+                           receiving_ae.empty() ? std::string(assoc.calling_ae()) : receiving_ae);
+    if (deletion_lock) {
+        information.set_string(ups_tags::deletion_lock, encoding::vr_type::LO, *deletion_lock ? "TRUE" : "FALSE");
+    }
+    request.set_dataset(std::move(information));
 
     // Send the request
     auto send_result = assoc.send_dimse(*context_id, request);

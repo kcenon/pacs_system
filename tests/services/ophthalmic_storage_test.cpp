@@ -28,7 +28,7 @@ TEST_CASE("ophthalmic SOP Class UIDs are correct",
     CHECK(ophthalmic_tomography_storage_uid
           == "1.2.840.10008.5.1.4.1.1.77.1.5.4");
     CHECK(wide_field_ophthalmic_photo_storage_uid
-          == "1.2.840.10008.5.1.4.1.1.77.1.5.7");
+          == "1.2.840.10008.5.1.4.1.1.77.1.5.5");
     CHECK(ophthalmic_oct_bscan_analysis_storage_uid
           == "1.2.840.10008.5.1.4.1.1.77.1.5.8");
 }
@@ -56,7 +56,7 @@ TEST_CASE("is_ophthalmic_storage_sop_class identifies ophthalmic SOP Classes",
 
     SECTION("Wide Field Ophthalmic Photography") {
         CHECK(is_ophthalmic_storage_sop_class(
-            "1.2.840.10008.5.1.4.1.1.77.1.5.7"));
+            "1.2.840.10008.5.1.4.1.1.77.1.5.5"));
     }
 
     SECTION("Ophthalmic OCT B-scan Volume Analysis") {
@@ -95,7 +95,7 @@ TEST_CASE("get_ophthalmic_storage_sop_classes returns all UIDs",
     CHECK(std::find(uids.begin(), uids.end(),
                     "1.2.840.10008.5.1.4.1.1.77.1.5.4") != uids.end());
     CHECK(std::find(uids.begin(), uids.end(),
-                    "1.2.840.10008.5.1.4.1.1.77.1.5.7") != uids.end());
+                    "1.2.840.10008.5.1.4.1.1.77.1.5.5") != uids.end());
     CHECK(std::find(uids.begin(), uids.end(),
                     "1.2.840.10008.5.1.4.1.1.77.1.5.8") != uids.end());
 }

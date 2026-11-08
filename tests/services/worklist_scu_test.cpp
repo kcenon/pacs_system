@@ -11,6 +11,7 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include "../../tools/worklist_scu/worklist_result_formatter.h"
 
 using namespace kcenon::pacs::services;
 using namespace kcenon::pacs::core;
@@ -249,4 +250,71 @@ TEST_CASE("worklist_scu date range format", "[services][worklist_scu]") {
     keys.scheduled_date = "20241201-20241231";
 
     CHECK(keys.scheduled_date.find('-') != std::string::npos);
+}
+
+TEST_CASE("MWL typed matching and return keys use the scheduled step item",
+          "[services][worklist_scu][nested]") {
+    worklist_scu scu;
+    worklist_query_keys keys;
+    keys.patient_id = "P003";
+    keys.modality = "MR";
+    keys.scheduled_date = "20261101-20261103";
+    keys.scheduled_time = "090000";
+    keys.scheduled_station_ae = "MR_STATION";
+    keys.scheduled_physician = "DOCTOR^TEST";
+    keys.scheduled_procedure_step_id = "SPS003";
+    keys.requested_procedure_description = "Requested MRI";
+    auto ds = scu.build_query_dataset(keys);
+    REQUIRE(ds.get_sequence(tags::scheduled_procedure_step_sequence) != nullptr);
+    const auto& steps = *ds.get_sequence(tags::scheduled_procedure_step_sequence);
+    REQUIRE(steps.size() == 1);
+    const auto& step = steps.front();
+    CHECK(ds.get_string(tags::patient_id) == "P003");
+    CHECK(ds.get_string(tags::requested_procedure_description) == "Requested MRI");
+    CHECK_FALSE(ds.contains(tags::study_description));
+    CHECK(step.get_string(tags::modality) == "MR");
+    CHECK(step.get_string(tags::scheduled_procedure_step_start_date) == keys.scheduled_date);
+    CHECK(step.get_string(tags::scheduled_procedure_step_start_time) == "090000");
+    CHECK(step.get_string(tags::scheduled_station_ae_title) == "MR_STATION");
+    CHECK(step.get_string(tags::scheduled_performing_physician_name) == "DOCTOR^TEST");
+    CHECK(step.get_string(tags::scheduled_procedure_step_id) == "SPS003");
+    for (auto tag : {tags::modality, tags::scheduled_procedure_step_start_date,
+                     tags::scheduled_procedure_step_start_time, tags::scheduled_station_ae_title,
+                     tags::scheduled_performing_physician_name, tags::scheduled_procedure_step_id,
+                     tags::scheduled_procedure_step_description, tags::scheduled_station_name,
+                     tags::scheduled_procedure_step_location}) {
+        CHECK_FALSE(ds.contains(tag));
+        CHECK(step.contains(tag));
+    }
+}
+
+TEST_CASE("MWL formatter preserves nested scheduled step fields in every output format",
+          "[services][worklist_scu][nested]") {
+    dicom_dataset ds;
+    ds.set_string(tags::patient_id, vr_type::LO, "P003");
+    // Misplaced root values must never override the nested fields.
+    ds.set_string(tags::modality, vr_type::CS, "ROOT_WRONG");
+    dicom_dataset step;
+    step.set_string(tags::modality, vr_type::CS, "MR");
+    step.set_string(tags::scheduled_procedure_step_start_date, vr_type::DA, "20261101");
+    step.set_string(tags::scheduled_procedure_step_start_time, vr_type::TM, "091530");
+    step.set_string(tags::scheduled_station_ae_title, vr_type::AE, "MR_STATION");
+    step.set_string(tags::scheduled_procedure_step_id, vr_type::SH, "SPS003");
+    step.set_string(tags::scheduled_procedure_step_description, vr_type::LO, "MRI Brain");
+    ds.get_or_create_sequence(tags::scheduled_procedure_step_sequence).push_back(std::move(step));
+    for (auto format : {worklist_cli::output_format::table, worklist_cli::output_format::json,
+                        worklist_cli::output_format::csv, worklist_cli::output_format::xml}) {
+        auto text = worklist_cli::worklist_result_formatter(format).format({ds});
+        CHECK(text.find("MR_STATION") != std::string::npos);
+        CHECK(text.find("SPS003") != std::string::npos);
+        CHECK(text.find("ROOT_WRONG") == std::string::npos);
+        if (format == worklist_cli::output_format::table) {
+            CHECK(text.find("2026-11-01") != std::string::npos);
+            CHECK(text.find("09:15") != std::string::npos);
+        } else {
+            CHECK(text.find("20261101") != std::string::npos);
+            CHECK(text.find("091530") != std::string::npos);
+            CHECK(text.find("MRI Brain") != std::string::npos);
+        }
+    }
 }

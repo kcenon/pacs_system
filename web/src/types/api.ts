@@ -3,7 +3,17 @@ export interface SystemStatus {
   status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
   message?: string;
   version: string;
-  components?: Record<string, ComponentStatus>;
+  database?: {
+    connected: boolean;
+    response_time_ms?: number;
+  };
+  storage?: {
+    writable: boolean;
+    readable: boolean;
+    total_bytes: number;
+    used_bytes: number;
+    available_bytes: number;
+  };
 }
 
 export interface ComponentStatus {
@@ -81,8 +91,6 @@ export interface DashboardStats {
   active_associations: number;
   total_patients: number;
   total_studies: number;
-  storage_used_bytes: number;
-  storage_total_bytes: number;
 }
 
 export interface StorageStats {
@@ -184,7 +192,7 @@ export interface Instance {
 export interface WorklistItem {
   pk: number;
   step_id: string;
-  step_status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISCONTINUED';
+  step_status: 'SCHEDULED' | 'STARTED' | 'COMPLETED';
   patient_id: string;
   patient_name: string;
   birth_date: string;
@@ -269,15 +277,15 @@ export interface AuditQuery {
 }
 
 // Association types
-export interface Association {
-  id: string;
-  remote_ae: string;
-  remote_host: string;
-  remote_port: number;
-  state: 'ESTABLISHED' | 'PENDING' | 'CLOSED';
-  role: 'SCU' | 'SCP';
-  start_time: string;
-  last_activity: string;
+export interface AssociationStatistics {
+  active_count: number;
+  total_associations: number;
+  rejected_associations: number;
+  messages_processed: number;
+  bytes_received: number;
+  bytes_sent: number;
+  uptime_seconds: number;
+  server_running: boolean;
 }
 
 // Pagination

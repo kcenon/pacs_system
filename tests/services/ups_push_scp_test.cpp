@@ -82,7 +82,7 @@ TEST_CASE("ups_push_sop_class_uid constant", "[services][ups]") {
 
 TEST_CASE("UPS N-ACTION type constants", "[services][ups]") {
     CHECK(ups_action_change_state == 1);
-    CHECK(ups_action_request_cancel == 3);
+    CHECK(ups_action_request_cancel == 2);
 }
 
 // ============================================================================

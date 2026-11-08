@@ -143,34 +143,109 @@ from_iso8601(const std::string& str) {
 }
 
 /**
- * @brief Simple JSON value extractor (for basic parsing)
+ * @brief The JSON string whose opening quote is at `pos`, unescaped
+ *
+ * `end` receives the position after its closing quote. Unicode escapes are kept as written.
  */
-[[nodiscard]] inline std::optional<std::string> extract_string(
-    const std::string& json,
-    const std::string& key) {
-    std::string search_key = "\"" + key + "\"";
+[[nodiscard]] inline std::optional<std::string> read_string(
+    const std::string& json, std::size_t pos, std::size_t* end = nullptr) {
+    std::string value;
+    for (auto i = pos + 1; i < json.size(); ++i) {
+        const char c = json[i];
+        if (c == '"') {
+            if (end != nullptr) {
+                *end = i + 1;
+            }
+            return value;
+        }
+        if (c != '\\') {
+            value += c;
+            continue;
+        }
+        if (++i >= json.size()) {
+            return std::nullopt;
+        }
+        switch (json[i]) {
+            case 'n': value += '\n'; break;
+            case 't': value += '\t'; break;
+            case 'r': value += '\r'; break;
+            case 'b': value += '\b'; break;
+            case 'f': value += '\f'; break;
+            case 'u': value += "\\u"; break;
+            default: value += json[i]; break;
+        }
+    }
+    return std::nullopt;
+}
+
+/**
+ * @brief Where the value of `key` starts, past the colon and any white space
+ */
+[[nodiscard]] inline std::optional<std::size_t> value_position(
+    const std::string& json, const std::string& key) {
+    const std::string search_key = "\"" + key + "\"";
     auto pos = json.find(search_key);
     if (pos == std::string::npos) {
         return std::nullopt;
     }
-
-    pos = json.find(':', pos);
+    pos = json.find(':', pos + search_key.size());
     if (pos == std::string::npos) {
         return std::nullopt;
     }
-
-    pos = json.find('"', pos);
+    pos = json.find_first_not_of(" \t\r\n", pos + 1);
     if (pos == std::string::npos) {
         return std::nullopt;
     }
+    return pos;
+}
 
-    auto start = pos + 1;
-    auto end = json.find('"', start);
-    if (end == std::string::npos) {
+/**
+ * @brief The string value of `key`; nothing when it is absent or not a string
+ *
+ * It used to return the next string after the colon, so `"error_message": null` read as the
+ * name of the following key.
+ */
+[[nodiscard]] inline std::optional<std::string> extract_string(
+    const std::string& json,
+    const std::string& key) {
+    const auto pos = value_position(json, key);
+    if (!pos || json[*pos] != '"') {
         return std::nullopt;
     }
+    return read_string(json, *pos);
+}
 
-    return json.substr(start, end - start);
+/**
+ * @brief The strings of an array value of `key`; nothing when it is absent or holds a non-string
+ */
+[[nodiscard]] inline std::optional<std::vector<std::string>> extract_string_array(
+    const std::string& json,
+    const std::string& key) {
+    auto pos = value_position(json, key);
+    if (!pos || json[*pos] != '[') {
+        return std::nullopt;
+    }
+    std::vector<std::string> values;
+    auto next = *pos + 1;
+    while (true) {
+        next = json.find_first_not_of(" \t\r\n,", next);
+        if (next == std::string::npos) {
+            return std::nullopt;
+        }
+        if (json[next] == ']') {
+            return values;
+        }
+        if (json[next] != '"') {
+            return std::nullopt;
+        }
+        std::size_t end = 0;
+        auto value = read_string(json, next, &end);
+        if (!value) {
+            return std::nullopt;
+        }
+        values.push_back(std::move(*value));
+        next = end;
+    }
 }
 
 /**
@@ -322,6 +397,11 @@ from_iso8601(const std::string& str) {
         if (tp) {
             status.completed_at = *tp;
         }
+    }
+
+    // The objects the inference produced; without them no result can be tied to its request.
+    if (auto result_uids = extract_string_array(json, "result_uids")) {
+        status.result_uids = std::move(*result_uids);
     }
 
     return status;

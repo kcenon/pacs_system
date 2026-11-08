@@ -39,10 +39,14 @@ inline constexpr std::string_view ct_image_storage_uid =
 inline constexpr std::string_view enhanced_ct_image_storage_uid =
     "1.2.840.10008.5.1.4.1.1.2.1";
 
-/// CT For Processing Image Storage SOP Class UID
-/// Multi-energy/spectral CT basis material decomposition images
-inline constexpr std::string_view ct_for_processing_image_storage_uid =
+/// Legacy Converted Enhanced CT Image Storage SOP Class UID
+inline constexpr std::string_view legacy_converted_enhanced_ct_image_storage_uid =
     "1.2.840.10008.5.1.4.1.1.2.2";
+
+/// Former name of legacy_converted_enhanced_ct_image_storage_uid. PS3.6 defines
+/// no "CT For Processing" class; this alias keeps existing callers compiling.
+inline constexpr std::string_view ct_for_processing_image_storage_uid =
+    legacy_converted_enhanced_ct_image_storage_uid;
 
 // =============================================================================
 // CT SOP Class Utilities

@@ -22,11 +22,13 @@
 #ifndef PACS_SERVICES_RETRIEVE_SCP_HPP
 #define PACS_SERVICES_RETRIEVE_SCP_HPP
 
+#include "query_scp.h"
 #include "scp_service.h"
 #include "kcenon/pacs/core/dicom_dataset.h"
 #include "kcenon/pacs/core/dicom_file.h"
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <string>
@@ -101,6 +103,28 @@ struct sub_operation_stats {
  */
 using retrieve_handler = std::function<std::vector<core::dicom_file>(
     const core::dicom_dataset& query_keys)>;
+
+/// A C-MOVE or C-GET request as the service understood it.
+struct retrieve_request {
+    qr_model model;
+    const core::dicom_dataset& keys;
+};
+
+/// The objects one retrieve names.
+struct retrieve_selection {
+    std::vector<core::dicom_file> files;
+    /// Selected objects whose files could not be read: failed sub-operations, not absences.
+    std::vector<std::string> unavailable_uids;
+    qr_failure failure{qr_failure::none};
+};
+
+/**
+ * @brief Retrieve selector function type
+ *
+ * Unlike retrieve_handler, it sees the Information Model and can report a refusal or an
+ * object it could not read, so neither turns into a final Success with fewer objects.
+ */
+using retrieve_selector = std::function<retrieve_selection(const retrieve_request& request)>;
 
 /**
  * @brief Destination resolver function type
@@ -257,6 +281,13 @@ public:
     void set_retrieve_handler(retrieve_handler handler);
 
     /**
+     * @brief Set the retrieve selector, which takes precedence over retrieve_handler
+     *
+     * @param selector The retrieve selector function
+     */
+    void set_retrieve_selector(retrieve_selector selector);
+
+    /**
      * @brief Set the destination resolver function
      *
      * The resolver maps AE titles to network addresses for C-MOVE operations.
@@ -286,6 +317,13 @@ public:
      */
     void set_cancel_check(retrieve_cancel_check check);
 
+    /// Configure positive destination connect/write, C-STORE response and release
+    /// deadlines before starting the server (defaults: 3s, 30s, 1s).
+    void set_move_timeouts(std::chrono::milliseconds connect,
+                           std::chrono::milliseconds response,
+                           std::chrono::milliseconds release);
+
+
     // =========================================================================
     // scp_service Interface Implementation
     // =========================================================================
@@ -296,6 +334,10 @@ public:
      * @return Vector containing Patient Root and Study Root Move/Get SOP Classes
      */
     [[nodiscard]] std::vector<std::string> supported_sop_classes() const override;
+    [[nodiscard]] std::vector<std::string> outbound_sop_classes() const override;
+
+    /// Maximum wait for each default C-GET C-STORE acknowledgement.
+    void set_get_response_timeout(std::chrono::milliseconds timeout);
 
     /**
      * @brief Handle an incoming DIMSE message (C-MOVE-RQ or C-GET-RQ)
@@ -421,7 +463,8 @@ private:
         std::string_view sop_class_uid,
         bool is_move,
         const sub_operation_stats& stats,
-        bool was_cancelled);
+        bool was_cancelled,
+        const std::vector<std::string>& failed_uids = {});
 
     /**
      * @brief Get the Move Destination AE title from the request
@@ -432,14 +475,23 @@ private:
     [[nodiscard]] std::string get_move_destination(
         const network::dimse::dimse_message& request) const;
 
+    /// Ask the selector or the handler for the objects an Identifier names.
+    [[nodiscard]] retrieve_selection select_objects(std::string_view sop_class_uid,
+                                                    const core::dicom_dataset& query_keys) const;
+
     // =========================================================================
     // Member Variables
     // =========================================================================
 
     retrieve_handler retrieve_handler_;
+    retrieve_selector retrieve_selector_;
     destination_resolver destination_resolver_;
     store_sub_operation store_handler_;
     retrieve_cancel_check cancel_check_;
+    std::chrono::milliseconds move_connect_timeout_{3000};
+    std::chrono::milliseconds move_response_timeout_{30000};
+    std::chrono::milliseconds move_release_timeout_{1000};
+    std::chrono::milliseconds get_response_timeout_{30000};
 
     std::atomic<size_t> move_operations_{0};
     std::atomic<size_t> get_operations_{0};

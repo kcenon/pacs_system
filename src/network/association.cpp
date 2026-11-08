@@ -18,6 +18,7 @@
 #include <array>
 #include <cctype>
 #include <deque>
+#include <condition_variable>
 #include <sstream>
 #include <stdexcept>
 
@@ -170,6 +171,75 @@ struct association::peer_link {
         association_state::aborted, association_state::aborted};
 };
 
+/**
+ * @brief Messages handed to this association by its in-memory peer or by
+ * dicom_server_v2, waiting for receive_dimse().
+ *
+ * One mutex guards the items, so whatever the sender wrote into a message
+ * happens before the receiver that takes it reads it. thread_system's
+ * detail::concurrent_queue, used here before, links a node under one mutex
+ * and takes it under another (kcenon/thread_system#761): a receiver could
+ * read a message before the sender's writes reached it, and ThreadSanitizer
+ * reported it in dicom_server's message loop.
+ */
+struct association::message_queue {
+    /// Add @p item and wake one waiter; dropped once shut down
+    void enqueue(message_type item) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if (shut_down_) {
+                return;
+            }
+            items_.push_back(std::move(item));
+        }
+        ready_.notify_one();
+    }
+
+    /// The oldest item, or std::nullopt when there is none
+    [[nodiscard]] std::optional<message_type> try_dequeue() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return pop_locked();
+    }
+
+    /// The oldest item, waiting up to @p timeout for one; once shut down,
+    /// what is left is still returned, without waiting
+    [[nodiscard]] std::optional<message_type> wait_dequeue(duration timeout) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        ready_.wait_for(lock, timeout, [this] { return !items_.empty() || shut_down_; });
+        return pop_locked();
+    }
+
+    /// Wake every waiter; one that finds nothing to take waits on
+    void notify_all() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        ready_.notify_all();
+    }
+
+    /// Refuse further items and wake every waiter
+    void shutdown() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            shut_down_ = true;
+        }
+        ready_.notify_all();
+    }
+
+private:
+    [[nodiscard]] std::optional<message_type> pop_locked() {
+        if (items_.empty()) {
+            return std::nullopt;
+        }
+        std::optional<message_type> item{std::move(items_.front())};
+        items_.pop_front();
+        return item;
+    }
+
+    std::mutex mutex_;
+    std::condition_variable ready_;
+    std::deque<message_type> items_;
+    bool shut_down_{false};
+};
+
 // =============================================================================
 // Transport (TCP connection or PDU writer)
 // =============================================================================
@@ -298,7 +368,30 @@ struct association::transport {
 // association Implementation - Construction/Destruction
 // =============================================================================
 
-association::association() = default;
+// A bounded, single-response mailbox, independent of the association mutex.
+// The receive path never waits for a service; lifecycle transitions wake it.
+struct association::response_router {
+    struct key {
+        uint8_t context;
+        dimse::command_field command;
+    };
+    struct pending_request {
+        uint16_t id;
+        std::string sop_class;
+        std::string sop_instance;
+        std::optional<Result<dimse::dimse_message>> result;
+    };
+    std::mutex mutex;
+    std::condition_variable ready;
+    std::map<uint16_t, key> sent; // At most 65535 IDs; no response payload history.
+    std::optional<pending_request> pending;
+    uint32_t next_id{1};
+    bool closed{false};
+};
+
+association::association()
+    : responses_(std::make_shared<response_router>()),
+      incoming_queue_(std::make_unique<message_queue>()) {}
 
 association::association(association&& other) noexcept {
     std::lock_guard<std::mutex> lock(other.mutex_);
@@ -312,6 +405,8 @@ association::association(association&& other) noexcept {
     remote_implementation_class_ = std::move(other.remote_implementation_class_);
     remote_implementation_version_ = std::move(other.remote_implementation_version_);
     proposed_contexts_ = std::move(other.proposed_contexts_);
+    proposed_roles_ = std::move(other.proposed_roles_);
+    accepted_roles_ = std::move(other.accepted_roles_);
     accepted_contexts_ = std::move(other.accepted_contexts_);
     abstract_syntax_to_context_ = std::move(other.abstract_syntax_to_context_);
     context_to_transfer_syntax_ = std::move(other.context_to_transfer_syntax_);
@@ -321,6 +416,7 @@ association::association(association&& other) noexcept {
     is_scu_ = other.is_scu_;
     take_peer_link_from(other);
     transport_ = std::move(other.transport_);
+    cancellable_operations_ = std::move(other.cancellable_operations_);
 
     other.state_ = association_state::idle;
 }
@@ -329,6 +425,7 @@ association& association::operator=(association&& other) noexcept {
     if (this != &other) {
         std::scoped_lock lock(mutex_, other.mutex_);
         // The association being overwritten ends here
+        close_response_waiters();
         leave_peer_link();
         if (transport_ && transport_->stream) {
             if (state_ == association_state::established) {
@@ -349,6 +446,8 @@ association& association::operator=(association&& other) noexcept {
         remote_implementation_class_ = std::move(other.remote_implementation_class_);
         remote_implementation_version_ = std::move(other.remote_implementation_version_);
         proposed_contexts_ = std::move(other.proposed_contexts_);
+        proposed_roles_ = std::move(other.proposed_roles_);
+        accepted_roles_ = std::move(other.accepted_roles_);
         accepted_contexts_ = std::move(other.accepted_contexts_);
         abstract_syntax_to_context_ = std::move(other.abstract_syntax_to_context_);
         context_to_transfer_syntax_ = std::move(other.context_to_transfer_syntax_);
@@ -358,6 +457,7 @@ association& association::operator=(association&& other) noexcept {
         is_scu_ = other.is_scu_;
         take_peer_link_from(other);
         transport_ = std::move(other.transport_);
+        cancellable_operations_ = std::move(other.cancellable_operations_);
 
         other.state_ = association_state::idle;
     }
@@ -374,6 +474,7 @@ association::~association() {
             state_ = association_state::aborted;
             notify_peer = true;
         }
+        close_response_waiters();
         // An in-memory peer must not keep sending to this object
         leave_peer_link();
         link = std::move(transport_);
@@ -405,7 +506,7 @@ Result<association> association::connect(
 
     // In-process dicom_server (test hook): pair in memory, no socket. Only
     // for loopback hosts, so a remote peer on the same port is not hijacked.
-    if (is_loopback_host(host)) {
+    if (!config.tls.enabled && is_loopback_host(host)) {
         if (auto* server = dicom_server::get_server_on_port(port)) {
             auto rq = assoc.build_associate_rq();
             auto result = server->simulate_association_request(rq, &assoc);
@@ -421,7 +522,7 @@ Result<association> association::connect(
         }
     }
 
-    auto established = assoc.establish_over_tcp(host, port, timeout);
+    auto established = assoc.establish_over_tcp(host, port, timeout, config.tls);
     if (established.is_err()) {
         return established.error();
     }
@@ -441,6 +542,14 @@ association association::propose(const association_config& config) {
     // Copy proposed contexts
     for (const auto& pc : config.proposed_contexts) {
         assoc.proposed_contexts_.push_back(pc);
+    }
+
+    for (const auto& role : config.role_selections) {
+        const bool has_context = std::any_of(config.proposed_contexts.begin(), config.proposed_contexts.end(),
+            [&](const auto& pc) { return pc.abstract_syntax == role.sop_class_uid; });
+        const bool duplicate = std::any_of(assoc.proposed_roles_.begin(), assoc.proposed_roles_.end(),
+            [&](const auto& offered) { return offered.sop_class_uid == role.sop_class_uid; });
+        if (has_context && !duplicate) assoc.proposed_roles_.push_back(role);
     }
 
     // Transition to awaiting state
@@ -467,6 +576,18 @@ association association::accept(
 
     // Negotiate presentation contexts
     assoc.negotiate_contexts(rq, config);
+
+    for (const auto& requested : rq.user_info.role_selections) {
+        const auto supported = std::find_if(config.supported_requestor_roles.begin(),
+            config.supported_requestor_roles.end(), [&](const auto& role) {
+                return role.sop_class_uid == requested.sop_class_uid;
+            });
+        if (supported != config.supported_requestor_roles.end()) {
+            assoc.accepted_roles_.emplace_back(requested.sop_class_uid,
+                requested.scu_role && supported->scu_role,
+                requested.scp_role && supported->scp_role);
+        }
+    }
 
     // Build lookup maps
     assoc.build_context_map();
@@ -668,9 +789,7 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
         return receive_over_tcp(*link, timeout);
     }
 
-    // In-memory peer: use the lock-free queue with blocking wait (a PDU
-    // writer's SCP gets its messages from dicom_server_v2 instead, so its
-    // queue stays empty)
+    // In-memory peers and asynchronous server dispatch enqueue responses here.
     if (auto item = incoming_queue_->wait_dequeue(timeout)) {
         return std::move(*item);
     }
@@ -697,9 +816,141 @@ Result<std::pair<uint8_t, dimse::dimse_message>> association::receive_dimse(
     return error_info{receive_timeout, "Receive timeout", "network"};
 }
 
+Result<uint16_t> association::next_request_message_id() {
+    std::lock_guard<std::mutex> lock(responses_->mutex);
+    while (responses_->next_id <= 65535 &&
+           responses_->sent.contains(static_cast<uint16_t>(responses_->next_id))) {
+        ++responses_->next_id;
+    }
+    if (responses_->closed || responses_->next_id > 65535) {
+        return error_info{invalid_association_state, "No unused request MessageID", "network"};
+    }
+    return static_cast<uint16_t>(responses_->next_id++);
+}
+
+Result<std::monostate> association::send_request(
+    uint8_t context_id, const dimse::dimse_message& request) {
+    using namespace dimse;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (state_ != association_state::established || (transport_ && transport_->stream)) {
+            return error_info{invalid_association_state,
+                "Response routing requires an established externally dispatched association", "network"};
+        }
+    }
+    if (request.command() != command_field::c_store_rq && request.command() != command_field::c_echo_rq &&
+        request.command() != command_field::n_event_report_rq) {
+        return error_info{pdu_error, "Only single-response C-STORE/C-ECHO/N-EVENT-REPORT exchanges are supported", "network"};
+    }
+    {
+        std::lock_guard<std::mutex> lock(responses_->mutex);
+        if (responses_->closed || responses_->pending || request.message_id() == 0 ||
+            responses_->sent.contains(request.message_id())) {
+            return error_info{invalid_association_state, "Response wait busy, closed, or MessageID reused", "network"};
+        }
+        responses_->sent.emplace(request.message_id(), response_router::key{
+            context_id, get_response_command(request.command())});
+        responses_->pending.emplace(response_router::pending_request{
+            request.message_id(), request.affected_sop_class_uid(), request.affected_sop_instance_uid(), {}});
+    }
+    // Register before writing: a peer may acknowledge immediately.
+    auto sent = send_dimse(context_id, request);
+    if (sent.is_err()) {
+        cancel_response_wait();
+    }
+    return sent;
+}
+
+Result<dimse::dimse_message> association::receive_response(duration timeout) {
+    auto router = responses_;
+    std::unique_lock<std::mutex> lock(router->mutex);
+    if (!router->pending) {
+        return error_info{invalid_association_state, "No pending response wait", "network"};
+    }
+    const auto waiting_for = router->pending->id;
+    if (!router->ready.wait_for(lock, timeout, [&] {
+            return router->closed || !router->pending || router->pending->id != waiting_for ||
+                   router->pending->result.has_value();
+        })) {
+        return error_info{receive_timeout, "Response timeout", "network"};
+    }
+    if (router->pending && router->pending->id != waiting_for) {
+        return error_info{association_aborted, "Response wait cancelled", "network"};
+    }
+    if (router->pending && router->pending->result) {
+        auto result = std::move(*router->pending->result);
+        router->pending.reset();
+        router->ready.notify_all();
+        return result;
+    }
+    router->pending.reset();
+    return error_info{association_aborted, "Response wait cancelled or association ended", "network"};
+}
+
+void association::cancel_response_wait() {
+    std::lock_guard<std::mutex> lock(responses_->mutex);
+    responses_->pending.reset();
+    responses_->ready.notify_all();
+}
+
+void association::close_response_waiters() {
+    std::lock_guard<std::mutex> lock(responses_->mutex);
+    responses_->closed = true;
+    responses_->ready.notify_all();
+}
+
+Result<std::monostate> association::deliver_response(
+    uint8_t context_id, const dimse::dimse_message& response) {
+    using namespace dimse;
+    std::lock_guard<std::mutex> lock(responses_->mutex);
+    const auto id = response.message_id_responded_to();
+    const auto key = responses_->sent.find(id);
+    const bool valid = response.command_set().get_numeric<uint16_t>(tag_message_id_responded_to).has_value() &&
+        response.command_set().get_numeric<uint16_t>(tag_status).has_value() && key != responses_->sent.end() &&
+        key->second.context == context_id && key->second.command == response.command() &&
+        !response.has_dataset() && !is_pending(response.status());
+    // Already completed/cancelled responses do not consume the current slot.
+    if (valid && (!responses_->pending || responses_->pending->id != id)) {
+        return std::monostate{};
+    }
+    const error_info mismatch{pdu_error, "Unsolicited or mismatched DIMSE response", "network"};
+    if (!responses_->pending) {
+        return mismatch;
+    }
+    if (responses_->closed) {
+        return std::monostate{}; // Shutdown already woke the waiter; no post-close acknowledgement.
+    }
+    auto& pending = *responses_->pending;
+    const bool identity_matches =
+        (!response.command_set().contains(tag_affected_sop_class_uid) ||
+         response.affected_sop_class_uid() == pending.sop_class) &&
+        (!response.command_set().contains(tag_affected_sop_instance_uid) ||
+         response.affected_sop_instance_uid() == pending.sop_instance);
+    if (!pending.result) {
+        if (valid && id == pending.id && identity_matches) {
+            pending.result.emplace(response);
+        } else {
+            pending.result.emplace(mismatch);
+        }
+        responses_->ready.notify_one();
+    }
+    return std::monostate{};
+}
+
 // =============================================================================
 // PDU Access
 // =============================================================================
+
+scp_scu_role_selection association::requestor_role(std::string_view sop_class_uid) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!abstract_syntax_to_context_.contains(std::string(sop_class_uid))) {
+        return {std::string(sop_class_uid), false, false};
+    }
+    const auto role = std::find_if(accepted_roles_.begin(), accepted_roles_.end(),
+        [&](const auto& value) { return value.sop_class_uid == sop_class_uid; });
+    return role == accepted_roles_.end()
+        ? scp_scu_role_selection{std::string(sop_class_uid), true, false} : *role;
+}
 
 associate_rq association::build_associate_rq() const {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -716,6 +967,7 @@ associate_rq association::build_associate_rq() const {
     }
 
     // User information
+    rq.user_info.role_selections = proposed_roles_;
     rq.user_info.max_pdu_length = max_pdu_size_;
     rq.user_info.implementation_class_uid = our_implementation_class_;
     rq.user_info.implementation_version_name = our_implementation_version_;
@@ -738,6 +990,7 @@ associate_ac association::build_associate_ac() const {
     }
 
     // User information
+    ac.user_info.role_selections = accepted_roles_;
     ac.user_info.max_pdu_length = max_pdu_size_;
     ac.user_info.implementation_class_uid = our_implementation_class_;
     ac.user_info.implementation_version_name = our_implementation_version_;
@@ -788,6 +1041,19 @@ bool association::process_associate_ac(const associate_ac& ac) {
         }
     }
 
+    accepted_roles_.clear();
+    for (const auto& response : ac.user_info.role_selections) {
+        const auto offered = std::find_if(proposed_roles_.begin(), proposed_roles_.end(),
+            [&](const auto& role) { return role.sop_class_uid == response.sop_class_uid; });
+        // Ignore unsolicited role responses. Never grant a role we did not offer.
+        if (offered == proposed_roles_.end()) continue;
+        if (std::any_of(accepted_roles_.begin(), accepted_roles_.end(), [&](const auto& role) {
+                return role.sop_class_uid == response.sop_class_uid;
+            })) return false;
+        accepted_roles_.emplace_back(response.sop_class_uid,
+            offered->scu_role && response.scu_role, offered->scp_role && response.scp_role);
+    }
+
     // Build lookup maps
     build_context_map();
 
@@ -836,6 +1102,7 @@ Result<std::monostate> association::release(duration timeout) {
 
         // Transition to awaiting release response
         state_ = association_state::awaiting_release_rp;
+        close_response_waiters();
 
         if (!transport_ || !transport_->stream) {
             // In-memory or detached: there is no A-RELEASE-RP to wait for
@@ -857,6 +1124,7 @@ void association::process_release_rq() {
 
     if (state_ == association_state::established) {
         state_ = association_state::awaiting_release_rq;
+        close_response_waiters();
     }
 }
 
@@ -885,6 +1153,7 @@ void association::abort(uint8_t source, uint8_t reason) {
         state_ = association_state::aborted;
         leave_peer_link();
 
+        close_response_waiters();
         // Wake up any waiters on the lock-free queue
         incoming_queue_->notify_all();
         link = transport_;
@@ -907,6 +1176,7 @@ void association::process_abort(const abort_source& source, const abort_reason& 
     state_ = association_state::aborted;
     leave_peer_link();
 
+    close_response_waiters();
     // Wake up any waiters on the lock-free queue
     incoming_queue_->notify_all();
 }
@@ -914,6 +1184,9 @@ void association::process_abort(const abort_source& source, const abort_reason& 
 void association::set_state(association_state new_state) {
     std::lock_guard<std::mutex> lock(mutex_);
     state_ = new_state;
+    if (new_state == association_state::released || new_state == association_state::aborted) {
+        close_response_waiters();
+    }
 }
 
 void association::set_pdu_writer(pdu_writer writer) {
@@ -954,8 +1227,43 @@ void association::set_peer(association* peer) {
 }
 
 void association::enqueue_message(uint8_t context_id, dimse::dimse_message msg) {
-    // Lock-free enqueue with automatic notification
+    if (msg.command() == dimse::command_field::c_cancel_rq) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = cancellable_operations_.find({context_id, msg.message_id_responded_to()});
+        if (it != cancellable_operations_.end()) {
+            it->second = true;
+        }
+        return;
+    }
+    if (dimse::is_response(msg.command())) {
+        bool routed;
+        {
+            std::lock_guard<std::mutex> lock(responses_->mutex);
+            routed = responses_->pending.has_value() ||
+                     responses_->sent.contains(msg.message_id_responded_to());
+        }
+        if (routed) {
+            (void)deliver_response(context_id, msg);
+            return;
+        }
+    }
     incoming_queue_->enqueue({context_id, std::move(msg)});
+}
+
+void association::register_cancellable_operation(uint8_t context_id, uint16_t message_id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    cancellable_operations_.try_emplace({context_id, message_id}, false);
+}
+
+void association::finish_cancellable_operation(uint8_t context_id, uint16_t message_id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    cancellable_operations_.erase({context_id, message_id});
+}
+
+bool association::cancellation_requested(uint8_t context_id, uint16_t message_id) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = cancellable_operations_.find({context_id, message_id});
+    return it != cancellable_operations_.end() && it->second;
 }
 
 void association::update_peer(association* old_peer, association* new_peer) {
@@ -1111,6 +1419,7 @@ void association::leave_peer_link() {
             // Wake the peer's receivers now instead of at their timeout; the
             // peer still dequeues what is queued, then sees this end gone
             peer->incoming_queue_->shutdown();
+            peer->close_response_waiters();
         }
     }
     peer_link_.reset();
@@ -1127,8 +1436,10 @@ void association::take_peer_link_from(association& other) {
         link_lock = std::unique_lock<std::mutex>(peer_link_->mutex);
         peer_link_->ends[peer_end_] = this;
     }
+    responses_ = std::move(other.responses_);
+    other.responses_ = std::make_shared<response_router>();
     incoming_queue_ = std::move(other.incoming_queue_);
-    other.incoming_queue_ = std::make_unique<message_queue_type>();
+    other.incoming_queue_ = std::make_unique<message_queue>();
 }
 
 std::optional<association_state> association::peer_exit_state() const {
@@ -1156,12 +1467,17 @@ void association::finish_after_peer_left(association_state peer_exit) {
 // TCP Transport
 // =============================================================================
 
+std::string association::negotiated_tls_version() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return transport_ && transport_->stream ? transport_->stream->tls_version() : "";
+}
+
 Result<std::monostate> association::establish_over_tcp(
-    const std::string& host, uint16_t port, duration timeout) {
+    const std::string& host, uint16_t port, duration timeout, const tls_config& tls) {
 
     const auto deadline = clock::now() + timeout;
 
-    auto stream = detail::tcp_stream::connect(host, port, timeout);
+    auto stream = detail::tcp_stream::connect(host, port, timeout, tls);
     if (stream.is_err()) {
         std::lock_guard<std::mutex> lock(mutex_);
         state_ = association_state::idle;
@@ -1428,6 +1744,7 @@ void association::abort_transport(transport& link, abort_source source, abort_re
         abort_reason_ = static_cast<uint8_t>(reason);
         state_ = association_state::aborted;
         incoming_queue_->notify_all();
+        close_response_waiters();
     }
     (void)link.write(pdu_encoder::encode_abort(source, reason), abort_write_timeout);
     link.shutdown();
@@ -1441,6 +1758,7 @@ void association::end_transport(transport& link, association_state final_state) 
             state_ = final_state;
         }
         incoming_queue_->notify_all();
+        close_response_waiters();
     }
     link.shutdown();
 }

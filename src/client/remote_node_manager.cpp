@@ -13,6 +13,7 @@
 #include "kcenon/pacs/network/dimse/dimse_message.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
 
+#include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <deque>
@@ -581,20 +582,31 @@ kcenon::pacs::Result<std::unique_ptr<network::association>> remote_node_manager:
             "Node not found: " + id_str);
     }
 
-    // Try to get from pool
+    // Try to get from pool: only an association that accepted every requested SOP class will do,
+    // as one negotiated for C-MOVE cannot carry a C-FIND. Expired or closed ones are dropped.
     {
         std::lock_guard<std::mutex> lock(impl_->pool_mutex);
         auto it = impl_->connection_pool.find(id_str);
-        if (it != impl_->connection_pool.end() && !it->second.empty()) {
-            auto pooled = std::move(it->second.front());
-            it->second.pop_front();
-
-            // Check if connection is still valid and not expired
-            auto age = std::chrono::steady_clock::now() - pooled.acquired_at;
-            if (age < impl_->config.pool_connection_ttl &&
-                pooled.assoc && pooled.assoc->is_established()) {
-                impl_->logger->debug_fmt("Reusing pooled association for {}", id_str);
-                return kcenon::pacs::ok(std::move(pooled.assoc));
+        if (it != impl_->connection_pool.end()) {
+            auto& pool = it->second;
+            for (auto entry = pool.begin(); entry != pool.end();) {
+                const auto age = std::chrono::steady_clock::now() - entry->acquired_at;
+                if (age >= impl_->config.pool_connection_ttl || !entry->assoc ||
+                    !entry->assoc->is_established()) {
+                    entry = pool.erase(entry);
+                    continue;
+                }
+                const bool carries = std::all_of(
+                    sop_classes.begin(), sop_classes.end(), [&entry](const std::string& sop_class) {
+                        return entry->assoc->has_accepted_context(sop_class);
+                    });
+                if (carries) {
+                    auto assoc = std::move(entry->assoc);
+                    pool.erase(entry);
+                    impl_->logger->debug_fmt("Reusing pooled association for {}", id_str);
+                    return kcenon::pacs::ok(std::move(assoc));
+                }
+                ++entry;
             }
         }
     }

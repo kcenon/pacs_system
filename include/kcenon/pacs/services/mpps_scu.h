@@ -64,6 +64,12 @@ struct performed_series_info {
 
     /// Number of instances in the series
     size_t num_instances{0};
+
+    /// Protocol Name (0018,1030), Type 1 in the Performed Series Sequence
+    std::string protocol_name{"UNSPECIFIED"};
+
+    /// SOP Class of the listed instances; without one they cannot be referenced
+    std::string sop_class_uid;
 };
 
 /**

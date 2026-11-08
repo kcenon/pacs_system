@@ -108,6 +108,12 @@ struct job_manager::impl {
     std::shared_ptr<remote_node_manager> node_manager;
     std::shared_ptr<di::ILogger> logger;
 
+    /// Where store jobs read their objects; set before jobs run
+    job_manager::instance_locator locator;
+
+    /// Whether this archive holds a study; sync and prefetch jobs retrieve the studies it lacks
+    job_manager::study_presence presence;
+
     // Job cache (for quick access)
     std::unordered_map<std::string, job_record> job_cache;
     mutable std::shared_mutex cache_mutex;
@@ -159,13 +165,82 @@ struct job_manager::impl {
         }
     }
 
-    std::optional<job_record> get_job_from_cache(std::string_view job_id) const {
-        std::shared_lock lock(cache_mutex);
-        auto it = job_cache.find(std::string(job_id));
-        if (it != job_cache.end()) {
-            return it->second;
+    std::optional<job_record> get_job_from_cache(std::string_view job_id) {
+        {
+            std::shared_lock lock(cache_mutex);
+            auto it = job_cache.find(std::string(job_id));
+            if (it != job_cache.end()) {
+                return it->second;
+            }
         }
-        return std::nullopt;
+        // A job that ended before a restart is only in the repository. The list shows it, so it is
+        // readable, and retryable, one by one too.
+        auto stored = find_stored_job(job_id);
+        if (!stored) {
+            return std::nullopt;
+        }
+        std::unique_lock lock(cache_mutex);
+        return job_cache.try_emplace(stored->job_id, std::move(*stored)).first->second;
+    }
+
+    std::optional<job_record> find_stored_job(std::string_view job_id) {
+        if (!repo) {
+            return std::nullopt;
+        }
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto found = repo->find_by_id(std::string(job_id));
+        if (found.is_err()) {
+            return std::nullopt;
+        }
+        return found.value();
+#else
+        return repo->find_by_id(job_id);
+#endif
+    }
+
+    std::vector<job_record> stored_jobs(job_status status) {
+        if (!repo) {
+            return {};
+        }
+#ifdef PACS_WITH_DATABASE_SYSTEM
+        auto found = repo->find_by_status(status, config.max_queue_size);
+        if (found.is_err()) {
+            return {};
+        }
+        return found.value();
+#else
+        return repo->find_by_status(status, config.max_queue_size);
+#endif
+    }
+
+    /// A node's status can be stale: unknown after a restart, offline after an outage that is over.
+    /// A node not seen online is asked again with C-ECHO before a job gives up on it.
+    bool reachable(const remote_node& node) {
+        return node.is_online() || node_manager->verify_node(node.node_id).is_ok();
+    }
+
+    /// Takes a queued job for one worker: queued becomes running under the cache lock, so no other
+    /// worker can take the same job.
+    bool claim(const std::string& job_id) {
+        std::unique_lock lock(cache_mutex);
+        auto it = job_cache.find(job_id);
+        if (it == job_cache.end() || it->second.status != job_status::queued) {
+            return false;
+        }
+        it->second.status = job_status::running;
+        return true;
+    }
+
+    /// Workers are stopping: a running job stops at the next object and waits for the next run.
+    bool stopping() const noexcept {
+        return !running.load();
+    }
+
+    /// A job a stop interrupted goes back to the queue, persisted, so the next run continues it.
+    void requeue_interrupted(const job_record& job) {
+        update_job_status(job.job_id, is_job_paused(job.job_id) ? job_status::paused : job_status::queued);
+        enqueue_job(job.job_id, job.priority);
+        logger->info_fmt("Job {} was interrupted by a stop and waits for the next run", job.job_id);
     }
 
     void update_job_status(const std::string& job_id, job_status status,
@@ -315,6 +390,13 @@ struct job_manager::impl {
 
             auto job = *job_opt;
 
+            // Only a queued job runs, and only once: a second start queues a job twice, a job can end
+            // before its entry comes up, and two workers can take a job's two entries at the same time.
+            if (!claim(job_id)) {
+                logger->debug_fmt("Job {} is no longer queued; its queue entry is dropped", job_id);
+                continue;
+            }
+
             // Mark as running
             mark_job_active(job_id);
             update_job_status(job_id, job_status::running);
@@ -368,7 +450,7 @@ struct job_manager::impl {
         }
 
         const auto& node = *node_opt;
-        if (!node.is_online()) {
+        if (!reachable(node)) {
             complete_job(job.job_id, job_status::failed,
                          "Source node is offline: " + job.source_node_id);
             return;
@@ -486,16 +568,17 @@ struct job_manager::impl {
 
         const auto& retrieve_result = result.value();
 
+        // The final response's counts: a pending response before it can count one more remaining.
+        progress.total_items = retrieve_result.completed + retrieve_result.failed + retrieve_result.warning;
+        progress.completed_items = retrieve_result.completed;
+        progress.failed_items = retrieve_result.failed;
+        progress.skipped_items = retrieve_result.warning;
+        progress.calculate_percent();
+        update_progress(job.job_id, progress);
+
         if (is_job_cancelled(job.job_id)) {
             complete_job(job.job_id, job_status::cancelled);
         } else if (retrieve_result.is_success()) {
-            // Update final progress
-            progress.completed_items = retrieve_result.completed;
-            progress.failed_items = retrieve_result.failed;
-            progress.skipped_items = retrieve_result.warning;
-            progress.percent_complete = 100.0f;
-            update_progress(job.job_id, progress);
-
             complete_job(job.job_id, job_status::completed);
         } else if (retrieve_result.has_failures()) {
             std::ostringstream oss;
@@ -528,7 +611,7 @@ struct job_manager::impl {
         }
 
         const auto& node = *node_opt;
-        if (!node.is_online()) {
+        if (!reachable(node)) {
             complete_job(job.job_id, job_status::failed,
                          "Destination node is offline: " + job.destination_node_id);
             return;
@@ -546,18 +629,47 @@ struct job_manager::impl {
             return;
         }
 
+        if (!locator) {
+            complete_job(job.job_id, job_status::failed,
+                         "No instance source is configured, so nothing can be sent");
+            return;
+        }
+
         // Initialize progress tracking
         job_progress progress;
         progress.total_items = job.instance_uids.size();
 
-        // We need to determine the SOP classes from the instances to be stored
-        // For now, use a placeholder set of common storage SOP classes
-        std::vector<std::string> sop_classes = {
-            "1.2.840.10008.5.1.4.1.1.2",     // CT Image Storage
-            "1.2.840.10008.5.1.4.1.1.4",     // MR Image Storage
-            "1.2.840.10008.5.1.4.1.1.7",     // Secondary Capture
-            "1.2.840.10008.5.1.4.1.1.1.2",   // Digital X-Ray
-        };
+        // Read every object first: the association proposes exactly the SOP classes they hold, and an
+        // object that cannot be read is counted as failed rather than skipped.
+        size_t completed = 0;
+        size_t failed = 0;
+        std::string last_error;
+        std::vector<core::dicom_file> files;
+        std::vector<std::string> sop_classes;
+        for (const auto& sop_instance_uid : job.instance_uids) {
+            const auto path = locator(sop_instance_uid);
+            if (!path) {
+                ++failed;
+                last_error = "No stored object " + sop_instance_uid;
+                continue;
+            }
+            auto file = core::dicom_file::open(*path);
+            if (file.is_err()) {
+                ++failed;
+                last_error = "Cannot read " + path->string() + ": " + file.error().message;
+                continue;
+            }
+            const auto sop_class = file.value().sop_class_uid();
+            if (std::find(sop_classes.begin(), sop_classes.end(), sop_class) == sop_classes.end()) {
+                sop_classes.push_back(sop_class);
+            }
+            files.push_back(std::move(file.value()));
+        }
+        progress.failed_items = failed;
+        if (files.empty()) {
+            complete_job(job.job_id, job_status::failed, "Nothing could be read: " + last_error);
+            return;
+        }
 
         // Acquire association
         auto assoc_result = node_manager->acquire_association(
@@ -575,43 +687,41 @@ struct job_manager::impl {
         store_config.continue_on_error = true;
         services::storage_scu scu(store_config, logger);
 
-        // Process each instance
-        size_t completed = 0;
-        size_t failed = 0;
-        std::string last_error;
-
-        for (size_t i = 0; i < job.instance_uids.size(); ++i) {
-            // Check for cancellation
-            if (is_job_cancelled(job.job_id)) {
+        for (size_t i = 0; i < files.size(); ++i) {
+            // Check for cancellation, and for a stop, after which the job continues in the next run
+            if (is_job_cancelled(job.job_id) || stopping()) {
                 break;
             }
 
             // Wait if paused
-            while (is_job_paused(job.job_id) && !is_job_cancelled(job.job_id)) {
+            while (is_job_paused(job.job_id) && !is_job_cancelled(job.job_id) && !stopping()) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
-            if (is_job_cancelled(job.job_id)) {
+            if (is_job_cancelled(job.job_id) || stopping()) {
                 break;
             }
 
-            const auto& sop_instance_uid = job.instance_uids[i];
+            const auto sop_instance_uid = files[i].sop_instance_uid();
 
             // Update progress - current item
             progress.current_item = sop_instance_uid;
             progress.current_item_description = "Storing instance " + std::to_string(i + 1);
             update_progress(job.job_id, progress);
 
-            // Load the DICOM file for this instance
-            // In a real implementation, this would query the local storage
-            // to get the file path for the SOP Instance UID
-            // For now, we simulate the store operation
             logger->debug_fmt("Storing instance {} ({}/{})",
-                              sop_instance_uid, i + 1, job.instance_uids.size());
+                              sop_instance_uid, i + 1, files.size());
 
-            // Simulated store result - in real implementation, would call:
-            // auto result = scu.store(*assoc, dataset);
-            // For now, mark as successful
-            ++completed;
+            // In the file's own transfer syntax, on a context that accepted it.
+            auto stored = scu.store(*assoc, files[i].dataset(), files[i].transfer_syntax());
+            if (stored.is_ok() && (stored.value().is_success() || stored.value().is_warning())) {
+                ++completed;
+            } else {
+                ++failed;
+                last_error = stored.is_err()
+                    ? stored.error().message
+                    : "Status " + std::to_string(stored.value().status) + " for " + sop_instance_uid +
+                          (stored.value().error_comment.empty() ? "" : ": " + stored.value().error_comment);
+            }
             progress.completed_items = completed;
             progress.failed_items = failed;
             progress.calculate_percent();
@@ -624,6 +734,8 @@ struct job_manager::impl {
         // Determine final status
         if (is_job_cancelled(job.job_id)) {
             complete_job(job.job_id, job_status::cancelled);
+        } else if (stopping() && completed + failed < job.instance_uids.size()) {
+            requeue_interrupted(job);
         } else if (failed == 0) {
             progress.percent_complete = 100.0f;
             update_progress(job.job_id, progress);
@@ -657,7 +769,7 @@ struct job_manager::impl {
         }
 
         const auto& node = *node_opt;
-        if (!node.is_online()) {
+        if (!reachable(node)) {
             complete_job(job.job_id, job_status::failed,
                          "Node is offline: " + job.source_node_id);
             return;
@@ -815,7 +927,7 @@ struct job_manager::impl {
         }
 
         const auto& node = *node_opt;
-        if (!node.is_online()) {
+        if (!reachable(node)) {
             complete_job(job.job_id, job_status::failed,
                          "Source node is offline: " + job.source_node_id);
             return;
@@ -908,24 +1020,8 @@ struct job_manager::impl {
             return;
         }
 
-        // Sync complete - in full implementation, would compare with local
-        // storage and create retrieve jobs for missing studies
-        progress.completed_items = 2;
-        progress.percent_complete = 100.0f;
-        progress.current_item_description =
-            "Sync complete: " + std::to_string(query_result.matches.size()) + " studies checked";
-        update_progress(job.job_id, progress);
-
-        // Store result in metadata
-        {
-            std::unique_lock lock(cache_mutex);
-            auto it = job_cache.find(job.job_id);
-            if (it != job_cache.end()) {
-                it->second.metadata["studies_found"] = std::to_string(query_result.matches.size());
-            }
-        }
-
-        complete_job(job.job_id, job_status::completed);
+        // Retrieve every study the node holds and this archive does not
+        retrieve_missing_studies(job, node, query_result, progress);
     }
 
     void execute_prefetch_job(job_record& job) {
@@ -951,7 +1047,7 @@ struct job_manager::impl {
         }
 
         const auto& node = *node_opt;
-        if (!node.is_online()) {
+        if (!reachable(node)) {
             complete_job(job.job_id, job_status::failed,
                          "Source node is offline: " + job.source_node_id);
             return;
@@ -1038,24 +1134,146 @@ struct job_manager::impl {
             return;
         }
 
-        // Complete prefetch - in full implementation would create
-        // retrieve jobs for each prior study
-        progress.completed_items = 2;
-        progress.percent_complete = 100.0f;
-        progress.current_item_description =
-            "Prefetch complete: " + std::to_string(query_result.matches.size()) + " studies identified";
+        // Retrieve the patient's studies this archive does not hold yet
+        retrieve_missing_studies(job, node, query_result, progress);
+    }
+
+    /// The outcome of moving one study into this archive.
+    struct study_transfer {
+        bool ok{false};
+        size_t instances{0};
+        std::string error;
+    };
+
+    /// One study by C-MOVE to this archive. C-GET would hand the objects to this job, which has
+    /// nowhere to store them, so a node without C-MOVE fails rather than reporting a transfer.
+    study_transfer move_study(const remote_node& node, const std::string& study_uid) {
+        study_transfer outcome;
+        if (!node.supports_move) {
+            outcome.error = "Node " + node.node_id + " does not support C-MOVE";
+            return outcome;
+        }
+        const std::vector<std::string> sop_classes{
+            std::string(services::study_root_move_sop_class_uid)};
+        auto assoc_result = node_manager->acquire_association(node.node_id, sop_classes);
+        if (assoc_result.is_err()) {
+            outcome.error = "Failed to acquire association: " + assoc_result.error().message;
+            return outcome;
+        }
+        auto assoc = std::move(assoc_result.value());
+
+        services::retrieve_scu_config retrieve_config;
+        retrieve_config.mode = services::retrieve_mode::c_move;
+        retrieve_config.model = services::query_model::study_root;
+        retrieve_config.level = services::query_level::study;
+        retrieve_config.move_destination = config.local_ae_title;
+        services::retrieve_scu scu(retrieve_config, logger);
+        auto result = scu.retrieve_study(*assoc, study_uid);
+        node_manager->release_association(node.node_id, std::move(assoc));
+
+        if (result.is_err()) {
+            outcome.error = "Retrieve of " + study_uid + " failed: " + result.error().message;
+            return outcome;
+        }
+        const auto& moved = result.value();
+        outcome.instances = moved.completed;
+        outcome.ok = moved.is_success();
+        if (!outcome.ok) {
+            std::ostringstream oss;
+            oss << "Retrieve of " << study_uid << " ended with status 0x" << std::hex
+                << moved.final_status << std::dec << ", " << moved.failed << " of "
+                << (moved.completed + moved.failed) << " sub-operations failed";
+            outcome.error = oss.str();
+        }
+        return outcome;
+    }
+
+    /// Moves, study by study, what a C-FIND found and this archive lacks, then ends the job.
+    void retrieve_missing_studies(job_record& job, const remote_node& node,
+                                  const services::query_result& found, job_progress& progress) {
+        if (!found.is_success()) {
+            std::ostringstream oss;
+            oss << "Query ended with status 0x" << std::hex << found.status;
+            complete_job(job.job_id, job_status::failed, oss.str());
+            return;
+        }
+        if (!presence) {
+            complete_job(job.job_id, job_status::failed,
+                         "No local archive is configured, so nothing can be compared");
+            return;
+        }
+
+        std::vector<std::string> studies;
+        std::vector<std::string> missing;
+        for (const auto& match : found.matches) {
+            auto study_uid = match.get_string(core::tags::study_instance_uid);
+            if (study_uid.empty() ||
+                std::find(studies.begin(), studies.end(), study_uid) != studies.end()) {
+                continue;
+            }
+            studies.push_back(study_uid);
+            if (!presence(study_uid)) {
+                missing.push_back(std::move(study_uid));
+            }
+        }
+
+        progress = job_progress{};
+        progress.total_items = studies.size();
+        progress.skipped_items = studies.size() - missing.size();
+        progress.calculate_percent();
         update_progress(job.job_id, progress);
 
-        // Store result in metadata
+        size_t instances = 0;
+        std::string last_error;
+        for (const auto& study_uid : missing) {
+            if (is_job_cancelled(job.job_id) || stopping()) {
+                break;
+            }
+            while (is_job_paused(job.job_id) && !is_job_cancelled(job.job_id) && !stopping()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            if (is_job_cancelled(job.job_id) || stopping()) {
+                break;
+            }
+            progress.current_item = study_uid;
+            progress.current_item_description = "Retrieving study " + study_uid;
+            update_progress(job.job_id, progress);
+
+            const auto moved = move_study(node, study_uid);
+            instances += moved.instances;
+            if (moved.ok) {
+                ++progress.completed_items;
+            } else {
+                ++progress.failed_items;
+                last_error = moved.error;
+            }
+            progress.calculate_percent();
+            update_progress(job.job_id, progress);
+        }
+
         {
             std::unique_lock lock(cache_mutex);
             auto it = job_cache.find(job.job_id);
             if (it != job_cache.end()) {
-                it->second.metadata["prior_studies"] = std::to_string(query_result.matches.size());
+                it->second.metadata["studies_found"] = std::to_string(studies.size());
+                it->second.metadata["studies_missing"] = std::to_string(missing.size());
+                it->second.metadata["instances_retrieved"] = std::to_string(instances);
             }
         }
 
-        complete_job(job.job_id, job_status::completed);
+        const auto handled = progress.completed_items + progress.failed_items;
+        if (is_job_cancelled(job.job_id)) {
+            complete_job(job.job_id, job_status::cancelled);
+        } else if (stopping() && handled < missing.size()) {
+            requeue_interrupted(job);
+        } else if (progress.failed_items == 0) {
+            complete_job(job.job_id, job_status::completed);
+        } else {
+            std::ostringstream oss;
+            oss << progress.failed_items << " of " << missing.size()
+                << " missing studies could not be retrieved. Last error: " << last_error;
+            complete_job(job.job_id, job_status::failed, oss.str());
+        }
     }
 
     void update_progress(const std::string& job_id, const job_progress& progress) {
@@ -1096,28 +1314,36 @@ struct job_manager::impl {
         logger->info_fmt("Job {} completed with status: {}", job_id, to_string(status));
     }
 
-    void load_pending_jobs_from_repo() {
+    /// A restart keeps every job's state: pending jobs wait for a start, queued and paused ones go
+    /// back in the queue, and a job a stop interrupted while it was running runs again.
+    void recover_jobs_from_repo() {
         if (!repo) return;
 
-#ifdef PACS_WITH_DATABASE_SYSTEM
-        auto pending_result = repo->find_pending_jobs(config.max_queue_size);
-        if (pending_result.is_err()) return;
-        auto& pending = pending_result.value();
-#else
-        auto pending = repo->find_pending_jobs(config.max_queue_size);
-#endif
-        for (auto& job : pending) {
-            // Add to cache
-            {
-                std::unique_lock lock(cache_mutex);
-                job_cache[job.job_id] = job;
+        size_t queued = 0;
+        for (const auto status : {job_status::pending, job_status::queued, job_status::paused,
+                                  job_status::running}) {
+            for (auto& job : stored_jobs(status)) {
+                if (status == job_status::running) {
+                    job.status = job_status::queued;
+                    [[maybe_unused]] auto result = repo->update_status(job.job_id, job_status::queued);
+                }
+                if (status == job_status::paused) {
+                    std::lock_guard lock(paused_mutex);
+                    paused_job_ids.insert(job.job_id);
+                }
+                {
+                    std::unique_lock lock(cache_mutex);
+                    job_cache[job.job_id] = job;
+                }
+                if (status != job_status::pending) {
+                    enqueue_job(job.job_id, job.priority);
+                    ++queued;
+                }
             }
-            // Enqueue for execution
-            enqueue_job(job.job_id, job.priority);
         }
 
-        if (!pending.empty()) {
-            logger->info_fmt("Loaded {} pending jobs from repository", pending.size());
+        if (queued > 0) {
+            logger->info_fmt("Queued {} jobs recovered from the repository", queued);
         }
     }
 };
@@ -1145,8 +1371,8 @@ job_manager::job_manager(
     impl_->node_manager = std::move(node_manager);
     impl_->logger = logger ? std::move(logger) : di::null_logger();
 
-    // Load any pending jobs from repository
-    impl_->load_pending_jobs_from_repo();
+    // Recover the jobs an earlier run left
+    impl_->recover_jobs_from_repo();
 }
 
 job_manager::~job_manager() {
@@ -1273,6 +1499,14 @@ std::string job_manager::create_prefetch_job(
 // Job Control
 // =============================================================================
 
+void job_manager::set_instance_locator(instance_locator locator) {
+    impl_->locator = std::move(locator);
+}
+
+void job_manager::set_study_presence(study_presence presence) {
+    impl_->presence = std::move(presence);
+}
+
 kcenon::pacs::VoidResult job_manager::start_job(std::string_view job_id) {
     auto job_opt = impl_->get_job_from_cache(job_id);
     if (!job_opt) {
@@ -1285,6 +1519,11 @@ kcenon::pacs::VoidResult job_manager::start_job(std::string_view job_id) {
         return kcenon::pacs::pacs_void_error(
             kcenon::pacs::error_codes::invalid_argument,
             "Job cannot be started in current state: " + std::string(to_string(job_opt->status)));
+    }
+
+    // A paused job can be in the middle of its run; queuing it again would run it twice.
+    if (job_opt->status == job_status::paused) {
+        return resume_job(job_id);
     }
 
     // Update status and enqueue
@@ -1420,7 +1659,8 @@ kcenon::pacs::VoidResult job_manager::retry_job(std::string_view job_id) {
     }
 
     impl_->logger->info_fmt("Retrying job {} (attempt {})", job_id, job_opt->retry_count + 1);
-    return kcenon::pacs::ok();
+    // As documented: the reset job is queued for execution again.
+    return start_job(job_id);
 }
 
 kcenon::pacs::VoidResult job_manager::delete_job(std::string_view job_id) {

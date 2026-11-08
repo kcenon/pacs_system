@@ -72,6 +72,8 @@ public:
 
     /**
      * @brief Encode a dataset to bytes using Explicit VR Little Endian
+     * Marked encapsulated Pixel Data retains its items and uses undefined length.
+     * DIMSE callers additionally validate the negotiated transfer syntax.
      * @param dataset The dataset to encode
      * @return Encoded byte vector
      */

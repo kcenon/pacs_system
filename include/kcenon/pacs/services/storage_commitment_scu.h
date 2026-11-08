@@ -19,6 +19,7 @@
 #ifndef PACS_SERVICES_STORAGE_COMMITMENT_SCU_HPP
 #define PACS_SERVICES_STORAGE_COMMITMENT_SCU_HPP
 
+#include "scp_service.h"
 #include "storage_commitment_types.h"
 
 #include "kcenon/pacs/core/dicom_dataset.h"
@@ -147,6 +148,35 @@ private:
 
     std::atomic<size_t> requests_sent_{0};
     std::atomic<size_t> event_reports_received_{0};
+};
+
+/**
+ * @brief Receives commitment results on associations the SCP opens
+ *
+ * PS3.4 J.3.3: an SCU shall be able to receive the N-EVENT-REPORT on a different
+ * association, where the SCP is the requestor and negotiates the SCP role. Register
+ * this with a server listening under the same AE Title that asked for the commitment.
+ */
+class storage_commitment_event_scu final : public scp_service {
+public:
+    explicit storage_commitment_event_scu(
+        std::shared_ptr<storage_commitment_scu> scu,
+        std::shared_ptr<di::ILogger> logger = nullptr);
+
+    [[nodiscard]] std::vector<std::string> supported_sop_classes() const override;
+
+    /// The requestor sends here in the SCP role, which the server grants for these classes.
+    [[nodiscard]] std::vector<std::string> outbound_sop_classes() const override;
+
+    [[nodiscard]] network::Result<std::monostate> handle_message(
+        network::association& assoc,
+        uint8_t context_id,
+        const network::dimse::dimse_message& request) override;
+
+    [[nodiscard]] std::string_view service_name() const noexcept override;
+
+private:
+    std::shared_ptr<storage_commitment_scu> scu_;
 };
 
 }  // namespace kcenon::pacs::services

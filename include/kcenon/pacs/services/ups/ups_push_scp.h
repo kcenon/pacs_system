@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <variant>
@@ -34,15 +35,21 @@ namespace kcenon::pacs::services {
 inline constexpr std::string_view ups_push_sop_class_uid =
     "1.2.840.10008.5.1.4.34.6.1";
 
+/// UPS Pull SOP Class UID (PS3.4 CC.3.1)
+inline constexpr std::string_view ups_pull_sop_class_uid = "1.2.840.10008.5.1.4.34.6.3";
+
+/// UPS Event SOP Class UID (PS3.4 CC.3.1)
+inline constexpr std::string_view ups_event_sop_class_uid = "1.2.840.10008.5.1.4.34.6.4";
+
 // =============================================================================
 // N-ACTION Type Constants
 // =============================================================================
 
-/// N-ACTION Type 1: Change UPS State (PS3.4 CC.2.4)
+/// N-ACTION Type 1: Change UPS State (PS3.4 CC.2.1)
 inline constexpr uint16_t ups_action_change_state = 1;
 
-/// N-ACTION Type 3: Request Cancellation (PS3.4 CC.2.5)
-inline constexpr uint16_t ups_action_request_cancel = 3;
+/// N-ACTION Type 2: Request UPS Cancel (PS3.4 CC.2.2). 3, 4 and 5 belong to UPS Watch.
+inline constexpr uint16_t ups_action_request_cancel = 2;
 
 // =============================================================================
 // Handler Types
@@ -54,7 +61,10 @@ inline constexpr uint16_t ups_action_request_cancel = 3;
  * Called when an N-CREATE request is received to create a new UPS workitem.
  * The workitem will always have state=SCHEDULED.
  *
- * @param workitem The UPS workitem data from the N-CREATE request
+ * Every handler here may refuse with a PS3.4 status by using it as the error code;
+ * see ups_status_from_error_code(). Any other error is answered with C001H.
+ *
+ * @param workitem The UPS workitem data; attributes holds the whole N-CREATE dataset
  * @return Success if the workitem was created, error description otherwise
  */
 using ups_create_handler = std::function<network::Result<std::monostate>(
@@ -76,10 +86,11 @@ using ups_set_handler = std::function<network::Result<std::monostate>(
 /**
  * @brief N-GET handler function type
  *
- * Called when an N-GET request is received to retrieve a UPS workitem.
+ * Called when an N-GET request is received to retrieve a UPS workitem, and before any
+ * state change or N-SET to apply the tables of PS3.4 Annex CC to the state found.
  *
  * @param workitem_uid The SOP Instance UID of the workitem to retrieve
- * @return The workitem if found, error otherwise
+ * @return The workitem if found; its attributes are returned when the host keeps them
  */
 using ups_get_handler = std::function<network::Result<storage::ups_workitem>(
     const std::string& workitem_uid)>;
@@ -100,9 +111,9 @@ using ups_change_state_handler = std::function<network::Result<std::monostate>(
     const std::string& transaction_uid)>;
 
 /**
- * @brief N-ACTION Type 3 handler: Request Cancellation
+ * @brief N-ACTION Type 2 handler: Request UPS Cancel
  *
- * Called when an N-ACTION request with Action Type ID 3 is received.
+ * Called when an N-ACTION request with Action Type ID 2 is received.
  *
  * @param workitem_uid The SOP Instance UID of the workitem
  * @param reason The cancellation reason (may be empty)
@@ -111,6 +122,22 @@ using ups_change_state_handler = std::function<network::Result<std::monostate>(
 using ups_request_cancel_handler = std::function<network::Result<std::monostate>(
     const std::string& workitem_uid,
     const std::string& reason)>;
+
+/**
+ * @brief N-ACTION Type 2 handler with all the request carries
+ *
+ * Called for a workitem that is neither COMPLETED nor CANCELED. Takes the place of
+ * ups_request_cancel_handler when both are set.
+ *
+ * @param workitem_uid The SOP Instance UID of the workitem
+ * @param request The action information (may be empty): reason, code sequence and contact
+ * @param requesting_ae The AE Title that asked, which the UPS Cancel Requested event names
+ * @return Success if the cancellation request was accepted, error otherwise
+ */
+using ups_cancel_request_handler = std::function<network::Result<std::monostate>(
+    const std::string& workitem_uid,
+    const core::dicom_dataset& request,
+    const std::string& requesting_ae)>;
 
 // =============================================================================
 // UPS Push SCP Class
@@ -192,6 +219,7 @@ public:
     void set_get_handler(ups_get_handler handler);
     void set_change_state_handler(ups_change_state_handler handler);
     void set_request_cancel_handler(ups_request_cancel_handler handler);
+    void set_cancel_request_handler(ups_cancel_request_handler handler);
 
     // =========================================================================
     // scp_service Interface Implementation
@@ -283,6 +311,10 @@ private:
     ups_get_handler get_handler_;
     ups_change_state_handler change_state_handler_;
     ups_request_cancel_handler request_cancel_handler_;
+    ups_cancel_request_handler cancel_request_handler_;
+
+    /// A state check and the change it allows must be one step, or two claims can both pass.
+    std::mutex state_mutex_;
 
     std::atomic<size_t> creates_processed_{0};
     std::atomic<size_t> sets_processed_{0};
@@ -321,6 +353,29 @@ inline constexpr core::dicom_tag input_information_sequence{0x0040, 0x4021};
 
 /// Reason for Cancellation (0074,1238)
 inline constexpr core::dicom_tag reason_for_cancellation{0x0074, 0x1238};
+
+inline constexpr core::dicom_tag scheduled_procedure_step_start_datetime{0x0040, 0x4005};
+inline constexpr core::dicom_tag scheduled_procedure_step_modification_datetime{0x0040, 0x4010};
+inline constexpr core::dicom_tag scheduled_station_name_code_sequence{0x0040, 0x4025};
+inline constexpr core::dicom_tag scheduled_human_performers_sequence{0x0040, 0x4034};
+inline constexpr core::dicom_tag input_readiness_state{0x0040, 0x4041};
+inline constexpr core::dicom_tag performed_procedure_sequence{0x0074, 0x1216};
+inline constexpr core::dicom_tag performed_station_name_code_sequence{0x0040, 0x4028};
+inline constexpr core::dicom_tag performed_workitem_code_sequence{0x0040, 0x4019};
+inline constexpr core::dicom_tag performed_procedure_step_start_datetime{0x0040, 0x4050};
+inline constexpr core::dicom_tag performed_procedure_step_end_datetime{0x0040, 0x4051};
+inline constexpr core::dicom_tag output_information_sequence{0x0040, 0x4033};
+inline constexpr core::dicom_tag procedure_step_progress_information_sequence{0x0074, 0x1002};
+inline constexpr core::dicom_tag procedure_step_cancellation_datetime{0x0040, 0x4052};
+inline constexpr core::dicom_tag discontinuation_reason_code_sequence{0x0074, 0x100E};
+inline constexpr core::dicom_tag contact_uri{0x0074, 0x100A};
+inline constexpr core::dicom_tag contact_display_name{0x0074, 0x100C};
+inline constexpr core::dicom_tag deletion_lock{0x0074, 0x1230};
+inline constexpr core::dicom_tag receiving_ae{0x0074, 0x1234};
+inline constexpr core::dicom_tag requesting_ae{0x0074, 0x1236};
+inline constexpr core::dicom_tag scp_status{0x0074, 0x1242};
+inline constexpr core::dicom_tag subscription_list_status{0x0074, 0x1244};
+inline constexpr core::dicom_tag unified_procedure_step_list_status{0x0074, 0x1246};
 
 }  // namespace ups_tags
 

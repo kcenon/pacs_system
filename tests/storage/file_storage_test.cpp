@@ -11,6 +11,7 @@
 #include <kcenon/pacs/encoding/vr_type.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include "transfer_syntax_fixture.h"
 
 #include <atomic>
 #include <filesystem>
@@ -684,4 +685,14 @@ TEST_CASE("file_storage: retrieve_batch", "[storage][file_storage][batch]") {
         REQUIRE(result.is_ok());
         CHECK(result.value().size() == 2);
     }
+}
+
+TEST_CASE("file_storage: transfer syntax and encapsulation survive persistence",
+          "[storage][file_storage][encapsulated]") {
+    temp_directory temp_dir;
+    file_storage_config config;
+    config.root_path = temp_dir.path();
+    file_storage storage{config};
+    storage_syntax_test::check_representation(storage,
+        create_test_dataset("1.2.3.1292", "1.2.3.1292.1", "1.2.3.1292.1.1"));
 }

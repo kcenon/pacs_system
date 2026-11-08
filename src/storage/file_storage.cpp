@@ -18,6 +18,8 @@
 #include <fstream>
 #include <random>
 #include <set>
+#include <string>
+#include <vector>
 
 namespace kcenon::pacs::storage {
 
@@ -49,6 +51,35 @@ auto generate_temp_filename(const std::filesystem::path& base)
     return base.parent_path() / temp_name;
 }
 
+/// Removes the temporary files generate_temp_filename() names, "<file><extension>.tmp.<digits>". One is on
+/// disk only while store() writes it, so any found before this storage stores anything is left over from a
+/// process that died mid-write: nothing will rename it, and it held no acknowledged object.
+void remove_leftover_temporaries(const std::filesystem::path& root, const std::string& extension) {
+    const auto marker = extension + ".tmp.";
+    std::vector<std::filesystem::path> leftovers;
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(root, ec)) {
+        std::error_code entry_error;
+        if (!entry.is_regular_file(entry_error)) {
+            continue;
+        }
+        const auto name = entry.path().filename().string();
+        const auto at = name.rfind(marker);
+        if (at == std::string::npos) {
+            continue;
+        }
+        const auto digits = name.substr(at + marker.size());
+        if (!digits.empty() && std::all_of(digits.begin(), digits.end(),
+                                           [](unsigned char c) { return c >= '0' && c <= '9'; })) {
+            leftovers.push_back(entry.path());
+        }
+    }
+    for (const auto& path : leftovers) {
+        std::error_code ignored;
+        std::filesystem::remove(path, ignored);
+    }
+}
+
 }  // namespace
 
 // ============================================================================
@@ -64,8 +95,9 @@ file_storage::file_storage(const file_storage_config& config)
         // Ignore error - will be caught during store operations
     }
 
-    // Rebuild index from existing files
+    // Rebuild index from existing files, after removing what an interrupted store() left behind
     if (std::filesystem::exists(config_.root_path)) {
+        remove_leftover_temporaries(config_.root_path, config_.file_extension);
         (void)rebuild_index();
     }
 }
@@ -75,6 +107,15 @@ file_storage::file_storage(const file_storage_config& config)
 // ============================================================================
 
 auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
+    auto syntax = native_store_syntax(dataset);
+    if (syntax.is_err()) return syntax.error();
+    return store(dataset,syntax.value());
+}
+
+auto file_storage::store(const core::dicom_dataset& dataset,
+                         const encoding::transfer_syntax& syntax) -> VoidResult {
+    auto validation = core::dicom_file::validate_pixel_data_representation(dataset,syntax);
+    if (validation.is_err()) return validation;
     // Extract required UIDs
     auto study_uid = dataset.get_string(core::tags::study_instance_uid);
     auto series_uid = dataset.get_string(core::tags::series_instance_uid);
@@ -85,6 +126,15 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
             kMissingRequiredUid,
             "Missing required UID (Study, Series, or SOP Instance UID)",
             "file_storage");
+    }
+    // sanitize_uid() keeps dots, so a UID of nothing but dots would name a directory above the archive.
+    for (const auto& uid : {study_uid, series_uid, sop_uid}) {
+        if (uid.find_first_not_of('.') == std::string::npos) {
+            return make_error<std::monostate>(
+                kMissingRequiredUid,
+                "A UID of only dots cannot name a file: " + uid,
+                "file_storage");
+        }
     }
 
     // Build file path based on naming scheme
@@ -119,6 +169,7 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
     }
 
     // Handle duplicate checking
+    std::filesystem::path replaced_path;
     {
         std::shared_lock lock(mutex_);
         if (index_.contains(sop_uid)) {
@@ -131,7 +182,8 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
                 case duplicate_policy::ignore:
                     return ok();
                 case duplicate_policy::replace:
-                    // Continue to overwrite
+                    // Continue to overwrite. The new copy may belong to another study, and so another path.
+                    replaced_path = index_[sop_uid];
                     break;
             }
         }
@@ -151,7 +203,7 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
 
     // Create DICOM file and write atomically
     auto dicom_file = core::dicom_file::create(
-        dataset, encoding::transfer_syntax::explicit_vr_little_endian);
+        dataset, syntax);
 
     // Write to temporary file first
     auto temp_path = generate_temp_filename(file_path);
@@ -182,18 +234,28 @@ auto file_storage::store(const core::dicom_dataset& dataset) -> VoidResult {
         index_[sop_uid] = file_path;
     }
 
+    if (!replaced_path.empty() && replaced_path != file_path) {
+        std::filesystem::remove(replaced_path, ec);
+    }
+
     return ok();
 }
 
-auto file_storage::retrieve(std::string_view sop_instance_uid)
-    -> Result<core::dicom_dataset> {
+auto file_storage::retrieve(std::string_view uid) -> Result<core::dicom_dataset> {
+    auto file = retrieve_file(uid);
+    if (file.is_err()) return file.error();
+    return file.value().dataset();
+}
+
+auto file_storage::retrieve_file(std::string_view sop_instance_uid)
+    -> Result<core::dicom_file> {
     std::filesystem::path file_path;
 
     {
         std::shared_lock lock(mutex_);
         auto it = index_.find(std::string{sop_instance_uid});
         if (it == index_.end()) {
-            return make_error<core::dicom_dataset>(
+            return make_error<core::dicom_file>(
                 kFileNotFound,
                 "Instance not found: " + std::string{sop_instance_uid},
                 "file_storage");
@@ -204,13 +266,13 @@ auto file_storage::retrieve(std::string_view sop_instance_uid)
     // Read DICOM file
     auto open_result = core::dicom_file::open(file_path);
     if (open_result.is_err()) {
-        return make_error<core::dicom_dataset>(
+        return make_error<core::dicom_file>(
             kFileReadError,
             "Failed to read DICOM file: " + open_result.error().message,
             "file_storage");
     }
 
-    return open_result.value().dataset();
+    return std::move(open_result.value());
 }
 
 auto file_storage::remove(std::string_view sop_instance_uid) -> VoidResult {

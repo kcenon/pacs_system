@@ -10,12 +10,16 @@
 #include "kcenon/pacs/services/storage_scp.h"
 #include "kcenon/pacs/core/dicom_tag_constants.h"
 #include "kcenon/pacs/core/events.h"
+#include "kcenon/pacs/core/dicom_file.h"
 #include "kcenon/pacs/core/result.h"
 #include "kcenon/pacs/network/dimse/command_field.h"
 #include "kcenon/pacs/network/dimse/status_codes.h"
 #include "kcenon/pacs/security/atna_service_auditor.h"
+#include "kcenon/pacs/services/sop_class_registry.h"
 
 #include <kcenon/common/patterns/event_bus.h>
+
+#include <algorithm>
 
 namespace kcenon::pacs::services {
 
@@ -36,6 +40,12 @@ storage_scp::storage_scp(const storage_scp_config& config,
 
 void storage_scp::set_handler(storage_handler handler) {
     handler_ = std::move(handler);
+    context_handler_ = {};
+}
+
+void storage_scp::set_context_handler(context_storage_handler handler) {
+    context_handler_ = std::move(handler);
+    handler_ = {};
 }
 
 void storage_scp::set_pre_store_handler(pre_store_handler handler) {
@@ -95,6 +105,16 @@ network::Result<std::monostate> storage_scp::handle_message(
     // Get dataset reference (already validated above)
     const auto& dataset = request.dataset().value().get();
 
+    const auto syntax = assoc.context_transfer_syntax(context_id);
+    if (syntax.is_err()
+        || core::dicom_file::validate_pixel_data_representation(dataset, syntax.value()).is_err()
+        || (syntax.value().is_encapsulated() && dataset.get(core::tags::pixel_data)
+            && !dataset.get(core::tags::pixel_data)->is_encapsulated_pixel_data())) {
+        return assoc.send_dimse(context_id, make_c_store_rsp(
+            request.message_id(), sop_class_uid, sop_instance_uid,
+            static_cast<status_code>(storage_status::cannot_understand)));
+    }
+
     // Pre-store validation
     if (pre_store_handler_ && !pre_store_handler_(dataset)) {
         auto response = make_c_store_rsp(
@@ -109,7 +129,11 @@ network::Result<std::monostate> storage_scp::handle_message(
     // Determine storage status
     storage_status status = storage_status::success;
 
-    if (handler_) {
+    if (context_handler_) {
+        const std::string calling_ae{assoc.calling_ae()};
+        status = context_handler_({dataset, calling_ae, sop_class_uid,
+                                   sop_instance_uid, syntax.value()});
+    } else if (handler_) {
         // Call the registered storage handler
         status = handler_(
             dataset,
@@ -220,61 +244,11 @@ void storage_scp::reset_statistics() noexcept {
 // =============================================================================
 
 std::vector<std::string> get_standard_storage_sop_classes() {
-    return {
-        // CT
-        std::string(ct_image_storage_uid),
-        std::string(enhanced_ct_image_storage_uid),
-
-        // MR
-        std::string(mr_image_storage_uid),
-        std::string(enhanced_mr_image_storage_uid),
-
-        // CR/DX
-        std::string(cr_image_storage_uid),
-        std::string(dx_image_storage_presentation_uid),
-        std::string(dx_image_storage_processing_uid),
-
-        // US
-        std::string(us_image_storage_uid),
-
-        // Secondary Capture
-        std::string(secondary_capture_image_storage_uid),
-
-        // RT
-        std::string(rt_image_storage_uid),
-        std::string(rt_dose_storage_uid),
-        std::string(rt_structure_set_storage_uid),
-        std::string(rt_plan_storage_uid),
-
-        // NM/PET
-        "1.2.840.10008.5.1.4.1.1.20",      // NM Image Storage
-        "1.2.840.10008.5.1.4.1.1.128",     // PET Image Storage
-        "1.2.840.10008.5.1.4.1.1.130",     // Enhanced PET Image Storage
-
-        // XA/RF
-        "1.2.840.10008.5.1.4.1.1.12.1",    // XA Image Storage
-        "1.2.840.10008.5.1.4.1.1.12.2",    // XRF Image Storage
-
-        // Mammography
-        "1.2.840.10008.5.1.4.1.1.1.2",     // Digital Mammography X-Ray - Presentation
-        "1.2.840.10008.5.1.4.1.1.1.2.1",   // Digital Mammography X-Ray - Processing
-
-        // Multi-frame
-        "1.2.840.10008.5.1.4.1.1.7.1",     // Multi-frame Single Bit SC
-        "1.2.840.10008.5.1.4.1.1.7.2",     // Multi-frame Grayscale Byte SC
-        "1.2.840.10008.5.1.4.1.1.7.3",     // Multi-frame Grayscale Word SC
-        "1.2.840.10008.5.1.4.1.1.7.4",     // Multi-frame True Color SC
-
-        // SR (Structured Reports)
-        "1.2.840.10008.5.1.4.1.1.88.11",   // Basic Text SR
-        "1.2.840.10008.5.1.4.1.1.88.22",   // Enhanced SR
-        "1.2.840.10008.5.1.4.1.1.88.33",   // Comprehensive SR
-        "1.2.840.10008.5.1.4.1.1.88.34",   // Comprehensive 3D SR
-
-        // Other common types
-        "1.2.840.10008.5.1.4.1.1.104.1",   // Encapsulated PDF
-        "1.2.840.10008.5.1.4.1.1.104.2",   // Encapsulated CDA
-    };
+    // One list only: the registry backs this default and the conformance statement,
+    // so advertising a class cannot drift from accepting it (#1318).
+    auto classes = sop_class_registry::instance().get_all_storage_classes(true);
+    std::sort(classes.begin(), classes.end());
+    return classes;
 }
 
 }  // namespace kcenon::pacs::services

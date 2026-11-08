@@ -20,6 +20,9 @@ category: "ARCH"
 
 ## Table of Contents
 
+The CLI SCP transport decision and retained v1 compatibility contract are recorded
+in [ADR-004](adr/ADR-004-cli-scp-tcp-transport.md).
+
 - [Design Philosophy](#design-philosophy)
 - [Core Principles](#core-principles)
 - [System Architecture](#system-architecture)

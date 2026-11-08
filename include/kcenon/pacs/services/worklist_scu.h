@@ -541,6 +541,14 @@ public:
      */
     void reset_statistics() noexcept;
 
+    /**
+     * @brief Build matching/return keys, with one Scheduled Procedure Step item
+     *
+     * Callers may add custom keys and pass the dataset to the raw query overload.
+     */
+    [[nodiscard]] core::dicom_dataset build_query_dataset(
+        const worklist_query_keys& keys) const;
+
 private:
     // =========================================================================
     // Private Implementation
@@ -551,12 +559,6 @@ private:
      */
     [[nodiscard]] worklist_item parse_worklist_item(
         const core::dicom_dataset& ds) const;
-
-    /**
-     * @brief Build query dataset from typed keys
-     */
-    [[nodiscard]] core::dicom_dataset build_query_dataset(
-        const worklist_query_keys& keys) const;
 
     /**
      * @brief Get the next message ID for DIMSE operations

@@ -56,6 +56,7 @@ if(PACS_BUILD_TESTS)
         tests/core/dicom_element_test.cpp
         tests/core/dicom_dataset_test.cpp
         tests/core/dicom_file_test.cpp
+        tests/core/undefined_un_test.cpp
         tests/core/tag_info_test.cpp
         tests/core/dicom_dictionary_test.cpp
         tests/core/events_test.cpp
@@ -73,6 +74,8 @@ if(PACS_BUILD_TESTS)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/utilities)
     add_executable(utilities_tests
         tests/utilities/dcm_modify_test.cpp
+        tests/utilities/directory_index_test.cpp
+        tools/dcm_dir/directory_index.cpp
     )
     target_link_libraries(utilities_tests
         PRIVATE
@@ -89,8 +92,10 @@ if(PACS_BUILD_TESTS)
         tests/encoding/vr_info_test.cpp
         tests/encoding/implicit_vr_codec_test.cpp
         tests/encoding/explicit_vr_codec_test.cpp
+        tests/encoding/defined_length_sequence_test.cpp
         tests/encoding/byte_swap_test.cpp
         tests/encoding/explicit_vr_big_endian_codec_test.cpp
+        tests/encoding/big_endian_value_test.cpp
         tests/encoding/compression/jpeg_baseline_codec_test.cpp
         tests/encoding/compression/jpeg_lossless_codec_test.cpp
         tests/encoding/compression/frame_deflate_codec_test.cpp
@@ -108,6 +113,32 @@ if(PACS_BUILD_TESTS)
             pacs_encoding
             Catch2::Catch2WithMain
     )
+
+    option(PACS_TEST_OPENJPH_INTERNALS "Test generic OpenJPH RCT branches for sanitizer validation" OFF)
+    if(PACS_TEST_OPENJPH_INTERNALS)
+        if(NOT PACS_HTJ2K_FOUND OR NOT DEFINED openjph_SOURCE_DIR)
+            message(FATAL_ERROR "PACS_TEST_OPENJPH_INTERNALS requires FetchContent OpenJPH")
+        endif()
+        target_sources(encoding_tests PRIVATE
+            tests/encoding/compression/openjph_rct_test.cpp)
+        target_include_directories(encoding_tests PRIVATE
+            "${openjph_SOURCE_DIR}/src/core/transform")
+        # OpenJPH's negative left shift is undefined only before C++20. A
+        # FetchContent build inherits C++20, while OpenJPH's own default and the
+        # vcpkg port use C++14. This lets the ARM job validate both modes (#1299).
+        set(PACS_TEST_OPENJPH_CXX_STANDARD "" CACHE STRING
+            "C++ standard for the fetched OpenJPH in sanitizer validation; empty inherits CMAKE_CXX_STANDARD")
+        if(PACS_TEST_OPENJPH_CXX_STANDARD)
+            set_target_properties(openjph PROPERTIES CXX_STANDARD "${PACS_TEST_OPENJPH_CXX_STANDARD}")
+        endif()
+        # Deliberate UB is an executable negative control, never a CTest case.
+        # The focused sanitizer runner requires the C++14 failure even with the
+        # OpenJPH-only suppression loaded, and compares the same source in C++20.
+        add_executable(pacs_ubsan_shift_control tests/sanitizers/shift_base_control.cpp)
+        set_target_properties(pacs_ubsan_shift_control PROPERTIES CXX_STANDARD 14)
+        add_executable(pacs_ubsan_shift_control_cxx20 tests/sanitizers/shift_base_control.cpp)
+        set_target_properties(pacs_ubsan_shift_control_cxx20 PROPERTIES CXX_STANDARD 20)
+    endif()
 
     # Network tests
     add_executable(network_tests
@@ -151,10 +182,14 @@ if(PACS_BUILD_TESTS)
 
     # Services tests
     add_executable(services_tests
+        tests/services/storage_sop_contract_test.cpp
         tests/services/verification_scp_test.cpp
         tests/services/storage_scp_test.cpp
         tests/services/storage_scu_test.cpp
         tests/services/retrieve_scu_test.cpp
+        tests/services/print_scp_flow_test.cpp
+        tests/services/qr_index_test.cpp
+        tests/services/qr_matching_test.cpp
         tests/services/query_scp_test.cpp
         tests/services/retrieve_scp_test.cpp
         tests/services/worklist_scp_test.cpp
@@ -169,6 +204,7 @@ if(PACS_BUILD_TESTS)
         tests/services/print_scp_test.cpp
         tests/services/print_scu_test.cpp
         tests/services/ups_push_scp_test.cpp
+        tests/services/ups_rules_test.cpp
         tests/services/ups_push_scu_test.cpp
         tests/services/ups_query_scp_test.cpp
         tests/services/ups_watch_scp_test.cpp
@@ -220,6 +256,10 @@ if(PACS_BUILD_TESTS)
             pacs_storage
             Catch2::Catch2WithMain
     )
+    # Read by tests/services/storage_sop_contract_test.cpp (Issue #1318)
+    target_compile_definitions(services_tests PRIVATE
+        PACS_CONFORMANCE_STATEMENT_PATH="${CMAKE_SOURCE_DIR}/docs/DICOM_CONFORMANCE_STATEMENT.md"
+    )
     # Link pacs_integration for thread_pool_adapter (used by parallel_query_executor tests)
     if(TARGET pacs_integration)
         target_link_libraries(services_tests PRIVATE pacs_integration)
@@ -233,6 +273,7 @@ if(PACS_BUILD_TESTS)
         tests/security/sqlite_security_storage_test.cpp
         tests/security/uid_mapping_test.cpp
         tests/security/anonymizer_test.cpp
+        tests/security/anonymizer_sequence_test.cpp
         tests/security/atna_audit_logger_test.cpp
         tests/security/atna_syslog_transport_test.cpp
         tests/security/atna_service_auditor_test.cpp
@@ -263,6 +304,7 @@ if(PACS_BUILD_TESTS)
         add_executable(storage_tests
             tests/storage/storage_interface_test.cpp
             tests/storage/file_storage_test.cpp
+            tests/storage/instance_archive_test.cpp
             tests/storage/s3_storage_test.cpp
             tests/storage/azure_blob_storage_test.cpp
             tests/storage/hsm_storage_test.cpp
@@ -304,6 +346,7 @@ if(PACS_BUILD_TESTS)
     #           Issue #205 - AI service connector for inference requests)
     if(TARGET pacs_ai)
         add_executable(ai_tests
+            tests/ai/ai_contract_test.cpp
             tests/ai/ai_result_handler_test.cpp
             tests/ai/ai_service_connector_test.cpp
             tests/ai/aira_assessment_test.cpp
@@ -357,10 +400,13 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_web)
         add_executable(web_tests
             tests/web/rest_server_test.cpp
+            tests/web/rest_http_smoke_test.cpp
+            tests/web/rest_gate_test.cpp
             tests/web/system_endpoints_test.cpp
             tests/web/patient_study_endpoints_test.cpp
             tests/web/worklist_audit_endpoints_test.cpp
             tests/web/dicomweb_endpoints_test.cpp
+            tests/web/dicomweb_contract_test.cpp
             tests/web/jobs_endpoints_test.cpp
             tests/web/thumbnail_service_test.cpp
             tests/web/metadata_service_test.cpp
@@ -373,6 +419,7 @@ if(PACS_BUILD_TESTS)
             tests/web/storage_commitment_endpoints_test.cpp
             tests/web/auth/jwt_validator_test.cpp
             tests/web/auth/oauth2_middleware_test.cpp
+            tests/web/auth/jwks_provider_test.cpp
         )
         target_link_libraries(web_tests
             PRIVATE
@@ -509,6 +556,7 @@ if(PACS_BUILD_TESTS)
     if(TARGET pacs_client AND TARGET pacs_storage)
         add_executable(client_tests
             tests/client/job_manager_test.cpp
+            tests/client/job_contract_test.cpp
             tests/client/routing_manager_test.cpp
             tests/client/prefetch_manager_test.cpp
             tests/client/sync_manager_test.cpp

@@ -42,9 +42,9 @@ inline constexpr std::string_view ophthalmic_photo_16bit_storage_uid =
 inline constexpr std::string_view ophthalmic_tomography_storage_uid =
     "1.2.840.10008.5.1.4.1.1.77.1.5.4";
 
-/// Wide Field Ophthalmic Photography SOP Class Storage
+/// Wide Field Ophthalmic Photography Stereographic Projection Image Storage
 inline constexpr std::string_view wide_field_ophthalmic_photo_storage_uid =
-    "1.2.840.10008.5.1.4.1.1.77.1.5.7";
+    "1.2.840.10008.5.1.4.1.1.77.1.5.5";
 
 /// Ophthalmic Optical Coherence Tomography B-scan Volume Analysis Storage
 inline constexpr std::string_view ophthalmic_oct_bscan_analysis_storage_uid =

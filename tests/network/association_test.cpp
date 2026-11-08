@@ -4,6 +4,10 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include "kcenon/pacs/network/detail/request_context.h"
+#include <barrier>
+#include <future>
+#include <thread>
 
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/network/pdu_types.h"
@@ -623,5 +627,294 @@ TEST_CASE("rejection_info description", "[association][rejection]") {
         CHECK(info.description.find("transient") != std::string::npos);
         CHECK(info.description.find("ACSE") != std::string::npos);
         CHECK(info.description.find("protocol version") != std::string::npos);
+    }
+}
+
+TEST_CASE("association negotiates requestor storage roles without assuming acceptance",
+          "[association][roles]") {
+    association_config request;
+    request.calling_ae_title = "GET_SCU";
+    request.called_ae_title = "ARCHIVE";
+    request.proposed_contexts = {{1, CT_IMAGE_STORAGE, {EXPLICIT_VR_LE}},
+                                 {3, VERIFICATION_SOP_CLASS, {EXPLICIT_VR_LE}}};
+    request.role_selections.emplace_back(CT_IMAGE_STORAGE, false, true);
+    auto client = association::propose(request);
+    auto rq = client.build_associate_rq();
+    REQUIRE(rq.user_info.role_selections.size() == 1);
+    CHECK(rq.user_info.role_selections[0].scp_role);
+    CHECK_FALSE(rq.user_info.role_selections[0].scu_role);
+    scp_config acceptor;
+    acceptor.ae_title = "ARCHIVE";
+    SECTION("explicit acceptance survives move construction") {
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, true);
+        auto server = association::accept(rq, acceptor);
+        auto ac = server.build_associate_ac();
+        REQUIRE(ac.user_info.role_selections.size() == 1);
+        REQUIRE(client.process_associate_ac(ac));
+        auto moved = std::move(client);
+        CHECK(moved.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(moved.requestor_role(CT_IMAGE_STORAGE).scu_role);
+        CHECK(server.requestor_role(CT_IMAGE_STORAGE).scp_role);
+    }
+    SECTION("no response restores defaults rather than requested SCP role") {
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("explicit denial is retained") {
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, false);
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("unsolicited roles cannot grant privileges") {
+        auto ac = association::accept(rq, acceptor).build_associate_ac();
+        ac.user_info.role_selections.emplace_back(VERIFICATION_SOP_CLASS, false, true);
+        ac.user_info.role_selections.emplace_back(CT_IMAGE_STORAGE, true, true);
+        REQUIRE(client.process_associate_ac(ac));
+        CHECK_FALSE(client.requestor_role(VERIFICATION_SOP_CLASS).scp_role);
+        CHECK(client.requestor_role(VERIFICATION_SOP_CLASS).scu_role);
+        CHECK(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    SECTION("role response cannot revive a rejected presentation context") {
+        acceptor.supported_abstract_syntaxes = {VERIFICATION_SOP_CLASS};
+        acceptor.supported_requestor_roles.emplace_back(CT_IMAGE_STORAGE, false, true);
+        auto server = association::accept(rq, acceptor);
+        REQUIRE(client.process_associate_ac(server.build_associate_ac()));
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scp_role);
+        CHECK_FALSE(client.requestor_role(CT_IMAGE_STORAGE).scu_role);
+    }
+    CHECK_FALSE(client.requestor_role("9.9.9").scp_role);
+}
+
+TEST_CASE("C-CANCEL is scoped to its registered association/context/message", "[association][cancel]") {
+    association first, second;
+    first.register_cancellable_operation(1, 77);
+    second.register_cancellable_operation(1, 77);
+    auto cancel = dimse::dimse_message{dimse::command_field::c_cancel_rq, 0};
+    cancel.set_message_id_responded_to(77);
+    first.enqueue_message(3, cancel);
+    CHECK_FALSE(first.cancellation_requested(1, 77));
+    cancel.set_message_id_responded_to(78);
+    first.enqueue_message(1, cancel);
+    CHECK_FALSE(first.cancellation_requested(1, 77));
+    cancel.set_message_id_responded_to(77);
+    first.enqueue_message(1, cancel);
+    CHECK(first.cancellation_requested(1, 77));
+    CHECK_FALSE(second.cancellation_requested(1, 77));
+    first.register_cancellable_operation(1, 77);
+    CHECK(first.cancellation_requested(1, 77)); // early cancellation survives dispatch
+    association moved{std::move(first)};
+    CHECK(moved.cancellation_requested(1, 77));
+    moved.finish_cancellable_operation(1, 77);
+    moved.enqueue_message(1, cancel); // late cancellation cannot cancel future reuse
+    moved.register_cancellable_operation(1, 77);
+    CHECK_FALSE(moved.cancellation_requested(1, 77));
+}
+
+namespace {
+association response_test_association() {
+    association_config proposed;
+    proposed.calling_ae_title = "PEER";
+    proposed.called_ae_title = "SCP";
+    proposed.proposed_contexts = {{1, VERIFICATION_SOP_CLASS, {EXPLICIT_VR_LE}}};
+    scp_config accepted;
+    accepted.ae_title = "SCP";
+    return association::accept(association::propose(proposed).build_associate_rq(), accepted);
+}
+}
+
+TEST_CASE("SCP response mailbox correlates and retires exchanges", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    auto request = make_c_echo_rq(1);
+    auto response = make_c_echo_rsp(1, status_success);
+    REQUIRE(assoc.send_request(1, request).is_ok());
+    CHECK(assoc.send_request(1, make_c_echo_rq(2)).is_err());
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    REQUIRE(assoc.deliver_response(1, response).is_ok());
+    REQUIRE(assoc.deliver_response(1, response).is_ok()); // duplicate before consumption
+    REQUIRE(assoc.receive_response(1ms).is_ok());
+    CHECK(assoc.receive_response(1ms).is_err()); // only one consumption
+    CHECK(assoc.send_request(1, request).is_err()); // no ID reuse
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(2)).is_ok());
+    REQUIRE(assoc.deliver_response(1, response).is_ok()); // duplicate during next wait
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    assoc.cancel_response_wait();
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(3)).is_ok());
+    REQUIRE(assoc.deliver_response(1, make_c_echo_rsp(2, status_success)).is_ok()); // late after cancel
+    CHECK(assoc.receive_response(1ms).error().code == kcenon::pacs::error_codes::receive_timeout);
+    auto moved = std::move(assoc);
+    REQUIRE(moved.deliver_response(1, make_c_echo_rsp(3, status_success)).is_ok());
+    REQUIRE(moved.receive_response(1ms).is_ok());
+    CHECK(moved.deliver_response(1, make_c_echo_rsp(99, status_success)).is_err());
+}
+
+TEST_CASE("SCP response mailbox rejects mismatched and malformed acknowledgements", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+    auto response = make_c_echo_rsp(1, status_success);
+    uint8_t context = 1;
+    SECTION("wrong context") { context = 3; }
+    SECTION("wrong MessageID") { response.set_message_id_responded_to(2); }
+    SECTION("wrong command") { response = make_c_store_rsp(1, VERIFICATION_SOP_CLASS, ""); }
+    SECTION("missing MessageID") { response.command_set().remove(tag_message_id_responded_to); }
+    SECTION("missing status") { response.command_set().remove(tag_status); }
+    SECTION("pending status") { response.set_status(status_pending); }
+    SECTION("wrong SOP class") { response.set_affected_sop_class_uid(CT_IMAGE_STORAGE); }
+    SECTION("unexpected dataset") { response.set_dataset(kcenon::pacs::core::dicom_dataset{}); }
+    REQUIRE(assoc.deliver_response(context, response).is_ok());
+    auto received = assoc.receive_response(1ms);
+    REQUIRE(received.is_err());
+    CHECK(received.error().code != kcenon::pacs::error_codes::receive_timeout);
+    CHECK(assoc.receive_response(1ms).is_err());
+}
+
+TEST_CASE("SCP response wait wakes on association lifecycle and explicit cancellation", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    auto assoc = response_test_association();
+    auto peer = response_test_association();
+    assoc.set_peer(&peer);
+    REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+    std::promise<void> started;
+    auto receiver = std::async(std::launch::async, [&] {
+        started.set_value();
+        return assoc.receive_response(5s);
+    });
+    started.get_future().wait();
+    SECTION("local abort") { assoc.abort(); }
+    SECTION("peer abort") { peer.abort(); }
+    SECTION("peer release") { REQUIRE(peer.release().is_ok()); }
+    SECTION("local release") { REQUIRE(assoc.release().is_ok()); }
+    SECTION("network abort") { assoc.process_abort(abort_source::service_user, abort_reason::not_specified); }
+    SECTION("network release") { assoc.process_release_rq(); }
+    SECTION("explicit cancellation") { assoc.cancel_response_wait(); }
+    CHECK(receiver.wait_for(1s) == std::future_status::ready);
+    CHECK(receiver.get().is_err());
+    CHECK(assoc.receive_response(1ms).is_err());
+}
+
+TEST_CASE("Response arrival racing close is consumed at most once", "[association][response-routing]") {
+    using namespace dimse;
+    using namespace std::chrono_literals;
+    for (int i = 0; i < 100; ++i) {
+        auto assoc = response_test_association();
+        REQUIRE(assoc.send_request(1, make_c_echo_rq(1)).is_ok());
+        std::barrier ready{3};
+        std::thread delivered([&] {
+            ready.arrive_and_wait();
+            (void)assoc.deliver_response(1, make_c_echo_rsp(1, status_success));
+        });
+        std::thread closed([&] {
+            ready.arrive_and_wait();
+            assoc.process_abort(abort_source::service_user, abort_reason::not_specified);
+        });
+        ready.arrive_and_wait();
+        auto result = assoc.receive_response(1s);
+        delivered.join();
+        closed.join();
+        CHECK((result.is_ok() || result.error().code == kcenon::pacs::error_codes::association_aborted));
+        CHECK(assoc.receive_response(1ms).is_err());
+    }
+}
+
+TEST_CASE("SCP request IDs have a bounded non-reusing lifetime", "[association][response-routing]") {
+    association assoc;
+    for (uint32_t id = 1; id <= 65535; ++id) {
+        auto result = assoc.next_request_message_id();
+        REQUIRE(result.is_ok());
+        REQUIRE(result.value() == id);
+    }
+    CHECK(assoc.next_request_message_id().is_err());
+}
+
+TEST_CASE("Request dispatch validates command-specific SOP identity against negotiated context",
+          "[association][request-routing]") {
+    using namespace dimse;
+    auto assoc = response_test_association();
+    SECTION("Affected identity for composite and N-CREATE requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_c_echo_rq(1)).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_create_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+    }
+    SECTION("Requested identity for normalized requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_delete_rq(1, VERIFICATION_SOP_CLASS, "1.2.3")).is_ok());
+    }
+    SECTION("wrong SOP class for accepted context") {
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
+    }
+    SECTION("unknown context") {
+        CHECK(detail::request_sop_class(assoc, 3, make_c_echo_rq(1)).is_err());
+    }
+    SECTION("missing Requested identity cannot fall back to Affected") {
+        auto msg = make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3");
+        msg.command_set().remove(tag_requested_sop_class_uid);
+        msg.set_affected_sop_class_uid(VERIFICATION_SOP_CLASS);
+        CHECK(detail::request_sop_class(assoc, 1, msg).is_err());
+    }
+    SECTION("conflicting command identities") {
+        auto msg = make_n_set_rq(1, VERIFICATION_SOP_CLASS, "1.2.3");
+        msg.set_affected_sop_class_uid(CT_IMAGE_STORAGE);
+        CHECK(detail::request_sop_class(assoc, 1, msg).is_err());
+    }
+    SECTION("responses are not service requests") {
+        CHECK(detail::request_sop_class(assoc, 1, make_c_echo_rsp(1, status_success)).is_err());
+    }
+}
+
+TEST_CASE("Print Meta SOP contexts accept only their declared member SOP classes", "[association][request-routing]") {
+    using namespace dimse;
+    for (const auto& meta : {"1.2.840.10008.5.1.1.9", "1.2.840.10008.5.1.1.18"}) {
+        association_config proposed;
+        proposed.called_ae_title = "SCP";
+        proposed.calling_ae_title = "PEER";
+        proposed.proposed_contexts = {{1, meta, {EXPLICIT_VR_LE}}};
+        scp_config accepted;
+        accepted.ae_title = "SCP";
+        auto assoc = association::accept(association::propose(proposed).build_associate_rq(), accepted);
+        for (const auto& member : {"1.2.840.10008.5.1.1.1", "1.2.840.10008.5.1.1.2", "1.2.840.10008.5.1.1.16"}) {
+            auto result = detail::request_sop_class(assoc, 1, make_n_get_rq(1, member, "1.2.3"));
+            REQUIRE(result.is_ok());
+            CHECK(result.value() == meta);
+        }
+        const bool gray = std::string_view(meta) == "1.2.840.10008.5.1.1.9";
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1,
+              gray ? "1.2.840.10008.5.1.1.4" : "1.2.840.10008.5.1.1.4.1", "1.2.3")).is_ok());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_set_rq(1,
+              gray ? "1.2.840.10008.5.1.1.4.1" : "1.2.840.10008.5.1.1.4", "1.2.3")).is_err());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
+    }
+}
+
+TEST_CASE("UPS contexts carry requests that name UPS Push", "[association][request-routing]") {
+    using namespace dimse;
+    constexpr const char* push = "1.2.840.10008.5.1.4.34.6.1";
+    for (const auto& context : {push, "1.2.840.10008.5.1.4.34.6.2", "1.2.840.10008.5.1.4.34.6.3", "1.2.840.10008.5.1.4.34.6.5"}) {
+        association_config proposed;
+        proposed.called_ae_title = "SCP";
+        proposed.calling_ae_title = "PEER";
+        proposed.proposed_contexts = {{1, context, {EXPLICIT_VR_LE}}};
+        scp_config accepted;
+        accepted.ae_title = "SCP";
+        auto assoc = association::accept(association::propose(proposed).build_associate_rq(), accepted);
+
+        // PS3.4 CC.2: every UPS is an instance of UPS Push, whatever context the request came on.
+        auto result = detail::request_sop_class(assoc, 1, make_n_action_rq(1, push, "1.2.3", 1));
+        REQUIRE(result.is_ok());
+        CHECK(result.value() == context);
+
+        // Only UPS Push: another UPS class is not a member of this context.
+        const char* another = std::string_view(context) == "1.2.840.10008.5.1.4.34.6.2" ? "1.2.840.10008.5.1.4.34.6.3"
+                                                                                          : "1.2.840.10008.5.1.4.34.6.2";
+        CHECK(detail::request_sop_class(assoc, 1, make_n_action_rq(1, another, "1.2.3", 1)).is_err());
+        CHECK(detail::request_sop_class(assoc, 1, make_n_get_rq(1, CT_IMAGE_STORAGE, "1.2.3")).is_err());
     }
 }

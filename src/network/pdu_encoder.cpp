@@ -246,16 +246,14 @@ void pdu_encoder::encode_user_information(std::vector<uint8_t>& buffer,
         buffer.push_back(static_cast<uint8_t>(item_type::scp_scu_role_selection));
         buffer.push_back(0x00);  // Reserved
 
-        size_t uid_len = role.sop_class_uid.size();
-        if (uid_len % 2 != 0) {
-            uid_len++;
-        }
+        const size_t uid_len = role.sop_class_uid.size();
         // Item length = UID length field (2) + UID + SCU role (1) + SCP role (1)
         write_uint16_be(buffer, static_cast<uint16_t>(2 + uid_len + 2));
 
         // UID length
         write_uint16_be(buffer, static_cast<uint16_t>(role.sop_class_uid.size()));
-        write_uid(buffer, role.sop_class_uid);
+        // Network negotiation UIDs are not padded (PS3.5 9.1).
+        buffer.insert(buffer.end(), role.sop_class_uid.begin(), role.sop_class_uid.end());
 
         buffer.push_back(role.scu_role ? 0x01 : 0x00);
         buffer.push_back(role.scp_role ? 0x01 : 0x00);

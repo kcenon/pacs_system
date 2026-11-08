@@ -174,6 +174,15 @@ public:
         std::string_view sop_instance_uid,
         const std::vector<core::dicom_tag>& attribute_tags = {});
 
+    /// The same on a presentation context that is not the SOP Class itself, as with a
+    /// Printer under a Print Meta SOP Class.
+    [[nodiscard]] network::Result<n_get_result> get(
+        network::association& assoc,
+        std::string_view sop_class_uid,
+        std::string_view sop_instance_uid,
+        const std::vector<core::dicom_tag>& attribute_tags,
+        std::string_view negotiated_sop_class);
+
     // =========================================================================
     // Statistics
     // =========================================================================

@@ -334,6 +334,18 @@ TEST_CASE("Empty string decoding", "[encoding][charset]") {
     CHECK(result.empty());
 }
 
+TEST_CASE("ISO_IR 13 single-byte Katakana decoding", "[encoding][charset]") {
+    const auto charset = parse_specific_character_set("ISO_IR 13");
+    REQUIRE(charset.default_set != nullptr);
+    CHECK(charset.default_set->defined_term == "ISO_IR 13");
+    CHECK_FALSE(charset.uses_extensions());
+    // Half-width katakana YA MA TA dakuten.
+    CHECK(decode_to_utf8("\xD4\xCF\xC0\xDE", charset) ==
+          "\xEF\xBE\x94\xEF\xBE\x8F\xEF\xBE\x80\xEF\xBE\x9E");
+    CHECK(encode_from_utf8("\xEF\xBE\x94\xEF\xBE\x8F\xEF\xBE\x80\xEF\xBE\x9E", charset) ==
+          "\xD4\xCF\xC0\xDE");
+}
+
 TEST_CASE("Latin-1 decoding", "[encoding][charset]") {
     auto scs = parse_specific_character_set("ISO_IR 100");
 
@@ -417,8 +429,15 @@ TEST_CASE("Escape sequence format verification", "[encoding][charset]") {
         REQUIRE(cs != nullptr);
         REQUIRE(cs->escape_sequence.size() == 3);
         CHECK(cs->escape_sequence[0] == '\x1B');  // ESC
-        CHECK(cs->escape_sequence[1] == '\x28');  // (
-        CHECK(cs->escape_sequence[2] == '\x4A');  // J
+        CHECK(cs->escape_sequence[1] == '\x29');  // )
+        CHECK(cs->escape_sequence[2] == '\x49');  // I
+    }
+
+    SECTION("Japanese Katakana decodes from both of its designations") {
+        const auto charset = parse_specific_character_set("\\ISO 2022 IR 13");
+        const std::string katakana = "\xEF\xBE\x94\xEF\xBE\x8F";
+        CHECK(decode_to_utf8("\x1B\x29\x49\xD4\xCF", charset) == katakana);
+        CHECK(decode_to_utf8("\x1B\x28\x4A\xD4\xCF", charset) == katakana);
     }
 }
 

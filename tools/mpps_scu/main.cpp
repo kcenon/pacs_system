@@ -112,6 +112,7 @@ Create Options (N-CREATE):
   --modality <mod>        Modality code (CT, MR, US, XR, etc.) [default: CT]
   --procedure-id <id>     Performed Procedure Step ID
   --study-uid <uid>       Study Instance UID (auto-generated if not provided)
+  --mpps-uid <uid>        MPPS SOP Instance UID (auto-generated if not provided)
 
 Set Options (N-SET):
   --mpps-uid <uid>        MPPS SOP Instance UID (required)
@@ -323,6 +324,7 @@ int perform_mpps_create(const options& opts) {
     mpps_scu scu;
 
     mpps_create_data create_data;
+    create_data.mpps_sop_instance_uid = opts.mpps_uid;
     create_data.patient_name = opts.patient_name;
     create_data.patient_id = opts.patient_id;
     create_data.modality = opts.modality;

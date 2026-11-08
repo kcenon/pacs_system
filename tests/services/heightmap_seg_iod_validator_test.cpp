@@ -202,7 +202,7 @@ dicom_dataset create_minimal_heightmap_seg_dataset() {
 TEST_CASE("Heightmap Segmentation Storage UID is correct",
           "[services][heightmap_seg][sop_class]") {
     CHECK(heightmap_segmentation_storage_uid ==
-          "1.2.840.10008.5.1.4.1.1.66.7");
+          "1.2.840.10008.5.1.4.1.1.66.8");
 }
 
 TEST_CASE("is_seg_storage_sop_class recognizes Heightmap Segmentation",

@@ -274,12 +274,15 @@ auto annotation_repository::update_annotation(const annotation_record& record)
     auto now_str = format_timestamp(std::chrono::system_clock::now());
     auto style_json = serialize_style(record.style);
 
+    // Every column in one set(): database_system's set(field, value) replaces what an earlier
+    // set() gave, so a chain of them stored only the last column.
     auto builder = query_builder();
     builder.update(table_name())
-        .set("geometry_json", record.geometry_json)
-        .set("text", record.text)
-        .set("style_json", style_json)
-        .set("updated_at", now_str)
+        .set(std::map<std::string, database_value>{
+            {"geometry_json", record.geometry_json},
+            {"text", record.text},
+            {"style_json", style_json},
+            {"updated_at", now_str}})
         .where("annotation_id", "=", record.annotation_id);
 
     auto result = storage_session().execute(builder.build());

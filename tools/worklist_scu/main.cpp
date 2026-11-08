@@ -28,6 +28,7 @@
 #include "worklist_result_formatter.h"
 
 #include "kcenon/pacs/core/dicom_tag_constants.h"
+#include "kcenon/pacs/core/dicom_dictionary.h"
 #include "kcenon/pacs/encoding/vr_type.h"
 #include "kcenon/pacs/network/association.h"
 #include "kcenon/pacs/services/worklist_scp.h"
@@ -476,37 +477,29 @@ int perform_query(const options& opts) {
     // Perform query using library
     kcenon::pacs::services::worklist_result query_result;
 
-    if (opts.custom_keys.empty()) {
-        // Use typed query keys
-        auto result = scu.query(assoc, keys);
-        if (result.is_err()) {
-            std::cerr << "Query failed: " << result.error().message << "\n";
+    auto query_dataset = scu.build_query_dataset(keys);
+    auto& step = query_dataset.get_or_create_sequence(
+        kcenon::pacs::core::tags::scheduled_procedure_step_sequence).front();
+    step.set_string(kcenon::pacs::core::tags::scheduled_station_name,
+                    kcenon::pacs::encoding::vr_type::SH, opts.station_name);
+    for (const auto& key : opts.custom_keys) {
+        const kcenon::pacs::core::dicom_tag tag{key.group, key.element};
+        const auto info = kcenon::pacs::core::dicom_dictionary::instance().find(tag);
+        if (!info || info->vr == static_cast<uint16_t>(kcenon::pacs::encoding::vr_type::SQ)) {
+            std::cerr << "Custom key requires a known scalar DICOM tag: " << tag.to_string() << "\n";
             assoc.abort();
             return 2;
         }
-        query_result = std::move(result.value());
-    } else {
-        // Build raw dataset for custom keys
-        auto query_ds = scu.query(assoc, keys);
-        if (query_ds.is_err()) {
-            std::cerr << "Query failed: " << query_ds.error().message << "\n";
-            assoc.abort();
-            return 2;
-        }
-        query_result = std::move(query_ds.value());
-
-        // Note: Custom keys are applied by building a raw dataset
-        // For now, we use typed keys and note that custom keys require
-        // building a custom dataset directly
-        if (opts.debug) {
-            for (const auto& key : opts.custom_keys) {
-                std::cout << "  Custom key: (" << std::hex << std::setw(4)
-                          << std::setfill('0') << key.group << ","
-                          << std::setw(4) << key.element << std::dec
-                          << ") = \"" << key.value << "\"\n";
-            }
-        }
+        auto& destination = step.contains(tag) ? step : query_dataset;
+        destination.set_string(tag, static_cast<kcenon::pacs::encoding::vr_type>(info->vr), key.value);
     }
+    auto result = scu.query(assoc, query_dataset);
+    if (result.is_err()) {
+        std::cerr << "Query failed: " << result.error().message << "\n";
+        assoc.abort();
+        return 2;
+    }
+    query_result = std::move(result.value());
 
     if (opts.verbose) {
         if (query_result.is_success()) {
@@ -532,6 +525,12 @@ int perform_query(const options& opts) {
     auto end_time = std::chrono::steady_clock::now();
     auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
+
+    // A failure from the SCP is not an empty worklist.
+    if (!query_result.is_success() && !query_result.is_cancelled()) {
+        std::cerr << "Query failed with status: 0x" << std::hex << query_result.status << std::dec << "\n";
+        return 2;
+    }
 
     // Convert worklist_items to dicom_datasets for formatter
     std::vector<kcenon::pacs::core::dicom_dataset> result_datasets;

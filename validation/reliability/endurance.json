@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "issue": 1326,
+  "description": "pacs_server under steady C-STORE and C-FIND load. Thresholds are judged after the warm-up; a run shorter than duration_seconds is diagnostic and passes nothing.",
+  "duration_seconds": 86400,
+  "warmup_seconds": 600,
+  "sample_seconds": 10,
+  "load": {
+    "store_batches_per_minute": 30,
+    "objects_per_batch": 10,
+    "object_rows": 64,
+    "finds_per_minute": 30
+  },
+  "limits": {
+    "rss_growth_mb_after_warmup": 64,
+    "fd_growth_after_warmup": 16,
+    "store_batch_p95_seconds": 2.0,
+    "find_p95_seconds": 1.0,
+    "failed_operations": 0
+  },
+  "resources": "24 h at this load stores 432,000 objects of about 4.5 KB: about 2 GB of archive plus the index."
+}

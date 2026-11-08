@@ -688,6 +688,16 @@ void routing_manager::execute_actions(const std::string& sop_instance_uid,
             instance_uids,
             action.priority);
 
+        // A created job only waits for a start; forwarding is the point of the rule.
+        auto started = job_manager_->start_job(job_id);
+        if (started.is_err()) {
+            if (logger_) {
+                logger_->warn_fmt("routing_manager: Forward job {} for UID {} did not start: {}",
+                                 job_id, sop_instance_uid, started.error().message);
+            }
+            continue;
+        }
+
         ++total_forwarded_;
 
         if (logger_) {

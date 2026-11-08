@@ -17,6 +17,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -170,8 +172,15 @@ void add_cors_headers(crow::response &res, const rest_server_context &ctx) {
 std::string format_timestamp(
     const std::chrono::system_clock::time_point &tp) {
   auto time = std::chrono::system_clock::to_time_t(tp);
+  // Routes run on several threads, and std::gmtime shares one static buffer.
+  std::tm utc{};
+#ifdef _WIN32
+  gmtime_s(&utc, &time);
+#else
+  gmtime_r(&time, &utc);
+#endif
   std::ostringstream oss;
-  oss << std::put_time(std::gmtime(&time), "%Y-%m-%dT%H:%M:%SZ");
+  oss << std::put_time(&utc, "%Y-%m-%dT%H:%M:%SZ");
   return oss.str();
 }
 
@@ -381,7 +390,7 @@ storage::annotation_style parse_style(const std::string &style_json) {
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_annotation_endpoints_impl(crow::SimpleApp &app,
+void register_annotation_endpoints_impl(rest_app &app,
                                         std::shared_ptr<rest_server_context> ctx) {
   // POST /api/v1/annotations - Create annotation
   CROW_ROUTE(app, "/api/v1/annotations")

@@ -19,6 +19,7 @@
 #define PACS_NETWORK_DETAIL_TCP_STREAM_HPP
 
 #include "kcenon/pacs/core/result.h"
+#include "kcenon/pacs/network/tls_config.h"
 
 #include <chrono>
 #include <cstddef>
@@ -54,7 +55,11 @@ public:
     [[nodiscard]] static kcenon::pacs::Result<std::unique_ptr<tcp_stream>> connect(
         const std::string& host,
         uint16_t port,
-        duration timeout);
+        duration timeout,
+        const tls_config& tls = {});
+
+    /// Negotiated protocol (empty for plaintext).
+    [[nodiscard]] std::string tls_version() const;
 
     /// Closes the socket
     ~tcp_stream();
@@ -93,6 +98,11 @@ public:
 
 private:
     explicit tcp_stream(std::intptr_t handle) noexcept;
+
+    struct tls_state;
+    std::unique_ptr<tls_state> tls_;
+    [[nodiscard]] kcenon::pacs::VoidResult start_tls(
+        const std::string& host, const tls_config& config, duration timeout);
 
     /// Native socket (int on POSIX, SOCKET on Windows)
     std::intptr_t handle_;

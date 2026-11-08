@@ -9,11 +9,14 @@
 
 #include "kcenon/pacs/network/v2/dicom_association_handler.h"
 #include "kcenon/pacs/network/detail/dimse_framing.h"
+#include "kcenon/pacs/network/detail/request_context.h"
 #include "kcenon/pacs/network/detail/scp_transfer_syntaxes.h"
 #include "kcenon/pacs/network/pdu_encoder.h"
 #include "kcenon/pacs/network/pdu_decoder.h"
 
+#include <algorithm>
 #include <span>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 
@@ -62,6 +65,18 @@ dicom_association_handler::~dicom_association_handler() {
         }
     } catch (...) {
         // Suppress exceptions in destructor to prevent std::terminate
+    }
+    wait_for_service();
+}
+
+void dicom_association_handler::wait_for_service() {
+    std::thread worker;
+    {
+        std::lock_guard<std::mutex> lock(service_mutex_);
+        worker = std::move(service_thread_);
+    }
+    if (worker.joinable()) {
+        worker.join();
     }
 }
 
@@ -160,6 +175,19 @@ Result<std::reference_wrapper<const association>> dicom_association_handler::get
 dicom_association_handler::time_point dicom_association_handler::last_activity() const noexcept {
     std::lock_guard<std::mutex> lock(mutex_);
     return last_activity_;
+}
+
+void dicom_association_handler::abort_idle() {
+    if (is_closed()) {
+        return;
+    }
+    send_abort(abort_source::service_provider, abort_reason::not_specified);
+    close_handler(false);
+}
+
+bool dicom_association_handler::service_active() const {
+    std::lock_guard<std::mutex> lock(service_mutex_);
+    return service_running_ || !service_requests_.empty();
 }
 
 // =============================================================================
@@ -408,6 +436,15 @@ void dicom_association_handler::process_pdu(const integration::pdu_data& pdu) {
 }
 
 void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& payload) {
+    if (reject_for_limit_) {
+        // PS3.8 Table 9-21. A closed connection would tell the peer nothing about why.
+        send_associate_rj(reject_result::rejected_transient,
+                          static_cast<uint8_t>(reject_source::service_provider_presentation),
+                          static_cast<uint8_t>(reject_reason_provider_presentation::local_limit_exceeded));
+        close_handler(false);
+        return;
+    }
+
     // Build full PDU for decoder (add header back)
     std::vector<uint8_t> full_pdu;
     full_pdu.reserve(pdu_header_size + payload.size());
@@ -475,9 +512,24 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     scp_cfg.implementation_class_uid = config_.implementation_class_uid;
     scp_cfg.implementation_version_name = config_.implementation_version_name;
 
-    // Collect supported abstract syntaxes from services
-    for (const auto& [uid, _] : services_) {
+    // Only grant roles actually implemented by registered services. Retrieve
+    // supplies outbound Storage without pretending to be an incoming Store SCP.
+    std::set<std::string> outbound;
+    std::set<const services::scp_service*> visited;
+    for (const auto& [uid, service] : services_) {
         scp_cfg.supported_abstract_syntaxes.push_back(uid);
+        if (visited.insert(service).second) {
+            const auto classes = service->outbound_sop_classes();
+            outbound.insert(classes.begin(), classes.end());
+        }
+    }
+    for (const auto& offered : rq.user_info.role_selections) {
+        const bool incoming = services_.contains(offered.sop_class_uid);
+        const bool outgoing = outbound.contains(offered.sop_class_uid);
+        scp_cfg.supported_requestor_roles.emplace_back(offered.sop_class_uid, incoming, outgoing);
+        if (!incoming && outgoing && offered.scp_role) {
+            scp_cfg.supported_abstract_syntaxes.push_back(offered.sop_class_uid);
+        }
     }
 
     // Accept compressed and uncompressed transfer syntaxes
@@ -486,8 +538,10 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     // Perform association negotiation
     association_ = association::accept(rq, scp_cfg);
 
-    // Check if any presentation contexts were accepted
-    if (association_.accepted_contexts().empty()) {
+    // accepted_contexts() lists the refused ones too. With nothing usable, an A-ASSOCIATE-AC
+    // would leave the peer an association it cannot send anything on.
+    const auto& answered = association_.accepted_contexts();
+    if (std::none_of(answered.begin(), answered.end(), [](const auto& context) { return context.is_accepted(); })) {
         report_error("No presentation contexts accepted");
         send_associate_rj(reject_result::rejected_permanent,
                           static_cast<uint8_t>(reject_source::service_user),
@@ -507,7 +561,8 @@ void dicom_association_handler::handle_associate_rq(const std::vector<uint8_t>& 
     association_.set_pdu_writer(
         [this, session = session_](std::vector<uint8_t> pdus) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
-            if (!session || !session->is_connected() ||
+            std::lock_guard<std::mutex> write_lock(write_mutex_);
+            if (is_closed() || !session || !session->is_connected() ||
                 session->send(std::move(pdus)).is_err()) {
                 return false;
             }
@@ -591,10 +646,34 @@ void dicom_association_handler::handle_p_data_tf(const std::vector<uint8_t>& pay
         const auto& [context_id, message] = *added.value();
         messages_processed_.fetch_add(1, std::memory_order_relaxed);
 
-        // Dispatch to service
-        auto dispatch_result = dispatch_to_service(context_id, message);
-        if (dispatch_result.is_err()) {
-            report_error("Service dispatch failed: " + dispatch_result.error().message);
+        if (message.command() == dimse::command_field::c_cancel_rq) {
+            association_.enqueue_message(context_id, message);
+        } else if (dimse::is_response(message.command())) {
+            auto delivered = association_.deliver_response(context_id, message);
+            if (delivered.is_err()) {
+                // No active exchange owns this reply. Report and discard it;
+                // never grow the service request queue or block future work.
+                // This also preserves fire-and-forget N-EVENT-REPORT services
+                // whose acknowledgements had no consumer in the legacy queue.
+                report_error(delivered.error().message);
+            }
+        } else {
+            // An outbound-only Storage context does not authorize an incoming
+            // C-STORE request on that same context. An N-EVENT-REPORT is the one
+            // request a requestor sends as SCP (PS3.4 J.3.3), so it needs that role.
+            const bool sent_as_scp = message.command() == dimse::command_field::n_event_report_rq;
+            for (const auto& context : association_.accepted_contexts()) {
+                if (context.id != context_id) {
+                    continue;
+                }
+                const auto role = association_.requestor_role(context.abstract_syntax);
+                if (sent_as_scp ? !role.scp_role : !role.scu_role) {
+                    send_abort(abort_source::service_provider, abort_reason::unexpected_pdu_parameter);
+                    close_handler(false);
+                    return;
+                }
+            }
+            enqueue_request(context_id, message);
         }
     }
 }
@@ -663,6 +742,7 @@ void dicom_association_handler::send_abort(abort_source source, abort_reason rea
 
 void dicom_association_handler::send_pdu(pdu_type /*type*/, const std::vector<uint8_t>& encoded_pdu) {
 #ifdef PACS_WITH_NETWORK_SYSTEM
+    std::lock_guard<std::mutex> write_lock(write_mutex_);
     if (session_ && session_->is_connected()) {
         // encoded_pdu already includes header for most PDU types
         // For encode_associate_ac, encode_associate_rj, etc., the encoder returns full PDU
@@ -681,22 +761,87 @@ void dicom_association_handler::send_pdu(pdu_type /*type*/, const std::vector<ui
 // Service Dispatching
 // =============================================================================
 
+void dicom_association_handler::enqueue_request(uint8_t context_id, dimse::dimse_message msg) {
+    std::unique_lock<std::mutex> lock(service_mutex_);
+    if (service_stopping_) {
+        return;
+    }
+    // Bound queued request memory even if a peer ignores the synchronous
+    // operations window. Responses and C-CANCEL bypass this queue.
+    if (service_requests_.size() >= 16) {
+        lock.unlock();
+        report_error("Too many queued DIMSE requests");
+        send_abort(abort_source::service_provider, abort_reason::unexpected_pdu);
+        close_handler(false);
+        return;
+    }
+    if (msg.command() == dimse::command_field::c_move_rq ||
+        msg.command() == dimse::command_field::c_get_rq ||
+        msg.command() == dimse::command_field::c_find_rq) {
+        association_.register_cancellable_operation(context_id, msg.message_id());
+    }
+    service_requests_.emplace_back(context_id, std::move(msg));
+    if (!service_thread_.joinable()) {
+        service_thread_ = std::thread([this] { run_services(); });
+    }
+    service_ready_.notify_one();
+}
+
+void dicom_association_handler::run_services() {
+    for (;;) {
+        std::unique_lock<std::mutex> lock(service_mutex_);
+        service_running_ = false;
+        service_ready_.wait(lock, [this] { return service_stopping_ || !service_requests_.empty(); });
+        if (service_stopping_) {
+            lock.unlock();
+            std::set<services::scp_service*> told;
+            for (const auto& [uid, service] : services_) {
+                if (told.insert(service).second) {
+                    service->association_ended(association_);
+                }
+            }
+            return;
+        }
+        auto [context_id, message] = std::move(service_requests_.front());
+        service_requests_.pop_front();
+        service_running_ = true;
+        lock.unlock();
+        try {
+            auto result = dispatch_to_service(context_id, message);
+            if (result.is_err()) {
+                report_error("Service dispatch failed: " + result.error().message);
+            }
+        } catch (const std::exception& e) {
+            report_error("Service exception: " + std::string(e.what()));
+        } catch (...) {
+            report_error("Unknown service exception");
+        }
+        if (message.command() != dimse::command_field::c_move_rq &&
+            message.command() != dimse::command_field::c_get_rq) {
+            association_.finish_cancellable_operation(context_id, message.message_id());
+        }
+        // Idleness counts from the end of the work, not from the request that started it.
+        std::lock_guard<std::mutex> activity(mutex_);
+        touch();
+    }
+}
+
 Result<std::monostate> dicom_association_handler::dispatch_to_service(
     uint8_t context_id,
     const dimse::dimse_message& msg) {
 
-    // Find the abstract syntax for this context
-    std::string abstract_syntax;
-    for (const auto& ctx : association_.accepted_contexts()) {
-        if (ctx.id == context_id) {
-            abstract_syntax = ctx.abstract_syntax;
-            break;
-        }
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (!is_established()) {
+        return error_info("Association closed before service dispatch");
     }
-
-    if (abstract_syntax.empty()) {
-        return error_info("Unknown presentation context ID");
+    auto identity = detail::request_sop_class(association_, context_id, msg);
+    if (identity.is_err()) {
+        lock.unlock();
+        send_abort(abort_source::service_provider, abort_reason::invalid_pdu_parameter);
+        close_handler(false);
+        return identity.error();
     }
+    const auto& abstract_syntax = identity.value();
 
     // Find service for this SOP class
     auto* service = find_service(abstract_syntax);
@@ -757,7 +902,8 @@ Result<std::monostate> dicom_association_handler::dispatch_to_service(
         }
     }
 
-    // Dispatch to service
+    // No handler lock may be held across service/network waits.
+    lock.unlock();
     return service->handle_message(association_, context_id, msg);
 }
 
@@ -798,6 +944,19 @@ void dicom_association_handler::close_handler(bool graceful) {
     if (state_.exchange(handler_state::closed, std::memory_order_acq_rel) ==
         handler_state::closed) {
         return;  // Already closed
+    }
+
+    association_.process_abort(abort_source::service_user, abort_reason::not_specified);
+    {
+        std::lock_guard<std::mutex> lock(service_mutex_);
+        service_stopping_ = true;
+        service_requests_.clear();
+    }
+    service_ready_.notify_all();
+    // No new service write can pass is_closed(); drain an in-flight writer
+    // before asking the network layer to close the underlying session.
+    {
+        std::lock_guard<std::mutex> write_lock(write_mutex_);
     }
 
 #ifdef PACS_WITH_NETWORK_SYSTEM

@@ -14,6 +14,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -189,7 +191,7 @@ std::pair<size_t, size_t> parse_pagination(const crow::request &req) {
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_study_endpoints_impl(crow::SimpleApp &app,
+void register_study_endpoints_impl(rest_app &app,
                                    std::shared_ptr<rest_server_context> ctx) {
   // GET /api/v1/studies - List studies (paginated)
   CROW_ROUTE(app, "/api/v1/studies")

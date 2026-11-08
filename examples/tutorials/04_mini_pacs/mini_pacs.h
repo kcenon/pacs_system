@@ -316,7 +316,8 @@ private:
         const core::dicom_dataset& dataset,
         const std::string& calling_ae,
         const std::string& sop_class_uid,
-        const std::string& sop_instance_uid);
+        const std::string& sop_instance_uid,
+        const encoding::transfer_syntax& syntax);
 
     bool update_index(
         const core::dicom_dataset& dataset,

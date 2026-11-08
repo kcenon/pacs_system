@@ -30,9 +30,6 @@ namespace {
 /// UID root for auto-generated Print UIDs
 constexpr const char* uid_root = "1.2.826.0.1.3680043.2.1545.1";
 
-/// Requested SOP Instance UID tag (used in N-SET/N-GET command set)
-constexpr core::dicom_tag tag_requested_sop_instance_uid{0x0000, 0x1001};
-
 /**
  * @brief Create N-CREATE request message for a Print SOP Class
  */
@@ -67,11 +64,8 @@ network::dimse::dimse_message make_n_set_rq(
     using namespace encoding;
 
     dimse_message msg{command_field::n_set_rq, message_id};
-    msg.set_affected_sop_class_uid(sop_class_uid);
-    msg.command_set().set_string(
-        tag_requested_sop_instance_uid,
-        vr_type::UI,
-        std::string(sop_instance_uid));
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
     msg.set_dataset(std::move(modifications));
 
     return msg;
@@ -89,11 +83,8 @@ network::dimse::dimse_message make_n_get_rq(
     using namespace encoding;
 
     dimse_message msg{command_field::n_get_rq, message_id};
-    msg.set_affected_sop_class_uid(sop_class_uid);
-    msg.command_set().set_string(
-        tag_requested_sop_instance_uid,
-        vr_type::UI,
-        std::string(sop_instance_uid));
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
 
     return msg;
 }
@@ -110,8 +101,8 @@ network::dimse::dimse_message make_n_action_rq(
     using namespace network::dimse;
 
     dimse_message msg{command_field::n_action_rq, message_id};
-    msg.set_affected_sop_class_uid(sop_class_uid);
-    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
     msg.set_action_type_id(action_type_id);
 
     return msg;
@@ -128,8 +119,8 @@ network::dimse::dimse_message make_n_delete_rq(
     using namespace network::dimse;
 
     dimse_message msg{command_field::n_delete_rq, message_id};
-    msg.set_affected_sop_class_uid(sop_class_uid);
-    msg.set_affected_sop_instance_uid(sop_instance_uid);
+    msg.set_requested_sop_class_uid(sop_class_uid);
+    msg.set_requested_sop_instance_uid(sop_instance_uid);
 
     return msg;
 }
@@ -621,8 +612,7 @@ network::Result<print_result> print_scu::set_image_box(
     core::dicom_dataset ds = data.pixel_data;
 
     if (data.image_position > 0) {
-        ds.set_string(print_tags::image_position, vr_type::US,
-                      std::to_string(data.image_position));
+        ds.set_numeric<uint16_t>(print_tags::image_position, vr_type::US, data.image_position);
     }
 
     auto request = make_n_set_rq(

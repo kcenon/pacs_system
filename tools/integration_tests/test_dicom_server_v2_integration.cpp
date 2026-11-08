@@ -164,6 +164,8 @@ public:
         }
     }
 
+    ~stress_test_server_v2() { stop(); }
+
     bool initialize() {
         server_->register_service(std::make_shared<verification_scp>());
 
@@ -196,6 +198,10 @@ public:
     const std::string& ae_title() const { return ae_title_; }
     size_t stored_count() const { return stored_count_.load(); }
     size_t failed_count() const { return failed_count_.load(); }
+    std::string storage_errors() const {
+        std::lock_guard lock(errors_mutex_);
+        return storage_errors_;
+    }
 
     server_statistics get_statistics() const {
         return server_->get_statistics();
@@ -210,9 +216,15 @@ private:
 
         auto store_result = file_storage_->store(dataset);
         if (store_result.is_err()) {
+            std::lock_guard lock(errors_mutex_);
+            storage_errors_ += "store_result: " + store_result.error().message + "\n";
             ++failed_count_;
             return storage_status::storage_error;
         }
+
+        // index_database requires external synchronization across its multi-step
+        // upserts; concurrent handlers can otherwise insert the same patient.
+        std::lock_guard database_lock(database_mutex_);
 
         // Index in database
         auto patient_res = database_->upsert_patient(
@@ -222,6 +234,8 @@ private:
             dataset.get_string(tags::patient_sex));
 
         if (patient_res.is_err()) {
+            std::lock_guard lock(errors_mutex_);
+            storage_errors_ += "patient_res: " + patient_res.error().message + "\n";
             ++failed_count_;
             return storage_status::storage_error;
         }
@@ -236,6 +250,8 @@ private:
             dataset.get_string(tags::accession_number));
 
         if (study_res.is_err()) {
+            std::lock_guard lock(errors_mutex_);
+            storage_errors_ += "study_res: " + study_res.error().message + "\n";
             ++failed_count_;
             return storage_status::storage_error;
         }
@@ -254,6 +270,8 @@ private:
             series_number);
 
         if (series_res.is_err()) {
+            std::lock_guard lock(errors_mutex_);
+            storage_errors_ += "series_res: " + series_res.error().message + "\n";
             ++failed_count_;
             return storage_status::storage_error;
         }
@@ -276,6 +294,8 @@ private:
             instance_number);
 
         if (instance_res.is_err()) {
+            std::lock_guard lock(errors_mutex_);
+            storage_errors_ += "instance_res: " + instance_res.error().message + "\n";
             ++failed_count_;
             return storage_status::storage_error;
         }
@@ -294,6 +314,9 @@ private:
     std::unique_ptr<file_storage> file_storage_;
     std::unique_ptr<index_database> database_;
 
+    std::mutex database_mutex_;
+    mutable std::mutex errors_mutex_;
+    std::string storage_errors_;
     std::atomic<size_t> stored_count_{0};
     std::atomic<size_t> failed_count_{0};
 };
@@ -903,6 +926,7 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
     constexpr int num_iterations = 10;
     std::atomic<int> echo_success{0};
     std::atomic<int> store_success{0};
+    std::vector<std::string> store_errors(2);
 
     std::vector<std::thread> threads;
 
@@ -958,8 +982,15 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
                     auto result = scu.store(assoc, ds);
                     if (result.is_ok() && result.value().is_success()) {
                         ++store_success;
+                    } else {
+                        store_errors[i] += "store iteration " + std::to_string(j) + ": "
+                            + (result.is_err() ? result.error().message
+                                : "status=" + std::to_string(result.value().status)) + "\n";
                     }
                     (void)assoc.release(std::chrono::milliseconds{500});
+                } else {
+                    store_errors[i] += "connect iteration " + std::to_string(j) + ": "
+                        + connect.error().message + "\n";
                 }
             }
         });
@@ -969,11 +1000,16 @@ TEST_CASE("dicom_server_v2 mixed operations stress", "[v2][stress][mixed]") {
         t.join();
     }
 
+    INFO("Storage handler failures: " << server.storage_errors());
+    INFO("Store worker 0: " << store_errors[0]);
+    INFO("Store worker 1: " << store_errors[1]);
     INFO("Echo success: " << echo_success.load());
     INFO("Store success: " << store_success.load());
 
     REQUIRE(echo_success == 3 * num_iterations);
     REQUIRE(store_success == 2 * num_iterations);
+    REQUIRE(server.stored_count() == 2 * num_iterations);
+    REQUIRE(server.failed_count() == 0);
 
     server.stop();
 }

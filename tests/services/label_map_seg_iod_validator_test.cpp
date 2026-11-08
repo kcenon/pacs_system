@@ -179,7 +179,7 @@ dicom_dataset create_minimal_label_map_seg_dataset() {
 TEST_CASE("Label Map Segmentation Storage UID is correct",
           "[services][label_map_seg][sop_class]") {
     CHECK(label_map_segmentation_storage_uid ==
-          "1.2.840.10008.5.1.4.1.1.66.8");
+          "1.2.840.10008.5.1.4.1.1.66.7");
 }
 
 TEST_CASE("is_seg_storage_sop_class recognizes Label Map Segmentation",

@@ -3,6 +3,7 @@
 
 add_executable(dcm_dir
     main.cpp
+    directory_index.cpp
 )
 
 target_include_directories(dcm_dir

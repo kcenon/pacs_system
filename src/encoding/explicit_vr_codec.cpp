@@ -8,6 +8,7 @@
  */
 
 #include "kcenon/pacs/encoding/explicit_vr_codec.h"
+#include "kcenon/pacs/core/encapsulated_pixel_data.h"
 
 #include <kcenon/pacs/encoding/vr_info.h>
 #include <kcenon/pacs/encoding/vr_type.h>
@@ -121,6 +122,20 @@ std::vector<uint8_t> explicit_vr_codec::encode_element(
     // Handle sequences specially
     if (element.is_sequence()) {
         encode_sequence(buffer, element);
+        return buffer;
+    }
+
+    if (element.is_encapsulated_pixel_data()) {
+        const auto data = element.raw_data();
+        const auto layout = core::inspect_encapsulated_pixel_data(data);
+        // The validated element factory guarantees this invariant.
+        if (!layout) return {};
+        write_le16(buffer, 0);
+        write_le32(buffer, UNDEFINED_LENGTH);
+        buffer.insert(buffer.end(), data.begin(), data.begin() + layout->items_size);
+        write_le16(buffer, ITEM_GROUP);
+        write_le16(buffer, SEQ_DELIM_ELEMENT);
+        write_le32(buffer, 0);
         return buffer;
     }
 
@@ -293,6 +308,21 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_element
     auto value_data = data.subspan(0, length);
     data = data.subspan(length);
 
+    // Defined-length SQ values contain the same item stream as undefined-
+    // length sequences, bounded by the value length instead of a delimiter.
+    // DIMSE peers such as DCMTK use this representation for MWL responses.
+    if (vr == vr_type::SQ) {
+        core::dicom_element sequence{tag, vr_type::SQ};
+        while (!value_data.empty()) {
+            auto item = decode_sequence_item(value_data);
+            if (item.is_err()) {
+                return item.error();
+            }
+            sequence.sequence_items().push_back(std::move(item.value()));
+        }
+        return sequence;
+    }
+
     return core::dicom_element(tag, vr, value_data);
 }
 
@@ -343,7 +373,21 @@ explicit_vr_codec::result<core::dicom_element> explicit_vr_codec::decode_undefin
         return seq_element;
     }
 
-    // For other undefined-length elements (like encapsulated pixel data),
+    if (tag == core::dicom_tag{0x7FE0, 0x0010}) {
+        const auto layout = core::inspect_encapsulated_pixel_data(data, true, true);
+        if (!layout || vr != vr_type::OB) {
+            return make_codec_error<core::dicom_element>(
+                kcenon::pacs::error_codes::invalid_sequence,
+                "Malformed encapsulated Pixel Data (PS3.5 A.4)");
+        }
+        // Keep the BOT, every item header, fragment payload and delimiter. The
+        // Part 10 writer and frame splitter use this same representation.
+        auto element = core::dicom_element::from_encapsulated_pixel_data(data.first(layout->encoded_size));
+        data = data.subspan(layout->encoded_size);
+        return element;
+    }
+
+    // For other undefined-length elements,
     // read until we find a sequence delimitation item
     std::vector<uint8_t> accumulated_data;
 
@@ -411,7 +455,7 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
         core::dicom_dataset item;
 
         while (!data.empty()) {
-            if (data.size() < 4) {
+            if (data.size() < 8) {
                 return make_codec_error<core::dicom_dataset>(
                     kcenon::pacs::error_codes::insufficient_data,
                     "Insufficient data for item delimiter check");
@@ -424,7 +468,7 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
             if (is_item_delimiter(elem_tag)) {
                 // Skip delimiter
                 data = data.subspan(8);
-                break;
+                return item;
             }
 
             auto elem_result = decode_element(data);
@@ -437,7 +481,9 @@ explicit_vr_codec::result<core::dicom_dataset> explicit_vr_codec::decode_sequenc
             item.insert(std::move(elem_result.value()));
         }
 
-        return item;
+        return make_codec_error<core::dicom_dataset>(
+            kcenon::pacs::error_codes::invalid_sequence,
+            "Missing Item Delimitation Item");
     }
 
     // Explicit item length

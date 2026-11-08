@@ -33,8 +33,10 @@ constexpr std::string_view esc_ir_149{"\x1B\x24\x29\x43", 4};
 // Japanese Kanji: ESC $ B
 constexpr std::string_view esc_ir_87{"\x1B\x24\x42", 3};
 
-// Japanese Katakana: ESC ( J
-constexpr std::string_view esc_ir_13{"\x1B\x28\x4A", 3};
+// Japanese Katakana: ESC ) I designates G1. ESC ( J designates the Romaji G0 of
+// the same set, so it selects this charset too (PS3.3 Table C.12-3).
+constexpr std::string_view esc_ir_13{"\x1B\x29\x49", 3};
+constexpr std::string_view esc_ir_13_romaji{"\x1B\x28\x4A", 3};
 
 // Chinese GB2312: ESC $ ) A
 constexpr std::string_view esc_ir_58{"\x1B\x24\x29\x41", 4};
@@ -247,6 +249,17 @@ const std::array<character_set_info, 20> charset_registry = {{
     },
 }};
 
+// ISO_IR 13 is the single-byte form of IR 13: no code extensions, no escape sequence
+const character_set_info charset_iso_ir_13 = {
+    "ISO_IR 13",
+    "Japanese Katakana (JIS X 0201)",
+    "ISO-IR 13",
+    false,
+    {},
+    "JIS_X0201",
+    false
+};
+
 // GB2312 is separate because it shares the same pattern as Korean
 const character_set_info charset_ir_58 = {
     "ISO 2022 IR 58",
@@ -277,6 +290,9 @@ const character_set_info* find_in_registry(std::string_view term) noexcept {
     }
     if (charset_ir_58.defined_term == term) {
         return &charset_ir_58;
+    }
+    if (charset_iso_ir_13.defined_term == term) {
+        return &charset_iso_ir_13;
     }
     if (charset_gb18030.defined_term == term) {
         return &charset_gb18030;
@@ -323,7 +339,72 @@ const character_set_info* find_by_escape_sequence(
         text.substr(pos, esc_ir_6.size()) == esc_ir_6) {
         return scs.default_set;
     }
+    // IR 13 as Value 1 is reselected by either of its own sequences.
+    const bool katakana_sequence =
+        pos + esc_ir_13.size() <= text.size() &&
+        (text.substr(pos, esc_ir_13.size()) == esc_ir_13 ||
+         text.substr(pos, esc_ir_13_romaji.size()) == esc_ir_13_romaji);
+    if (katakana_sequence) {
+        if (scs.default_set && scs.default_set->escape_sequence == esc_ir_13) {
+            return scs.default_set;
+        }
+        for (const auto* cs : scs.extension_sets) {
+            if (cs && cs->escape_sequence == esc_ir_13) {
+                return cs;
+            }
+        }
+    }
     return nullptr;
+}
+
+// JIS X 0201 is a fixed table, and not every ICU data build carries it. G1 holds
+// half-width katakana. In G0, 05/12 is the Yen sign but stays the DICOM delimiter
+// (PS3.5 Section 6.1.2.5.2), so only 07/14 differs from ASCII.
+std::string jis_x0201_to_utf8(std::string_view input) {
+    std::string output;
+    output.reserve(input.size() * 3);
+    for (const char value : input) {
+        const auto byte = static_cast<unsigned char>(value);
+        if (byte >= 0xA1 && byte <= 0xDF) {
+            const unsigned code_point = 0xFF61u + (byte - 0xA1u);
+            output += static_cast<char>(0xE0u | (code_point >> 12));
+            output += static_cast<char>(0x80u | ((code_point >> 6) & 0x3Fu));
+            output += static_cast<char>(0x80u | (code_point & 0x3Fu));
+        } else if (byte == 0x7E) {
+            output += "\xE2\x80\xBE";  // U+203E OVERLINE
+        } else if (byte < 0x80) {
+            output += value;
+        } else {
+            output += "\xEF\xBF\xBD";  // U+FFFD: no such character in JIS X 0201
+        }
+    }
+    return output;
+}
+
+std::string utf8_to_jis_x0201(std::string_view input) {
+    std::string output;
+    output.reserve(input.size());
+    for (size_t i = 0; i < input.size();) {
+        const auto lead = static_cast<unsigned char>(input[i]);
+        if (lead < 0x80) {
+            output += input[i++];
+            continue;
+        }
+        const size_t length = lead >= 0xF0 ? 4 : lead >= 0xE0 ? 3 : 2;
+        unsigned code_point = 0;
+        if (length == 3 && i + 2 < input.size()) {
+            code_point = ((lead & 0x0Fu) << 12) |
+                         ((static_cast<unsigned char>(input[i + 1]) & 0x3Fu) << 6) |
+                         (static_cast<unsigned char>(input[i + 2]) & 0x3Fu);
+        }
+        if (code_point >= 0xFF61 && code_point <= 0xFF9F) {
+            output += static_cast<char>(0xA1u + (code_point - 0xFF61u));
+        } else {
+            output += code_point == 0x203E ? '~' : '?';
+        }
+        i += length;
+    }
+    return output;
 }
 
 // ICU-based encoding conversion: source encoding → UTF-8
@@ -332,6 +413,9 @@ std::string icu_convert_to_utf8(std::string_view input,
     if (charset.encoding_name == "ASCII" ||
         charset.encoding_name == "UTF-8") {
         return std::string(input);
+    }
+    if (charset.encoding_name == "JIS_X0201") {
+        return jis_x0201_to_utf8(input);
     }
 
     // ISO-2022-JP is a stateful encoding: ICU expects escape sequences
@@ -373,6 +457,9 @@ std::string icu_convert_from_utf8(std::string_view utf8_input,
     if (charset.encoding_name == "ASCII" ||
         charset.encoding_name == "UTF-8") {
         return std::string(utf8_input);
+    }
+    if (charset.encoding_name == "JIS_X0201") {
+        return utf8_to_jis_x0201(utf8_input);
     }
 
     auto out_size = static_cast<int32_t>(utf8_input.size() * 4 + 4);

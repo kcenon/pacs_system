@@ -39,7 +39,7 @@ struct rest_server_config {
   /// Enable CORS (Cross-Origin Resource Sharing) headers
   bool enable_cors{true};
 
-  /// CORS allowed origins (empty = allow all)
+  /// CORS allowed origins (empty = no Access-Control-Allow-Origin header, so no other origin may read responses)
   std::string cors_allowed_origins{"*"};
 
   /// Enable TLS/SSL encryption (future feature)
@@ -56,6 +56,10 @@ struct rest_server_config {
 
   /// Maximum request body size in bytes (default 10MB)
   std::size_t max_body_size{10 * 1024 * 1024};
+
+  /// Serve the REST API under /api. With false, start_async() serves only DICOMweb and WADO-URI.
+  /// Most /api routes check no credentials, so a host that needs authorization turns this off.
+  bool enable_rest_api{true};
 };
 
 } // namespace kcenon::pacs::web

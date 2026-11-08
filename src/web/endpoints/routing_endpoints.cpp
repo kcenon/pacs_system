@@ -18,6 +18,8 @@
 // declaration conflicts
 #include "crow.h"
 
+#include "../rest_app.h"
+
 // Workaround for Windows: DELETE is defined as a macro in <winnt.h>
 // which conflicts with crow::HTTPMethod::DELETE
 #ifdef DELETE
@@ -193,71 +195,55 @@ std::string rules_to_json(const std::vector<client::routing_rule>& rules,
     return oss.str();
 }
 
-/**
- * @brief Get string value from JSON body (simple parser)
- */
-std::string get_json_string(const std::string& body, const std::string& key) {
-    std::string search = "\"" + key + "\":\"";
-    auto pos = body.find(search);
-    if (pos == std::string::npos) {
-        return "";
-    }
-    pos += search.length();
-    auto end_pos = body.find('"', pos);
-    if (end_pos == std::string::npos) {
-        return "";
-    }
-    return body.substr(pos, end_pos - pos);
+/// Whether parsed JSON is an object. A failed parse throws on t(), so validity is tested first.
+bool is_object(const crow::json::rvalue &json) {
+    return json && json.t() == crow::json::type::Object;
 }
 
-/**
- * @brief Get integer value from JSON body
- */
-std::optional<int64_t> get_json_int(const std::string& body, const std::string& key) {
-    std::string search = "\"" + key + "\":";
-    auto pos = body.find(search);
-    if (pos == std::string::npos) {
-        return std::nullopt;
+/// A string member of a JSON object; absent or of another type reads as empty.
+std::string string_member(const crow::json::rvalue &object, const std::string &key) {
+    if (!is_object(object) || !object.has(key) ||
+        object[key].t() != crow::json::type::String) {
+        return "";
     }
-    pos += search.length();
-    while (pos < body.length() && (body[pos] == ' ' || body[pos] == '\t')) {
-        ++pos;
-    }
-    if (pos >= body.length()) {
-        return std::nullopt;
-    }
-    try {
-        size_t idx = 0;
-        auto val = std::stoll(body.substr(pos), &idx);
-        return val;
-    } catch (...) {
-        return std::nullopt;
-    }
+    return std::string(object[key].s());
 }
 
-/**
- * @brief Get boolean value from JSON body
- */
-bool get_json_bool(const std::string& body, const std::string& key, bool default_val) {
-    std::string search = "\"" + key + "\":";
-    auto pos = body.find(search);
-    if (pos == std::string::npos) {
+std::optional<int64_t> int_member(const crow::json::rvalue &object, const std::string &key) {
+    if (!is_object(object) || !object.has(key) ||
+        object[key].t() != crow::json::type::Number) {
+        return std::nullopt;
+    }
+    return object[key].i();
+}
+
+bool bool_member(const crow::json::rvalue &object, const std::string &key, bool default_val) {
+    if (!is_object(object) || !object.has(key)) {
         return default_val;
     }
-    pos += search.length();
-    while (pos < body.length() && (body[pos] == ' ' || body[pos] == '\t')) {
-        ++pos;
-    }
-    if (pos >= body.length()) {
-        return default_val;
-    }
-    if (body.substr(pos, 4) == "true") {
+    const auto type = object[key].t();
+    if (type == crow::json::type::True) {
         return true;
     }
-    if (body.substr(pos, 5) == "false") {
+    if (type == crow::json::type::False) {
         return false;
     }
     return default_val;
+}
+
+std::string get_json_string(const std::string& body, const std::string& key) {
+    const auto json = crow::json::load(body);
+    return string_member(json, key);
+}
+
+std::optional<int64_t> get_json_int(const std::string& body, const std::string& key) {
+    const auto json = crow::json::load(body);
+    return int_member(json, key);
+}
+
+bool get_json_bool(const std::string& body, const std::string& key, bool default_val) {
+    const auto json = crow::json::load(body);
+    return bool_member(json, key, default_val);
 }
 
 /**
@@ -265,43 +251,20 @@ bool get_json_bool(const std::string& body, const std::string& key, bool default
  */
 std::vector<client::routing_condition> parse_conditions(const std::string& body) {
     std::vector<client::routing_condition> conditions;
-
-    // Find conditions array
-    auto start = body.find("\"conditions\":[");
-    if (start == std::string::npos) {
+    const auto json = crow::json::load(body);
+    if (!is_object(json) || !json.has("conditions") || json["conditions"].t() != crow::json::type::List) {
         return conditions;
     }
-    start += 14; // skip "conditions":[
-
-    auto end = body.find(']', start);
-    if (end == std::string::npos) {
-        return conditions;
-    }
-
-    std::string arr = body.substr(start, end - start);
-
-    // Parse each condition object
-    size_t obj_start = 0;
-    while ((obj_start = arr.find('{', obj_start)) != std::string::npos) {
-        auto obj_end = arr.find('}', obj_start);
-        if (obj_end == std::string::npos) break;
-
-        std::string obj = arr.substr(obj_start, obj_end - obj_start + 1);
-
+    for (const auto& item : json["conditions"]) {
         client::routing_condition cond;
-        auto field_str = get_json_string(obj, "field");
-        cond.match_field = client::routing_field_from_string(field_str);
-        cond.pattern = get_json_string(obj, "pattern");
-        cond.case_sensitive = get_json_bool(obj, "case_sensitive", false);
-        cond.negate = get_json_bool(obj, "negate", false);
-
+        cond.match_field = client::routing_field_from_string(string_member(item, "field"));
+        cond.pattern = string_member(item, "pattern");
+        cond.case_sensitive = bool_member(item, "case_sensitive", false);
+        cond.negate = bool_member(item, "negate", false);
         if (!cond.pattern.empty()) {
             conditions.push_back(std::move(cond));
         }
-
-        obj_start = obj_end + 1;
     }
-
     return conditions;
 }
 
@@ -310,49 +273,23 @@ std::vector<client::routing_condition> parse_conditions(const std::string& body)
  */
 std::vector<client::routing_action> parse_actions(const std::string& body) {
     std::vector<client::routing_action> actions;
-
-    // Find actions array
-    auto start = body.find("\"actions\":[");
-    if (start == std::string::npos) {
+    const auto json = crow::json::load(body);
+    if (!is_object(json) || !json.has("actions") || json["actions"].t() != crow::json::type::List) {
         return actions;
     }
-    start += 11; // skip "actions":[
-
-    auto end = body.find(']', start);
-    if (end == std::string::npos) {
-        return actions;
-    }
-
-    std::string arr = body.substr(start, end - start);
-
-    // Parse each action object
-    size_t obj_start = 0;
-    while ((obj_start = arr.find('{', obj_start)) != std::string::npos) {
-        auto obj_end = arr.find('}', obj_start);
-        if (obj_end == std::string::npos) break;
-
-        std::string obj = arr.substr(obj_start, obj_end - obj_start + 1);
-
+    for (const auto& item : json["actions"]) {
         client::routing_action action;
-        action.destination_node_id = get_json_string(obj, "destination_node_id");
-        auto priority_str = get_json_string(obj, "priority");
-        action.priority = priority_from_string(priority_str);
-
-        auto delay = get_json_int(obj, "delay_minutes");
-        if (delay) {
+        action.destination_node_id = string_member(item, "destination_node_id");
+        action.priority = priority_from_string(string_member(item, "priority"));
+        if (auto delay = int_member(item, "delay_minutes")) {
             action.delay = std::chrono::minutes(*delay);
         }
-
-        action.delete_after_send = get_json_bool(obj, "delete_after_send", false);
-        action.notify_on_failure = get_json_bool(obj, "notify_on_failure", true);
-
+        action.delete_after_send = bool_member(item, "delete_after_send", false);
+        action.notify_on_failure = bool_member(item, "notify_on_failure", true);
         if (!action.destination_node_id.empty()) {
             actions.push_back(std::move(action));
         }
-
-        obj_start = obj_end + 1;
     }
-
     return actions;
 }
 
@@ -407,36 +344,15 @@ std::optional<client::routing_rule> parse_rule_from_json(const std::string& body
  */
 std::vector<std::string> parse_rule_ids(const std::string& body) {
     std::vector<std::string> ids;
-
-    // Find rule_ids array
-    auto start = body.find("\"rule_ids\":[");
-    if (start == std::string::npos) {
+    const auto json = crow::json::load(body);
+    if (!is_object(json) || !json.has("rule_ids") || json["rule_ids"].t() != crow::json::type::List) {
         return ids;
     }
-    start += 12; // skip "rule_ids":[
-
-    auto end = body.find(']', start);
-    if (end == std::string::npos) {
-        return ids;
-    }
-
-    std::string arr = body.substr(start, end - start);
-
-    // Parse each string
-    size_t str_start = 0;
-    while ((str_start = arr.find('"', str_start)) != std::string::npos) {
-        ++str_start;
-        auto str_end = arr.find('"', str_start);
-        if (str_end == std::string::npos) break;
-
-        std::string id = arr.substr(str_start, str_end - str_start);
-        if (!id.empty()) {
-            ids.push_back(std::move(id));
+    for (const auto& item : json["rule_ids"]) {
+        if (item.t() == crow::json::type::String && !std::string(item.s()).empty()) {
+            ids.emplace_back(item.s());
         }
-
-        str_start = str_end + 1;
     }
-
     return ids;
 }
 
@@ -480,38 +396,11 @@ std::pair<size_t, size_t> parse_pagination(const crow::request& req) {
 core::dicom_dataset parse_test_dataset(const std::string& body) {
     core::dicom_dataset dataset;
 
-    // Find dataset object
-    auto start = body.find("\"dataset\":{");
-    if (start == std::string::npos) {
-        start = body.find("\"dataset\": {");
-    }
-    if (start == std::string::npos) {
+    const auto json = crow::json::load(body);
+    if (!is_object(json) || !json.has("dataset") || json["dataset"].t() != crow::json::type::Object) {
         return dataset;
     }
-
-    // Find the opening brace of dataset
-    auto brace_start = body.find('{', start);
-    if (brace_start == std::string::npos) {
-        return dataset;
-    }
-
-    // Find matching closing brace (handle nested objects)
-    int brace_count = 1;
-    size_t brace_end = brace_start + 1;
-    while (brace_end < body.length() && brace_count > 0) {
-        if (body[brace_end] == '{') {
-            ++brace_count;
-        } else if (body[brace_end] == '}') {
-            --brace_count;
-        }
-        ++brace_end;
-    }
-
-    if (brace_count != 0) {
-        return dataset;
-    }
-
-    std::string dataset_json = body.substr(brace_start, brace_end - brace_start);
+    const auto& dataset_json = json["dataset"];
 
     // Map of JSON field names to DICOM tags
     // These match the routing_field enum values in routing_types.hpp
@@ -535,7 +424,7 @@ core::dicom_dataset parse_test_dataset(const std::string& body) {
     };
 
     for (const auto& mapping : field_mappings) {
-        std::string value = get_json_string(dataset_json, mapping.json_key);
+        std::string value = string_member(dataset_json, mapping.json_key);
         if (!value.empty()) {
             dataset.set_string(mapping.tag, encoding::vr_type::LO, value);
         }
@@ -609,7 +498,7 @@ std::string single_rule_test_to_json(bool matched,
 } // namespace
 
 // Internal implementation function called from rest_server.cpp
-void register_routing_endpoints_impl(crow::SimpleApp& app,
+void register_routing_endpoints_impl(rest_app& app,
                                      std::shared_ptr<rest_server_context> ctx) {
     // GET /api/v1/routing/rules - List routing rules (paginated)
     CROW_ROUTE(app, "/api/v1/routing/rules")

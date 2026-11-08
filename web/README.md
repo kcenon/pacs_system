@@ -4,45 +4,32 @@ React-based web administration interface for the PACS system.
 
 ## Features
 
-- **Dashboard**: Real-time system status with:
-  - Active associations counter with live updates
-  - Patient and study statistics
-  - Storage usage pie charts (used/free and by modality)
-  - System health component indicators
-  - Recent activity feed from audit logs
-  - Auto-refresh (10s for real-time data, 30s for status)
-  - Manual refresh button
-- **Patient/Study Browser**: Full DICOM hierarchy navigation with:
-  - Patient search with debounced input (300ms)
-  - Study list with date range and modality filters
-  - Expandable Series/Instance navigation tree
-  - Detailed metadata viewer panel for Study, Series, and Instance
-  - Table and tree view options for study navigation
-- **Worklist Management**: Full CRUD operations for scheduled procedures with:
-  - Scheduled procedure list view with pagination and search
-  - Create new worklist item form with auto-generated IDs
-  - Edit existing worklist items
-  - Status tracking with quick update dialog (Scheduled/In Progress/Completed/Discontinued)
-  - Delete confirmation dialog with item details
-  - Expandable row details showing all procedure information
-  - Form validation for required fields (Step ID, Patient ID, Modality, Scheduled DateTime)
-- **Audit Logs**: Comprehensive audit trail viewer with:
-  - Searchable log table with server-side pagination
-  - Filter by event type (Store/Query/Retrieve/Association/Login)
-  - Filter by outcome (Success/Failure)
-  - Date range picker for time-based filtering
-  - Detail view modal with full event information
-  - Export to CSV/JSON with applied filters
-- **Configuration Management**: Comprehensive settings management with:
-  - **REST API Settings**: Bind address, port, concurrency, timeout, body size limits
-  - **DICOM Server Settings**: AE Title, port, max associations, PDU size, timeouts
-  - **Storage Configuration**: Storage path, type (file/S3/Azure/HSM), compression
-  - **Security Settings**: TLS/SSL toggle with certificate path configuration
-  - **Logging Settings**: Log level, directory, rotation, audit trail options
-  - Form validation with clear error messages
-  - Toast notifications for save status feedback
-  - Confirmation dialogs for critical changes
-- **Associations**: Monitor active DICOM network connections
+Every page shows what the server reports, and says why when a request fails. Pages that could only
+pretend have no controls: the server reads its settings at start, so Configuration shows them read-only.
+
+- **Sign-in**: the server accepts OAuth 2.0 bearer tokens from one issuer and has no accounts of its own,
+  so signing in means pasting an access token from that issuer. The token is kept for the tab only and
+  sent as `Authorization: Bearer`; a refused or expired token returns to the sign-in page.
+- **Dashboard**: system status and component health from `/system/status`, storage use, patient and
+  study totals, association count and recent audit events. Nothing is shown that the server did not report.
+- **Patients**: search by the start of a patient name (Korean names too), then studies, series and
+  instances with their details.
+- **Worklist**: create, change status (Scheduled, Started, Completed, the values the server keeps) and
+  delete Modality Worklist items; DICOM modalities find them through C-FIND.
+- **Audit Logs**: the stores, queries, retrieves, associations, REST API changes and refused requests
+  the server recorded, filtered by event and outcome, exported as CSV or JSON. Administrators only.
+- **Associations**: association totals and traffic since the DICOM server started.
+- **Configuration**: the HTTP settings of the running server. Administrators only.
+
+## Access
+
+| Token scope | Allows |
+|-------------|--------|
+| `pacs.read` | Every page except Audit Logs and Configuration |
+| `pacs.write` | That, plus worklist changes |
+| `pacs.admin` | Everything, including Audit Logs, Configuration and deleting studies |
+
+A valid token without any of these is refused at sign-in.
 
 ## Tech Stack
 
@@ -57,9 +44,9 @@ React-based web administration interface for the PACS system.
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20.19+ (Vite 8)
 - npm 9+
-- PACS REST API server running on port 8080
+- `pacs_server --http-port 8080 --http-rest-api` with its OAuth 2.0 options, or another `rest_server` host
 
 ## Getting Started
 
@@ -75,11 +62,16 @@ npm run build
 
 # Preview production build
 npm run preview
+
+# Browser flows against a running server (see validation/browser/README.md)
+npm run test:e2e
 ```
 
 ## Development
 
-The development server runs on port 3000 and proxies API requests to `http://localhost:8080`.
+The development server runs on port 3000 and proxies API requests to `http://localhost:8080`, or to
+`PACS_API_URL` when set. `npm run preview` uses the same proxy, so the app and the API share one origin
+and a browser needs no CORS.
 
 ### Project Structure
 
@@ -101,33 +93,26 @@ web/
 
 ### API Endpoints
 
-The frontend connects to the following REST API endpoints:
+The frontend connects to the following REST API endpoints, each needing a token with the scope shown:
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/v1/system/status` | System health status |
-| `GET /api/v1/system/metrics` | Performance metrics |
-| `GET /api/v1/system/config` | REST server configuration |
-| `PUT /api/v1/system/config` | Update REST server configuration |
-| `GET /api/v1/system/dicom-config` | DICOM server configuration |
-| `PUT /api/v1/system/dicom-config` | Update DICOM server configuration |
-| `GET /api/v1/system/storage-config` | Storage configuration |
-| `PUT /api/v1/system/storage-config` | Update storage configuration |
-| `GET /api/v1/system/logging-config` | Logging configuration |
-| `PUT /api/v1/system/logging-config` | Update logging configuration |
-| `GET /api/v1/patients` | Patient list |
-| `GET /api/v1/patients/:id` | Patient details |
-| `GET /api/v1/patients/:id/studies` | Patient's studies |
-| `GET /api/v1/studies/:uid/series` | Study's series |
-| `GET /api/v1/series/:uid/instances` | Series' instances |
-| `GET /api/v1/worklist` | Worklist items (paginated) |
-| `POST /api/v1/worklist` | Create worklist item |
-| `GET /api/v1/worklist/:id` | Get worklist item by ID |
-| `PUT /api/v1/worklist/:id` | Update worklist item status |
-| `DELETE /api/v1/worklist/:id` | Delete worklist item |
-| `GET /api/v1/audit/logs` | Audit log entries with filtering |
-| `GET /api/v1/audit/export` | Export audit logs (CSV/JSON) |
-| `GET /api/v1/associations` | DICOM associations |
+| Endpoint | Scope | Description |
+|----------|-------|-------------|
+| `GET /api/v1/system/status` | read | System health status |
+| `GET /api/v1/system/metrics` | read | Performance metrics, when the server has a provider |
+| `GET /api/v1/system/config` | admin | HTTP server configuration |
+| `GET /api/v1/system/version` | read | Server and API versions |
+| `GET /api/v1/patients` | read | Patient list; `patient_name` ending in `*` matches by prefix |
+| `GET /api/v1/patients/:id/studies` | read | Patient's studies |
+| `GET /api/v1/studies` | read | Study list |
+| `GET /api/v1/studies/:uid/series` | read | Study's series |
+| `GET /api/v1/series/:uid/instances` | read | Series' instances |
+| `GET /api/v1/worklist` | read | Worklist items (paginated) |
+| `POST /api/v1/worklist` | write | Create worklist item |
+| `PUT /api/v1/worklist/:id` | write | Change worklist item status |
+| `DELETE /api/v1/worklist/:id` | write | Delete worklist item |
+| `GET /api/v1/audit/logs` | admin | Audit log entries with filtering |
+| `GET /api/v1/audit/export` | admin | Export audit logs (CSV/JSON) |
+| `GET /api/v1/associations/active` | read | Association statistics |
 
 ## Building for Production
 

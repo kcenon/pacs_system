@@ -160,6 +160,8 @@ struct image_params {
     [[nodiscard]] bool valid_for_jpeg_baseline() const noexcept {
         if (bits_allocated != 8 || bits_stored != 8) return false;
         if (samples_per_pixel != 1 && samples_per_pixel != 3) return false;
+        // Process 1 codes unsigned samples; lossy errors would wrap signed patterns.
+        if (pixel_representation != 0) return false;
         return true;
     }
 

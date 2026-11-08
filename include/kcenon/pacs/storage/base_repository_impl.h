@@ -284,6 +284,21 @@ template <typename Entity, typename PrimaryKey>
 auto base_repository<Entity, PrimaryKey>::save(const Entity& entity)
     -> Result<PrimaryKey> {
     if (has_pk(entity)) {
+        if constexpr (!std::is_integral_v<PrimaryKey>) {
+            // A natural key (a job, node or rule ID) names a record before it is stored, so the
+            // first save inserts it. Updating alone stored no job, node or rule at all.
+            auto stored = exists(get_pk(entity));
+            if (stored.is_err()) {
+                return Result<PrimaryKey>(stored.error());
+            }
+            if (!stored.value()) {
+                auto inserted = insert(entity);
+                if (inserted.is_err()) {
+                    return inserted;
+                }
+                return Result<PrimaryKey>(get_pk(entity));
+            }
+        }
         auto update_result = update(entity);
         if (update_result.is_err()) {
             return Result<PrimaryKey>(update_result.error());
